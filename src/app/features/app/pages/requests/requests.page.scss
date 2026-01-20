@@ -7,6 +7,7 @@
 
     h1 {
       margin: 0;
+      color: var(--color-text-primary);
     }
   }
 }
@@ -25,11 +26,11 @@
     font-size: 64px;
     width: 64px;
     height: 64px;
-    color: #dc2626;
+    color: var(--color-error);
   }
 
   p {
-    color: #666;
+    color: var(--color-text-secondary);
   }
 }
 
@@ -44,6 +45,7 @@
   .message {
     margin: 0 0 16px;
     line-height: 1.5;
+    color: var(--color-text-primary);
   }
 
   .contact-info {
@@ -51,7 +53,7 @@
     gap: 24px;
     margin-bottom: 16px;
     font-size: 14px;
-    color: #666;
+    color: var(--color-text-secondary);
 
     span {
       display: flex;
@@ -67,30 +69,30 @@
   }
 
   .status-pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--chip-warning-bg);
+    color: var(--chip-warning-text);
   }
 
   .status-contacted {
-    background: #dbeafe;
-    color: #1e40af;
+    background: var(--chip-info-bg);
+    color: var(--chip-info-text);
   }
 
   .status-closed {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--chip-success-bg);
+    color: var(--chip-success-text);
   }
 
   .status-rejected {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--chip-error-bg);
+    color: var(--chip-error-text);
   }
 }
 
 .empty-state {
   text-align: center;
   padding: 64px;
-  color: #999;
+  color: var(--color-text-tertiary);
 
   mat-icon {
     font-size: 64px;

@@ -7,6 +7,7 @@
 
     h1 {
       margin: 0;
+      color: var(--color-text-primary);
     }
   }
 }
@@ -26,21 +27,22 @@
       font-size: 2rem;
       font-weight: 600;
       line-height: 1;
+      color: var(--color-text-primary);
     }
 
     .stat-label {
       display: block;
       font-size: 0.85rem;
-      color: #666;
+      color: var(--color-text-secondary);
       margin-top: 8px;
     }
 
     &.pending .stat-value {
-      color: #d97706;
+      color: var(--color-warning);
     }
 
     &.rejected .stat-value {
-      color: #dc2626;
+      color: var(--color-error);
     }
   }
 }
@@ -59,11 +61,11 @@
     font-size: 64px;
     width: 64px;
     height: 64px;
-    color: #dc2626;
+    color: var(--color-error);
   }
 
   p {
-    color: #666;
+    color: var(--color-text-secondary);
   }
 }
 
@@ -89,7 +91,7 @@
     align-items: center;
     gap: 4px;
     padding: 4px 12px;
-    background: #f0f9ff;
+    background: var(--chip-info-bg);
     border-radius: 16px;
     font-size: 14px;
 
@@ -97,11 +99,11 @@
       font-size: 18px;
       width: 18px;
       height: 18px;
-      color: #0284c7;
+      color: var(--color-info);
     }
 
     a {
-      color: #0284c7;
+      color: var(--color-info);
       text-decoration: none;
 
       &:hover {
@@ -114,7 +116,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #666;
+    color: var(--color-text-secondary);
     font-size: 14px;
     margin: 0 0 8px;
 
@@ -128,6 +130,7 @@
   .message {
     margin: 0 0 16px;
     line-height: 1.5;
+    color: var(--color-text-primary);
   }
 
   .meta-row {
@@ -142,7 +145,7 @@
       align-items: center;
       gap: 4px;
       font-size: 14px;
-      color: #666;
+      color: var(--color-text-secondary);
 
       mat-icon {
         font-size: 18px;
@@ -153,30 +156,30 @@
   }
 
   .status-pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--chip-warning-bg);
+    color: var(--chip-warning-text);
   }
 
   .status-contacted {
-    background: #dbeafe;
-    color: #1e40af;
+    background: var(--chip-info-bg);
+    color: var(--chip-info-text);
   }
 
   .status-closed {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--chip-success-bg);
+    color: var(--chip-success-text);
   }
 
   .status-rejected {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--chip-error-bg);
+    color: var(--chip-error-text);
   }
 }
 
 .empty-state {
   text-align: center;
   padding: 64px;
-  color: #999;
+  color: var(--color-text-tertiary);
 
   mat-icon {
     font-size: 64px;

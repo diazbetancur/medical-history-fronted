@@ -6,9 +6,11 @@
  * - http: interceptors
  * - platform: SSR helpers
  * - config: environment config
+ * - pwa: install and update services
  */
 
 export * from './auth';
+export * from './config';
 export * from './http';
 export * from './platform';
-export * from './config';
+export * from './pwa';

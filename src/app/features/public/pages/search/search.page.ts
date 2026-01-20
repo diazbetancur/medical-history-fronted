@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -9,10 +9,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
 import { SearchParams } from '@data/models';
-import { SearchStore } from '@data/stores';
+import { HomeStore, SearchStore } from '@data/stores';
 import { AnalyticsService, SeoService } from '@shared/services';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-search-page',
@@ -34,6 +34,7 @@ import { AnalyticsService, SeoService } from '@shared/services';
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
   readonly store = inject(SearchStore);
+  private readonly homeStore = inject(HomeStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly seoService = inject(SeoService);
@@ -43,16 +44,18 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
   searchQuery = '';
 
-  popularCategories = [
-    'Plomeros',
-    'Electricistas',
-    'Abogados',
-    'Contadores',
-    'Médicos',
-    'Veterinarios',
-  ];
+  // Use categories from API via HomeStore
+  readonly popularCategories = computed(() =>
+    this.homeStore.featuredCategories().map((c) => ({
+      name: c.name,
+      slug: c.slug,
+    }))
+  );
 
   ngOnInit(): void {
+    // Load home data to get categories (uses cache if available)
+    this.homeStore.load();
+
     // React to query param changes (SSR-safe)
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
@@ -107,10 +110,10 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  searchByCategory(category: string): void {
-    this.searchQuery = category;
+  searchByCategory(category: { name: string; slug: string }): void {
+    this.searchQuery = category.name;
     this.router.navigate(['/search'], {
-      queryParams: { category, q: null, page: 1 },
+      queryParams: { category: category.slug, q: null, page: 1 },
       queryParamsHandling: 'merge',
     });
   }

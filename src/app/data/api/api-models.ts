@@ -16,6 +16,19 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  userId: string;
+}
+
 export interface LoginResponse {
   token: string;
   expiresAt: string;

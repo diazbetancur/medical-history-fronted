@@ -1,0 +1,857 @@
+// ============================================================================
+// ANGULAR MATERIAL CUSTOM THEME - ProDirectory Design System v2.0
+// ============================================================================
+// Custom theme using Angular Material theming system.
+// Based on ProDirectory brand colors with WCAG AA compliant contrast.
+//
+// Brand Colors:
+// - Primary: #2563EB (Blue) - Trust, professionalism
+// - Accent:  #FF6B35 (Orange) - Energy, CTAs
+// - Success: #10B981 (Green) - Verification, success states
+// - Warn:    #DC2626 (Red) - Errors, destructive actions
+// ============================================================================
+
+@use "@angular/material" as mat;
+
+// ============================================================================
+// CUSTOM PALETTES
+// ============================================================================
+
+// Primary Palette - Brand Blue #2563EB
+// WCAG AA: White text on 500+ passes (4.5:1+)
+$primary-palette: (
+  50: #eff6ff,
+  100: #dbeafe,
+  200: #bfdbfe,
+  300: #93c5fd,
+  400: #60a5fa,
+  500: #3b82f6,
+  600: #2563eb,
+  // Brand Primary - Main color
+  700: #1d4ed8,
+  // Hover state
+  800: #1e40af,
+  // Active/pressed state
+  900: #1e3a8a,
+  A100: #bfdbfe,
+  A200: #93c5fd,
+  A400: #60a5fa,
+  A700: #1d4ed8,
+  contrast: (
+    50: #1e293b,
+    // Dark text for light backgrounds
+    100: #1e293b,
+    200: #1e293b,
+    300: #1e293b,
+    400: #1e293b,
+    500: #ffffff,
+    // White text for dark backgrounds
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #1e293b,
+    A200: #1e293b,
+    A400: #ffffff,
+    A700: #ffffff,
+  ),
+);
+
+// Accent Palette - Brand Orange #FF6B35
+// WCAG AA: White text on 500+ passes for large text (3:1)
+// Note: Use only for large text or UI elements, not small text
+$accent-palette: (
+  50: #fff7ed,
+  100: #ffedd5,
+  200: #fed7aa,
+  300: #fdba74,
+  400: #fb923c,
+  500: #f97316,
+  600: #ff6b35,
+  // Brand Accent - Main color
+  700: #ea580c,
+  // Hover state
+  800: #c2410c,
+  // Active/pressed state
+  900: #9a3412,
+  A100: #fed7aa,
+  A200: #fdba74,
+  A400: #fb923c,
+  A700: #ea580c,
+  contrast: (
+    50: #1e293b,
+    100: #1e293b,
+    200: #1e293b,
+    300: #1e293b,
+    400: #1e293b,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #1e293b,
+    A200: #1e293b,
+    A400: #1e293b,
+    A700: #ffffff,
+  ),
+);
+
+// Warn/Error Palette - Red #DC2626
+// Used for form validation, errors, destructive actions
+$warn-palette: (
+  50: #fef2f2,
+  100: #fee2e2,
+  200: #fecaca,
+  300: #fca5a5,
+  400: #f87171,
+  500: #ef4444,
+  600: #dc2626,
+  // Error color - Main
+  700: #b91c1c,
+  // Hover state
+  800: #991b1b,
+  // Active/pressed state
+  900: #7f1d1d,
+  A100: #fecaca,
+  A200: #fca5a5,
+  A400: #f87171,
+  A700: #b91c1c,
+  contrast: (
+    50: #1e293b,
+    100: #1e293b,
+    200: #1e293b,
+    300: #1e293b,
+    400: #1e293b,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #1e293b,
+    A200: #1e293b,
+    A400: #ffffff,
+    A700: #ffffff,
+  ),
+);
+
+// Success Palette - Green #10B981
+// Used for success states, verification badges, positive feedback
+$success-palette: (
+  50: #ecfdf5,
+  100: #d1fae5,
+  200: #a7f3d0,
+  300: #6ee7b7,
+  400: #34d399,
+  500: #10b981,
+  // Success color - Main
+  600: #059669,
+  // Hover state
+  700: #047857,
+  // Active/pressed state
+  800: #065f46,
+  900: #064e3b,
+  contrast: (
+    50: #1e293b,
+    100: #1e293b,
+    200: #1e293b,
+    300: #1e293b,
+    400: #1e293b,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+  ),
+);
+
+// ============================================================================
+// THEME DEFINITION
+// ============================================================================
+
+// Define the palettes with default, lighter, darker variants
+$pro-directory-primary: mat.m2-define-palette($primary-palette, 600, 400, 800);
+$pro-directory-accent: mat.m2-define-palette($accent-palette, 600, 400, 800);
+$pro-directory-warn: mat.m2-define-palette($warn-palette, 600, 400, 800);
+$pro-directory-success: mat.m2-define-palette($success-palette, 500, 300, 700);
+
+// Typography configuration - Optimized for readability
+$pro-directory-typography: mat.m2-define-typography-config(
+  $font-family: 'Roboto, "Helvetica Neue", sans-serif',
+  $headline-1: mat.m2-define-typography-level(
+      96px,
+      96px,
+      300,
+      $letter-spacing: -1.5px
+    ),
+  $headline-2: mat.m2-define-typography-level(
+      60px,
+      60px,
+      300,
+      $letter-spacing: -0.5px
+    ),
+  $headline-3: mat.m2-define-typography-level(48px, 50px, 400),
+  $headline-4: mat.m2-define-typography-level(
+      34px,
+      40px,
+      400,
+      $letter-spacing: 0.25px
+    ),
+  $headline-5: mat.m2-define-typography-level(24px, 32px, 400),
+  $headline-6: mat.m2-define-typography-level(
+      20px,
+      32px,
+      500,
+      $letter-spacing: 0.15px
+    ),
+  $subtitle-1: mat.m2-define-typography-level(
+      16px,
+      28px,
+      400,
+      $letter-spacing: 0.15px
+    ),
+  $subtitle-2: mat.m2-define-typography-level(
+      14px,
+      22px,
+      500,
+      $letter-spacing: 0.1px
+    ),
+  $body-1: mat.m2-define-typography-level(
+      16px,
+      24px,
+      400,
+      $letter-spacing: 0.5px
+    ),
+  $body-2: mat.m2-define-typography-level(
+      14px,
+      20px,
+      400,
+      $letter-spacing: 0.25px
+    ),
+  $caption: mat.m2-define-typography-level(
+      12px,
+      20px,
+      400,
+      $letter-spacing: 0.4px
+    ),
+  $button: mat.m2-define-typography-level(
+      14px,
+      36px,
+      500,
+      $letter-spacing: 0.5px
+    ),
+);
+
+// Create the light theme
+$pro-directory-light-theme: mat.m2-define-light-theme(
+  (
+    color: (
+      primary: $pro-directory-primary,
+      accent: $pro-directory-accent,
+      warn: $pro-directory-warn,
+    ),
+    typography: $pro-directory-typography,
+    density: 0,
+  )
+);
+
+// Dark theme (prepared but not active)
+$pro-directory-dark-theme: mat.m2-define-dark-theme(
+  (
+    color: (
+      primary: $pro-directory-primary,
+      accent: $pro-directory-accent,
+      warn: $pro-directory-warn,
+    ),
+    typography: $pro-directory-typography,
+  )
+);
+
+// ============================================================================
+// INCLUDE MATERIAL CORE & THEME
+// ============================================================================
+
+// Include the core styles
+@include mat.core();
+
+// Include all component themes for light theme
+@include mat.all-component-themes($pro-directory-light-theme);
+
+// ============================================================================
+// COMPONENT OVERRIDES
+// ============================================================================
+
+// Buttons
+.mat-mdc-button,
+.mat-mdc-outlined-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-unelevated-button {
+  border-radius: 8px !important;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  transition: all 150ms ease-in-out;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-outline, #2563eb);
+    outline-offset: 2px;
+  }
+}
+
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button {
+  &.mat-primary {
+    --mdc-filled-button-container-color: var(--color-primary, #2563eb);
+
+    &:hover:not(:disabled) {
+      --mdc-filled-button-container-color: var(--color-primary-hover, #1d4ed8);
+    }
+
+    &:active:not(:disabled) {
+      --mdc-filled-button-container-color: var(--color-primary-active, #1e40af);
+      transform: scale(0.98);
+    }
+  }
+
+  &.mat-accent {
+    --mdc-filled-button-container-color: var(--color-accent, #ff6b35);
+
+    &:hover:not(:disabled) {
+      --mdc-filled-button-container-color: var(--color-accent-hover, #e55a2b);
+    }
+
+    &:active:not(:disabled) {
+      --mdc-filled-button-container-color: var(--color-accent-active, #c2410c);
+      transform: scale(0.98);
+    }
+  }
+}
+
+.mat-mdc-outlined-button {
+  &.mat-primary {
+    --mdc-outlined-button-outline-color: var(--color-primary, #2563eb);
+
+    &:hover:not(:disabled) {
+      background-color: rgba(37, 99, 235, 0.08);
+    }
+  }
+}
+
+// Cards
+.mat-mdc-card {
+  border-radius: 12px !important;
+  border: 1px solid var(--color-border, #e2e8f0);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1)) !important;
+  transition:
+    box-shadow 200ms ease-in-out,
+    transform 200ms ease-in-out;
+
+  &:hover {
+    box-shadow: var(
+      --shadow-lg,
+      0 10px 15px -3px rgba(0, 0, 0, 0.1)
+    ) !important;
+  }
+}
+
+.mat-mdc-card-title {
+  color: var(--color-text-primary, #1e293b);
+  font-weight: 600;
+}
+
+.mat-mdc-card-subtitle {
+  color: var(--color-text-secondary, #475569);
+}
+
+// Form fields
+.mat-mdc-form-field {
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--color-primary, #2563eb) !important;
+      border-width: 2px;
+    }
+  }
+
+  &.mat-form-field-invalid {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--color-error, #dc2626) !important;
+    }
+  }
+}
+
+.mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+}
+
+// Chips
+.mat-mdc-chip {
+  border-radius: 9999px !important;
+  font-weight: 500;
+
+  &.mat-primary {
+    --mdc-chip-elevated-container-color: var(--chip-primary-bg, #dbeafe);
+    --mdc-chip-label-text-color: var(--chip-primary-text, #1e40af);
+  }
+}
+
+// Toolbar
+.mat-toolbar {
+  &.mat-primary {
+    background-color: var(--color-primary, #2563eb);
+    color: var(--color-primary-contrast, white);
+  }
+}
+
+// Snackbar
+.mat-mdc-snack-bar-container {
+  border-radius: 8px !important;
+
+  &.success-snackbar {
+    --mdc-snackbar-container-color: var(--color-success, #10b981);
+    --mdc-snackbar-supporting-text-color: white;
+  }
+
+  &.error-snackbar {
+    --mdc-snackbar-container-color: var(--color-error, #dc2626);
+    --mdc-snackbar-supporting-text-color: white;
+  }
+
+  &.warning-snackbar {
+    --mdc-snackbar-container-color: var(--color-warning, #f59e0b);
+    --mdc-snackbar-supporting-text-color: rgba(0, 0, 0, 0.87);
+  }
+
+  &.info-snackbar {
+    --mdc-snackbar-container-color: var(--color-info, #0ea5e9);
+    --mdc-snackbar-supporting-text-color: white;
+  }
+}
+
+// Progress bar
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-active-indicator-color: var(--color-primary, #2563eb);
+  --mdc-linear-progress-track-color: var(--color-primary-light, #bfdbfe);
+}
+
+// Progress spinner
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: var(--color-primary, #2563eb);
+}
+
+// Tabs
+.mat-mdc-tab-group {
+  .mat-mdc-tab {
+    &.mdc-tab--active {
+      .mdc-tab__text-label {
+        color: var(--color-primary, #2563eb);
+      }
+    }
+  }
+
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+  }
+
+  .mdc-tab-indicator__content--underline {
+    border-color: var(--color-primary, #2563eb);
+  }
+}
+
+// Dialog
+.mat-mdc-dialog-container {
+  border-radius: 16px !important;
+
+  .mat-mdc-dialog-title {
+    color: var(--color-text-primary, #1e293b);
+    font-weight: 600;
+  }
+}
+
+// Menu
+.mat-mdc-menu-panel {
+  border-radius: 12px !important;
+  border: 1px solid var(--color-border, #e2e8f0);
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1)) !important;
+
+  .mat-mdc-menu-item {
+    &:hover {
+      background-color: var(--color-surface-hover, #f8fafc);
+    }
+
+    &.mat-mdc-menu-item-highlighted {
+      background-color: var(--color-surface-hover, #f8fafc);
+    }
+  }
+}
+
+// List
+.mat-mdc-list-item {
+  &:hover {
+    background-color: var(--color-surface-hover, #f8fafc);
+  }
+
+  &.mdc-list-item--selected {
+    background-color: rgba(37, 99, 235, 0.08);
+  }
+}
+
+// Icon
+.mat-icon {
+  &.icon-primary {
+    color: var(--color-primary, #2563eb);
+  }
+
+  &.icon-accent {
+    color: var(--color-accent, #ff6b35);
+  }
+
+  &.icon-success {
+    color: var(--color-success, #10b981);
+  }
+
+  &.icon-warning {
+    color: var(--color-warning, #f59e0b);
+  }
+
+  &.icon-error {
+    color: var(--color-error, #dc2626);
+  }
+}
+
+// Table
+.mat-mdc-table {
+  background: var(--table-row-bg, var(--color-surface, white));
+  border-radius: 8px;
+  overflow: hidden;
+
+  .mat-mdc-header-row {
+    background-color: var(
+      --table-header-bg,
+      var(--color-background-alt, #f8fafc)
+    );
+  }
+
+  .mat-mdc-row {
+    transition: background-color 150ms ease-in-out;
+
+    &:hover {
+      background-color: var(
+        --table-row-bg-hover,
+        var(--color-surface-hover, #f8fafc)
+      );
+    }
+
+    &:last-child .mat-mdc-cell {
+      border-bottom: none;
+    }
+  }
+
+  .mat-mdc-header-cell {
+    color: var(--table-header-text, var(--color-text-secondary, #475569));
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--table-border, var(--color-border, #e2e8f0));
+    padding: 12px 16px;
+  }
+
+  .mat-mdc-cell {
+    color: var(--table-cell-text, var(--color-text-primary, #1e293b));
+    border-bottom-color: var(
+      --table-border,
+      var(--color-border-light, #f1f5f9)
+    );
+    padding: 12px 16px;
+  }
+}
+
+// Paginator
+.mat-mdc-paginator {
+  background: var(--color-surface, white);
+  color: var(--color-text-secondary, #475569);
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+
+// Selection controls (checkbox, radio, slide-toggle)
+.mat-mdc-checkbox,
+.mat-mdc-radio-button,
+.mat-mdc-slide-toggle {
+  &.mat-primary {
+    --mdc-checkbox-selected-checkmark-color: white;
+    --mdc-checkbox-selected-focus-icon-color: var(--color-primary, #2563eb);
+    --mdc-checkbox-selected-hover-icon-color: var(
+      --color-primary-hover,
+      #1d4ed8
+    );
+    --mdc-checkbox-selected-icon-color: var(--color-primary, #2563eb);
+    --mdc-checkbox-selected-pressed-icon-color: var(
+      --color-primary-active,
+      #1e40af
+    );
+    --mdc-checkbox-unselected-icon-color: var(--color-border-dark, #cbd5e1);
+    --mdc-checkbox-unselected-hover-icon-color: var(
+      --color-text-tertiary,
+      #64748b
+    );
+  }
+
+  &.mat-accent {
+    --mdc-checkbox-selected-checkmark-color: white;
+    --mdc-checkbox-selected-icon-color: var(--color-accent, #ff6b35);
+    --mdc-checkbox-selected-hover-icon-color: var(
+      --color-accent-hover,
+      #ea580c
+    );
+  }
+}
+
+// Slide toggle specific
+.mat-mdc-slide-toggle {
+  &.mat-primary {
+    --mdc-switch-selected-track-color: var(--color-primary, #2563eb);
+    --mdc-switch-selected-hover-track-color: var(
+      --color-primary-hover,
+      #1d4ed8
+    );
+    --mdc-switch-selected-focus-track-color: var(--color-primary, #2563eb);
+    --mdc-switch-selected-pressed-track-color: var(
+      --color-primary-active,
+      #1e40af
+    );
+  }
+}
+
+// FAB
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  border-radius: 16px !important;
+
+  &.mat-primary {
+    --mdc-fab-container-color: var(--color-primary, #2563eb);
+
+    &:hover {
+      --mdc-fab-container-color: var(--color-primary-hover, #1d4ed8);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-focus-outline, #2563eb);
+      outline-offset: 2px;
+    }
+  }
+
+  &.mat-accent {
+    --mdc-fab-container-color: var(--color-accent, #ff6b35);
+
+    &:hover {
+      --mdc-fab-container-color: var(--color-accent-hover, #ea580c);
+    }
+  }
+}
+
+// Extended FAB
+.mat-mdc-extended-fab {
+  border-radius: 16px !important;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+// Badge
+.mat-badge-content {
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.mat-badge-primary .mat-badge-content {
+  background: var(--color-primary, #2563eb);
+  color: white;
+}
+
+.mat-badge-accent .mat-badge-content {
+  background: var(--color-accent, #ff6b35);
+  color: white;
+}
+
+// Expansion panel
+.mat-expansion-panel {
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-sm) !important;
+  border: 1px solid var(--color-border, #e2e8f0);
+
+  &:not([class*="mat-elevation-z"]) {
+    box-shadow: none !important;
+  }
+
+  .mat-expansion-panel-header {
+    font-weight: 500;
+
+    &:hover {
+      background: var(--color-surface-hover, #f8fafc) !important;
+    }
+  }
+}
+
+// Stepper
+.mat-stepper-horizontal,
+.mat-stepper-vertical {
+  background: var(--color-surface, white);
+
+  .mat-step-header {
+    &:hover {
+      background: var(--color-surface-hover, #f8fafc);
+    }
+
+    .mat-step-icon {
+      background: var(--color-primary, #2563eb);
+      color: white;
+    }
+
+    .mat-step-icon-state-edit {
+      background: var(--color-primary, #2563eb);
+    }
+
+    .mat-step-icon-state-done {
+      background: var(--color-success, #10b981);
+    }
+
+    .mat-step-icon-state-error {
+      background: var(--color-error, #dc2626);
+    }
+  }
+}
+
+// Bottom sheet
+.mat-bottom-sheet-container {
+  border-top-left-radius: 16px !important;
+  border-top-right-radius: 16px !important;
+}
+
+// Autocomplete
+.mat-mdc-autocomplete-panel {
+  border-radius: 8px !important;
+  border: 1px solid var(--color-border, #e2e8f0);
+  box-shadow: var(--shadow-lg) !important;
+
+  .mat-mdc-option {
+    &:hover:not(.mat-mdc-option-disabled) {
+      background: var(--color-surface-hover, #f8fafc);
+    }
+
+    &.mat-mdc-option-active {
+      background: var(--color-surface-hover, #f8fafc);
+    }
+
+    &.mdc-list-item--selected {
+      background: rgba(37, 99, 235, 0.08);
+    }
+  }
+}
+
+// Datepicker
+.mat-datepicker-content {
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-xl) !important;
+  border: 1px solid var(--color-border, #e2e8f0);
+
+  .mat-calendar-body-selected {
+    background: var(--color-primary, #2563eb);
+    color: white;
+  }
+
+  .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+    border-color: var(--color-primary, #2563eb);
+  }
+
+  .mat-calendar-body-cell:hover:not(.mat-calendar-body-disabled)
+    .mat-calendar-body-cell-content {
+    background: var(--color-surface-hover, #f8fafc);
+  }
+}
+
+// ============================================================================
+// SUCCESS VARIANT - Custom addition
+// ============================================================================
+
+// Success button
+.mat-mdc-raised-button.mat-success,
+.mat-mdc-unelevated-button.mat-success,
+.mat-mdc-flat-button.mat-success {
+  --mdc-filled-button-container-color: var(--color-success, #10b981);
+  --mdc-filled-button-label-text-color: white;
+
+  &:hover:not(:disabled) {
+    --mdc-filled-button-container-color: #059669;
+  }
+
+  &:active:not(:disabled) {
+    --mdc-filled-button-container-color: #047857;
+  }
+}
+
+// Success chip
+.mat-mdc-chip.mat-success {
+  --mdc-chip-elevated-container-color: var(--chip-success-bg);
+  --mdc-chip-label-text-color: var(--chip-success-text);
+}
+
+// Success icon
+.mat-icon.icon-success {
+  color: var(--color-success, #10b981);
+}
+
+// ============================================================================
+// DARK THEME (Prepared but not active)
+// ============================================================================
+// To enable dark theme, add .theme-dark class to <html> or <body>
+
+/*
+.theme-dark {
+  @include mat.all-component-colors($pro-directory-dark-theme);
+
+  // Additional dark mode overrides here
+  .mat-mdc-card {
+    background-color: #1e293b;
+    border-color: #334155;
+  }
+
+  .mat-toolbar.mat-primary {
+    background-color: #1e3a8a;
+  }
+}
+*/
+
+// ============================================================================
+// ACCESSIBILITY ENHANCEMENTS
+// ============================================================================
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .mat-mdc-button,
+  .mat-mdc-outlined-button {
+    border-width: 2px;
+  }
+
+  .mat-mdc-card {
+    border-width: 2px;
+  }
+
+  .mat-mdc-form-field {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-width: 2px;
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .mat-mdc-button,
+  .mat-mdc-card,
+  .mat-mdc-fab {
+    transition: none !important;
+  }
+}

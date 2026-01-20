@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth';
+import { AuthApi } from '@data/api';
 
 @Component({
   selector: 'app-login',
@@ -29,16 +30,50 @@ import { AuthService } from '@core/auth';
 })
 export class LoginPageComponent {
   private readonly authService = inject(AuthService);
+  private readonly authApi = inject(AuthApi);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
+  // Form mode: 'login' | 'register'
+  mode = signal<'login' | 'register'>('login');
+
+  // Login fields
   email = '';
   password = '';
   hidePassword = signal(true);
 
-  // Expose auth signals
+  // Register fields
+  firstName = '';
+  lastName = '';
+  confirmPassword = '';
+  hideConfirmPassword = signal(true);
+
+  // Status signals
   readonly loading = this.authService.loading;
   readonly loginError = this.authService.loginError;
+  registerLoading = signal(false);
+  registerError = signal<string | null>(null);
+  registerSuccess = signal<string | null>(null);
+
+  toggleMode(): void {
+    this.mode.update((m) => (m === 'login' ? 'register' : 'login'));
+    this.clearErrors();
+    this.clearForm();
+  }
+
+  private clearErrors(): void {
+    this.authService.clearLoginError();
+    this.registerError.set(null);
+    this.registerSuccess.set(null);
+  }
+
+  private clearForm(): void {
+    this.email = '';
+    this.password = '';
+    this.firstName = '';
+    this.lastName = '';
+    this.confirmPassword = '';
+  }
 
   login(): void {
     if (!this.email || !this.password) {
@@ -55,6 +90,68 @@ export class LoginPageComponent {
         // Error is handled by authService and exposed via loginError signal
       },
     });
+  }
+
+  register(): void {
+    if (
+      !this.email ||
+      !this.password ||
+      !this.confirmPassword ||
+      !this.firstName ||
+      !this.lastName
+    ) {
+      this.registerError.set('Por favor completa todos los campos');
+      return;
+    }
+
+    if (this.password !== this.confirmPassword) {
+      this.registerError.set('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (this.password.length < 6) {
+      this.registerError.set('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    this.registerLoading.set(true);
+    this.registerError.set(null);
+    this.registerSuccess.set(null);
+
+    this.authApi
+      .register({
+        email: this.email,
+        password: this.password,
+        confirmPassword: this.confirmPassword,
+        firstName: this.firstName,
+        lastName: this.lastName,
+      })
+      .subscribe({
+        next: () => {
+          this.registerLoading.set(false);
+          this.registerSuccess.set(
+            '¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.'
+          );
+          // Auto-switch to login after 2 seconds
+          setTimeout(() => {
+            this.mode.set('login');
+            this.registerSuccess.set(null);
+            // Keep email for convenience
+            this.password = '';
+            this.confirmPassword = '';
+            this.firstName = '';
+            this.lastName = '';
+          }, 2000);
+        },
+        error: (err) => {
+          this.registerLoading.set(false);
+          this.registerError.set(
+            err.error?.message ||
+              err.error?.title ||
+              'Error al crear la cuenta. Intenta nuevamente.'
+          );
+        },
+      });
   }
 
   private navigateAfterLogin(session: {

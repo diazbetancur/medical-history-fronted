@@ -1,7 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiClient } from './api-client';
-import { LoginRequest, LoginResponse, UserSession } from './api-models';
+import {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  UserSession,
+} from './api-models';
 
 /**
  * Auth API Client
@@ -17,6 +23,14 @@ export class AuthApi {
    */
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.api.post<LoginResponse>('/auth/login', credentials);
+  }
+
+  /**
+   * POST /api/auth/register
+   * Register a new user account
+   */
+  register(data: RegisterRequest): Observable<RegisterResponse> {
+    return this.api.post<RegisterResponse>('/auth/register', data);
   }
 
   /**

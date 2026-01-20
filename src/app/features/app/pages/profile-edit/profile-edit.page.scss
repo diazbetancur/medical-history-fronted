@@ -7,10 +7,11 @@
 
     h1 {
       margin: 0 0 8px;
+      color: var(--color-text-primary);
     }
 
     p {
-      color: #666;
+      color: var(--color-text-secondary);
       margin: 0;
     }
   }
@@ -27,7 +28,7 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-hero);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -36,7 +37,7 @@
       font-size: 60px;
       width: 60px;
       height: 60px;
-      color: white;
+      color: var(--color-text-inverted);
     }
   }
 }
@@ -56,6 +57,7 @@
 
   h3 {
     margin: 0 0 16px;
+    color: var(--color-text-primary);
   }
 
   .add-service {
