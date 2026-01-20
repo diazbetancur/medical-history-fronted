@@ -9,8 +9,8 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
+import { environment } from '@env';
 import { distinctUntilChanged, filter, map } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { GA4Adapter } from './analytics-ga4.adapter';
 import {
   AnalyticsEventMap,

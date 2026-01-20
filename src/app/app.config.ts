@@ -20,8 +20,8 @@ import {
   withEventReplay,
 } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
+import { jwtInterceptor } from '@core/http';
 import { routes } from './app.routes';
-import { jwtInterceptor } from './shared/interceptors/jwt.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [

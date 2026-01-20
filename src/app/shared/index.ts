@@ -1,5 +1,15 @@
-// Barrel export for shared module
-export * from './guards/auth.guard';
-export * from './guards/role.guard';
-export * from './services/auth.service';
-export * from './services/platform.service';
+/**
+ * Shared Module - Public exports
+ *
+ * Contains reusable components, utilities, and services.
+ * Note: Auth-related items moved to @core/auth
+ */
+
+// Services
+export * from './services';
+
+// UI Components
+export * from './ui';
+
+// Utils
+export * from './utils';

@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { environment } from '@env';
 import {
   AnalyticsEventMap,
   AnalyticsEventName,

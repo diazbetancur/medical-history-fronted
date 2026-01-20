@@ -1,0 +1,14 @@
+/**
+ * Core Module - Public exports
+ *
+ * Contains singletons and application-level services:
+ * - auth: authentication, guards, roles
+ * - http: interceptors
+ * - platform: SSR helpers
+ * - config: environment config
+ */
+
+export * from './auth';
+export * from './http';
+export * from './platform';
+export * from './config';

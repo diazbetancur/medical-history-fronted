@@ -1,7 +1,7 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
-import { SeoMeta } from '../../data-access/public-page.models';
+import { SeoMeta } from '@data/models';
 
 /**
  * SEO Service for managing meta tags, title, and OpenGraph data.
