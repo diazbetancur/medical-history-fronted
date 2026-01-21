@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://localhost:5254/api',
+  apiBaseUrl:
+    'https://back-directory-bdg9fefsbsc3fyer.eastus-01.azurewebsites.net//api',
   analytics: {
     enabled: true, // Enable in dev for testing
     provider: 'ga4' as const,
