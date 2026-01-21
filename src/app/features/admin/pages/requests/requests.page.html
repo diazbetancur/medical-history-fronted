@@ -1,0 +1,119 @@
+<div class="admin-requests-page">
+  <header>
+    <h1>Gestión de Solicitudes</h1>
+    <button mat-icon-button (click)="refresh()" [disabled]="store.loading()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </header>
+
+  <div class="stats-row">
+    <mat-card class="stat-card">
+      <span class="stat-value">{{ store.totalCount() }}</span>
+      <span class="stat-label">Total</span>
+    </mat-card>
+    <mat-card class="stat-card pending">
+      <span class="stat-value">{{ store.pendingCount() }}</span>
+      <span class="stat-label">Pendientes</span>
+    </mat-card>
+    <mat-card class="stat-card rejected">
+      <span class="stat-value">{{ store.rejectedCount() }}</span>
+      <span class="stat-label">Rechazadas</span>
+    </mat-card>
+  </div>
+
+  @if (store.loading() && store.requests().length === 0) {
+  <div class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Cargando solicitudes...</p>
+  </div>
+  } @else if (store.error()) {
+  <div class="error-state">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ store.error() }}</p>
+    <button mat-raised-button color="primary" (click)="refresh()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+  } @else {
+  <mat-tab-group (selectedTabChange)="onTabChange($event.index)">
+    <mat-tab label="Pendientes ({{ store.pendingCount() }})"></mat-tab>
+    <mat-tab label="Contactadas ({{ store.contactedCount() }})"></mat-tab>
+    <mat-tab label="Cerradas ({{ store.closedCount() }})"></mat-tab>
+    <mat-tab label="Rechazadas ({{ store.rejectedCount() }})"></mat-tab>
+    <mat-tab label="Todas"></mat-tab>
+  </mat-tab-group>
+
+  <div class="requests-list">
+    @for (request of filteredRequests(); track request.id) {
+    <mat-card class="request-card">
+      <mat-card-header>
+        <div class="header-row">
+          <div class="client-info">
+            <mat-card-title>{{ request.clientName }}</mat-card-title>
+            <mat-card-subtitle>
+              {{ request.clientEmail }} @if (request.clientPhone) { • {{
+              request.clientPhone }} }
+            </mat-card-subtitle>
+          </div>
+          @if (request.profileBusinessName) {
+          <div class="professional-badge">
+            <mat-icon>person</mat-icon>
+            <a
+              [routerLink]="['/pro', request.profileSlug]"
+              matTooltip="Ver perfil del profesional"
+            >
+              {{ request.profileBusinessName }}
+            </a>
+          </div>
+          }
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (request.serviceName) {
+        <p class="service-name">
+          <mat-icon>build</mat-icon>
+          {{ request.serviceName }}
+        </p>
+        }
+        <p class="message">{{ request.message }}</p>
+
+        <div class="meta-row">
+          <span class="date">
+            <mat-icon>schedule</mat-icon>
+            {{ formatDate(request.dateCreated) }}
+          </span>
+          <mat-chip [class]="'status-' + request.status.toLowerCase()">
+            {{ request.statusName }}
+          </mat-chip>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        @if (request.status !== 'Rejected') {
+        <button
+          mat-button
+          color="warn"
+          (click)="rejectRequest(request)"
+          matTooltip="Rechazar solicitud (spam, contenido inapropiado, etc.)"
+        >
+          <mat-icon>block</mat-icon>
+          Rechazar
+        </button>
+        }
+        <a mat-button [href]="'mailto:' + request.clientEmail">
+          <mat-icon>email</mat-icon>
+          Contactar Cliente
+        </a>
+      </mat-card-actions>
+    </mat-card>
+    } @empty {
+    <div class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>No hay solicitudes en esta categoría</p>
+    </div>
+    }
+  </div>
+  }
+</div>

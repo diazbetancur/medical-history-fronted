@@ -1,0 +1,190 @@
+.admin-requests-page {
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0;
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .stat-card {
+    padding: 16px;
+    text-align: center;
+
+    .stat-value {
+      display: block;
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--color-text-primary);
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      margin-top: 8px;
+    }
+
+    &.pending .stat-value {
+      color: var(--color-warning);
+    }
+
+    &.rejected .stat-value {
+      color: var(--color-error);
+    }
+  }
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  gap: 16px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--color-error);
+  }
+
+  p {
+    color: var(--color-text-secondary);
+  }
+}
+
+.requests-list {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.request-card {
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .professional-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    background: var(--chip-info-bg);
+    border-radius: 16px;
+    font-size: 14px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--color-info);
+    }
+
+    a {
+      color: var(--color-info);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .service-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    margin: 0 0 8px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .message {
+    margin: 0 0 16px;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .date {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      color: var(--color-text-secondary);
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .status-pending {
+    background: var(--chip-warning-bg);
+    color: var(--chip-warning-text);
+  }
+
+  .status-contacted {
+    background: var(--chip-info-bg);
+    color: var(--chip-info-text);
+  }
+
+  .status-closed {
+    background: var(--chip-success-bg);
+    color: var(--chip-success-text);
+  }
+
+  .status-rejected {
+    background: var(--chip-error-bg);
+    color: var(--chip-error-text);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px;
+  color: var(--color-text-tertiary);
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+}

@@ -1,0 +1,62 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.public-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    font-weight: 500;
+    font-size: 1.2rem;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 4px;
+
+    @media (max-width: 599px) {
+      display: none;
+    }
+  }
+
+  .active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.public-content {
+  flex: 1;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 599px) {
+    padding: 16px;
+  }
+}
+
+.public-footer {
+  background: var(--color-background-alt);
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-secondary);
+
+  p {
+    margin: 0;
+  }
+}

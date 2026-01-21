@@ -1,0 +1,85 @@
+<div class="dashboard-home">
+  <header class="welcome-header">
+    <h1>¡Hola, {{ userName }}!</h1>
+    <p>Aquí tienes un resumen de tu actividad</p>
+  </header>
+
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon>visibility</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">1,234</span>
+          <span class="stat-label">Visitas este mes</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon>inbox</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">12</span>
+          <span class="stat-label">Solicitudes pendientes</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon>star</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">4.8</span>
+          <span class="stat-label">Calificación promedio</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon>reviews</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">89</span>
+          <span class="stat-label">Reseñas totales</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <section class="quick-actions">
+    <h2>Acciones Rápidas</h2>
+    <div class="actions-grid">
+      <button mat-stroked-button routerLink="/dashboard/requests">
+        <mat-icon>inbox</mat-icon>
+        Ver Solicitudes
+      </button>
+      <button mat-stroked-button routerLink="/dashboard/profile">
+        <mat-icon>edit</mat-icon>
+        Editar Perfil
+      </button>
+      <button mat-stroked-button routerLink="/dashboard/settings">
+        <mat-icon>settings</mat-icon>
+        Configuración
+      </button>
+    </div>
+  </section>
+
+  <section class="recent-activity">
+    <h2>Actividad Reciente</h2>
+    <mat-card>
+      <mat-card-content>
+        <div class="activity-list">
+          @for (activity of recentActivities; track activity.id) {
+          <div class="activity-item">
+            <mat-icon>{{ activity.icon }}</mat-icon>
+            <div class="activity-info">
+              <span class="activity-text">{{ activity.text }}</span>
+              <span class="activity-time">{{ activity.time }}</span>
+            </div>
+          </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</div>

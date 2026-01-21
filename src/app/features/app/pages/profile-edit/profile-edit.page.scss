@@ -1,0 +1,73 @@
+.profile-edit-page {
+  max-width: 600px;
+  margin: 0 auto;
+
+  header {
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0 0 8px;
+      color: var(--color-text-primary);
+    }
+
+    p {
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+  }
+}
+
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+
+  .avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--gradient-hero);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 60px;
+      width: 60px;
+      height: 60px;
+      color: var(--color-text-inverted);
+    }
+  }
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.services-section {
+  margin-top: 16px;
+
+  h3 {
+    margin: 0 0 16px;
+    color: var(--color-text-primary);
+  }
+
+  .add-service {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 16px;
+
+    mat-form-field {
+      flex: 1;
+    }
+  }
+}

@@ -1,0 +1,42 @@
+<mat-toolbar color="primary" class="public-toolbar">
+  <a routerLink="/" class="logo">
+    <mat-icon>business</mat-icon>
+    <span>ProDirectory</span>
+  </a>
+
+  <span class="spacer"></span>
+
+  <nav class="nav-links">
+    <a
+      mat-button
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Inicio
+    </a>
+    <a mat-button routerLink="/search" routerLinkActive="active"> Buscar </a>
+  </nav>
+
+  <span class="spacer"></span>
+
+  @if (authService.isAuthenticated()) {
+  <a mat-button routerLink="/dashboard">
+    <mat-icon>dashboard</mat-icon>
+    Dashboard
+  </a>
+  } @else {
+  <a mat-stroked-button routerLink="/login">
+    <mat-icon>login</mat-icon>
+    Ingresar
+  </a>
+  }
+</mat-toolbar>
+
+<main class="public-content">
+  <router-outlet />
+</main>
+
+<footer class="public-footer">
+  <p>&copy; 2026 ProDirectory. Todos los derechos reservados.</p>
+</footer>

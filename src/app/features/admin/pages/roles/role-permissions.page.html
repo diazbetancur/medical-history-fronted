@@ -1,0 +1,137 @@
+<div class="permissions-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <div class="header-title">
+          <button mat-icon-button (click)="cancel()" matTooltip="Volver">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-content">
+            <mat-icon>key</mat-icon>
+            <div>
+              <h1>Gestión de Permisos</h1>
+              @if (selectedRole()) {
+              <span class="role-name">{{ selectedRole()!.name }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      </mat-card-title>
+      <mat-card-subtitle>
+        Configura los permisos asignados a este rol
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <mat-icon>check_circle</mat-icon>
+          <span
+            >{{ getSelectedCount() }} de {{ getTotalPermissionsCount() }}
+            permisos seleccionados</span
+          >
+        </div>
+        @if (hasChanges()) {
+        <mat-chip color="warn">
+          <mat-icon>edit</mat-icon>
+          Cambios sin guardar
+        </mat-chip>
+        }
+      </div>
+
+      <!-- Error Message -->
+      @if (error()) {
+      <div class="error-banner">
+        <mat-icon>error</mat-icon>
+        <span>{{ error() }}</span>
+      </div>
+      }
+
+      <!-- Loading State -->
+      @if (loading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando permisos...</p>
+      </div>
+      }
+
+      <!-- Permissions by Module -->
+      @if (!loading() && permissionsByModule().length > 0) {
+      <div class="modules-container">
+        <mat-accordion multi>
+          @for (module of permissionsByModule(); track module.moduleName) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-checkbox
+                  [checked]="isModuleSelected(module)"
+                  [indeterminate]="isModuleIndeterminate(module)"
+                  (change)="toggleModule(module)"
+                  (click)="$event.stopPropagation()"
+                >
+                  <span class="module-title">{{ module.moduleName }}</span>
+                </mat-checkbox>
+              </mat-panel-title>
+              <mat-panel-description>
+                <mat-chip> {{ module.permissions.length }} permisos </mat-chip>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="permissions-list">
+              @for (permission of module.permissions; track permission) {
+              <div class="permission-item">
+                <mat-checkbox
+                  [checked]="isPermissionSelected(permission)"
+                  (change)="togglePermission(permission)"
+                >
+                  <div class="permission-content">
+                    <span class="permission-name">
+                      {{ getPermissionLabel(permission) }}
+                    </span>
+                    <span class="permission-full-name"> {{ permission }} </span>
+                  </div>
+                </mat-checkbox>
+              </div>
+              }
+            </div>
+          </mat-expansion-panel>
+          }
+        </mat-accordion>
+      </div>
+      }
+
+      <!-- Empty State -->
+      @if (!loading() && permissionsByModule().length === 0 && !error()) {
+      <div class="empty-state">
+        <mat-icon>lock_outline</mat-icon>
+        <h3>No hay permisos disponibles</h3>
+        <p>No se encontraron permisos en el sistema</p>
+      </div>
+      }
+    </mat-card-content>
+
+    <mat-card-actions>
+      <div class="actions-left">
+        <button mat-button (click)="cancel()">
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+      </div>
+      <div class="actions-right">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="saveChanges()"
+          [disabled]="!hasChanges() || saving()"
+        >
+          @if (saving()) {
+          <mat-spinner diameter="20"></mat-spinner>
+          } @if (!saving()) {
+          <mat-icon>save</mat-icon>
+          } Guardar Cambios
+        </button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -1,0 +1,135 @@
+<!-- Loading State -->
+@if (store.loading()) {
+<div class="loading-container">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>Cargando...</p>
+</div>
+}
+
+<!-- Error State -->
+@if (store.error(); as error) {
+<div class="error-container">
+  <mat-icon>error_outline</mat-icon>
+  <h2>Ocurrió un error</h2>
+  <p>{{ error }}</p>
+  <button mat-raised-button color="primary" (click)="reload()">
+    <mat-icon>refresh</mat-icon>
+    Reintentar
+  </button>
+</div>
+}
+
+<!-- Content -->
+@if (store.data(); as data) {
+<section class="hero">
+  <h1>Encuentra Profesionales de Confianza</h1>
+  <p>Conecta con expertos verificados en tu área</p>
+  <a mat-raised-button color="primary" routerLink="/search" class="cta-button">
+    <mat-icon>search</mat-icon>
+    Buscar Profesionales
+  </a>
+</section>
+
+<!-- Featured Categories -->
+@if (store.featuredCategories().length > 0) {
+<section class="categories">
+  <h2>Categorías Populares</h2>
+  <div class="categories-grid">
+    @for (category of store.featuredCategories(); track category.id) {
+    <a
+      [routerLink]="['/search']"
+      [queryParams]="{ category: category.slug }"
+      class="category-card"
+    >
+      <mat-icon>{{ category.icon || 'work' }}</mat-icon>
+      <span class="category-name">{{ category.name }}</span>
+      @if (category.professionalCount) {
+      <span class="category-count">
+        {{ category.professionalCount }} profesionales
+      </span>
+      }
+    </a>
+    }
+  </div>
+</section>
+}
+
+<!-- Featured Professionals -->
+@if (store.featuredProfessionals().length > 0) {
+<section class="featured">
+  <h2>Profesionales Destacados</h2>
+  <div class="featured-grid">
+    @for (pro of store.featuredProfessionals(); track pro.id) {
+    <mat-card class="pro-card">
+      <mat-card-header>
+        <div mat-card-avatar class="pro-avatar">
+          @if (pro.profileImageUrl) {
+          <img [src]="pro.profileImageUrl" [alt]="pro.businessName" />
+          } @else {
+          <mat-icon>person</mat-icon>
+          }
+        </div>
+        <mat-card-title>{{ pro.businessName }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ pro.categoryName }} • {{ pro.cityName }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (pro.isVerified) {
+        <div class="verified-badge">
+          <mat-icon>verified</mat-icon>
+          <span>Verificado</span>
+        </div>
+        } @if (pro.priceFrom) {
+        <div class="price-from">
+          <span>Desde ${{ pro.priceFrom }}</span>
+        </div>
+        }
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button color="primary" [routerLink]="['/pro', pro.slug]">
+          Ver Perfil
+        </a>
+      </mat-card-actions>
+    </mat-card>
+    }
+  </div>
+</section>
+}
+
+<!-- Features Section -->
+<section class="features">
+  <h2>¿Por qué ProDirectory?</h2>
+  <div class="features-grid">
+    <mat-card class="feature-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>verified</mat-icon>
+        <mat-card-title>Verificados</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Todos los profesionales pasan por un proceso de verificación.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="feature-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>star</mat-icon>
+        <mat-card-title>Calificados</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Sistema de reseñas y calificaciones transparente.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="feature-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>speed</mat-icon>
+        <mat-card-title>Rápido</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Encuentra y contacta profesionales en minutos.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>
+}

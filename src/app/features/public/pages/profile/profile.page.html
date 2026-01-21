@@ -1,0 +1,174 @@
+<div class="profile-container">
+  <!-- Loading State -->
+  @if (store.loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Cargando perfil...</p>
+  </div>
+  }
+
+  <!-- Error State -->
+  @if (store.error(); as error) {
+  <div class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <h2>No se pudo cargar el perfil</h2>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="reload()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+  }
+
+  <!-- Profile Content -->
+  @if (store.profile(); as profile) {
+  <mat-card class="profile-header">
+    <div class="profile-info">
+      <div class="avatar">
+        @if (profile.profileImageUrl) {
+        <img [src]="profile.profileImageUrl" [alt]="profile.businessName" />
+        } @else {
+        <mat-icon>person</mat-icon>
+        }
+      </div>
+      <div class="details">
+        <h1>{{ profile.businessName }}</h1>
+        <p class="specialty">
+          {{ profile.categoryName }} • {{ profile.cityName }}
+        </p>
+        <div class="badges">
+          @if (profile.isVerified) {
+          <mat-chip highlighted>
+            <mat-icon>verified</mat-icon>
+            Verificado
+          </mat-chip>
+          } @if (profile.isFeatured) {
+          <mat-chip color="accent">
+            <mat-icon>star</mat-icon>
+            Destacado
+          </mat-chip>
+          }
+        </div>
+        <p class="view-count">
+          <mat-icon>visibility</mat-icon>
+          {{ profile.viewCount }} visitas
+        </p>
+      </div>
+    </div>
+    <div class="actions">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onContactClick('form')"
+      >
+        <mat-icon>message</mat-icon>
+        Contactar
+      </button>
+      @if (profile.phone) {
+      <a
+        mat-stroked-button
+        [href]="'tel:' + profile.phone"
+        (click)="onContactClick('phone')"
+      >
+        <mat-icon>phone</mat-icon>
+        Llamar
+      </a>
+      } @if (profile.whatsApp) {
+      <a
+        mat-stroked-button
+        [href]="'https://wa.me/' + profile.whatsApp"
+        target="_blank"
+        (click)="onContactClick('whatsapp')"
+      >
+        <mat-icon>chat</mat-icon>
+        WhatsApp
+      </a>
+      }
+    </div>
+  </mat-card>
+
+  <mat-tab-group>
+    <mat-tab label="Información">
+      <div class="tab-content">
+        @if (profile.description) {
+        <h3>Acerca de</h3>
+        <p>{{ profile.description }}</p>
+        } @if (store.services().length > 0) {
+        <h3>Servicios</h3>
+        <div class="services-list">
+          @for (service of store.services(); track service.id) {
+          <mat-card class="service-card">
+            <mat-card-header>
+              <mat-card-title>{{ service.name }}</mat-card-title>
+              @if (service.priceFrom) {
+              <mat-card-subtitle>
+                Desde ${{ service.priceFrom }} @if (service.priceTo) { - ${{
+                service.priceTo }} }
+              </mat-card-subtitle>
+              }
+            </mat-card-header>
+            @if (service.description) {
+            <mat-card-content>
+              <p>{{ service.description }}</p>
+            </mat-card-content>
+            }
+          </mat-card>
+          }
+        </div>
+        } @if (profile.email) {
+        <h3>Contacto</h3>
+        <p>
+          <mat-icon>email</mat-icon>
+          <a [href]="'mailto:' + profile.email">{{ profile.email }}</a>
+        </p>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Ubicación">
+      <div class="tab-content">
+        <p class="location-text">
+          <mat-icon>location_on</mat-icon>
+          {{ profile.cityName }}, {{ profile.countryName }} @if
+          (profile.address) { - {{ profile.address }} }
+        </p>
+        <div class="map-placeholder">
+          <mat-icon>map</mat-icon>
+          <span>Mapa (próximamente)</span>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Related Professionals -->
+  @if (store.relatedProfessionals().length > 0) {
+  <section class="related-section">
+    <h3>Profesionales Similares</h3>
+    <div class="related-grid">
+      @for (related of store.relatedProfessionals(); track related.id) {
+      <mat-card class="related-card">
+        <mat-card-header>
+          <div mat-card-avatar class="related-avatar">
+            @if (related.profileImageUrl) {
+            <img [src]="related.profileImageUrl" [alt]="related.businessName" />
+            } @else {
+            <mat-icon>person</mat-icon>
+            }
+          </div>
+          <mat-card-title>{{ related.businessName }}</mat-card-title>
+          <mat-card-subtitle
+            >{{ related.categoryName }} • {{ related.cityName
+            }}</mat-card-subtitle
+          >
+        </mat-card-header>
+        <mat-card-actions>
+          <a mat-button color="primary" [routerLink]="['/pro', related.slug]">
+            Ver Perfil
+          </a>
+        </mat-card-actions>
+      </mat-card>
+      }
+    </div>
+  </section>
+  } }
+</div>

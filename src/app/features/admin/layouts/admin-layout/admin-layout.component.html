@@ -1,0 +1,95 @@
+<mat-sidenav-container class="admin-container">
+  <!-- Sidenav -->
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile()"
+    class="admin-sidenav"
+  >
+    <div class="sidenav-header">
+      <mat-icon>admin_panel_settings</mat-icon>
+      <span>Admin Panel</span>
+    </div>
+
+    <!-- Dynamic Menu Sections -->
+    @for (section of adminMenu(); track section.title) {
+      @if (section.hasVisibleItems) {
+        @if (section.title) {
+          <div class="section-title">{{ section.title }}</div>
+        }
+        <mat-nav-list>
+          @for (item of section.items; track item.id) {
+            @if (item.visible) {
+              <a
+                mat-list-item
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: item.exactMatch ?? false }"
+                [matTooltip]="item.tooltip ?? ''"
+                matTooltipPosition="right"
+                (click)="isMobile() && sidenav.close()"
+              >
+                <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                <span matListItemTitle>{{ item.label }}</span>
+                @if (item.badge) {
+                  <span class="menu-badge">{{ item.badge }}</span>
+                }
+              </a>
+            }
+          }
+        </mat-nav-list>
+        @if (section.dividerAfter) {
+          <mat-divider></mat-divider>
+        }
+      }
+    }
+
+    <!-- Footer Navigation -->
+    <div class="sidenav-footer">
+      <mat-divider></mat-divider>
+      @for (item of footerMenu(); track item.id) {
+        @if (item.visible) {
+          <a mat-list-item [routerLink]="item.route">
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      }
+    </div>
+  </mat-sidenav>
+
+  <!-- Main Content -->
+  <mat-sidenav-content>
+    <!-- Top Toolbar -->
+    <mat-toolbar color="primary" class="admin-toolbar">
+      <button mat-icon-button (click)="sidenav.toggle()" class="menu-button">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="toolbar-title">Administración</span>
+
+      <span class="spacer"></span>
+
+      <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+
+      <mat-menu #userMenu="matMenu">
+        <div class="user-info">
+          <strong>{{ authService.session().email }}</strong>
+          <span class="role-badge">{{ authService.primaryRole() }}</span>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar Sesión</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <!-- Page Content -->
+    <main class="admin-content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

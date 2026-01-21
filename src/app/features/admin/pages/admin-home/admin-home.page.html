@@ -1,0 +1,176 @@
+<div class="admin-home">
+  <header>
+    <h1>Panel de Administración</h1>
+    <p>Bienvenido al panel de control</p>
+  </header>
+
+  <!-- Empty State: Sin Permisos Administrativos -->
+  @if (!hasAnyWidgetVisible()) {
+  <div class="empty-state">
+    <mat-card class="empty-state-card">
+      <mat-card-content>
+        <mat-icon class="empty-icon">admin_panel_settings</mat-icon>
+        <h2>No tienes permisos administrativos asignados</h2>
+        <p class="hint">
+          Si crees que deberías tener acceso, contacta a tu administrador del
+          sistema.
+        </p>
+        <button mat-raised-button color="primary" routerLink="/dashboard">
+          <mat-icon>arrow_back</mat-icon>
+          Volver al Dashboard
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  } @else {
+  <!-- Stats Grid: Solo widgets con permisos -->
+  <div class="stats-grid">
+    <!-- Profesionales Stats -->
+    @if (canViewProfessionals()) {
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon class="stat-icon users">people</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().totalProfessionals }}</span>
+          <span class="stat-label">Profesionales Registrados</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon class="stat-icon pending">pending_actions</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().pendingReview }}</span>
+          <span class="stat-label">Pendientes de Revisión</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon class="stat-icon verified">verified</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().verifiedProfessionals }}</span>
+          <span class="stat-label">Verificados</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+
+    <!-- Solicitudes Stats -->
+    @if (canViewRequests()) {
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon class="stat-icon requests">inbox</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().totalRequests }}</span>
+          <span class="stat-label">Solicitudes Totales</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+
+    <!-- Usuarios Stats -->
+    @if (canViewUsers()) {
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon class="stat-icon users">manage_accounts</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().totalUsers }}</span>
+          <span class="stat-label">Usuarios del Sistema</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+
+    <!-- Roles Stats -->
+    @if (canViewRoles()) {
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <mat-icon class="stat-icon roles">shield</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats().activeRoles }}</span>
+          <span class="stat-label">Roles Activos</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+
+  <!-- Quick Actions: Solo acciones con permisos -->
+  <section class="quick-actions">
+    <h2>Acciones Rápidas</h2>
+    <div class="actions-grid">
+      @if (canViewProfessionals()) {
+      <mat-card class="action-card" routerLink="/admin/professionals">
+        <mat-card-content>
+          <mat-icon>person_search</mat-icon>
+          <span>Revisar Profesionales</span>
+          <mat-icon class="arrow">arrow_forward</mat-icon>
+        </mat-card-content>
+      </mat-card>
+      } @if (canViewRequests()) {
+      <mat-card class="action-card" routerLink="/admin/requests">
+        <mat-card-content>
+          <mat-icon>inbox</mat-icon>
+          <span>Gestionar Solicitudes</span>
+          <mat-icon class="arrow">arrow_forward</mat-icon>
+        </mat-card-content>
+      </mat-card>
+      } @if (canViewCatalogs()) {
+      <mat-card class="action-card" routerLink="/admin/catalogs">
+        <mat-card-content>
+          <mat-icon>category</mat-icon>
+          <span>Gestionar Catálogos</span>
+          <mat-icon class="arrow">arrow_forward</mat-icon>
+        </mat-card-content>
+      </mat-card>
+      } @if (canViewUsers()) {
+      <mat-card class="action-card" routerLink="/admin/users">
+        <mat-card-content>
+          <mat-icon>manage_accounts</mat-icon>
+          <span>Administrar Usuarios</span>
+          <mat-icon class="arrow">arrow_forward</mat-icon>
+        </mat-card-content>
+      </mat-card>
+      } @if (canViewRoles()) {
+      <mat-card class="action-card" routerLink="/admin/roles">
+        <mat-card-content>
+          <mat-icon>shield</mat-icon>
+          <span>Gestionar Roles</span>
+          <mat-icon class="arrow">arrow_forward</mat-icon>
+        </mat-card-content>
+      </mat-card>
+      } @if (canViewConfig()) {
+      <mat-card class="action-card" routerLink="/admin/config">
+        <mat-card-content>
+          <mat-icon>settings</mat-icon>
+          <span>Configuración</span>
+          <mat-icon class="arrow">arrow_forward</mat-icon>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+  </section>
+
+  <!-- Recent Activity: Visible si tiene al menos un permiso -->
+  @if (canViewProfessionals()) {
+  <section class="recent-activity">
+    <h2>Actividad Reciente</h2>
+    <mat-card>
+      <mat-card-content>
+        @for (activity of recentActivities; track activity.id) {
+        <div class="activity-item">
+          <mat-icon [class]="activity.type">{{ activity.icon }}</mat-icon>
+          <div class="activity-info">
+            <span class="activity-text">{{ activity.text }}</span>
+            <span class="activity-time">{{ activity.time }}</span>
+          </div>
+        </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </section>
+  } }
+</div>

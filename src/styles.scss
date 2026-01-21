@@ -1,1 +1,179 @@
-/* You can add global styles to this file, and also import other style files */
+// ============================================================================
+// GLOBAL STYLES - ProDirectory Design System
+// ============================================================================
+// Este es el archivo principal de estilos. Importa todos los módulos del
+// sistema de diseño y define estilos globales base.
+// ============================================================================
+
+// Import Design System
+@use "styles/design-tokens" as tokens;
+@use "styles/material-theme";
+@use "styles/utilities";
+
+// ============================================================================
+// Reset & Base
+// ============================================================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ============================================================================
+// Typography
+// ============================================================================
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+a {
+  color: var(--color-text-link);
+  text-decoration: none;
+  transition: color 150ms ease-in-out;
+
+  &:hover {
+    color: var(--color-text-link-hover);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-outline);
+    outline-offset: 2px;
+  }
+}
+
+p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+// ============================================================================
+// View Transitions (Angular 19+)
+// ============================================================================
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+}
+
+// ============================================================================
+// Scrollbar Styling
+// ============================================================================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-alt);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-dark);
+  border-radius: 4px;
+
+  &:hover {
+    background: var(--color-text-disabled);
+  }
+}
+
+// Firefox scrollbar
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-dark) var(--color-background-alt);
+}
+
+// ============================================================================
+// Selection Styling
+// ============================================================================
+
+::selection {
+  background-color: tokens.$color-primary-alpha-30;
+  color: var(--color-text-primary);
+}
+
+// ============================================================================
+// Focus Styling (Accessibility)
+// ============================================================================
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-outline);
+  outline-offset: 2px;
+}
+
+// ============================================================================
+// Print Styles
+// ============================================================================
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  a {
+    color: black;
+    text-decoration: underline;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+// ============================================================================
+// Toast Notifications (Global Snackbar Styling)
+// ============================================================================
+
+.toast-success {
+  --mdc-snackbar-container-color: #059669;
+  --mdc-snackbar-supporting-text-color: white;
+  --mat-snack-bar-button-color: white;
+}
+
+.toast-error {
+  --mdc-snackbar-container-color: #dc2626;
+  --mdc-snackbar-supporting-text-color: white;
+  --mat-snack-bar-button-color: white;
+}
+
+.toast-warning {
+  --mdc-snackbar-container-color: #d97706;
+  --mdc-snackbar-supporting-text-color: white;
+  --mat-snack-bar-button-color: white;
+}
+
+.toast-info {
+  --mdc-snackbar-container-color: #2563eb;
+  --mdc-snackbar-supporting-text-color: white;
+  --mat-snack-bar-button-color: white;
+}

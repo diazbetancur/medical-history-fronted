@@ -1,0 +1,103 @@
+.requests-page {
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0;
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  gap: 16px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--color-error);
+  }
+
+  p {
+    color: var(--color-text-secondary);
+  }
+}
+
+.requests-list {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.request-card {
+  .message {
+    margin: 0 0 16px;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+  }
+
+  .contact-info {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .status-pending {
+    background: var(--chip-warning-bg);
+    color: var(--chip-warning-text);
+  }
+
+  .status-contacted {
+    background: var(--chip-info-bg);
+    color: var(--chip-info-text);
+  }
+
+  .status-closed {
+    background: var(--chip-success-bg);
+    color: var(--chip-success-text);
+  }
+
+  .status-rejected {
+    background: var(--chip-error-bg);
+    color: var(--chip-error-text);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px;
+  color: var(--color-text-tertiary);
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+}

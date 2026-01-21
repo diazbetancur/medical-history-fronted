@@ -1,0 +1,115 @@
+<div class="professionals-review">
+  <header>
+    <h1>Revisar Profesionales</h1>
+    <p>Gestiona las solicitudes de verificación</p>
+  </header>
+
+  <mat-card>
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="professionals()">
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let pro">
+              <div class="pro-info">
+                <div class="avatar">
+                  <mat-icon>person</mat-icon>
+                </div>
+                <div class="details">
+                  <span class="name">{{ pro.name }}</span>
+                  <span class="email">{{ pro.email }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Specialty Column -->
+          <ng-container matColumnDef="specialty">
+            <th mat-header-cell *matHeaderCellDef>Especialidad</th>
+            <td mat-cell *matCellDef="let pro">{{ pro.specialty }}</td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let pro">
+              <mat-chip [class]="'status-' + pro.status">
+                {{ getStatusLabel(pro.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Date Column -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Fecha Registro</th>
+            <td mat-cell *matCellDef="let pro">{{ pro.createdAt }}</td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let pro">
+              @if (pro.status === 'pending') { @if (canVerify()) {
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="verifyPro(pro.id)"
+                matTooltip="Verificar"
+              >
+                <mat-icon>check_circle</mat-icon>
+              </button>
+              } @if (canUpdate()) {
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="rejectPro(pro.id)"
+                matTooltip="Rechazar"
+              >
+                <mat-icon>cancel</mat-icon>
+              </button>
+              } }
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #actionMenu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon>visibility</mat-icon>
+                  <span>Ver Perfil</span>
+                </button>
+                @if (canUpdate()) {
+                <button mat-menu-item (click)="editPro(pro.id)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar</span>
+                </button>
+                } @if (canFeature()) {
+                <button mat-menu-item (click)="featurePro(pro.id)">
+                  <mat-icon>star</mat-icon>
+                  <span>Destacar</span>
+                </button>
+                }
+                <button mat-menu-item>
+                  <mat-icon>email</mat-icon>
+                  <span>Contactar</span>
+                </button>
+                @if (canDelete()) {
+                <button
+                  mat-menu-item
+                  class="warn-item"
+                  (click)="deletePro(pro.id)"
+                >
+                  <mat-icon>delete</mat-icon>
+                  <span>Eliminar</span>
+                </button>
+                }
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

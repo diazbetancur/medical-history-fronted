@@ -1,0 +1,76 @@
+.professionals-review {
+  header {
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0 0 8px;
+    }
+
+    p {
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+
+  .pro-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        color: white;
+        font-size: 20px;
+      }
+    }
+
+    .details {
+      display: flex;
+      flex-direction: column;
+
+      .name {
+        font-weight: 500;
+      }
+
+      .email {
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+      }
+    }
+  }
+
+  .status-pending {
+    background: var(--chip-warning-bg);
+    color: var(--chip-warning-text);
+  }
+
+  .status-verified {
+    background: var(--chip-success-bg);
+    color: var(--chip-success-text);
+  }
+
+  .status-rejected {
+    background: var(--chip-error-bg);
+    color: var(--chip-error-text);
+  }
+}
+
+.warn-item {
+  color: var(--color-error);
+}

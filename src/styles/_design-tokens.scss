@@ -1,0 +1,1193 @@
+// ============================================================================
+// DESIGN TOKENS - ProDirectory Design System v2.0
+// ============================================================================
+// Este archivo contiene todos los tokens de diseño del sistema.
+// NO usar colores hexadecimales directamente en componentes.
+// Usar siempre las variables CSS o mixins definidos aquí.
+//
+// Estructura:
+// A) Base Color Palette - Colores base de marca
+// B) Color Variations - Variantes automáticas (light/dark)
+// C) Transparency & Opacity - Tokens con transparencia
+// D) Semantic Tokens (CSS Custom Properties) - Variables CSS semánticas
+// E) Dark Mode Preparation - Estructura lista para tema oscuro
+// F) SCSS Functions & Mixins - Utilidades para componentes
+// G) Component-Specific Tokens - Tokens para componentes específicos
+// ============================================================================
+
+@use "sass:color";
+@use "sass:map";
+@use "sass:math";
+
+// ============================================================================
+// A) BASE COLOR PALETTE
+// ============================================================================
+// Definición única de colores. Solo cambiar estos valores para rebranding.
+
+// Brand Colors (Core) - Nueva paleta de marca
+$color-brand-primary: #2563eb; // Primary / Brand Blue - Confiable, profesional
+$color-brand-accent: #ff6b35; // Accent / Brand Orange - Energético, CTA
+$color-brand-success: #10b981; // Success / Green - Verificado, éxito
+
+// Neutral Scale (Light → Dark) - Escala completa de grises
+$color-neutral-white: #ffffff;
+$color-neutral-50: #f8fafc; // Background Alt / Lightest
+$color-neutral-100: #f1f5f9; // Surface pressed
+$color-neutral-200: #e2e8f0; // Border default
+$color-neutral-300: #cbd5e1; // Border dark
+$color-neutral-400: #94a3b8; // Text disabled
+$color-neutral-500: #64748b; // Text tertiary
+$color-neutral-600: #475569; // Text secondary
+$color-neutral-700: #334155; // Text emphasis
+$color-neutral-800: #1e293b; // Text primary (brand dark)
+$color-neutral-900: #0f172a; // Darkest
+$color-neutral-black: #000000; // Pure black (usar con moderación)
+
+// Semantic Status Colors - Feedback visual
+$color-warning: #f59e0b; // Amber - Alertas, pendientes
+$color-error: #dc2626; // Red - Errores, destructivo
+$color-info: #0ea5e9; // Sky Blue - Información, enlaces
+
+// ============================================================================
+// B) COLOR VARIATIONS (Auto-generated)
+// ============================================================================
+
+// Primary Variations
+$color-primary-50: color.mix($color-neutral-white, $color-brand-primary, 95%);
+$color-primary-100: color.mix($color-neutral-white, $color-brand-primary, 90%);
+$color-primary-200: color.mix($color-neutral-white, $color-brand-primary, 70%);
+$color-primary-300: color.mix($color-neutral-white, $color-brand-primary, 50%);
+$color-primary-400: color.mix($color-neutral-white, $color-brand-primary, 25%);
+$color-primary-500: $color-brand-primary; // Base
+$color-primary-600: color.mix($color-neutral-black, $color-brand-primary, 15%);
+$color-primary-700: color.mix($color-neutral-black, $color-brand-primary, 30%);
+$color-primary-800: color.mix($color-neutral-black, $color-brand-primary, 45%);
+$color-primary-900: color.mix($color-neutral-black, $color-brand-primary, 60%);
+
+// Accent Variations
+$color-accent-50: color.mix($color-neutral-white, $color-brand-accent, 95%);
+$color-accent-100: color.mix($color-neutral-white, $color-brand-accent, 90%);
+$color-accent-200: color.mix($color-neutral-white, $color-brand-accent, 70%);
+$color-accent-300: color.mix($color-neutral-white, $color-brand-accent, 50%);
+$color-accent-400: color.mix($color-neutral-white, $color-brand-accent, 25%);
+$color-accent-500: $color-brand-accent; // Base
+$color-accent-600: color.mix($color-neutral-black, $color-brand-accent, 15%);
+$color-accent-700: color.mix($color-neutral-black, $color-brand-accent, 30%);
+$color-accent-800: color.mix($color-neutral-black, $color-brand-accent, 45%);
+$color-accent-900: color.mix($color-neutral-black, $color-brand-accent, 60%);
+
+// Success Variations
+$color-success-50: color.mix($color-neutral-white, $color-brand-success, 95%);
+$color-success-100: color.mix($color-neutral-white, $color-brand-success, 90%);
+$color-success-200: color.mix($color-neutral-white, $color-brand-success, 70%);
+$color-success-300: color.mix($color-neutral-white, $color-brand-success, 50%);
+$color-success-400: color.mix($color-neutral-white, $color-brand-success, 25%);
+$color-success-500: $color-brand-success; // Base
+$color-success-600: color.mix($color-neutral-black, $color-brand-success, 15%);
+$color-success-700: color.mix($color-neutral-black, $color-brand-success, 30%);
+$color-success-800: color.mix($color-neutral-black, $color-brand-success, 45%);
+$color-success-900: color.mix($color-neutral-black, $color-brand-success, 60%);
+
+// Warning Variations
+$color-warning-50: color.mix($color-neutral-white, $color-warning, 95%);
+$color-warning-100: color.mix($color-neutral-white, $color-warning, 90%);
+$color-warning-200: color.mix($color-neutral-white, $color-warning, 70%);
+$color-warning-300: color.mix($color-neutral-white, $color-warning, 50%);
+$color-warning-400: color.mix($color-neutral-white, $color-warning, 25%);
+$color-warning-500: $color-warning; // Base
+$color-warning-600: color.mix($color-neutral-black, $color-warning, 15%);
+$color-warning-700: color.mix($color-neutral-black, $color-warning, 30%);
+$color-warning-800: color.mix($color-neutral-black, $color-warning, 45%);
+$color-warning-900: color.mix($color-neutral-black, $color-warning, 60%);
+
+// Error Variations
+$color-error-50: color.mix($color-neutral-white, $color-error, 95%);
+$color-error-100: color.mix($color-neutral-white, $color-error, 90%);
+$color-error-200: color.mix($color-neutral-white, $color-error, 70%);
+$color-error-300: color.mix($color-neutral-white, $color-error, 50%);
+$color-error-400: color.mix($color-neutral-white, $color-error, 25%);
+$color-error-500: $color-error; // Base
+$color-error-600: color.mix($color-neutral-black, $color-error, 15%);
+$color-error-700: color.mix($color-neutral-black, $color-error, 30%);
+$color-error-800: color.mix($color-neutral-black, $color-error, 45%);
+$color-error-900: color.mix($color-neutral-black, $color-error, 60%);
+
+// Info Variations
+$color-info-50: color.mix($color-neutral-white, $color-info, 95%);
+$color-info-100: color.mix($color-neutral-white, $color-info, 90%);
+$color-info-200: color.mix($color-neutral-white, $color-info, 70%);
+$color-info-300: color.mix($color-neutral-white, $color-info, 50%);
+$color-info-400: color.mix($color-neutral-white, $color-info, 25%);
+$color-info-500: $color-info; // Base
+$color-info-600: color.mix($color-neutral-black, $color-info, 15%);
+$color-info-700: color.mix($color-neutral-black, $color-info, 30%);
+$color-info-800: color.mix($color-neutral-black, $color-info, 45%);
+$color-info-900: color.mix($color-neutral-black, $color-info, 60%);
+
+// ============================================================================
+// C) TRANSPARENCY & OPACITY TOKENS
+// ============================================================================
+
+// Primary with opacity
+$color-primary-alpha-5: rgba($color-brand-primary, 0.05);
+$color-primary-alpha-10: rgba($color-brand-primary, 0.1);
+$color-primary-alpha-20: rgba($color-brand-primary, 0.2);
+$color-primary-alpha-30: rgba($color-brand-primary, 0.3);
+$color-primary-alpha-50: rgba($color-brand-primary, 0.5);
+$color-primary-alpha-70: rgba($color-brand-primary, 0.7);
+$color-primary-alpha-90: rgba($color-brand-primary, 0.9);
+
+// Accent with opacity
+$color-accent-alpha-5: rgba($color-brand-accent, 0.05);
+$color-accent-alpha-10: rgba($color-brand-accent, 0.1);
+$color-accent-alpha-20: rgba($color-brand-accent, 0.2);
+$color-accent-alpha-30: rgba($color-brand-accent, 0.3);
+$color-accent-alpha-50: rgba($color-brand-accent, 0.5);
+$color-accent-alpha-70: rgba($color-brand-accent, 0.7);
+$color-accent-alpha-90: rgba($color-brand-accent, 0.9);
+
+// Neutral (Black) with opacity - for overlays
+$color-overlay-5: rgba($color-neutral-black, 0.05);
+$color-overlay-10: rgba($color-neutral-black, 0.1);
+$color-overlay-20: rgba($color-neutral-black, 0.2);
+$color-overlay-30: rgba($color-neutral-black, 0.3);
+$color-overlay-50: rgba($color-neutral-black, 0.5);
+$color-overlay-70: rgba($color-neutral-black, 0.7);
+$color-overlay-90: rgba($color-neutral-black, 0.9);
+
+// White with opacity - for light overlays
+$color-white-alpha-5: rgba($color-neutral-white, 0.05);
+$color-white-alpha-10: rgba($color-neutral-white, 0.1);
+$color-white-alpha-20: rgba($color-neutral-white, 0.2);
+$color-white-alpha-30: rgba($color-neutral-white, 0.3);
+$color-white-alpha-50: rgba($color-neutral-white, 0.5);
+$color-white-alpha-70: rgba($color-neutral-white, 0.7);
+$color-white-alpha-90: rgba($color-neutral-white, 0.9);
+
+// ============================================================================
+// D) SEMANTIC TOKENS (CSS Custom Properties)
+// ============================================================================
+// Estos tokens se definen como CSS Custom Properties para permitir
+// cambio dinámico de tema (light/dark mode)
+
+:root {
+  // ----------------------------------------------------------------------------
+  // Brand
+  // ----------------------------------------------------------------------------
+  --color-primary: #{$color-brand-primary};
+  --color-primary-light: #{$color-primary-300};
+  --color-primary-dark: #{$color-primary-700};
+  --color-primary-hover: #{$color-primary-600};
+  --color-primary-active: #{$color-primary-700};
+  --color-primary-disabled: #{$color-primary-300};
+  --color-primary-contrast: #{$color-neutral-white};
+
+  --color-accent: #{$color-brand-accent};
+  --color-accent-light: #{$color-accent-300};
+  --color-accent-dark: #{$color-accent-700};
+  --color-accent-hover: #{$color-accent-600};
+  --color-accent-active: #{$color-accent-700};
+  --color-accent-disabled: #{$color-accent-300};
+  --color-accent-contrast: #{$color-neutral-white};
+
+  // ----------------------------------------------------------------------------
+  // Status
+  // ----------------------------------------------------------------------------
+  --color-success: #{$color-brand-success};
+  --color-success-light: #{$color-success-100};
+  --color-success-dark: #{$color-success-700};
+  --color-success-contrast: #{$color-neutral-white};
+  --color-success-bg: #{$color-success-50};
+  --color-success-text: #{$color-success-800};
+
+  --color-warning: #{$color-warning};
+  --color-warning-light: #{$color-warning-100};
+  --color-warning-dark: #{$color-warning-700};
+  --color-warning-contrast: #{$color-neutral-900};
+  --color-warning-bg: #{$color-warning-50};
+  --color-warning-text: #{$color-warning-800};
+
+  --color-error: #{$color-error};
+  --color-error-light: #{$color-error-100};
+  --color-error-dark: #{$color-error-700};
+  --color-error-contrast: #{$color-neutral-white};
+  --color-error-bg: #{$color-error-50};
+  --color-error-text: #{$color-error-800};
+
+  --color-info: #{$color-info};
+  --color-info-light: #{$color-info-100};
+  --color-info-dark: #{$color-info-700};
+  --color-info-contrast: #{$color-neutral-white};
+  --color-info-bg: #{$color-info-50};
+  --color-info-text: #{$color-info-800};
+
+  // ----------------------------------------------------------------------------
+  // Backgrounds & Surfaces
+  // ----------------------------------------------------------------------------
+  --color-background: #{$color-neutral-white};
+  --color-background-alt: #{$color-neutral-50};
+  --color-surface: #{$color-neutral-white};
+  --color-surface-elevated: #{$color-neutral-white};
+  --color-surface-hover: #{$color-neutral-50};
+  --color-surface-pressed: #{$color-neutral-100};
+  --color-surface-disabled: #{$color-neutral-100};
+
+  // ----------------------------------------------------------------------------
+  // Text
+  // ----------------------------------------------------------------------------
+  --color-text-primary: #{$color-neutral-800};
+  --color-text-secondary: #{$color-neutral-600};
+  --color-text-tertiary: #{$color-neutral-500};
+  --color-text-disabled: #{$color-neutral-400};
+  --color-text-inverted: #{$color-neutral-white};
+  --color-text-link: #{$color-brand-primary};
+  --color-text-link-hover: #{$color-primary-700};
+
+  // ----------------------------------------------------------------------------
+  // Borders
+  // ----------------------------------------------------------------------------
+  --color-border: #{$color-neutral-200};
+  --color-border-light: #{$color-neutral-100};
+  --color-border-dark: #{$color-neutral-300};
+  --color-border-focus: #{$color-brand-primary};
+  --color-border-error: #{$color-error};
+  --color-border-success: #{$color-brand-success};
+
+  // ----------------------------------------------------------------------------
+  // Focus & Interaction
+  // ----------------------------------------------------------------------------
+  --color-focus-ring: #{$color-primary-alpha-50};
+  --color-focus-outline: #{$color-brand-primary};
+  --color-overlay: #{$color-overlay-50};
+  --color-overlay-light: #{$color-overlay-20};
+  --color-backdrop: #{$color-overlay-70};
+
+  // ----------------------------------------------------------------------------
+  // Shadows (Semantic)
+  // ----------------------------------------------------------------------------
+  --shadow-color: #{$color-neutral-900};
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --shadow-focus: 0 0 0 3px var(--color-focus-ring);
+
+  // ----------------------------------------------------------------------------
+  // Gradients
+  // ----------------------------------------------------------------------------
+  --gradient-primary: linear-gradient(
+    135deg,
+    #{$color-brand-primary} 0%,
+    #{$color-primary-700} 100%
+  );
+  --gradient-accent: linear-gradient(
+    135deg,
+    #{$color-brand-accent} 0%,
+    #{$color-accent-700} 100%
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    #{$color-brand-primary} 0%,
+    #{color.mix($color-brand-primary, $color-brand-accent, 70%)} 100%
+  );
+  --gradient-surface: linear-gradient(
+    180deg,
+    #{$color-neutral-white} 0%,
+    #{$color-neutral-50} 100%
+  );
+
+  // ----------------------------------------------------------------------------
+  // Component-Specific Tokens
+  // ----------------------------------------------------------------------------
+
+  // Cards
+  --card-background: var(--color-surface);
+  --card-background-hover: var(--color-surface-hover);
+  --card-border: var(--color-border);
+  --card-border-hover: var(--color-border-dark);
+  --card-shadow: var(--shadow-md);
+  --card-shadow-hover: var(--shadow-lg);
+  --card-radius: 12px;
+
+  // Inputs
+  --input-background: var(--color-surface);
+  --input-background-disabled: #{$color-neutral-100};
+  --input-border: var(--color-border);
+  --input-border-hover: var(--color-border-dark);
+  --input-border-focus: var(--color-border-focus);
+  --input-border-error: var(--color-error);
+  --input-placeholder: var(--color-text-tertiary);
+  --input-text: var(--color-text-primary);
+  --input-radius: 8px;
+
+  // Buttons
+  --btn-radius: 8px;
+  --btn-transition: all 150ms ease-in-out;
+
+  --btn-primary-bg: var(--color-primary);
+  --btn-primary-bg-hover: var(--color-primary-hover);
+  --btn-primary-bg-active: var(--color-primary-active);
+  --btn-primary-bg-disabled: var(--color-primary-disabled);
+  --btn-primary-text: var(--color-primary-contrast);
+
+  --btn-secondary-bg: transparent;
+  --btn-secondary-bg-hover: #{$color-primary-alpha-10};
+  --btn-secondary-bg-active: #{$color-primary-alpha-20};
+  --btn-secondary-border: var(--color-primary);
+  --btn-secondary-text: var(--color-primary);
+
+  --btn-accent-bg: var(--color-accent);
+  --btn-accent-bg-hover: var(--color-accent-hover);
+  --btn-accent-bg-active: var(--color-accent-active);
+  --btn-accent-text: var(--color-accent-contrast);
+
+  --btn-ghost-bg: transparent;
+  --btn-ghost-bg-hover: var(--color-surface-hover);
+  --btn-ghost-bg-active: var(--color-surface-pressed);
+  --btn-ghost-text: var(--color-text-primary);
+
+  --btn-danger-bg: var(--color-error);
+  --btn-danger-bg-hover: var(--color-error-dark);
+  --btn-danger-text: var(--color-error-contrast);
+
+  // Navigation
+  --nav-background: var(--color-surface);
+  --nav-background-scrolled: #{rgba($color-neutral-white, 0.95)};
+  --nav-border: var(--color-border);
+  --nav-text: var(--color-text-primary);
+  --nav-text-hover: var(--color-primary);
+  --nav-text-active: var(--color-primary);
+  --nav-indicator: var(--color-primary);
+  --nav-height: 64px;
+  --nav-height-mobile: 56px;
+
+  // Sidebar
+  --sidebar-background: var(--color-surface);
+  --sidebar-border: var(--color-border);
+  --sidebar-item-hover: var(--color-surface-hover);
+  --sidebar-item-active: #{$color-primary-alpha-10};
+  --sidebar-item-text: var(--color-text-secondary);
+  --sidebar-item-text-active: var(--color-primary);
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 72px;
+
+  // Chips/Tags
+  --chip-radius: 9999px;
+  --chip-default-bg: var(--color-surface-hover);
+  --chip-default-text: var(--color-text-secondary);
+  --chip-primary-bg: #{$color-primary-100};
+  --chip-primary-text: #{$color-primary-700};
+  --chip-accent-bg: #{$color-accent-100};
+  --chip-accent-text: #{$color-accent-700};
+  --chip-success-bg: var(--color-success-bg);
+  --chip-success-text: var(--color-success-text);
+  --chip-warning-bg: var(--color-warning-bg);
+  --chip-warning-text: var(--color-warning-text);
+  --chip-error-bg: var(--color-error-bg);
+  --chip-error-text: var(--color-error-text);
+  --chip-info-bg: var(--color-info-bg);
+  --chip-info-text: var(--color-info-text);
+
+  // Tables
+  --table-header-bg: var(--color-background-alt);
+  --table-header-text: var(--color-text-secondary);
+  --table-row-bg: var(--color-surface);
+  --table-row-bg-hover: var(--color-surface-hover);
+  --table-row-bg-striped: var(--color-background-alt);
+  --table-border: var(--color-border-light);
+  --table-cell-text: var(--color-text-primary);
+
+  // Modals/Dialogs
+  --dialog-background: var(--color-surface);
+  --dialog-border: var(--color-border);
+  --dialog-shadow: var(--shadow-2xl);
+  --dialog-radius: 16px;
+  --dialog-backdrop: var(--color-backdrop);
+
+  // Tooltips
+  --tooltip-bg: #{$color-neutral-800};
+  --tooltip-text: var(--color-text-inverted);
+  --tooltip-radius: 6px;
+
+  // Alerts/Notifications
+  --alert-radius: 8px;
+  --alert-success-bg: var(--color-success-bg);
+  --alert-success-border: var(--color-success);
+  --alert-success-text: var(--color-success-text);
+  --alert-warning-bg: var(--color-warning-bg);
+  --alert-warning-border: var(--color-warning);
+  --alert-warning-text: var(--color-warning-text);
+  --alert-error-bg: var(--color-error-bg);
+  --alert-error-border: var(--color-error);
+  --alert-error-text: var(--color-error-text);
+  --alert-info-bg: var(--color-info-bg);
+  --alert-info-border: var(--color-info);
+  --alert-info-text: var(--color-info-text);
+
+  // Avatars
+  --avatar-bg: var(--color-primary-light);
+  --avatar-text: var(--color-primary-dark);
+  --avatar-border: var(--color-surface);
+
+  // Ratings
+  --rating-star-filled: #{$color-warning};
+  --rating-star-empty: #{$color-neutral-300};
+  --rating-star-size: 20px;
+
+  // Skeleton/Loading
+  --skeleton-bg: #{$color-neutral-200};
+  --skeleton-shine: #{$color-neutral-100};
+
+  // Dividers
+  --divider-color: var(--color-border);
+  --divider-color-strong: var(--color-border-dark);
+
+  // Scrollbar
+  --scrollbar-track: var(--color-background-alt);
+  --scrollbar-thumb: var(--color-border-dark);
+  --scrollbar-thumb-hover: var(--color-text-disabled);
+  --scrollbar-width: 8px;
+
+  // Z-Index Scale
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+
+  // Spacing Scale (reference)
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+
+  // Border Radius Scale
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  // Transition Durations
+  --transition-fast: 100ms;
+  --transition-normal: 150ms;
+  --transition-slow: 300ms;
+  --transition-slower: 500ms;
+
+  // Animation Easings
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================================================
+// E) DARK MODE PREPARATION (Not active yet)
+// ============================================================================
+// Estructura lista para dark mode. Para activar:
+// 1. Descomentar este bloque
+// 2. Agregar clase .theme-dark al elemento <html> o <body>
+// 3. O usar prefers-color-scheme media query (ver abajo)
+//
+// Ejemplo de implementación en Angular:
+// document.documentElement.classList.toggle('theme-dark', isDark);
+
+/*
+.theme-dark {
+  // Brand Colors - Adjusted for dark backgrounds
+  --color-primary: #{$color-primary-400};
+  --color-primary-light: #{$color-primary-300};
+  --color-primary-dark: #{$color-primary-500};
+  --color-primary-hover: #{$color-primary-300};
+  --color-primary-active: #{$color-primary-500};
+  --color-primary-disabled: #{$color-primary-700};
+  --color-primary-contrast: #{$color-neutral-900};
+
+  --color-accent: #{$color-accent-400};
+  --color-accent-light: #{$color-accent-300};
+  --color-accent-dark: #{$color-accent-500};
+  --color-accent-hover: #{$color-accent-300};
+  --color-accent-contrast: #{$color-neutral-900};
+
+  // Backgrounds & Surfaces
+  --color-background: #{$color-neutral-900};
+  --color-background-alt: #{$color-neutral-800};
+  --color-surface: #{$color-neutral-800};
+  --color-surface-elevated: #{$color-neutral-700};
+  --color-surface-hover: #{$color-neutral-700};
+  --color-surface-pressed: #{$color-neutral-600};
+  --color-surface-disabled: #{$color-neutral-800};
+
+  // Text
+  --color-text-primary: #{$color-neutral-50};
+  --color-text-secondary: #{$color-neutral-300};
+  --color-text-tertiary: #{$color-neutral-400};
+  --color-text-disabled: #{$color-neutral-500};
+  --color-text-inverted: #{$color-neutral-900};
+  --color-text-link: #{$color-primary-400};
+  --color-text-link-hover: #{$color-primary-300};
+
+  // Borders
+  --color-border: #{$color-neutral-700};
+  --color-border-light: #{$color-neutral-800};
+  --color-border-dark: #{$color-neutral-600};
+  --color-border-focus: #{$color-primary-400};
+
+  // Status Colors - Dark Mode
+  --color-success-bg: #{color.mix($color-neutral-900, $color-brand-success, 85%)};
+  --color-success-text: #{$color-success-300};
+  --color-warning-bg: #{color.mix($color-neutral-900, $color-warning, 85%)};
+  --color-warning-text: #{$color-warning-300};
+  --color-error-bg: #{color.mix($color-neutral-900, $color-error, 85%)};
+  --color-error-text: #{$color-error-300};
+  --color-info-bg: #{color.mix($color-neutral-900, $color-info, 85%)};
+  --color-info-text: #{$color-info-300};
+
+  // Shadows - Darker for dark mode
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+
+  // Gradients
+  --gradient-primary: linear-gradient(135deg, #{$color-primary-500} 0%, #{$color-primary-700} 100%);
+  --gradient-accent: linear-gradient(135deg, #{$color-accent-500} 0%, #{$color-accent-700} 100%);
+  --gradient-hero: linear-gradient(135deg, #{$color-neutral-800} 0%, #{$color-neutral-900} 100%);
+  --gradient-surface: linear-gradient(180deg, #{$color-neutral-800} 0%, #{$color-neutral-900} 100%);
+
+  // Component Overrides - Dark Mode
+  --card-background: #{$color-neutral-800};
+  --card-border: #{$color-neutral-700};
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+
+  --input-background: #{$color-neutral-800};
+  --input-background-disabled: #{$color-neutral-900};
+  --input-border: #{$color-neutral-600};
+
+  --nav-background: #{$color-neutral-900};
+  --nav-background-scrolled: #{rgba($color-neutral-900, 0.95)};
+  --nav-border: #{$color-neutral-700};
+
+  --sidebar-background: #{$color-neutral-900};
+  --sidebar-border: #{$color-neutral-700};
+  --sidebar-item-hover: #{$color-neutral-800};
+  --sidebar-item-active: #{rgba($color-primary-400, 0.15)};
+
+  --chip-default-bg: #{$color-neutral-700};
+  --chip-default-text: #{$color-neutral-200};
+  --chip-primary-bg: #{color.mix($color-neutral-800, $color-brand-primary, 70%)};
+  --chip-primary-text: #{$color-primary-300};
+
+  --dialog-background: #{$color-neutral-800};
+  --dialog-border: #{$color-neutral-700};
+
+  --tooltip-bg: #{$color-neutral-200};
+  --tooltip-text: #{$color-neutral-900};
+
+  --table-header-bg: #{$color-neutral-800};
+  --table-row-bg: #{$color-neutral-900};
+  --table-row-bg-hover: #{$color-neutral-800};
+  --table-row-bg-striped: #{color.mix($color-neutral-800, $color-neutral-900, 50%)};
+  --table-border: #{$color-neutral-700};
+
+  --skeleton-bg: #{$color-neutral-700};
+  --skeleton-shine: #{$color-neutral-600};
+
+  --scrollbar-track: #{$color-neutral-800};
+  --scrollbar-thumb: #{$color-neutral-600};
+  --scrollbar-thumb-hover: #{$color-neutral-500};
+}
+*/
+
+// Alternative: Auto dark mode using prefers-color-scheme
+// Uncomment to enable automatic dark mode based on system preference
+/*
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light) {
+    // Copy all dark mode variables here
+  }
+}
+*/
+
+// ============================================================================
+// F) SCSS FUNCTIONS & MIXINS
+// ============================================================================
+
+/// Get semantic color from CSS custom property
+/// @param {String} $name - Color token name (without --color- prefix)
+/// @return {Var} CSS custom property
+@function color($name) {
+  @return var(--color-#{$name});
+}
+
+/// Get shadow from CSS custom property
+/// @param {String} $size - Shadow size (sm, md, lg, xl, 2xl)
+/// @return {Var} CSS custom property
+@function shadow($size) {
+  @return var(--shadow-#{$size});
+}
+
+/// Get spacing from CSS custom property
+/// @param {String} $size - Spacing size (1, 2, 3, 4, 5, 6, 8, 10, 12, 16)
+/// @return {Var} CSS custom property
+@function spacing($size) {
+  @return var(--spacing-#{$size});
+}
+
+/// Get radius from CSS custom property
+/// @param {String} $size - Radius size (none, sm, md, lg, xl, 2xl, full)
+/// @return {Var} CSS custom property
+@function radius($size) {
+  @return var(--radius-#{$size});
+}
+
+// ----------------------------------------------------------------------------
+// FOCUS & ACCESSIBILITY MIXINS
+// ----------------------------------------------------------------------------
+
+/// Mixin for focus ring (accessible)
+@mixin focus-ring {
+  outline: 2px solid var(--color-focus-outline);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-focus);
+}
+
+/// Mixin for focus-visible only (keyboard navigation)
+@mixin focus-visible-ring {
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+/// Mixin for focus within container
+@mixin focus-within-ring {
+  &:focus-within {
+    outline: 2px solid var(--color-focus-outline);
+    outline-offset: 2px;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// INTERACTIVE STATE MIXINS
+// ----------------------------------------------------------------------------
+
+/// Mixin for interactive state colors
+/// @param {Color} $base - Base color
+/// @param {Color} $hover - Hover color
+/// @param {Color} $active - Active/pressed color
+@mixin interactive-states($base, $hover, $active) {
+  background-color: $base;
+  transition:
+    background-color var(--transition-normal) var(--ease-in-out),
+    transform var(--transition-fast) var(--ease-out);
+
+  &:hover:not(:disabled):not([disabled]) {
+    background-color: $hover;
+  }
+
+  &:active:not(:disabled):not([disabled]) {
+    background-color: $active;
+    transform: scale(0.98);
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+/// Mixin for text link states
+@mixin link-states {
+  color: var(--color-text-link);
+  text-decoration: none;
+  transition: color var(--transition-normal) var(--ease-in-out);
+
+  &:hover {
+    color: var(--color-text-link-hover);
+    text-decoration: underline;
+  }
+
+  &:active {
+    color: var(--color-primary-active);
+  }
+
+  @include focus-visible-ring;
+}
+
+/// Mixin for button base styles
+/// @param {String} $variant - Button variant (primary, secondary, ghost, accent, danger)
+@mixin button-variant($variant: "primary") {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--btn-radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: var(--btn-transition);
+
+  @include focus-visible-ring;
+
+  @if $variant == "primary" {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: var(--btn-primary-bg-hover);
+    }
+    &:active:not(:disabled) {
+      background: var(--btn-primary-bg-active);
+      transform: scale(0.98);
+    }
+    &:disabled {
+      background: var(--btn-primary-bg-disabled);
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  } @else if $variant == "secondary" {
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    border: 1px solid var(--btn-secondary-border);
+
+    &:hover:not(:disabled) {
+      background: var(--btn-secondary-bg-hover);
+    }
+    &:active:not(:disabled) {
+      background: var(--btn-secondary-bg-active);
+    }
+  } @else if $variant == "ghost" {
+    background: var(--btn-ghost-bg);
+    color: var(--btn-ghost-text);
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: var(--btn-ghost-bg-hover);
+    }
+    &:active:not(:disabled) {
+      background: var(--btn-ghost-bg-active);
+    }
+  } @else if $variant == "accent" {
+    background: var(--btn-accent-bg);
+    color: var(--btn-accent-text);
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: var(--btn-accent-bg-hover);
+    }
+    &:active:not(:disabled) {
+      background: var(--btn-accent-bg-active);
+      transform: scale(0.98);
+    }
+  } @else if $variant == "danger" {
+    background: var(--btn-danger-bg);
+    color: var(--btn-danger-text);
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: var(--btn-danger-bg-hover);
+    }
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
+// COMPONENT MIXINS
+// ----------------------------------------------------------------------------
+
+/// Mixin for card styling
+@mixin card-base {
+  background: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition:
+    box-shadow var(--transition-normal) var(--ease-in-out),
+    border-color var(--transition-normal) var(--ease-in-out);
+}
+
+/// Mixin for interactive card (clickable)
+@mixin card-interactive {
+  @include card-base;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--card-border-hover);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  @include focus-visible-ring;
+}
+
+/// Mixin for status badge/chip
+/// @param {String} $status - Status type (success, warning, error, info, primary, accent, default)
+@mixin status-chip($status: "default") {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: 4px 12px;
+  border-radius: var(--chip-radius);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+
+  @if $status == "default" {
+    background: var(--chip-default-bg);
+    color: var(--chip-default-text);
+  } @else {
+    background: var(--chip-#{$status}-bg);
+    color: var(--chip-#{$status}-text);
+  }
+}
+
+/// Mixin for input field base
+@mixin input-base {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--input-background);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  color: var(--input-text);
+  font-size: 1rem;
+  line-height: 1.5;
+  transition:
+    border-color var(--transition-normal) var(--ease-in-out),
+    box-shadow var(--transition-normal) var(--ease-in-out);
+
+  &::placeholder {
+    color: var(--input-placeholder);
+  }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: var(--input-border-hover);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--input-border-focus);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+  }
+
+  &:disabled {
+    background: var(--input-background-disabled);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &.error,
+  &[aria-invalid="true"] {
+    border-color: var(--input-border-error);
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($color-error, 0.2);
+    }
+  }
+}
+
+/// Mixin for alert/notification
+/// @param {String} $type - Alert type (success, warning, error, info)
+@mixin alert($type: "info") {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--alert-radius);
+  border-left: 4px solid;
+  background: var(--alert-#{$type}-bg);
+  border-color: var(--alert-#{$type}-border);
+  color: var(--alert-#{$type}-text);
+
+  .alert-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  .alert-content {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/// Mixin for table styling
+@mixin table-base {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--table-row-bg);
+
+  th {
+    padding: var(--spacing-3) var(--spacing-4);
+    background: var(--table-header-bg);
+    color: var(--table-header-text);
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 2px solid var(--table-border);
+  }
+
+  td {
+    padding: var(--spacing-3) var(--spacing-4);
+    color: var(--table-cell-text);
+    border-bottom: 1px solid var(--table-border);
+  }
+
+  tr:hover td {
+    background: var(--table-row-bg-hover);
+  }
+
+  &.striped tr:nth-child(even) td {
+    background: var(--table-row-bg-striped);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// LAYOUT MIXINS
+// ----------------------------------------------------------------------------
+
+/// Mixin for flex centering
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/// Mixin for flex column
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/// Mixin for absolute centering
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/// Mixin for full bleed (escape container)
+@mixin full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+/// Mixin for container
+@mixin container($max-width: 1280px) {
+  width: 100%;
+  max-width: $max-width;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-4);
+  padding-right: var(--spacing-4);
+
+  @media (min-width: 640px) {
+    padding-left: var(--spacing-6);
+    padding-right: var(--spacing-6);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// TEXT MIXINS
+// ----------------------------------------------------------------------------
+
+/// Mixin for text truncation
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Mixin for line clamp
+/// @param {Number} $lines - Number of lines to show
+@mixin line-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/// Mixin for visually hidden (accessibility)
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ----------------------------------------------------------------------------
+// ANIMATION MIXINS
+// ----------------------------------------------------------------------------
+
+/// Mixin for skeleton loading animation
+@mixin skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-bg) 0%,
+    var(--skeleton-shine) 50%,
+    var(--skeleton-bg) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/// Mixin for fade in animation
+@mixin fade-in($duration: var(--transition-normal)) {
+  animation: fade-in $duration var(--ease-out);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/// Mixin for slide up animation
+@mixin slide-up($duration: var(--transition-slow)) {
+  animation: slide-up $duration var(--ease-out);
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// RESPONSIVE MIXINS
+// ----------------------------------------------------------------------------
+
+/// Breakpoint map
+$breakpoints: (
+  "sm": 640px,
+  "md": 768px,
+  "lg": 1024px,
+  "xl": 1280px,
+  "2xl": 1536px,
+);
+
+/// Mixin for min-width media query
+/// @param {String} $breakpoint - Breakpoint name (sm, md, lg, xl, 2xl)
+@mixin breakpoint-up($breakpoint) {
+  @if map.has-key($breakpoints, $breakpoint) {
+    @media (min-width: map.get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @media (min-width: $breakpoint) {
+      @content;
+    }
+  }
+}
+
+/// Mixin for max-width media query
+/// @param {String} $breakpoint - Breakpoint name (sm, md, lg, xl, 2xl)
+@mixin breakpoint-down($breakpoint) {
+  @if map.has-key($breakpoints, $breakpoint) {
+    @media (max-width: #{map.get($breakpoints, $breakpoint) - 1px}) {
+      @content;
+    }
+  } @else {
+    @media (max-width: $breakpoint) {
+      @content;
+    }
+  }
+}
+
+/// Mixin for mobile only
+@mixin mobile-only {
+  @include breakpoint-down("sm") {
+    @content;
+  }
+}
+
+/// Mixin for tablet and up
+@mixin tablet-up {
+  @include breakpoint-up("md") {
+    @content;
+  }
+}
+
+/// Mixin for desktop and up
+@mixin desktop-up {
+  @include breakpoint-up("lg") {
+    @content;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// ACCESSIBILITY MIXINS
+// ----------------------------------------------------------------------------
+
+/// Mixin for reduced motion preference
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+/// Mixin for high contrast mode
+@mixin high-contrast {
+  @media (prefers-contrast: high) {
+    @content;
+  }
+}
+
+/// Mixin for print styles
+@mixin print {
+  @media print {
+    @content;
+  }
+}

@@ -1,0 +1,384 @@
+<mat-sidenav-container class="users-container">
+  <!-- Main Content -->
+  <mat-sidenav-content>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <div class="header-row">
+            <div class="header-title">
+              <mat-icon>manage_accounts</mat-icon>
+              <h1>Usuarios</h1>
+            </div>
+            @if (canCreate()) {
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="createUser()"
+              [disabled]="saving()"
+            >
+              <mat-icon>person_add</mat-icon>
+              Crear Usuario
+            </button>
+            }
+          </div>
+        </mat-card-title>
+        <mat-card-subtitle>
+          Gestiona usuarios y sus roles de acceso al sistema
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Stats Summary -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <mat-icon>people</mat-icon>
+            <div class="stat-info">
+              <span class="stat-value">{{ totalUsers() }}</span>
+              <span class="stat-label">Total Usuarios</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <mat-icon>check_circle</mat-icon>
+            <div class="stat-info">
+              <span class="stat-value">{{ activeUsersCount() }}</span>
+              <span class="stat-label">Activos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Buscar usuarios</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+              matInput
+              type="text"
+              placeholder="Buscar por nombre o email..."
+              [value]="searchValue()"
+              (input)="onSearchChange($any($event.target).value)"
+            />
+            @if (searchValue()) {
+            <button
+              matSuffix
+              mat-icon-button
+              (click)="clearSearch()"
+              matTooltip="Limpiar búsqueda"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Error State -->
+        @if (error()) {
+        <div class="error-banner">
+          <mat-icon>error</mat-icon>
+          <div class="error-content">
+            <span class="error-title">Error al cargar usuarios</span>
+            <span class="error-message">{{ errorMessage() }}</span>
+          </div>
+          <button mat-stroked-button (click)="retry()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+        }
+
+        <!-- Loading State -->
+        @if (loading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Cargando usuarios...</p>
+        </div>
+        }
+
+        <!-- Users Table -->
+        @if (showTable()) {
+        <div class="table-container">
+          <table mat-table [dataSource]="users()" [trackBy]="trackByUserId">
+            <!-- User Name Column -->
+            <ng-container matColumnDef="userName">
+              <th mat-header-cell *matHeaderCellDef>Usuario</th>
+              <td mat-cell *matCellDef="let user">
+                <div class="user-cell">
+                  <mat-icon class="user-icon">account_circle</mat-icon>
+                  <div class="user-info">
+                    <span class="user-name">{{ user.userName }}</span>
+                    @if (user.profile?.firstName || user.profile?.lastName) {
+                    <span class="user-fullname">
+                      {{ user.profile?.firstName }} {{ user.profile?.lastName }}
+                    </span>
+                    }
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Email Column -->
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef>Email</th>
+              <td mat-cell *matCellDef="let user">
+                <span class="email-text">{{ user.email }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Roles Column -->
+            <ng-container matColumnDef="roles">
+              <th mat-header-cell *matHeaderCellDef>Roles</th>
+              <td mat-cell *matCellDef="let user">
+                <div class="roles-cell">
+                  @if (user.roles.length === 0) {
+                  <span class="no-roles">Sin roles</span>
+                  } @for (role of user.roles; track role) {
+                  <mat-chip
+                    [color]="getRoleColor(role)"
+                    [highlighted]="!!getRoleColor(role)"
+                  >
+                    {{ role }}
+                  </mat-chip>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="isLockedOut">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let user">
+                <div class="status-badge" [class.locked]="user.isLockedOut">
+                  <mat-icon>{{ getStatusIcon(user.isLockedOut) }}</mat-icon>
+                  <span>{{ getStatusLabel(user.isLockedOut) }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Created At Column -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Registrado</th>
+              <td mat-cell *matCellDef="let user">
+                <span class="date-text"
+                  >{{ user.createdAt | date: 'dd/MM/yyyy' }}</span
+                >
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let user">
+                <div class="actions-cell">
+                  <!-- View -->
+                  <button
+                    mat-icon-button
+                    matTooltip="Ver detalle"
+                    (click)="viewUser(user)"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+
+                  <!-- Edit -->
+                  @if (canUpdate()) {
+                  <button
+                    mat-icon-button
+                    matTooltip="Editar usuario"
+                    (click)="editUser(user)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  }
+
+                  <!-- Manage Roles -->
+                  @if (canAssignRoles()) {
+                  <button
+                    mat-icon-button
+                    matTooltip="Gestionar roles"
+                    color="primary"
+                    (click)="manageRoles(user)"
+                  >
+                    <mat-icon>shield</mat-icon>
+                  </button>
+                  }
+
+                  <!-- Delete -->
+                  @if (canDelete()) {
+                  <button
+                    mat-icon-button
+                    matTooltip="Eliminar usuario"
+                    color="warn"
+                    (click)="deleteUser(user)"
+                    [disabled]="saving()"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+
+        <!-- Paginator -->
+        <mat-paginator
+          [length]="pagination().totalItems"
+          [pageSize]="pageSize()"
+          [pageIndex]="page() - 1"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="onPageChange($event)"
+          showFirstLastButtons
+          aria-label="Seleccionar página de usuarios"
+        >
+        </mat-paginator>
+        }
+
+        <!-- Empty State -->
+        @if (isEmpty()) {
+        <div class="empty-state">
+          <mat-icon>people_outline</mat-icon>
+          @if (searchValue()) {
+          <h3>No se encontraron usuarios</h3>
+          <p>No hay usuarios que coincidan con "{{ searchValue() }}"</p>
+          <button mat-stroked-button (click)="clearSearch()">
+            <mat-icon>clear</mat-icon>
+            Limpiar búsqueda
+          </button>
+          } @else {
+          <h3>No hay usuarios registrados</h3>
+          <p>Los usuarios aparecerán aquí cuando se registren en el sistema</p>
+          @if (canCreate()) {
+          <button mat-raised-button color="primary" (click)="createUser()">
+            <mat-icon>person_add</mat-icon>
+            Crear primer usuario
+          </button>
+          } }
+        </div>
+        }
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button (click)="loadUsers()" [disabled]="loading()">
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </mat-sidenav-content>
+
+  <!-- User Detail Drawer -->
+  <mat-sidenav
+    #drawer
+    [opened]="drawerOpen()"
+    position="end"
+    mode="over"
+    class="user-drawer"
+    (closedStart)="closeDrawer()"
+  >
+    <div class="drawer-header">
+      <h2>Detalle del Usuario</h2>
+      <button mat-icon-button (click)="closeDrawer()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    @if (loadingDetail()) {
+    <div class="drawer-loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando detalle...</p>
+    </div>
+    } @if (selectedUser(); as user) {
+    <div class="drawer-content">
+      <div class="user-header">
+        <mat-icon class="avatar-icon">account_circle</mat-icon>
+        <div class="user-main-info">
+          <h3>{{ user.userName }}</h3>
+          <p>{{ user.email }}</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Información</h4>
+        <div class="detail-grid">
+          @if (user.profile?.firstName || user.profile?.lastName) {
+          <div class="detail-item">
+            <span class="label">Nombre completo</span>
+            <span class="value"
+              >{{ user.profile?.firstName }} {{ user.profile?.lastName }}</span
+            >
+          </div>
+          } @if (user.profile?.phone) {
+          <div class="detail-item">
+            <span class="label">Teléfono</span>
+            <span class="value">{{ user.profile?.phone }}</span>
+          </div>
+          }
+          <div class="detail-item">
+            <span class="label">Email verificado</span>
+            <span class="value">{{ user.emailConfirmed ? 'Sí' : 'No' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Registrado</span>
+            <span class="value"
+              >{{ user.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span
+            >
+          </div>
+          @if (user.lastLogin) {
+          <div class="detail-item">
+            <span class="label">Último acceso</span>
+            <span class="value"
+              >{{ user.lastLogin | date: 'dd/MM/yyyy HH:mm' }}</span
+            >
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Roles</h4>
+        <div class="roles-list">
+          @if (user.roles.length === 0) {
+          <span class="no-roles">Sin roles asignados</span>
+          } @for (role of user.roles; track role) {
+          <mat-chip
+            [color]="getRoleColor(role)"
+            [highlighted]="!!getRoleColor(role)"
+          >
+            {{ role }}
+          </mat-chip>
+          }
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Estado</h4>
+        <div class="status-badge large" [class.locked]="user.isLockedOut">
+          <mat-icon>{{ getStatusIcon(user.isLockedOut) }}</mat-icon>
+          <span>{{ getStatusLabel(user.isLockedOut) }}</span>
+        </div>
+      </div>
+
+      <div class="drawer-actions">
+        @if (canUpdate()) {
+        <button mat-stroked-button (click)="editUser(user)">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        } @if (canAssignRoles()) {
+        <button mat-stroked-button color="primary" (click)="manageRoles(user)">
+          <mat-icon>shield</mat-icon>
+          Roles
+        </button>
+        } @if (canDelete()) {
+        <button mat-stroked-button color="warn" (click)="deleteUser(user)">
+          <mat-icon>delete</mat-icon>
+          Eliminar
+        </button>
+        }
+      </div>
+    </div>
+    }
+  </mat-sidenav>
+</mat-sidenav-container>
