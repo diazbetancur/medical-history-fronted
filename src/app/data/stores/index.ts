@@ -11,5 +11,15 @@ export * from './request-form.store';
 
 // RBAC stores
 export * from './admin-users.store';
+export * from './institutions.store';
 export * from './roles.store';
 export * from './users.store';
+
+// Patient flow stores
+export * from './patient-appointments.store';
+export * from './patient-profile.store';
+export * from './professionals-search.store';
+
+// Professional flow stores
+export * from './professional-appointments.store';
+export * from './professional-availability.store';

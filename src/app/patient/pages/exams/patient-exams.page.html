@@ -1,0 +1,178 @@
+<div class="patient-exams-page">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Mis Exámenes</h1>
+      <p class="subtitle">Gestiona tus resultados de exámenes médicos</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="uploadExam()">
+      <mat-icon>upload_file</mat-icon>
+      Subir Examen
+    </button>
+  </div>
+
+  <!-- Summary Card -->
+  <mat-card class="summary-card">
+    <mat-card-content>
+      <div class="summary-stats">
+        <div class="stat-item">
+          <mat-icon>description</mat-icon>
+          <div class="stat-content">
+            <span class="stat-value">{{ totalItems() }}</span>
+            <span class="stat-label">Exámenes Registrados</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando exámenes...</p>
+  </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+  <mat-card class="error-card">
+    <mat-card-content>
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <p class="error-message">{{ error() }}</p>
+      <button mat-raised-button color="primary" (click)="retry()">
+        Reintentar
+      </button>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Empty State -->
+  @else if (exams().length === 0) {
+  <mat-card class="empty-card">
+    <mat-card-content>
+      <mat-icon class="empty-icon">description</mat-icon>
+      <p class="empty-message">No tienes exámenes registrados</p>
+      <p class="empty-subtitle">
+        Sube tus resultados de exámenes para tenerlos siempre disponibles
+      </p>
+      <button mat-raised-button color="primary" (click)="uploadExam()">
+        <mat-icon>upload_file</mat-icon>
+        Subir Primer Examen
+      </button>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Content -->
+  @else {
+  <div class="exams-list">
+    @for (exam of sortedExams(); track exam.id) {
+    <mat-card class="exam-card">
+      <mat-card-header>
+        <mat-icon
+          mat-card-avatar
+          [class]="'file-icon ' + exam.fileType.toLowerCase()"
+        >
+          {{ getFileTypeIcon(exam) }}
+        </mat-icon>
+        <mat-card-title>{{ exam.title }}</mat-card-title>
+        <mat-card-subtitle>
+          <div class="exam-meta">
+            <mat-chip class="file-type-chip">
+              {{ getFileTypeLabel(exam) }}
+            </mat-chip>
+            <span class="exam-date">
+              {{ exam.examDate | date: 'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="exam-details">
+          <div class="detail-item">
+            <mat-icon>insert_drive_file</mat-icon>
+            <span class="detail-label">Archivo:</span>
+            <span class="detail-value">{{ exam.fileName }}</span>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>storage</mat-icon>
+            <span class="detail-label">Tamaño:</span>
+            <span class="detail-value"
+              >{{ formatFileSize(exam.fileSizeBytes) }}</span
+            >
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>access_time</mat-icon>
+            <span class="detail-label">Subido:</span>
+            <span class="detail-value">
+              {{ exam.uploadedAtUtc | date: 'dd/MM/yyyy HH:mm' }}
+            </span>
+          </div>
+
+          @if (exam.notes) {
+          <div class="detail-item notes">
+            <mat-icon>notes</mat-icon>
+            <span class="detail-label">Notas:</span>
+            <span class="detail-value">{{ exam.notes }}</span>
+          </div>
+          }
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-button
+          color="primary"
+          (click)="viewExam(exam)"
+          matTooltip="Ver en nueva pestaña"
+        >
+          <mat-icon>visibility</mat-icon>
+          Ver
+        </button>
+        <button
+          mat-button
+          color="accent"
+          (click)="downloadExam(exam)"
+          matTooltip="Descargar archivo"
+        >
+          <mat-icon>download</mat-icon>
+          Descargar
+        </button>
+        <button
+          mat-button
+          color="primary"
+          (click)="editExam(exam)"
+          matTooltip="Editar metadata"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        <button
+          mat-button
+          color="warn"
+          (click)="deleteExam(exam)"
+          matTooltip="Eliminar examen"
+        >
+          <mat-icon>delete</mat-icon>
+          Eliminar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+    }
+  </div>
+
+  <!-- Pagination -->
+  <mat-paginator
+    [length]="totalItems()"
+    [pageSize]="pageSize()"
+    [pageIndex]="currentPage()"
+    [pageSizeOptions]="[5, 10, 20, 50]"
+    (page)="onPageChange($event)"
+    showFirstLastButtons
+  >
+  </mat-paginator>
+  }
+</div>

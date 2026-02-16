@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
+  CurrentUserDto,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
@@ -35,10 +36,21 @@ export class AuthApi {
 
   /**
    * GET /api/auth/me
+   * Get current authenticated user session with contexts
+   * Requires valid JWT token (added by interceptor)
+   * @returns CurrentUserDto with roles, permissions, and available contexts
+   */
+  me(): Observable<CurrentUserDto> {
+    return this.api.get<CurrentUserDto>('/auth/me');
+  }
+
+  /**
+   * GET /api/auth/me (legacy method)
+   * @deprecated Use me() instead which returns CurrentUserDto
    * Get current authenticated user session
    * Requires valid JWT token (added by interceptor)
    */
-  me(): Observable<UserSession> {
+  getLegacySession(): Observable<UserSession> {
     return this.api.get<UserSession>('/auth/me');
   }
 }

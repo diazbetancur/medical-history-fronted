@@ -1,0 +1,80 @@
+<div class="confirm-appointment-container">
+  <mat-card class="confirm-card">
+    <!-- Confirming State -->
+    @if (confirming()) {
+    <mat-card-content class="loading-content">
+      <mat-spinner></mat-spinner>
+      <h2>Confirmando tu cita...</h2>
+      <p>Por favor espera un momento</p>
+    </mat-card-content>
+    }
+
+    <!-- Success State -->
+    @if (success() && !confirming()) {
+    <mat-card-content class="success-content">
+      <mat-icon color="primary">check_circle</mat-icon>
+      <h2>¡Cita Confirmada!</h2>
+      <p>Tu cita ha sido confirmada exitosamente</p>
+
+      @if (appointment()) {
+      <div class="appointment-summary">
+        <div class="summary-item">
+          <mat-icon>person</mat-icon>
+          <div>
+            <strong>Profesional</strong>
+            <p>
+              {{ appointment()!.professional.firstName }} {{
+              appointment()!.professional.lastName }}
+            </p>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <mat-icon>schedule</mat-icon>
+          <div>
+            <strong>Fecha y Hora</strong>
+            <p>{{ toLocalTime(appointment()!.startTime) }}</p>
+          </div>
+        </div>
+      </div>
+      }
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-button (click)="goToList()">
+        <mat-icon>list</mat-icon>
+        Ver todas mis citas
+      </button>
+      <button mat-raised-button color="primary" (click)="viewDetails()">
+        <mat-icon>info</mat-icon>
+        Ver detalles
+      </button>
+    </mat-card-actions>
+    }
+
+    <!-- Error State -->
+    @if (error() && !confirming()) {
+    <mat-card-content class="error-content">
+      <mat-icon color="warn">error</mat-icon>
+      <h2>Error al Confirmar</h2>
+      <p>{{ error() }}</p>
+
+      <div class="error-hints">
+        <p><strong>Posibles causas:</strong></p>
+        <ul>
+          <li>El link de confirmación expiró</li>
+          <li>La cita ya fue confirmada anteriormente</li>
+          <li>El link es inválido o fue modificado</li>
+        </ul>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="goToList()">
+        <mat-icon>list</mat-icon>
+        Ir a mis citas
+      </button>
+    </mat-card-actions>
+    }
+  </mat-card>
+</div>

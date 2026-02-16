@@ -1,0 +1,206 @@
+<div class="book-appointment-container">
+  <header class="page-header">
+    <h1>Agendar Cita</h1>
+    <button mat-icon-button (click)="cancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <mat-card>
+    <mat-card-content>
+      <mat-stepper linear #stepper>
+        <!-- Step 1: Select Professional -->
+        <mat-step [stepControl]="professionalForm">
+          <form [formGroup]="professionalForm">
+            <ng-template matStepLabel>Seleccionar Profesional</ng-template>
+
+            @if (loading()) {
+            <div class="loading-inline">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Cargando profesionales...</p>
+            </div>
+            } @else {
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Profesional</mat-label>
+              <mat-select formControlName="professionalId" required>
+                @for (prof of professionals(); track prof.id) {
+                <mat-option [value]="prof.id">
+                  {{ prof.firstName }} {{ prof.lastName }} @if
+                  (prof.specialization) {
+                  <span class="specialization">
+                    - {{ prof.specialization }}
+                  </span>
+                  }
+                </mat-option>
+                }
+              </mat-select>
+              <mat-error>Selecciona un profesional</mat-error>
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button mat-raised-button color="primary" matStepperNext>
+                Siguiente
+              </button>
+            </div>
+            }
+          </form>
+        </mat-step>
+
+        <!-- Step 2: Select Date -->
+        <mat-step [stepControl]="dateForm">
+          <form [formGroup]="dateForm">
+            <ng-template matStepLabel>Seleccionar Fecha</ng-template>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Fecha</mat-label>
+              <input
+                matInput
+                [matDatepicker]="picker"
+                formControlName="date"
+                [min]="minDate"
+                required
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="picker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-error>Selecciona una fecha</mat-error>
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>Atrás</button>
+              <button
+                mat-raised-button
+                color="primary"
+                matStepperNext
+                [disabled]="!dateForm.valid"
+              >
+                Siguiente
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 3: Select Time Slot -->
+        <mat-step [stepControl]="slotForm">
+          <form [formGroup]="slotForm">
+            <ng-template matStepLabel>Seleccionar Horario</ng-template>
+
+            @if (loadingSlots()) {
+            <div class="loading-inline">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Cargando horarios disponibles...</p>
+            </div>
+            } @else if (availableSlots().length === 0) {
+            <div class="empty-slots">
+              <mat-icon>event_busy</mat-icon>
+              <p>No hay horarios disponibles para esta fecha</p>
+              <button mat-button matStepperPrevious>Elegir otra fecha</button>
+            </div>
+            } @else {
+            <div class="slots-grid">
+              @for (slot of availableSlots(); track slot.startTime) {
+              <button
+                type="button"
+                mat-stroked-button
+                class="slot-button"
+                [class.selected]="selectedSlot() === slot"
+                (click)="slotForm.patchValue({ slot })"
+              >
+                <mat-icon>schedule</mat-icon>
+                <span>{{ toLocalTime(slot.startTime) }}</span>
+              </button>
+              }
+            </div>
+
+            <mat-error *ngIf="slotForm.invalid && slotForm.touched">
+              Selecciona un horario
+            </mat-error>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>Atrás</button>
+              <button
+                mat-raised-button
+                color="primary"
+                matStepperNext
+                [disabled]="!slotForm.valid"
+              >
+                Siguiente
+              </button>
+            </div>
+            }
+          </form>
+        </mat-step>
+
+        <!-- Step 4: Add Notes & Confirm -->
+        <mat-step [stepControl]="notesForm">
+          <form [formGroup]="notesForm">
+            <ng-template matStepLabel>Confirmar</ng-template>
+
+            <div class="confirmation-summary">
+              <h3>Resumen de la Cita</h3>
+
+              <div class="summary-item">
+                <mat-icon>person</mat-icon>
+                <div>
+                  <strong>Profesional</strong>
+                  <p>
+                    {{ getProfessionalName(
+                    professionalForm.value.professionalId ) }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="summary-item">
+                <mat-icon>calendar_today</mat-icon>
+                <div>
+                  <strong>Fecha y Hora</strong>
+                  <p>
+                    @if (selectedSlot()) { {{
+                    toLocalTime(selectedSlot()!.startTime) }} }
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notas (opcional)</mat-label>
+              <textarea
+                matInput
+                formControlName="notes"
+                rows="4"
+                placeholder="Agrega información adicional para el profesional..."
+                maxlength="500"
+              ></textarea>
+              <mat-hint align="end"
+                >{{ notesForm.value.notes?.length || 0 }}/500</mat-hint
+              >
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious [disabled]="creating()">
+                Atrás
+              </button>
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="createAppointment()"
+                [disabled]="creating()"
+              >
+                @if (creating()) {
+                <mat-spinner diameter="20"></mat-spinner>
+                Creando... } @else {
+                <ng-container>
+                  <mat-icon>check</mat-icon>
+                  Confirmar Cita
+                </ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        </mat-step>
+      </mat-stepper>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -74,8 +74,10 @@ export interface ConfirmDeleteDialogData {
         @if (saving()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
-          <mat-icon>delete_forever</mat-icon>
-          Eliminar Usuario
+          <ng-container>
+            <mat-icon>delete_forever</mat-icon>
+            Eliminar Usuario
+          </ng-container>
         }
       </button>
     </mat-dialog-actions>

@@ -1,0 +1,108 @@
+<h2 mat-dialog-title>{{ dialogTitle }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="allergy-form">
+    <!-- Allergen -->
+    <mat-form-field appearance="outline">
+      <mat-label>Alérgeno *</mat-label>
+      <input
+        matInput
+        formControlName="allergen"
+        placeholder="Ej: Penicilina, Polen, Maní"
+        required
+        maxlength="200"
+      />
+      <mat-hint align="end"
+        >{{ form.get("allergen")?.value?.length || 0 }}/200</mat-hint
+      >
+      <mat-error>{{ getErrorMessage("allergen") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Reaction -->
+    <mat-form-field appearance="outline">
+      <mat-label>Reacción</mat-label>
+      <input
+        matInput
+        formControlName="reaction"
+        placeholder="Ej: Urticaria, Dificultad para respirar"
+        maxlength="500"
+      />
+      <mat-hint align="end"
+        >{{ form.get("reaction")?.value?.length || 0 }}/500</mat-hint
+      >
+      <mat-error>{{ getErrorMessage("reaction") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Severity -->
+    <mat-form-field appearance="outline">
+      <mat-label>Severidad</mat-label>
+      <mat-select formControlName="severity">
+        <mat-option [value]="null">Sin especificar</mat-option>
+        @for (option of severityOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>{{ getErrorMessage("severity") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Status -->
+    <mat-form-field appearance="outline">
+      <mat-label>Estado *</mat-label>
+      <mat-select formControlName="status" required>
+        @for (option of statusOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>{{ getErrorMessage("status") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Onset Date -->
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de aparición</mat-label>
+      <input
+        matInput
+        [matDatepicker]="onsetDatePicker"
+        formControlName="onsetDate"
+      />
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="onsetDatePicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #onsetDatePicker></mat-datepicker>
+      <mat-error>{{ getErrorMessage("onsetDate") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="notes-field">
+      <mat-label>Notas adicionales</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        rows="3"
+        placeholder="Observaciones, tratamiento recomendado, etc."
+        maxlength="1000"
+      ></textarea>
+      <mat-hint align="end"
+        >{{ form.get("notes")?.value?.length || 0 }}/1000</mat-hint
+      >
+      <mat-error>{{ getErrorMessage("notes") }}</mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSubmitting()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || isSubmitting()"
+  >
+    @if (isSubmitting()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    }
+    {{ submitButtonText }}
+  </button>
+</mat-dialog-actions>

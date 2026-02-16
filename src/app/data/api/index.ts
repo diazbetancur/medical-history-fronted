@@ -29,8 +29,15 @@ export type {
   UpdateUserRolesResultDto,
 } from './admin-users.types';
 export { AdminApi } from './admin.api';
+export { AppointmentsApi } from './appointments.api';
+export type * from './appointments.types';
 export { AuthApi } from './auth.api';
+export { InstitutionsApi } from './institutions.api';
+export { PatientsApi } from './patients.api';
+export { ProfessionalAppointmentsApi } from './professional-appointments.api';
+export { ProfessionalAvailabilityApi } from './professional-availability.api';
 export { ProfessionalApi } from './professional.api';
+export { ProfessionalsPublicApi } from './professionals-public.api';
 export { PublicApi } from './public.api';
 export type * from './roles.api';
 export { RolesApi } from './roles.api';

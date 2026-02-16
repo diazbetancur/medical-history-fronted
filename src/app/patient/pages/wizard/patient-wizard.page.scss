@@ -1,0 +1,44 @@
+.wizard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+mat-card {
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+
+    mat-icon {
+      margin-right: 8px;
+      color: var(--mat-primary);
+    }
+  }
+
+  mat-card-content {
+    padding: 0;
+  }
+}
+
+mat-stepper {
+  .step-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// Responsive: vertical stepper on mobile
+@media (max-width: 768px) {
+  mat-stepper {
+    ::ng-deep .mat-stepper-horizontal {
+      flex-direction: column !important;
+    }
+  }
+}

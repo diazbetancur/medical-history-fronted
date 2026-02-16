@@ -1,0 +1,213 @@
+<div class="professional-medications-tab">
+  <div class="tab-header">
+    <h2>Medicamentos del Paciente</h2>
+    @if (!noRelation() && !isLoading() && medications().length > 0) {
+      <div class="summary-info">
+        <mat-chip class="active-chip">
+          <mat-icon>medication</mat-icon>
+          {{ activeCount() }} activos
+        </mat-chip>
+        <mat-chip class="total-chip">
+          <mat-icon>list</mat-icon>
+          {{ totalItems() }} total
+        </mat-chip>
+      </div>
+    }
+  </div>
+
+  <!-- No Relation Banner -->
+  @if (noRelation()) {
+    <mat-card class="no-relation-banner">
+      <mat-card-content>
+        <mat-icon class="no-relation-icon">info</mat-icon>
+        <div class="no-relation-content">
+          <h3>Sin relación terapéutica</h3>
+          <p>
+            No tienes relación terapéutica con este paciente. Solo puedes ver
+            medicamentos de pacientes con los que tienes una relación
+            establecida.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Loading State -->
+  @else if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando medicamentos...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <p class="error-message">{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="retry()">
+          Reintentar
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Empty State -->
+  @else if (medications().length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <mat-icon class="empty-icon">medication</mat-icon>
+        <p class="empty-message">
+          Este paciente no tiene medicamentos registrados
+        </p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Content -->
+  @else {
+    <!-- Filters -->
+    <div class="filters-bar">
+      <mat-form-field appearance="outline" class="status-filter">
+        <mat-label>Filtrar por estado</mat-label>
+        <mat-select
+          [value]="statusFilter()"
+          (selectionChange)="onStatusFilterChange($event.value)"
+        >
+          <mat-option value="All">Todos</mat-option>
+          <mat-option value="Active">Activos</mat-option>
+          <mat-option value="Stopped">Suspendidos</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Medications List -->
+    <div class="medications-list">
+      @for (medication of medications(); track medication.id) {
+        <mat-card class="medication-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="medication-icon"
+              >medication</mat-icon
+            >
+            <mat-card-title>{{ medication.name }}</mat-card-title>
+            <mat-card-subtitle>
+              <div class="medication-meta">
+                <mat-chip
+                  [class.status-active]="medication.status === 'Active'"
+                  [class.status-stopped]="medication.status === 'Stopped'"
+                  class="status-chip"
+                >
+                  {{ medication.status === "Active" ? "Activo" : "Suspendido" }}
+                </mat-chip>
+                @if (medication.isOngoing) {
+                  <mat-chip class="ongoing-chip">
+                    <mat-icon>sync</mat-icon>
+                    En curso
+                  </mat-chip>
+                }
+              </div>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Chips: Dose, Frequency, Route -->
+            <div class="medication-chips">
+              @if (medication.dose) {
+                <mat-chip class="info-chip">
+                  <mat-icon>medication_liquid</mat-icon>
+                  {{ medication.dose }}
+                </mat-chip>
+              }
+              @if (medication.frequency) {
+                <mat-chip class="info-chip">
+                  <mat-icon>schedule</mat-icon>
+                  {{ medication.frequency }}
+                </mat-chip>
+              }
+              @if (medication.route) {
+                <mat-chip class="info-chip">
+                  <mat-icon>route</mat-icon>
+                  {{ medication.route }}
+                </mat-chip>
+              }
+            </div>
+
+            <div class="medication-details">
+              @if (medication.dose) {
+                <div class="detail-item">
+                  <mat-icon>medication_liquid</mat-icon>
+                  <span class="detail-label">Dosis:</span>
+                  <span class="detail-value">{{ medication.dose }}</span>
+                </div>
+              }
+
+              @if (medication.frequency) {
+                <div class="detail-item">
+                  <mat-icon>schedule</mat-icon>
+                  <span class="detail-label">Frecuencia:</span>
+                  <span class="detail-value">{{ medication.frequency }}</span>
+                </div>
+              }
+
+              @if (medication.route) {
+                <div class="detail-item">
+                  <mat-icon>route</mat-icon>
+                  <span class="detail-label">Vía:</span>
+                  <span class="detail-value">{{ medication.route }}</span>
+                </div>
+              }
+
+              @if (medication.prescribedBy) {
+                <div class="detail-item">
+                  <mat-icon>person</mat-icon>
+                  <span class="detail-label">Prescrito por:</span>
+                  <span class="detail-value">{{
+                    medication.prescribedBy
+                  }}</span>
+                </div>
+              }
+
+              <div class="detail-item">
+                <mat-icon>event</mat-icon>
+                <span class="detail-label">Fecha inicio:</span>
+                <span class="detail-value">
+                  {{ medication.startDate | date: "dd/MM/yyyy" }}
+                </span>
+              </div>
+
+              @if (medication.endDate) {
+                <div class="detail-item">
+                  <mat-icon>event_busy</mat-icon>
+                  <span class="detail-label">Fecha fin:</span>
+                  <span class="detail-value">
+                    {{ medication.endDate | date: "dd/MM/yyyy" }}
+                  </span>
+                </div>
+              }
+
+              @if (medication.notes) {
+                <div class="detail-item notes">
+                  <mat-icon>notes</mat-icon>
+                  <span class="detail-label">Notas:</span>
+                  <span class="detail-value">{{ medication.notes }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator
+      [length]="totalItems()"
+      [pageSize]="pageSize()"
+      [pageIndex]="currentPage()"
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  }
+</div>

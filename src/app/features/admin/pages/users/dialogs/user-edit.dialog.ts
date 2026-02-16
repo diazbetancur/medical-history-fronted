@@ -137,8 +137,10 @@ export interface UserEditDialogData {
         @if (saving()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
-          <mat-icon>save</mat-icon>
-          Guardar Cambios
+          <ng-container>
+            <mat-icon>save</mat-icon>
+            Guardar Cambios
+          </ng-container>
         }
       </button>
     </mat-dialog-actions>

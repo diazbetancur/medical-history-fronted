@@ -1,0 +1,93 @@
+<h2 mat-dialog-title>{{ dialogTitle }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="background-form">
+    <!-- Type -->
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de Antecedente</mat-label>
+      <mat-select formControlName="type">
+        @for (option of typeOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error>{{ getErrorMessage("type") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Title -->
+    <mat-form-field appearance="outline">
+      <mat-label>Título</mat-label>
+      <input
+        matInput
+        formControlName="title"
+        placeholder="Ej: Apendicectomía"
+        maxlength="200"
+      />
+      <mat-hint>{{ getRemainingChars("title", 200) }}</mat-hint>
+      <mat-error>{{ getErrorMessage("title") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Description -->
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        placeholder="Detalles adicionales sobre este antecedente"
+        rows="4"
+        maxlength="1000"
+      ></textarea>
+      <mat-hint>{{ getRemainingChars("description", 1000) }}</mat-hint>
+      <mat-error>{{ getErrorMessage("description") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Event Date -->
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha del evento</mat-label>
+      <input
+        matInput
+        [matDatepicker]="eventDatePicker"
+        formControlName="eventDate"
+        placeholder="Opcional"
+      />
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="eventDatePicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #eventDatePicker></mat-datepicker>
+      <mat-hint>Fecha aproximada en que ocurrió</mat-hint>
+      <mat-error>{{ getErrorMessage("eventDate") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Is Chronic Toggle -->
+    <div class="chronic-toggle">
+      <mat-slide-toggle formControlName="isChronic" color="primary">
+        <div class="toggle-label">
+          <span class="toggle-text">Condición Crónica</span>
+          <span class="toggle-hint"
+            >Indica si es una condición de largo plazo o recurrente</span
+          >
+        </div>
+      </mat-slide-toggle>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSubmitting()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || isSubmitting()"
+  >
+    @if (isSubmitting()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      {{ submitButtonText }}
+    }
+  </button>
+</mat-dialog-actions>

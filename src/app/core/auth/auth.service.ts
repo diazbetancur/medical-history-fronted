@@ -7,13 +7,8 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  UserSession as ApiUserSession,
-  AuthApi,
-  getErrorMessage,
-  LoginResponse,
-} from '@data/api';
-import { environment } from '@env';
+import { CurrentUserDto } from '@core/models';
+import { AuthApi, getErrorMessage, LoginResponse } from '@data/api';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
 import { hasAnyAdminPermission } from './permission.guard';
 import {
@@ -111,7 +106,7 @@ export class AuthService {
    * Initialize auth state from stored token (call on app init)
    * Only runs in browser and if a valid token exists
    */
-  initialize(): Observable<ApiUserSession | null> {
+  initialize(): Observable<CurrentUserDto | null> {
     if (!this.isBrowser || !this.tokenStorage.hasValidToken()) {
       return of(null);
     }
@@ -123,21 +118,18 @@ export class AuthService {
         this._session.set({
           isAuthenticated: true,
           loading: false,
-          userId: session.userId,
-          userName: session.userName,
+          userId: session.id,
+          userName: session.name,
           email: session.email,
           roles: session.roles,
           permissions: session.permissions || [],
-          hasProfessionalProfile: session.hasProfessionalProfile,
-          professionalProfileId: session.professionalProfileId,
-          professionalProfileSlug: session.professionalProfileSlug,
+          hasProfessionalProfile: !!session.professionalProfileId,
+          professionalProfileId: session.professionalProfileId ?? null,
+          professionalProfileSlug: session.professionalProfileSlug ?? null,
         });
       }),
       catchError((err) => {
-        // Token is invalid or expired - log only in development
-        if (!environment.production) {
-          console.warn('[AuthService] Failed to restore session:', err);
-        }
+        // Token is invalid or expired
         this.tokenStorage.clearToken();
         this._session.set(INITIAL_SESSION);
         return of(null);
@@ -188,7 +180,7 @@ export class AuthService {
   loginAndFetchSession(
     email: string,
     password: string,
-  ): Observable<ApiUserSession> {
+  ): Observable<CurrentUserDto> {
     return new Observable((subscriber) => {
       this.login(email, password).subscribe({
         next: () => {
@@ -198,14 +190,15 @@ export class AuthService {
               this._session.set({
                 isAuthenticated: true,
                 loading: false,
-                userId: session.userId,
-                userName: session.userName,
+                userId: session.id,
+                userName: session.name,
                 email: session.email,
                 roles: session.roles,
                 permissions: session.permissions || [],
-                hasProfessionalProfile: session.hasProfessionalProfile,
-                professionalProfileId: session.professionalProfileId,
-                professionalProfileSlug: session.professionalProfileSlug,
+                hasProfessionalProfile: !!session.professionalProfileId,
+                professionalProfileId: session.professionalProfileId ?? null,
+                professionalProfileSlug:
+                  session.professionalProfileSlug ?? null,
               });
               subscriber.next(session);
               subscriber.complete();
@@ -222,19 +215,19 @@ export class AuthService {
    * Refresh session from /me endpoint
    * Use after profile changes or to verify token
    */
-  refreshSession(): Observable<ApiUserSession> {
+  refreshSession(): Observable<CurrentUserDto> {
     return this.authApi.me().pipe(
       tap((session) => {
         this._session.update((s) => ({
           ...s,
-          userId: session.userId,
-          userName: session.userName,
+          userId: session.id,
+          userName: session.name,
           email: session.email,
           roles: session.roles,
           permissions: session.permissions || [],
-          hasProfessionalProfile: session.hasProfessionalProfile,
-          professionalProfileId: session.professionalProfileId,
-          professionalProfileSlug: session.professionalProfileSlug,
+          hasProfessionalProfile: !!session.professionalProfileId,
+          professionalProfileId: session.professionalProfileId ?? null,
+          professionalProfileSlug: session.professionalProfileSlug ?? null,
         }));
       }),
     );

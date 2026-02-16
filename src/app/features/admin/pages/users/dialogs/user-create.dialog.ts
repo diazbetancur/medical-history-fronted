@@ -199,8 +199,10 @@ import { AdminUsersStore } from '@data/stores/admin-users.store';
         @if (saving()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
-          <mat-icon>person_add</mat-icon>
-          Crear Usuario
+          <ng-container>
+            <mat-icon>person_add</mat-icon>
+            Crear Usuario
+          </ng-container>
         }
       </button>
     </mat-dialog-actions>

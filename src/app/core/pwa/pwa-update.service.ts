@@ -1,6 +1,5 @@
 import { ApplicationRef, Injectable, inject, signal } from '@angular/core';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { environment } from '@env';
 import { filter, first } from 'rxjs';
 import { PlatformService } from '../platform/platform.service';
 
@@ -73,9 +72,6 @@ export class PwaUpdateService {
         window.location.reload();
       });
     } catch (err) {
-      if (!environment.production) {
-        console.error('Failed to activate update:', err);
-      }
       // Force reload anyway
       this.platform.runInBrowser(() => {
         window.location.reload();
@@ -98,18 +94,12 @@ export class PwaUpdateService {
       .pipe(
         filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
       )
-      .subscribe((evt) => {
-        if (!environment.production) {
-          console.log('PWA Update available:', evt.latestVersion);
-        }
+      .subscribe(() => {
         this.updateAvailable.set(true);
       });
 
     // Handle unrecoverable state (corrupted SW)
-    this.swUpdate.unrecoverable.subscribe((evt) => {
-      if (!environment.production) {
-        console.error('SW unrecoverable state:', evt.reason);
-      }
+    this.swUpdate.unrecoverable.subscribe(() => {
       // Force reload to get fresh content
       this.platform.runInBrowser(() => {
         window.location.reload();

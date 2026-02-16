@@ -1,7 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { environment } from '@env';
 import {
   CreateServiceRequestPayload,
   CreateServiceRequestResponse,
@@ -10,6 +8,8 @@ import {
   ServiceRequestStatus,
   UpdateRequestStatusPayload,
 } from '@data/models';
+import { environment } from '@env';
+import { Observable } from 'rxjs';
 
 export interface RequestOptions {
   params?: Record<string, string | number | boolean>;
@@ -41,7 +41,7 @@ export class ApiClient {
     endpoint: string,
     page: number = 1,
     pageSize: number = 10,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Observable<PaginatedResponse<T>> {
     const params = {
       ...options?.params,
@@ -57,7 +57,7 @@ export class ApiClient {
   post<T, B = unknown>(
     endpoint: string,
     body: B,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Observable<T> {
     const url = this.buildUrl(endpoint);
     const httpOptions = this.buildHttpOptions(options);
@@ -70,7 +70,7 @@ export class ApiClient {
   put<T, B = unknown>(
     endpoint: string,
     body: B,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Observable<T> {
     const url = this.buildUrl(endpoint);
     const httpOptions = this.buildHttpOptions(options);
@@ -83,7 +83,7 @@ export class ApiClient {
   patch<T, B = unknown>(
     endpoint: string,
     body: B,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Observable<T> {
     const url = this.buildUrl(endpoint);
     const httpOptions = this.buildHttpOptions(options);
@@ -100,9 +100,24 @@ export class ApiClient {
   }
 
   /**
-   * Build full URL from endpoint
+   * POST multipart/form-data request (for file uploads)
    */
-  private buildUrl(endpoint: string): string {
+  postMultipart<T>(
+    endpoint: string,
+    formData: FormData,
+    options?: RequestOptions,
+  ): Observable<T> {
+    const url = this.buildUrl(endpoint);
+    // Don't set Content-Type header - browser will set it with boundary
+    const httpOptions = this.buildHttpOptions(options);
+    return this.http.post<T>(url, formData, httpOptions);
+  }
+
+  /**
+   * Build full URL from endpoint
+   * Made public for special cases like file downloads
+   */
+  buildUrl(endpoint: string): string {
     // Remove leading slash if present
     const cleanEndpoint = endpoint.startsWith('/')
       ? endpoint.slice(1)
@@ -146,11 +161,11 @@ export class ApiClient {
    * Create a service request (public - no auth required)
    */
   createPublicRequest(
-    payload: CreateServiceRequestPayload
+    payload: CreateServiceRequestPayload,
   ): Observable<CreateServiceRequestResponse> {
     return this.post<CreateServiceRequestResponse, CreateServiceRequestPayload>(
       '/public/requests',
-      payload
+      payload,
     );
   }
 
@@ -166,11 +181,11 @@ export class ApiClient {
    */
   updateProfessionalRequestStatus(
     requestId: string,
-    status: Extract<ServiceRequestStatus, 'CONTACTED' | 'CLOSED'>
+    status: Extract<ServiceRequestStatus, 'CONTACTED' | 'CLOSED'>,
   ): Observable<ServiceRequest> {
     return this.patch<ServiceRequest, UpdateRequestStatusPayload>(
       `/professional/requests/${requestId}`,
-      { status }
+      { status },
     );
   }
 
@@ -186,11 +201,11 @@ export class ApiClient {
    */
   updateAdminRequestStatus(
     requestId: string,
-    status: Extract<ServiceRequestStatus, 'REJECTED'>
+    status: Extract<ServiceRequestStatus, 'REJECTED'>,
   ): Observable<ServiceRequest> {
     return this.patch<ServiceRequest, UpdateRequestStatusPayload>(
       `/admin/requests/${requestId}`,
-      { status }
+      { status },
     );
   }
 }

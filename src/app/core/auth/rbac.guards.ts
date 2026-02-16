@@ -1,14 +1,8 @@
 /**
- * ============================================================================
  * RBAC Guards - Permission-Based Route Protection
- * ============================================================================
  *
  * Sistema de guards funcionales para protección de rutas basado en permisos
  * granulares (RBAC), sin depender de roles.
- *
- * @author Senior Angular Architect
- * @version 2.0
- * @date January 20, 2026
  */
 
 import { inject } from '@angular/core';
@@ -19,10 +13,6 @@ import {
   RouterStateSnapshot,
 } from '@angular/router';
 import { AuthService } from './auth.service';
-
-// ============================================================================
-// 📋 INTERFACES
-// ============================================================================
 
 /**
  * Route data para protección basada en permisos
@@ -50,17 +40,13 @@ export interface PermissionRouteData {
   redirectTo?: string;
 }
 
-// ============================================================================
-// 🛡️ PERMISSION GUARD
-// ============================================================================
-
 /**
  * Permission Guard
  *
  * Protege rutas verificando que el usuario tenga AL MENOS UNO de los
  * permisos especificados en route.data.permissions
  *
- * ✅ Características:
+ * Características:
  * - Lee permisos desde route.data.permissions
  * - Usa lógica OR (cualquiera de los permisos)
  * - Redirige a /403 si falla
@@ -132,9 +118,6 @@ export const permissionGuard: CanActivateFn = (
   const hasAccess = authService.hasAnyPermission(requiredPermissions);
 
   if (!hasAccess) {
-    console.warn(
-      `[PermissionGuard] Access denied to ${state.url}. Required: [${requiredPermissions.join(', ')}]`,
-    );
     return router.createUrlTree([redirectTo]);
   }
 
@@ -197,18 +180,11 @@ export const adminAreaGuard: CanActivateFn = (
   const hasAdminAccess = authService.isAdminArea();
 
   if (!hasAdminAccess) {
-    console.warn(
-      `[AdminAreaGuard] Access denied to ${state.url}. User has no administrative permissions.`,
-    );
     return router.createUrlTree(['/403']);
   }
 
   return true;
 };
-
-// ============================================================================
-// 🔧 HELPER FUNCTIONS (Export para uso en otros guards)
-// ============================================================================
 
 /**
  * Check if user has ANY of the required permissions (OR logic)

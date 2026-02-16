@@ -36,29 +36,6 @@ import { ApiClient } from './api-client';
  * - Users.Update: Update user details
  * - Users.Delete: Delete users
  * - Users.AssignRoles: Manage user roles
- *
- * @example
- * ```typescript
- * // List users with search
- * this.adminUsersApi.listUsers({ q: 'john', page: 1, pageSize: 20 })
- *   .subscribe(response => {
- *     console.log(response.data); // AdminUserListDto[]
- *     console.log(response.pagination); // PaginationInfo
- *   });
- *
- * // Create user
- * this.adminUsersApi.createUser({
- *   userName: 'johndoe',
- *   email: 'john@example.com',
- *   password: 'SecurePass123!',
- *   confirmPassword: 'SecurePass123!',
- *   roles: ['User']
- * }).subscribe(result => {
- *   if (result.success) {
- *     console.log('User created:', result.userId);
- *   }
- * });
- * ```
  */
 @Injectable({ providedIn: 'root' })
 export class AdminUsersApi {
@@ -289,7 +266,6 @@ export class AdminUsersApi {
     }
 
     // Unknown format - return empty with default pagination
-    console.warn('[AdminUsersApi] Unknown response format:', response);
     return {
       data: [],
       pagination: {
