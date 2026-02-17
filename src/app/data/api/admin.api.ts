@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
   AdminCatalogsResponse,
+  AdminDashboardSummaryResponse,
   AdminProfessionalDetail,
   AdminProfessionalsParams,
   AdminProfessionalsResponse,
@@ -34,13 +35,13 @@ export class AdminApi {
    * List all professional profiles with filters
    */
   getProfessionals(
-    params: AdminProfessionalsParams = {}
+    params: AdminProfessionalsParams = {},
   ): Observable<AdminProfessionalsResponse> {
     const queryParams = this.buildProfessionalsParams(params);
     const queryString = queryParams.toString();
-    const endpoint = `/admin/professionals${
-      queryString ? `?${queryString}` : ''
-    }`;
+    const endpoint = queryString
+      ? '/admin/professionals?' + queryString
+      : '/admin/professionals';
     return this.api.get<AdminProfessionalsResponse>(endpoint);
   }
 
@@ -58,11 +59,11 @@ export class AdminApi {
    */
   moderateProfile(
     id: string,
-    payload: ModerateProfilePayload
+    payload: ModerateProfilePayload,
   ): Observable<ModerateProfileResponse> {
     return this.api.patch<ModerateProfileResponse>(
       `/admin/professionals/${id}`,
-      payload
+      payload,
     );
   }
 
@@ -76,7 +77,7 @@ export class AdminApi {
    */
   moderateService(
     id: string,
-    payload: ModerateServicePayload
+    payload: ModerateServicePayload,
   ): Observable<Service> {
     return this.api.patch<Service>(`/admin/services/${id}`, payload);
   }
@@ -90,11 +91,13 @@ export class AdminApi {
    * List all service requests
    */
   getRequests(
-    params: AdminRequestsParams = {}
+    params: AdminRequestsParams = {},
   ): Observable<AdminRequestsResponse> {
     const queryParams = this.buildRequestsParams(params);
     const queryString = queryParams.toString();
-    const endpoint = `/admin/requests${queryString ? `?${queryString}` : ''}`;
+    const endpoint = queryString
+      ? '/admin/requests?' + queryString
+      : '/admin/requests';
     return this.api.get<AdminRequestsResponse>(endpoint);
   }
 
@@ -104,11 +107,11 @@ export class AdminApi {
    */
   moderateRequest(
     id: string,
-    payload: ModerateRequestPayload
+    payload: ModerateRequestPayload,
   ): Observable<ModerateRequestResponse> {
     return this.api.patch<ModerateRequestResponse>(
       `/admin/requests/${id}`,
-      payload
+      payload,
     );
   }
 
@@ -124,12 +127,22 @@ export class AdminApi {
     return this.api.get<AdminCatalogsResponse>('/admin/catalogs');
   }
 
+  /**
+   * GET /api/admin/dashboard/summary
+   * Get dashboard KPI summary for admin area
+   */
+  getDashboardSummary(): Observable<AdminDashboardSummaryResponse> {
+    return this.api.get<AdminDashboardSummaryResponse>(
+      '/admin/dashboard/summary',
+    );
+  }
+
   // ===========================================================================
   // Helpers
   // ===========================================================================
 
   private buildProfessionalsParams(
-    params: AdminProfessionalsParams
+    params: AdminProfessionalsParams,
   ): URLSearchParams {
     const searchParams = new URLSearchParams();
 

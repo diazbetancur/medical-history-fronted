@@ -1,15 +1,17 @@
 import { Component, Input, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { AuthService, AuthStore } from '@core/auth';
 import { PublicHomeProfessionalCardDto } from '../../../public/models/public-home.dto';
+import { BookAppointmentDialogComponent } from './book-appointment-dialog.component';
 
 @Component({
   selector: 'app-professional-card',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatIconModule],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatDialogModule],
   template: `
     <mat-card
       class="professional-card"
@@ -150,6 +152,7 @@ export class ProfessionalCardComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly authStore = inject(AuthStore);
+  private readonly dialog = inject(MatDialog);
 
   get imageUrl(): string {
     return (
@@ -167,7 +170,7 @@ export class ProfessionalCardComponent {
     if (!isAuthenticated) {
       this.router.navigate(['/login'], {
         queryParams: {
-          returnUrl: `/patient/wizard?professionalSlug=${this.professional.slug}`,
+          returnUrl: `/pro/${this.professional.slug}`,
         },
       });
       return;
@@ -178,13 +181,22 @@ export class ProfessionalCardComponent {
       this.authStore.availableContexts().some((ctx) => ctx.type === 'PATIENT');
 
     if (hasPatientContext || this.authService.isClient()) {
-      this.router.navigate(['/patient/wizard'], {
-        queryParams: { professionalSlug: this.professional.slug },
+      this.dialog.open(BookAppointmentDialogComponent, {
+        width: '760px',
+        maxWidth: '96vw',
+        data: {
+          slug: this.professional.slug,
+          name: this.professional.fullName,
+          imageUrl: this.imageUrl,
+          specialties: this.professional.specialty
+            ? [this.professional.specialty]
+            : [],
+        },
       });
     } else {
       this.router.navigate(['/login'], {
         queryParams: {
-          returnUrl: `/patient/wizard?professionalSlug=${this.professional.slug}`,
+          returnUrl: `/pro/${this.professional.slug}`,
         },
       });
     }

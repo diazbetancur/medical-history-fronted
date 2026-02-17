@@ -15,11 +15,11 @@ import {
   UpdateBackgroundDto,
 } from '@data/models';
 import { PatientBackgroundService } from '@patient/services/patient-background.service';
+import { ConfirmDialogComponent } from '@shared/ui';
 import {
   BackgroundDialogComponent,
   BackgroundDialogData,
 } from './background-dialog.component';
-import { ConfirmDialogComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-patient-background',

@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -10,6 +11,7 @@ import { AuthService, AuthStore } from '@core/auth';
 import { ProfileStore } from '@data/stores';
 import { AnalyticsService, SeoService } from '@shared/services';
 import { isNotFoundError } from '@shared/utils';
+import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog.component';
 import { PublicHeaderComponent } from '../../components/public-header.component';
 
 @Component({
@@ -20,6 +22,7 @@ import { PublicHeaderComponent } from '../../components/public-header.component'
     RouterLink,
     MatCardModule,
     MatButtonModule,
+    MatDialogModule,
     MatIconModule,
     MatTabsModule,
     MatChipsModule,
@@ -34,6 +37,7 @@ export class ProfilePageComponent {
   private readonly analytics = inject(AnalyticsService);
   private readonly authService = inject(AuthService);
   private readonly authStore = inject(AuthStore);
+  private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
   readonly estimatedTariff = computed(() => {
@@ -144,15 +148,23 @@ export class ProfilePageComponent {
       this.authStore.availableContexts().some((ctx) => ctx.type === 'PATIENT');
 
     if (isAuthenticated && (hasPatientContext || this.authService.isClient())) {
-      this.router.navigate(['/patient/wizard'], {
-        queryParams: { professionalSlug: profile.slug },
+      this.dialog.open(BookAppointmentDialogComponent, {
+        width: '760px',
+        maxWidth: '96vw',
+        data: {
+          slug: profile.slug,
+          professionalId: profile.id,
+          name: profile.businessName,
+          imageUrl: profile.profileImageUrl,
+          specialties: this.profileSpecialties(),
+        },
       });
       return;
     }
 
     this.router.navigate(['/login'], {
       queryParams: {
-        returnUrl: `/patient/wizard?professionalSlug=${profile.slug}`,
+        returnUrl: `/pro/${profile.slug}`,
       },
     });
   }

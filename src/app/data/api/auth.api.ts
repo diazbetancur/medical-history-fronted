@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
+  BecomeProfessionalRequest,
   ChangePasswordRequest,
   CurrentUserDto,
   ForgotPasswordRequest,
@@ -173,5 +174,18 @@ export class AuthApi {
    */
   getLegacySession(): Observable<UserSession> {
     return this.api.get<UserSession>('/auth/me');
+  }
+
+  /**
+   * POST /api/auth/become-professional
+   * Grants Professional role to an authenticated client user
+   */
+  becomeProfessional(
+    payload: BecomeProfessionalRequest = {},
+  ): Observable<UserOperationResultDto> {
+    return this.api.post<UserOperationResultDto>(
+      '/auth/become-professional',
+      payload,
+    );
   }
 }

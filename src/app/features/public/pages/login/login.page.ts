@@ -2,13 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthStore, PostLoginNavigationService } from '@core/auth';
-import { ProblemDetails } from '@core/models';
+import { CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
 
@@ -24,6 +25,7 @@ import { ToastService } from '@shared/services';
     RouterLink,
     MatButtonModule,
     MatCardModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
@@ -38,10 +40,12 @@ export class LoginPageComponent {
   private readonly postLoginNavigation = inject(PostLoginNavigationService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    asProfessional: [false],
   });
 
   readonly isLoading = signal(false);
@@ -65,7 +69,12 @@ export class LoginPageComponent {
 
     const credentials = this.form.getRawValue();
 
-    this.authApi.login(credentials).subscribe({
+    this.authApi
+      .login({
+        email: credentials.email,
+        password: credentials.password,
+      })
+      .subscribe({
       next: (response) => {
         // Step 1: Save token
         this.authStore.setToken(response.token, response.expiresAt);
@@ -74,9 +83,7 @@ export class LoginPageComponent {
         this.authStore.loadMe().subscribe({
           next: (user) => {
             if (user) {
-              const displayName = user.name || user.email || 'usuario';
-              this.toast.success(`¡Bienvenido, ${displayName}!`);
-              this.postLoginNavigation.navigateByContext();
+              this.handlePostLogin(user, credentials.asProfessional);
             } else {
               this.errorMessage.set('Error al cargar la sesión');
               this.isLoading.set(false);
@@ -94,7 +101,99 @@ export class LoginPageComponent {
         this.errorMessage.set(problem.title || 'Credenciales inválidas');
         this.isLoading.set(false);
       },
-    });
+      });
+  }
+
+  constructor() {
+    const query = this.route.snapshot.queryParamMap;
+    const email = query.get('email');
+    const asProfessional = query.get('professional') === '1';
+
+    if (email) {
+      this.form.controls.email.setValue(email);
+    }
+    if (asProfessional) {
+      this.form.controls.asProfessional.setValue(true);
+    }
+  }
+
+  private handlePostLogin(user: CurrentUserDto, asProfessional: boolean): void {
+    if (!asProfessional) {
+      const displayName = user.name || user.email || 'usuario';
+      this.toast.success(`¡Bienvenido, ${displayName}!`);
+      this.isLoading.set(false);
+      this.postLoginNavigation.navigateByContext();
+      return;
+    }
+
+    const hasProfessionalContext = user.contexts.some(
+      (ctx) => ctx.type === 'PROFESSIONAL',
+    );
+
+    if (hasProfessionalContext) {
+      this.switchAndNavigateProfessional(user);
+      return;
+    }
+
+    this.authApi
+      .becomeProfessional({ reason: 'Activación desde login en frontend' })
+      .subscribe({
+        next: (result) => {
+          if (!result.success) {
+            this.errorMessage.set(
+              result.message ||
+                'No fue posible activar el perfil profesional en este momento.',
+            );
+            this.isLoading.set(false);
+            return;
+          }
+
+          this.authStore.loadMe().subscribe({
+            next: (updatedUser) => {
+              if (!updatedUser) {
+                this.errorMessage.set('No se pudo actualizar la sesión');
+                this.isLoading.set(false);
+                return;
+              }
+
+              this.toast.success(
+                result.message || 'Perfil profesional activado correctamente',
+              );
+              this.switchAndNavigateProfessional(updatedUser);
+            },
+            error: (err) => {
+              const problem = this.extractProblemDetails(err);
+              this.errorMessage.set(
+                problem.title || 'No se pudo actualizar la sesión',
+              );
+              this.isLoading.set(false);
+            },
+          });
+        },
+        error: (err) => {
+          const problem = this.extractProblemDetails(err);
+          this.errorMessage.set(
+            problem.title ||
+              'No fue posible activar tu contexto profesional en este momento',
+          );
+          this.isLoading.set(false);
+        },
+      });
+  }
+
+  private switchAndNavigateProfessional(user: CurrentUserDto): void {
+    const professionalContext = user.contexts.find(
+      (ctx) => ctx.type === 'PROFESSIONAL',
+    );
+
+    if (professionalContext) {
+      this.authStore.switchContext(professionalContext);
+    }
+
+    const displayName = user.name || user.email || 'usuario';
+    this.toast.success(`¡Bienvenido, ${displayName}!`);
+    this.isLoading.set(false);
+    this.postLoginNavigation.navigateByContext();
   }
 
   /**

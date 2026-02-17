@@ -1,24 +1,20 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import type {
-  AdminProfessionalsResponse,
-  AdminProfessionalsParams,
-} from '@data/api/api-models';
-import type {
-  ProfessionalSpecialtiesResponseDto,
+  CreateSpecialtyDto,
   SpecialtyDto,
-  UpdateProfessionalSpecialtiesItemDto,
+  UpdateSpecialtyDto,
 } from '@data/models/specialty.models';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 
 /**
  * Specialties API Service
  *
  * Endpoints usados:
- * - GET /api/public/specialties
- * - GET /api/admin/professionals/{id}/specialties
- * - PUT /api/admin/professionals/{id}/specialties
- * - GET /api/admin/professionals (búsqueda de profesionales)
+ * - GET /api/admin/specialties
+ * - POST /api/admin/specialties
+ * - PUT /api/admin/specialties/{id}
+ * - DELETE /api/specialties/{id}
  */
 @Injectable({
   providedIn: 'root',
@@ -26,56 +22,54 @@ import { ApiClient } from './api-client';
 export class SpecialtiesApi {
   private readonly api = inject(ApiClient);
 
-  getCatalog(): Observable<SpecialtyDto[]> {
-    return this.api.get<SpecialtyDto[]>('/public/specialties');
+  getSpecialties(): Observable<SpecialtyDto[]> {
+    return this.api
+      .get<unknown>('/admin/specialties')
+      .pipe(map((response) => this.normalizeSpecialties(response)));
   }
 
-  searchProfessionals(
-    params: AdminProfessionalsParams,
-  ): Observable<AdminProfessionalsResponse> {
-    const query = this.buildProfessionalsParams(params).toString();
-    const endpoint = query
-      ? '/admin/professionals?' + query
-      : '/admin/professionals';
-    return this.api.get<AdminProfessionalsResponse>(endpoint);
+  createSpecialty(dto: CreateSpecialtyDto): Observable<SpecialtyDto> {
+    return this.api.post<SpecialtyDto>('/admin/specialties', dto);
   }
 
-  getProfessionalSpecialties(
-    professionalProfileId: string,
-  ): Observable<ProfessionalSpecialtiesResponseDto> {
-    return this.api.get<ProfessionalSpecialtiesResponseDto>(
-      `/admin/professionals/${professionalProfileId}/specialties`,
-    );
+  updateSpecialty(
+    id: string,
+    dto: UpdateSpecialtyDto,
+  ): Observable<SpecialtyDto> {
+    return this.api.put<SpecialtyDto>(`/admin/specialties/${id}`, dto);
   }
 
-  updateProfessionalSpecialties(
-    professionalProfileId: string,
-    payload: UpdateProfessionalSpecialtiesItemDto[],
-  ): Observable<ProfessionalSpecialtiesResponseDto> {
-    return this.api.put<ProfessionalSpecialtiesResponseDto>(
-      `/admin/professionals/${professionalProfileId}/specialties`,
-      payload,
-    );
+  deleteSpecialty(id: string): Observable<void> {
+    return this.api.delete<void>(`/admin/specialties/${id}`);
   }
 
-  private buildProfessionalsParams(
-    params: AdminProfessionalsParams,
-  ): URLSearchParams {
-    const searchParams = new URLSearchParams();
-
-    if (params.status) {
-      searchParams.set('status', params.status);
-    }
-    if (params.q) {
-      searchParams.set('q', params.q);
-    }
-    if (params.page && params.page > 1) {
-      searchParams.set('page', String(params.page));
-    }
-    if (params.pageSize && params.pageSize > 0) {
-      searchParams.set('pageSize', String(params.pageSize));
+  private normalizeSpecialties(payload: unknown): SpecialtyDto[] {
+    if (Array.isArray(payload)) {
+      return payload as SpecialtyDto[];
     }
 
-    return searchParams;
+    if (!payload || typeof payload !== 'object') {
+      return [];
+    }
+
+    const candidate = payload as {
+      items?: unknown;
+      data?: unknown;
+      specialties?: unknown;
+    };
+
+    if (Array.isArray(candidate.items)) {
+      return candidate.items as SpecialtyDto[];
+    }
+
+    if (Array.isArray(candidate.data)) {
+      return candidate.data as SpecialtyDto[];
+    }
+
+    if (Array.isArray(candidate.specialties)) {
+      return candidate.specialties as SpecialtyDto[];
+    }
+
+    return [];
   }
 }
