@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatStepperModule } from '@angular/material/stepper';
 import { PatientProfileDto } from '../../models/patient-profile.dto';
 import { SlotDto } from '../../models/slot.dto';
-import { Step1ProfileComponent } from './steps/step1-profile.component';
 import { Step2SearchProfessionalComponent } from './steps/step2-search-professional.component';
 import { Step3SlotsComponent } from './steps/step3-slots.component';
 import { Step4ConfirmComponent } from './steps/step4-confirm.component';
@@ -81,7 +80,6 @@ export class WizardStore {
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    Step1ProfileComponent,
     Step2SearchProfessionalComponent,
     Step3SlotsComponent,
     Step4ConfirmComponent,
@@ -95,7 +93,6 @@ export class PatientWizardPage {
   readonly wizardStore = inject(WizardStore);
 
   // Expose wizard state for template
-  readonly isStep1Complete = this.wizardStore.isStep1Complete;
   readonly isStep2Complete = this.wizardStore.isStep2Complete;
   readonly isStep3Complete = this.wizardStore.isStep3Complete;
 }

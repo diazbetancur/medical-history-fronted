@@ -24,7 +24,7 @@
 
       .subtitle {
         margin: 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
         font-size: 14px;
       }
     }
@@ -52,7 +52,7 @@
           font-size: 32px;
           width: 32px;
           height: 32px;
-          color: var(--primary-color, #1976d2);
+          color: var(--color-primary);
         }
 
         .stat-content {
@@ -67,7 +67,7 @@
 
           .stat-label {
             font-size: 12px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
         }
       }
@@ -84,7 +84,7 @@
 
     p {
       margin: 0;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--color-text-secondary);
     }
   }
 
@@ -105,11 +105,11 @@
         height: 64px;
 
         &.error-icon {
-          color: var(--warn-color, #f44336);
+          color: var(--color-error);
         }
 
         &.empty-icon {
-          color: rgba(0, 0, 0, 0.3);
+          color: var(--color-text-disabled);
         }
       }
 
@@ -123,7 +123,7 @@
       .empty-subtitle {
         margin: 0;
         font-size: 14px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
       }
 
       button {
@@ -171,12 +171,12 @@
           height: 40px;
 
           &.pdf {
-            background-color: #f44336;
+            background-color: var(--color-error);
             color: white;
           }
 
           &.image {
-            background-color: #4caf50;
+            background-color: var(--color-success);
             color: white;
           }
         }
@@ -200,13 +200,13 @@
             height: 24px;
             font-size: 12px;
             min-height: unset;
-            background-color: #e3f2fd;
-            color: #1976d2;
+            background-color: var(--color-primary-soft);
+            color: var(--color-primary);
           }
 
           .exam-date {
             font-size: 13px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
         }
       }
@@ -226,7 +226,7 @@
             font-size: 14px;
 
             mat-icon {
-              color: rgba(0, 0, 0, 0.54);
+              color: var(--color-text-secondary);
               font-size: 20px;
               width: 20px;
               height: 20px;
@@ -235,12 +235,12 @@
 
             .detail-label {
               font-weight: 500;
-              color: rgba(0, 0, 0, 0.87);
+              color: var(--color-text-primary);
               min-width: 70px;
             }
 
             .detail-value {
-              color: rgba(0, 0, 0, 0.6);
+              color: var(--color-text-secondary);
               flex: 1;
               word-break: break-word;
             }

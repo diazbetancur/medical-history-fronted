@@ -1,12 +1,16 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
+  ChangePasswordRequest,
   CurrentUserDto,
+  ForgotPasswordRequest,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
+  ResetPasswordRequest,
+  UserOperationResultDto,
   UserSession,
 } from './api-models';
 
@@ -17,6 +21,81 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AuthApi {
   private readonly api = inject(ApiClient);
+
+  private normalizeContextType(type: string): 'ADMIN' | 'PROFESSIONAL' | 'PATIENT' {
+    const value = (type || '').toUpperCase();
+    if (value === 'ADMIN') return 'ADMIN';
+    if (value === 'PROFESSIONAL') return 'PROFESSIONAL';
+    return 'PATIENT';
+  }
+
+  private normalizeCurrentUser(raw: any): CurrentUserDto {
+    const roles: string[] = raw?.roles ?? [];
+    const permissions: string[] = raw?.permissions ?? [];
+    const rawContexts = Array.isArray(raw?.contexts) ? raw.contexts : [];
+
+    const contexts = rawContexts.map((context: any) => {
+      if (typeof context === 'string') {
+        const type = this.normalizeContextType(context);
+        return {
+          type,
+          id:
+            type === 'PROFESSIONAL'
+              ? (raw?.professionalProfileId ?? raw?.userId ?? raw?.id ?? '')
+              : (raw?.patientProfileId ?? raw?.userId ?? raw?.id ?? ''),
+          name: raw?.fullName ?? raw?.name ?? raw?.userName ?? raw?.email ?? 'Usuario',
+          slug: raw?.professionalProfileSlug,
+        };
+      }
+
+      const type = this.normalizeContextType(context?.type);
+      return {
+        type,
+        id: context?.id ?? raw?.userId ?? raw?.id ?? '',
+        name:
+          context?.name ??
+          raw?.fullName ??
+          raw?.name ??
+          raw?.userName ??
+          raw?.email ??
+          'Usuario',
+        slug: context?.slug ?? raw?.professionalProfileSlug,
+      };
+    });
+
+    const fallbackContext = {
+      type: this.normalizeContextType(raw?.defaultContext ?? 'PATIENT'),
+      id:
+        raw?.patientProfileId ??
+        raw?.professionalProfileId ??
+        raw?.userId ??
+        raw?.id ??
+        '',
+      name: raw?.fullName ?? raw?.name ?? raw?.userName ?? raw?.email ?? 'Usuario',
+      slug: raw?.professionalProfileSlug,
+    };
+
+    return {
+      id: raw?.id ?? raw?.userId ?? '',
+      email: raw?.email ?? '',
+      name: raw?.name ?? raw?.fullName ?? raw?.userName ?? raw?.email ?? 'Usuario',
+      roles,
+      permissions,
+      contexts: contexts.length > 0 ? contexts : [fallbackContext],
+      defaultContext:
+        contexts.find(
+          (context: {
+            type: 'ADMIN' | 'PROFESSIONAL' | 'PATIENT';
+            id: string;
+            name: string;
+            slug?: string;
+          }) =>
+            context.type === this.normalizeContextType(raw?.defaultContext ?? ''),
+        ) ?? fallbackContext,
+      professionalProfileId: raw?.professionalProfileId,
+      professionalProfileSlug: raw?.professionalProfileSlug,
+    };
+  }
 
   /**
    * POST /api/auth/login
@@ -35,13 +114,45 @@ export class AuthApi {
   }
 
   /**
+   * POST /api/auth/change-password
+   * Change password for authenticated user
+   */
+  changePassword(
+    data: ChangePasswordRequest,
+  ): Observable<UserOperationResultDto> {
+    return this.api.post<UserOperationResultDto>('/auth/change-password', data);
+  }
+
+  /**
+   * POST /api/auth/forgot-password
+   * Request password reset token by email
+   */
+  forgotPassword(
+    data: ForgotPasswordRequest,
+  ): Observable<UserOperationResultDto> {
+    return this.api.post<UserOperationResultDto>('/auth/forgot-password', data);
+  }
+
+  /**
+   * POST /api/auth/reset-password
+   * Reset password using token
+   */
+  resetPassword(
+    data: ResetPasswordRequest,
+  ): Observable<UserOperationResultDto> {
+    return this.api.post<UserOperationResultDto>('/auth/reset-password', data);
+  }
+
+  /**
    * GET /api/auth/me
    * Get current authenticated user session with contexts
    * Requires valid JWT token (added by interceptor)
    * @returns CurrentUserDto with roles, permissions, and available contexts
    */
   me(): Observable<CurrentUserDto> {
-    return this.api.get<CurrentUserDto>('/auth/me');
+    return this.api
+      .get<any>('/auth/me')
+      .pipe(map((response) => this.normalizeCurrentUser(response)));
   }
 
   /**

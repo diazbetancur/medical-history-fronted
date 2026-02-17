@@ -13,6 +13,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AuthStore } from '@core/auth';
 import { ApiError, ApiErrorCode, getUserMessage } from '@core/http/api-error';
 import { ToastService } from '@core/ui/toast.service';
 import { CreateAppointmentDto } from '../../../models/appointment.dto';
@@ -155,7 +156,7 @@ import { WizardStore } from '../patient-wizard.page';
 
       .subtitle {
         margin: 0 0 24px 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
       }
 
       .summary-card {
@@ -174,7 +175,7 @@ import { WizardStore } from '../patient-wizard.page';
 
             mat-icon {
               margin-top: 4px;
-              color: rgba(0, 0, 0, 0.54);
+              color: var(--color-text-secondary);
             }
 
             .summary-item-content {
@@ -184,7 +185,7 @@ import { WizardStore } from '../patient-wizard.page';
 
               .label {
                 font-size: 12px;
-                color: rgba(0, 0, 0, 0.6);
+                color: var(--color-text-secondary);
                 text-transform: uppercase;
                 margin-bottom: 4px;
               }
@@ -196,7 +197,7 @@ import { WizardStore } from '../patient-wizard.page';
 
               .subvalue {
                 font-size: 14px;
-                color: rgba(0, 0, 0, 0.6);
+                color: var(--color-text-secondary);
               }
             }
           }
@@ -222,14 +223,14 @@ import { WizardStore } from '../patient-wizard.page';
           p {
             margin: 0;
             font-size: 14px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
         }
 
         .error-section {
           margin-top: 16px;
           padding: 16px;
-          background: #ffebee;
+          background: var(--color-error-light);
           border-radius: 4px;
           display: flex;
           flex-direction: column;
@@ -245,13 +246,13 @@ import { WizardStore } from '../patient-wizard.page';
           .error-message {
             margin: 0;
             text-align: center;
-            color: rgba(0, 0, 0, 0.87);
+            color: var(--color-text-primary);
           }
         }
       }
 
       .notes-card {
-        background: #e3f2fd;
+        background: var(--color-primary-soft);
 
         h3 {
           display: flex;
@@ -262,7 +263,7 @@ import { WizardStore } from '../patient-wizard.page';
           font-weight: 500;
 
           mat-icon {
-            color: #1976d2;
+            color: var(--color-primary);
           }
         }
 
@@ -300,6 +301,7 @@ import { WizardStore } from '../patient-wizard.page';
 export class Step4ConfirmComponent implements OnInit {
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly toast = inject(ToastService);
+  private readonly authStore = inject(AuthStore);
 
   // Inputs/Outputs
   readonly wizardStore = input.required<WizardStore>();
@@ -314,9 +316,12 @@ export class Step4ConfirmComponent implements OnInit {
   // Computed
   readonly patientName = computed(() => {
     const profile = this.wizardStore().profile();
-    return profile
-      ? `${profile.firstName} ${profile.lastName}`
-      : 'No disponible';
+    if (profile) {
+      return `${profile.firstName} ${profile.lastName}`;
+    }
+
+    const user = this.authStore.user();
+    return user?.name || user?.email || 'Paciente';
   });
 
   readonly professionalName = computed(

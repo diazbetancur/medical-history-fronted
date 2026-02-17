@@ -65,11 +65,13 @@ export class AppointmentsService {
 
   /**
    * Cancel appointment
-   * DELETE /api/appointments/{id}
+   * POST /api/appointments/{id}/cancel
    */
   cancelAppointment(appointmentId: string): Observable<void> {
     return this.http
-      .delete<void>(`${this.baseUrl}/${appointmentId}`)
+      .post<void>(`${this.baseUrl}/${appointmentId}/cancel`, {
+        reason: 'Cancelado por el paciente',
+      })
       .pipe(catchError((error) => this.handleError(error)));
   }
 

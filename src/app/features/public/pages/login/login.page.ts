@@ -6,8 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Router, RouterLink } from '@angular/router';
-import { AuthStore } from '@core/auth';
+import { RouterLink } from '@angular/router';
+import { AuthStore, PostLoginNavigationService } from '@core/auth';
 import { ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
@@ -35,7 +35,7 @@ import { ToastService } from '@shared/services';
 export class LoginPageComponent {
   private readonly authApi = inject(AuthApi);
   private readonly authStore = inject(AuthStore);
-  private readonly router = inject(Router);
+  private readonly postLoginNavigation = inject(PostLoginNavigationService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
 
@@ -74,15 +74,9 @@ export class LoginPageComponent {
         this.authStore.loadMe().subscribe({
           next: (user) => {
             if (user) {
-              this.toast.success(`¡Bienvenido, ${user.name}!`);
-
-              // Redirect based on current context type
-              const context = this.authStore.currentContext();
-              if (context?.type === 'PROFESSIONAL') {
-                this.router.navigate(['/dashboard/professional']);
-              } else {
-                this.router.navigate(['/dashboard']);
-              }
+              const displayName = user.name || user.email || 'usuario';
+              this.toast.success(`¡Bienvenido, ${displayName}!`);
+              this.postLoginNavigation.navigateByContext();
             } else {
               this.errorMessage.set('Error al cargar la sesión');
               this.isLoading.set(false);

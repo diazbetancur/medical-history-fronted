@@ -4,11 +4,10 @@
 // Custom theme using Angular Material theming system.
 // Based on ProDirectory brand colors with WCAG AA compliant contrast.
 //
-// Brand Colors:
-// - Primary: #2563EB (Blue) - Trust, professionalism
-// - Accent:  #FF6B35 (Orange) - Energy, CTAs
-// - Success: #10B981 (Green) - Verification, success states
-// - Warn:    #DC2626 (Red) - Errors, destructive actions
+// Brand Colors (Medical Clean):
+// - Primary:  #2563EB (Clinical blue)
+// - Accent:   #14B8A6 (Teal)
+// - Warn:     #DC2626 (Sober red)
 // ============================================================================
 
 @use "@angular/material" as mat;
@@ -57,27 +56,22 @@ $primary-palette: (
   ),
 );
 
-// Accent Palette - Brand Orange #FF6B35
-// WCAG AA: White text on 500+ passes for large text (3:1)
-// Note: Use only for large text or UI elements, not small text
+// Accent Palette - Teal #14B8A6
 $accent-palette: (
-  50: #fff7ed,
-  100: #ffedd5,
-  200: #fed7aa,
-  300: #fdba74,
-  400: #fb923c,
-  500: #f97316,
-  600: #ff6b35,
-  // Brand Accent - Main color
-  700: #ea580c,
-  // Hover state
-  800: #c2410c,
-  // Active/pressed state
-  900: #9a3412,
-  A100: #fed7aa,
-  A200: #fdba74,
-  A400: #fb923c,
-  A700: #ea580c,
+  50: #f0fdfa,
+  100: #ccfbf1,
+  200: #99f6e4,
+  300: #5eead4,
+  400: #2dd4bf,
+  500: #14b8a6,
+  600: #0d9488,
+  700: #0f766e,
+  800: #115e59,
+  900: #134e4a,
+  A100: #99f6e4,
+  A200: #5eead4,
+  A400: #2dd4bf,
+  A700: #0f766e,
   contrast: (
     50: #1e293b,
     100: #1e293b,
@@ -313,14 +307,14 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
   }
 
   &.mat-accent {
-    --mdc-filled-button-container-color: var(--color-accent, #ff6b35);
+    --mdc-filled-button-container-color: var(--color-accent, #14b8a6);
 
     &:hover:not(:disabled) {
-      --mdc-filled-button-container-color: var(--color-accent-hover, #e55a2b);
+      --mdc-filled-button-container-color: var(--color-accent-hover, #0f766e);
     }
 
     &:active:not(:disabled) {
-      --mdc-filled-button-container-color: var(--color-accent-active, #c2410c);
+      --mdc-filled-button-container-color: var(--color-accent-active, #115e59);
       transform: scale(0.98);
     }
   }
@@ -420,12 +414,12 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
   }
 
   &.warning-snackbar {
-    --mdc-snackbar-container-color: var(--color-warning, #f59e0b);
+    --mdc-snackbar-container-color: var(--color-warning, #d97706);
     --mdc-snackbar-supporting-text-color: rgba(0, 0, 0, 0.87);
   }
 
   &.info-snackbar {
-    --mdc-snackbar-container-color: var(--color-info, #0ea5e9);
+    --mdc-snackbar-container-color: var(--color-info, #2563eb);
     --mdc-snackbar-supporting-text-color: white;
   }
 }
@@ -505,7 +499,7 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
   }
 
   &.icon-accent {
-    color: var(--color-accent, #ff6b35);
+    color: var(--color-accent, #14b8a6);
   }
 
   &.icon-success {
@@ -513,7 +507,7 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
   }
 
   &.icon-warning {
-    color: var(--color-warning, #f59e0b);
+    color: var(--color-warning, #d97706);
   }
 
   &.icon-error {
@@ -601,10 +595,10 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 
   &.mat-accent {
     --mdc-checkbox-selected-checkmark-color: white;
-    --mdc-checkbox-selected-icon-color: var(--color-accent, #ff6b35);
+    --mdc-checkbox-selected-icon-color: var(--color-accent, #14b8a6);
     --mdc-checkbox-selected-hover-icon-color: var(
       --color-accent-hover,
-      #ea580c
+      #0f766e
     );
   }
 }
@@ -644,10 +638,10 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
   }
 
   &.mat-accent {
-    --mdc-fab-container-color: var(--color-accent, #ff6b35);
+    --mdc-fab-container-color: var(--color-accent, #14b8a6);
 
     &:hover {
-      --mdc-fab-container-color: var(--color-accent-hover, #ea580c);
+      --mdc-fab-container-color: var(--color-accent-hover, #0f766e);
     }
   }
 }
@@ -671,7 +665,7 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 }
 
 .mat-badge-accent .mat-badge-content {
-  background: var(--color-accent, #ff6b35);
+  background: var(--color-accent, #14b8a6);
   color: white;
 }
 

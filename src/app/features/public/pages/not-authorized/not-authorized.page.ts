@@ -64,7 +64,7 @@ import { RouterLink } from '@angular/router';
         justify-content: center;
         min-height: 100vh;
         padding: 24px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: var(--color-background-alt);
       }
 
       .not-authorized-content {
@@ -80,7 +80,7 @@ import { RouterLink } from '@angular/router';
         font-size: 80px;
         width: 80px;
         height: 80px;
-        color: #f44336;
+        color: var(--color-error);
         margin: 0 auto 24px;
         display: block;
       }
@@ -88,7 +88,7 @@ import { RouterLink } from '@angular/router';
       .error-code {
         font-size: 72px;
         font-weight: 700;
-        color: #f44336;
+        color: var(--color-error);
         margin: 0 0 16px;
         line-height: 1;
       }
@@ -96,20 +96,20 @@ import { RouterLink } from '@angular/router';
       .error-title {
         font-size: 28px;
         font-weight: 500;
-        color: #333;
+        color: var(--color-text-primary);
         margin: 0 0 16px;
       }
 
       .error-message {
         font-size: 16px;
-        color: #666;
+        color: var(--color-text-secondary);
         margin: 0 0 12px;
         line-height: 1.6;
       }
 
       .error-hint {
         font-size: 14px;
-        color: #999;
+        color: var(--color-text-disabled);
         margin: 0 0 32px;
         line-height: 1.5;
       }

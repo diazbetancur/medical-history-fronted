@@ -151,7 +151,7 @@ import { ContextDto } from '@core/models';
 
         .user-email {
           font-size: 0.85rem;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
           margin-top: 2px;
         }
       }

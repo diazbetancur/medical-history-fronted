@@ -391,7 +391,7 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
 
         p {
           margin-top: 16px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -407,12 +407,12 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
       }
 
       .working-hours {
-        color: #4caf50;
+        color: var(--color-success);
         font-weight: 500;
       }
 
       .no-work {
-        color: rgba(0, 0, 0, 0.4);
+        color: var(--color-text-disabled);
       }
 
       .time-blocks {
@@ -422,7 +422,7 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
           margin: 0 0 16px 0;
           font-size: 14px;
           font-weight: 500;
-          color: rgba(0, 0, 0, 0.7);
+          color: var(--color-text-primary);
         }
 
         .time-block {
@@ -436,7 +436,7 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
           }
 
           .arrow {
-            color: rgba(0, 0, 0, 0.4);
+            color: var(--color-text-disabled);
           }
         }
       }
@@ -464,7 +464,7 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
 
       .absence-form {
         padding: 16px;
-        background: #f5f5f5;
+        background: var(--color-background-alt);
         border-radius: 8px;
         margin-bottom: 24px;
 
@@ -523,7 +523,7 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
             align-items: center;
             gap: 8px;
             margin-bottom: 8px;
-            color: rgba(0, 0, 0, 0.7);
+            color: var(--color-text-primary);
 
             mat-icon {
               font-size: 18px;
@@ -537,14 +537,14 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
       .empty-absences {
         text-align: center;
         padding: 32px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
 
         mat-icon {
           font-size: 48px;
           width: 48px;
           height: 48px;
           margin-bottom: 8px;
-          color: rgba(0, 0, 0, 0.3);
+          color: var(--color-text-disabled);
         }
       }
 

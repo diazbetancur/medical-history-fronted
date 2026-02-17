@@ -72,7 +72,7 @@ import { PwaInstallService } from '@core/pwa';
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--gradient-primary);
         color: white;
         padding: 12px 16px;
         z-index: 1000;

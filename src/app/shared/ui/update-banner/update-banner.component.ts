@@ -48,11 +48,11 @@ import { PwaUpdateService } from '@core/pwa';
         top: 0;
         left: 0;
         right: 0;
-        background: #323232;
+        background: var(--color-text-primary);
         color: white;
         padding: 12px 16px;
         z-index: 1001;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 2px 10px var(--color-text-disabled);
         animation: slideDown 0.3s ease-out;
       }
 
@@ -77,7 +77,7 @@ import { PwaUpdateService } from '@core/pwa';
 
       .update-icon {
         flex-shrink: 0;
-        color: #69f0ae;
+        color: var(--color-success);
       }
 
       .update-text {

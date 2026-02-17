@@ -44,7 +44,10 @@ export class HomeStore {
   readonly loading = computed(() => this._state().loading);
   readonly error = computed(() => this._state().error);
   readonly featuredCategories = computed(
-    () => this._state().data?.featuredCategories ?? []
+    () =>
+      this._state().data?.featuredSpecialties ??
+      this._state().data?.featuredCategories ??
+      []
   );
   readonly featuredProfessionals = computed(
     () => this._state().data?.featuredProfessionals ?? []

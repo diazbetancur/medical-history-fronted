@@ -24,7 +24,7 @@
 
       .subtitle {
         margin: 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
         font-size: 14px;
       }
     }
@@ -57,7 +57,7 @@
           font-size: 32px;
           width: 32px;
           height: 32px;
-          color: var(--warn-color, #f44336);
+          color: var(--color-error);
         }
 
         .stat-content {
@@ -72,7 +72,7 @@
 
           .stat-label {
             font-size: 12px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
         }
       }
@@ -99,7 +99,7 @@
 
     p {
       margin: 0;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--color-text-secondary);
     }
   }
 
@@ -120,11 +120,11 @@
         height: 64px;
 
         &.error-icon {
-          color: var(--warn-color, #f44336);
+          color: var(--color-error);
         }
 
         &.empty-icon {
-          color: rgba(0, 0, 0, 0.3);
+          color: var(--color-text-disabled);
         }
       }
 
@@ -138,7 +138,7 @@
       .empty-subtitle {
         margin: 0;
         font-size: 14px;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
       }
 
       button {
@@ -178,7 +178,7 @@
         padding-bottom: 16px;
 
         .allergy-icon {
-          background-color: var(--warn-color, #f44336);
+          background-color: var(--color-error);
           color: white;
           display: flex;
           align-items: center;
@@ -207,30 +207,30 @@
 
             &.status-chip {
               &.status-active {
-                background-color: #ffebee;
-                color: #c62828;
+                background-color: var(--color-error-light);
+                color: var(--color-error);
               }
 
               &.status-resolved {
-                background-color: #e8f5e9;
-                color: #2e7d32;
+                background-color: var(--color-success-bg);
+                color: var(--color-success-dark);
               }
             }
 
             &.severity-chip {
               &.severity-mild {
-                background-color: #fff9c4;
-                color: #f57f17;
+                background-color: var(--color-warning-light);
+                color: var(--color-warning-dark);
               }
 
               &.severity-moderate {
-                background-color: #ffe0b2;
-                color: #e65100;
+                background-color: var(--color-warning-light);
+                color: var(--color-warning-dark);
               }
 
               &.severity-severe {
-                background-color: #ffcdd2;
-                color: #b71c1c;
+                background-color: var(--color-error-light);
+                color: var(--color-error-dark);
               }
             }
           }
@@ -252,7 +252,7 @@
             font-size: 14px;
 
             mat-icon {
-              color: rgba(0, 0, 0, 0.54);
+              color: var(--color-text-secondary);
               font-size: 20px;
               width: 20px;
               height: 20px;
@@ -261,12 +261,12 @@
 
             .detail-label {
               font-weight: 500;
-              color: rgba(0, 0, 0, 0.87);
+              color: var(--color-text-primary);
               min-width: 140px;
             }
 
             .detail-value {
-              color: rgba(0, 0, 0, 0.6);
+              color: var(--color-text-secondary);
               flex: 1;
             }
 

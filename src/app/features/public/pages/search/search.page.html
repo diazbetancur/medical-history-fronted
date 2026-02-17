@@ -1,133 +1,181 @@
+<app-public-header></app-public-header>
+
 <div class="search-container">
-  <h1>Buscar Profesionales</h1>
+  <section class="search-hero">
+    <h1>Buscar Médicos</h1>
+    <p>Encuentra al especialista ideal para tu consulta</p>
+  </section>
 
-  <div class="search-box">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>¿Qué servicio necesitas?</mat-label>
-      <input
-        matInput
-        [(ngModel)]="searchQuery"
-        placeholder="Ej: Plomero, Electricista, Abogado..."
-        (keyup.enter)="executeSearch()"
-      />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
+  <section class="filters-section">
+    <mat-card class="filters-card">
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="filter-field search-field compact-field">
+          <mat-label>Buscar por nombre o servicio</mat-label>
+          <input
+            matInput
+            [formControl]="searchControl"
+            [matAutocomplete]="nameAuto"
+            placeholder="Escribe mínimo 3 letras"
+            (keyup.enter)="onSearchClick()"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
 
-    <button mat-raised-button color="primary" (click)="executeSearch()">
-      Buscar
-    </button>
-  </div>
+        <mat-autocomplete #nameAuto="matAutocomplete" (optionSelected)="selectSuggestion($event.option.value)">
+          @for (item of suggestions(); track item) {
+            <mat-option [value]="item">{{ item }}</mat-option>
+          }
+        </mat-autocomplete>
 
-  <div class="popular-categories">
-    <h3>Categorías Populares</h3>
-    <mat-chip-set>
-      @for (category of popularCategories(); track category.slug) {
-      <mat-chip (click)="searchByCategory(category)">
-        {{ category.name }}
-      </mat-chip>
-      }
-    </mat-chip-set>
-  </div>
+        <mat-form-field appearance="outline" class="filter-field compact-field">
+          <mat-label>Especialidad</mat-label>
+          <mat-select [formControl]="specialtyControl">
+            <mat-option [value]="null">Todas</mat-option>
+            @for (specialty of specialties(); track specialty.id) {
+              <mat-option [value]="specialty.slug">{{ specialty.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-  <!-- Loading State -->
-  @if (store.loading()) {
-  <div class="loading-container">
-    <mat-spinner diameter="48"></mat-spinner>
-    <p>Buscando profesionales...</p>
-  </div>
+        <mat-form-field appearance="outline" class="filter-field compact-field">
+          <mat-label>Ubicación (Ciudad)</mat-label>
+          <mat-select [formControl]="cityControl">
+            <mat-option [value]="null">Todas</mat-option>
+            @for (city of cities(); track city.id) {
+              <mat-option [value]="city.slug">{{ city.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" class="search-btn" (click)="onSearchClick()">
+          Buscar
+        </button>
+      </div>
+    </mat-card>
+  </section>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="44"></mat-spinner>
+      <p>Cargando resultados...</p>
+    </div>
   }
 
-  <!-- Error State -->
-  @if (store.error(); as error) {
-  <div class="error-container">
-    <mat-icon>error_outline</mat-icon>
-    <h2>Error en la búsqueda</h2>
-    <p>{{ error }}</p>
-    <button mat-raised-button color="primary" (click)="reload()">
-      <mat-icon>refresh</mat-icon>
-      Reintentar
-    </button>
-  </div>
+  @if (error(); as errorMessage) {
+    <div class="error-container">
+      <mat-icon>error_outline</mat-icon>
+      <h2>Error en la búsqueda</h2>
+      <p>{{ errorMessage }}</p>
+      <button mat-stroked-button (click)="reload()">Reintentar</button>
+    </div>
   }
 
-  <!-- Results -->
-  @if (!store.loading() && !store.error()) {
-  <div class="results">
-    <div class="results-header">
-      <h2>Resultados</h2>
-      @if (store.pagination(); as pagination) {
-      <span class="results-count">
-        {{ pagination.totalItems }} profesionales encontrados
-      </span>
-      }
-    </div>
+  @if (!loading() && !error()) {
+    <section class="results-section">
+      <div class="results-header">
+        <h2>Médicos disponibles</h2>
+        @if (pagination(); as pageInfo) {
+          <span>{{ pageInfo.totalItems }} resultados</span>
+        }
+      </div>
 
-    @if (store.isEmpty()) {
-    <div class="empty-state">
-      <mat-icon>search_off</mat-icon>
-      <p>No se encontraron profesionales.</p>
-      <span>Intenta con otra búsqueda o categoría</span>
-    </div>
-    } @else {
-    <div class="results-grid">
-      @for (pro of store.professionals(); track pro.id) {
-      <mat-card class="pro-card">
-        <mat-card-header>
-          <div mat-card-avatar class="pro-avatar">
-            @if (pro.profileImageUrl) {
-            <img [src]="pro.profileImageUrl" [alt]="pro.businessName" />
-            } @else {
-            <mat-icon>person</mat-icon>
-            }
-          </div>
-          <mat-card-title>{{ pro.businessName }}</mat-card-title>
-          <mat-card-subtitle>
-            {{ pro.categoryName }} • {{ pro.cityName }}
-          </mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="pro-details">
-            @if (pro.isVerified) {
-            <mat-chip class="verified-chip">
-              <mat-icon>verified</mat-icon>
-              Verificado
-            </mat-chip>
-            } @if (pro.isFeatured) {
-            <mat-chip class="featured-chip">
-              <mat-icon>star</mat-icon>
-              Destacado
-            </mat-chip>
-            } @if (pro.priceFrom) {
-            <span class="price-from">Desde ${{ pro.priceFrom }}</span>
-            }
-          </div>
-        </mat-card-content>
-        <mat-card-actions>
-          <a mat-button color="primary" [routerLink]="['/pro', pro.slug]">
-            Ver Perfil
-          </a>
-          <button mat-button>
-            <mat-icon>message</mat-icon>
-            Contactar
-          </button>
-        </mat-card-actions>
-      </mat-card>
-      }
-    </div>
+      @if (!hasResults()) {
+        <div class="empty-state">
+          <mat-icon>search_off</mat-icon>
+          <p>No encontramos médicos con esos filtros.</p>
+        </div>
+      } @else {
+        <div class="doctor-list">
+          @for (doctor of professionals(); track doctor.id) {
+            <mat-card class="doctor-card">
+              <div class="doctor-photo">
+                @if (doctor.profileImageUrl) {
+                  <img [src]="doctor.profileImageUrl" [alt]="doctor.businessName" title="Foto del médico" />
+                } @else {
+                  <mat-icon>person</mat-icon>
+                }
+              </div>
 
-    <!-- Pagination -->
-    @if (store.pagination(); as pagination) { @if (pagination.totalItems >
-    pagination.pageSize) {
-    <mat-paginator
-      [length]="pagination.totalItems"
-      [pageSize]="pagination.pageSize"
-      [pageIndex]="pagination.currentPage - 1"
-      [pageSizeOptions]="[10, 25, 50]"
-      (page)="onPageChange($event)"
-      showFirstLastButtons
-    >
-    </mat-paginator>
-    } } }
-  </div>
+              <div class="doctor-info">
+                <h3>{{ doctor.businessName }}</h3>
+                <p class="location">
+                  <mat-icon>place</mat-icon>
+                  {{ doctor.cityName }}
+                </p>
+                <p class="extra-line">
+                  <!-- Experiencia pendiente de backend en SearchProfessional -->
+                  @if (doctor.priceFrom) {
+                    Valor consulta aprox: ${{ doctor.priceFrom }}
+                  } @else {
+                    Valor consulta aprox: por confirmar
+                  }
+                </p>
+              </div>
+
+              <div class="doctor-actions">
+                <button mat-stroked-button color="primary" (click)="goToProfile(doctor.slug)">
+                  Ver perfil
+                </button>
+              </div>
+            </mat-card>
+          }
+        </div>
+
+        @if (pagination(); as pageInfo) {
+          @if (pageInfo.totalItems > pageInfo.pageSize) {
+            <mat-paginator
+              [length]="pageInfo.totalItems"
+              [pageSize]="pageInfo.pageSize"
+              [pageIndex]="pageInfo.currentPage - 1"
+              [pageSizeOptions]="[10, 25, 50]"
+              (page)="onPageChange($event)"
+              showFirstLastButtons
+            ></mat-paginator>
+          }
+        }
+      }
+    </section>
   }
 </div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h3 class="footer-title">MediTigo</h3>
+        <p class="footer-description">
+          Tu directorio médico de confianza. Conectando pacientes con los mejores profesionales de la salud.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Enlaces Rápidos</h4>
+        <ul class="footer-links">
+          <li><a routerLink="/">Inicio</a></li>
+          <li><a routerLink="/search">Buscar Médicos</a></li>
+          <li><a routerLink="/login">Iniciar Sesión</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Soporte</h4>
+        <ul class="footer-links">
+          <li><a href="#">Ayuda</a></li>
+          <li><a href="#">Términos de Servicio</a></li>
+          <li><a href="#">Política de Privacidad</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Contáctanos</h4>
+        <ul class="footer-links">
+          <li><a href="mailto:contacto@meditigo.com">contacto&#64;meditigo.com</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; {{ 2024 }} MediTigo. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>

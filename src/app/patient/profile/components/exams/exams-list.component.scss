@@ -18,7 +18,7 @@
     margin: 0;
     font-size: 24px;
     font-weight: 500;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--color-text-primary);
   }
 
   button {
@@ -38,7 +38,7 @@
 
   p {
     margin: 0;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--color-text-secondary);
   }
 }
 
@@ -61,12 +61,12 @@
 
   h3 {
     margin: 0 0 8px 0;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--color-text-primary);
   }
 
   p {
     margin: 0 0 16px 0;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--color-text-secondary);
   }
 }
 
@@ -81,19 +81,19 @@
     font-size: 64px;
     width: 64px;
     height: 64px;
-    color: rgba(0, 0, 0, 0.26);
+    color: var(--color-text-disabled);
     margin-bottom: 16px;
   }
 
   h3 {
     margin: 0 0 8px 0;
     font-size: 20px;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--color-text-primary);
   }
 
   p {
     margin: 0 0 24px 0;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--color-text-secondary);
   }
 
   button mat-icon {
@@ -141,7 +141,7 @@
     margin: 0;
     font-size: 18px;
     font-weight: 500;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--color-text-primary);
     flex: 1;
     line-height: 1.4;
   }
@@ -163,7 +163,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--color-text-secondary);
     font-size: 14px;
 
     mat-icon {
@@ -177,7 +177,7 @@
 .exam-notes {
   margin: 12px 0;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--color-text-secondary);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -192,15 +192,15 @@
   align-items: center;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  border-top: 1px solid var(--color-border);
 
   .exam-date {
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--color-text-tertiary);
   }
 
   .arrow-icon {
-    color: rgba(0, 0, 0, 0.38);
+    color: var(--color-text-disabled);
     font-size: 24px;
     width: 24px;
     height: 24px;

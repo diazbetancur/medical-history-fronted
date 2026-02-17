@@ -66,10 +66,19 @@
           <span>Ingresar</span>
           }
         </button>
+
+        <div class="forgot-link">
+          <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
       </form>
     </mat-card-content>
 
     <mat-card-actions>
+      <button mat-button type="button" routerLink="/" class="back-home-btn">
+        <mat-icon>arrow_back</mat-icon>
+        Regresar al inicio
+      </button>
+
       <p class="register-link">
         ¿No tienes cuenta?
         <a routerLink="/register">Regístrate aquí</a>

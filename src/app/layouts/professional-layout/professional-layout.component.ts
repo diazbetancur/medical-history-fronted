@@ -60,7 +60,7 @@ import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
 
       .layout-sidenav {
         width: 260px;
-        border-right: 1px solid rgba(0, 0, 0, 0.12);
+        border-right: 1px solid var(--color-border);
       }
 
       .sidenav-header {
@@ -68,7 +68,7 @@ import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
         display: flex;
         align-items: center;
         gap: 12px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        border-bottom: 1px solid var(--color-border);
 
         mat-icon {
           font-size: 32px;

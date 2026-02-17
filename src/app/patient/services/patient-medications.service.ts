@@ -32,10 +32,13 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 })
 export class PatientMedicationsService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiBaseUrl}/patients/me/medications`;
+  private readonly baseUrl = `${environment.apiBaseUrl}/patient/medications`;
 
   // Simple cache
-  private cache = new Map<string, CacheEntry<PatientMedicationsResponseDto>>();
+  private readonly cache = new Map<
+    string,
+    CacheEntry<PatientMedicationsResponseDto>
+  >();
 
   // ==========================================================================
   // Medications List

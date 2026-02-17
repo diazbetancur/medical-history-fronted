@@ -40,6 +40,51 @@ export const routes: Routes = [
       ),
     title: 'Iniciar Sesión - Directory Pro',
   },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/public/pages/register/register.page').then(
+        (m) => m.RegisterPageComponent,
+      ),
+    title: 'Registro - Directory Pro',
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/public/pages/forgot-password/forgot-password.page').then(
+        (m) => m.ForgotPasswordPageComponent,
+      ),
+    title: 'Recuperar Contraseña - Directory Pro',
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/public/pages/reset-password/reset-password.page').then(
+        (m) => m.ResetPasswordPageComponent,
+      ),
+    title: 'Restablecer Contraseña - Directory Pro',
+  },
+  {
+    path: 'search',
+    loadComponent: () =>
+      import('./features/public/pages/search/search.page').then(
+        (m) => m.SearchPageComponent,
+      ),
+    title: 'Buscar Médicos - Directory Pro',
+  },
+  {
+    path: 'pro/:slug',
+    loadComponent: () =>
+      import('./features/public/pages/profile/profile.page').then(
+        (m) => m.ProfilePageComponent,
+      ),
+    title: 'Perfil Profesional - Directory Pro',
+  },
+  {
+    path: 'buscar-medicos',
+    redirectTo: 'search',
+    pathMatch: 'full',
+  },
 
   // ============================================================================
   // ADMIN AREA (/admin/*)
@@ -187,6 +232,14 @@ export const routes: Routes = [
             (m) => m.ProfilePageComponent,
           ),
         title: 'Mi Perfil - Directory Pro',
+      },
+      {
+        path: 'change-password',
+        loadComponent: () =>
+          import('./patient/pages/change-password/patient-change-password.page').then(
+            (m) => m.PatientChangePasswordPage,
+          ),
+        title: 'Cambiar Contraseña - Directory Pro',
       },
       {
         path: 'medications',

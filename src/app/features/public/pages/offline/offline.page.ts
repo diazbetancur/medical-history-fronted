@@ -49,7 +49,7 @@ import { RouterLink } from '@angular/router';
         align-items: center;
         justify-content: center;
         padding: 24px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: var(--color-background-alt);
       }
 
       .offline-content {
@@ -65,19 +65,19 @@ import { RouterLink } from '@angular/router';
         font-size: 80px;
         width: 80px;
         height: 80px;
-        color: #9e9e9e;
+        color: var(--color-text-disabled);
         margin-bottom: 16px;
       }
 
       h1 {
         margin: 0 0 16px;
         font-size: 1.75rem;
-        color: #333;
+        color: var(--color-text-primary);
       }
 
       p {
         margin: 0 0 24px;
-        color: #666;
+        color: var(--color-text-secondary);
         line-height: 1.5;
       }
 
@@ -98,14 +98,14 @@ import { RouterLink } from '@angular/router';
 
       .offline-tips {
         text-align: left;
-        background: #f5f5f5;
+        background: var(--color-background-alt);
         padding: 16px;
         border-radius: 8px;
 
         h3 {
           margin: 0 0 12px;
           font-size: 0.9rem;
-          color: #555;
+          color: var(--color-text-secondary);
         }
 
         ul {
@@ -115,7 +115,7 @@ import { RouterLink } from '@angular/router';
           li {
             margin-bottom: 8px;
             font-size: 0.85rem;
-            color: #666;
+            color: var(--color-text-secondary);
 
             &:last-child {
               margin-bottom: 0;

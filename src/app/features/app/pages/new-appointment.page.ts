@@ -222,7 +222,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
         p {
           margin-top: 16px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -245,7 +245,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
         .subtitle {
           margin: 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
           font-size: 16px;
         }
       }
@@ -254,7 +254,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
         margin-bottom: 24px;
 
         .professional-avatar {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: var(--gradient-primary);
           color: white;
           display: flex;
           align-items: center;
@@ -304,7 +304,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
           align-items: center;
           gap: 16px;
           padding: 24px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
 
         .no-slots {
@@ -316,12 +316,12 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
             width: 64px;
             height: 64px;
             margin-bottom: 16px;
-            color: rgba(0, 0, 0, 0.3);
+            color: var(--color-text-disabled);
           }
 
           p {
             margin: 0 0 24px 0;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
             font-size: 16px;
           }
         }
@@ -355,7 +355,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
           .duration {
             font-size: 12px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
 
           .unavailable-icon {
@@ -365,13 +365,13 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
             font-size: 16px;
             width: 16px;
             height: 16px;
-            color: #f44336;
+            color: var(--color-error);
           }
 
           &.selected {
-            background-color: #3f51b5;
+            background-color: var(--color-primary);
             color: white;
-            border-color: #3f51b5;
+            border-color: var(--color-primary);
 
             .duration {
               color: rgba(255, 255, 255, 0.8);
@@ -385,7 +385,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
           &:not(:disabled):not(.selected):hover {
             background-color: rgba(63, 81, 181, 0.1);
-            border-color: #3f51b5;
+            border-color: var(--color-primary);
           }
         }
 
@@ -394,9 +394,9 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
           align-items: center;
           gap: 8px;
           padding: 12px;
-          background-color: #e8f5e9;
+          background-color: var(--color-success-bg);
           border-radius: 4px;
-          color: #2e7d32;
+          color: var(--color-success-dark);
 
           mat-icon {
             font-size: 20px;

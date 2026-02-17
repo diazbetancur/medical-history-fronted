@@ -20,11 +20,13 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AuthStore } from '@core/auth';
 import { ApiError, ApiErrorCode, getUserMessage } from '@core/http/api-error';
 import { formatDateOnly } from '@core/http/http-utils';
 import { ToastService } from '@core/ui/toast.service';
 import {
   CreatePatientProfileDto,
+  PatientProfileDto,
   UpdatePatientProfileDto,
 } from '../../../models/patient-profile.dto';
 import { PatientService } from '../../../services/patient.service';
@@ -183,7 +185,7 @@ import { WizardStore } from '../patient-wizard.page';
 
       .subtitle {
         margin: 0 0 24px 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
       }
 
       .loading {
@@ -240,6 +242,7 @@ export class Step1ProfileComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly patientService = inject(PatientService);
   private readonly toast = inject(ToastService);
+  private readonly authStore = inject(AuthStore);
 
   // Inputs/Outputs
   readonly wizardStore = input.required<WizardStore>();
@@ -249,6 +252,7 @@ export class Step1ProfileComponent implements OnInit {
   readonly isLoading = signal(false);
   readonly isSaving = signal(false);
   readonly isCreateMode = signal(false);
+  readonly hasAutoAdvanced = signal(false);
 
   // Form
   form!: FormGroup;
@@ -289,6 +293,14 @@ export class Step1ProfileComponent implements OnInit {
         this.wizardStore().setProfile(profile);
         this.isCreateMode.set(false);
         this.isLoading.set(false);
+
+        if (
+          this.isProfileCompleteForWizard(profile) &&
+          !this.hasAutoAdvanced()
+        ) {
+          this.hasAutoAdvanced.set(true);
+          this.completed.emit();
+        }
       },
       error: (error: ApiError) => {
         this.isLoading.set(false);
@@ -298,6 +310,7 @@ export class Step1ProfileComponent implements OnInit {
           error.code === ApiErrorCode.PROFILE_NOT_FOUND ||
           error.status === 404
         ) {
+          this.prefillFromAuthenticatedUser();
           this.isCreateMode.set(true);
           this.toast.info('Completa tu perfil para reservar tu primera cita');
         } else {
@@ -335,8 +348,9 @@ export class Step1ProfileComponent implements OnInit {
 
     request.subscribe({
       next: (profile) => {
+        const safeProfile = this.toSafeProfile(profile, dto);
         this.isSaving.set(false);
-        this.wizardStore().setProfile(profile);
+        this.wizardStore().setProfile(safeProfile);
         this.toast.success(
           this.isCreateMode()
             ? 'Perfil creado correctamente'
@@ -349,5 +363,75 @@ export class Step1ProfileComponent implements OnInit {
         this.toast.error(getUserMessage(error));
       },
     });
+  }
+
+  private prefillFromAuthenticatedUser(): void {
+    const user = this.authStore.user();
+    if (!user) return;
+
+    const nameParts = (user.name || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    const firstName = nameParts[0] ?? '';
+    const lastName = nameParts.slice(1).join(' ');
+    const phone =
+      ((user as { phone?: string; phoneNumber?: string }).phone ??
+        (user as { phone?: string; phoneNumber?: string }).phoneNumber ??
+        '');
+
+    this.form.patchValue({
+      firstName,
+      lastName,
+      phone,
+    });
+  }
+
+  private toSafeProfile(
+    profile: unknown,
+    dto: CreatePatientProfileDto | UpdatePatientProfileDto,
+  ): PatientProfileDto {
+    if (profile && typeof profile === 'object' && 'firstName' in profile) {
+      return profile as PatientProfileDto;
+    }
+
+    const user = this.authStore.user();
+    const firstName = dto.firstName ?? this.form.get('firstName')?.value ?? '';
+    const lastName = dto.lastName ?? this.form.get('lastName')?.value ?? '';
+    const dateOfBirth =
+      dto.dateOfBirth ?? this.form.get('dateOfBirth')?.value ?? '1900-01-01';
+    const phone = dto.phone ?? this.form.get('phone')?.value ?? '';
+    const address = dto.address ?? {
+      street: this.form.get('street')?.value ?? '',
+      city: this.form.get('city')?.value ?? '',
+      country: this.form.get('country')?.value ?? '',
+    };
+
+    return {
+      id: '',
+      userId: user?.id ?? '',
+      firstName,
+      lastName,
+      dateOfBirth,
+      phone,
+      email: user?.email ?? '',
+      address,
+      hasInsurance: dto.hasInsurance ?? false,
+      isProfileComplete: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  private isProfileCompleteForWizard(profile: PatientProfileDto): boolean {
+    return !!(
+      profile.firstName &&
+      profile.lastName &&
+      profile.dateOfBirth &&
+      profile.phone &&
+      profile.address?.street &&
+      profile.address?.city &&
+      profile.address?.country
+    );
   }
 }
