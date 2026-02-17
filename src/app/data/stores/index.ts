@@ -13,6 +13,7 @@ export * from './request-form.store';
 export * from './admin-users.store';
 export * from './institutions.store';
 export * from './roles.store';
+export * from './specialties-admin.store';
 export * from './users.store';
 
 // Patient flow stores

@@ -39,6 +39,7 @@ export { ProfessionalAvailabilityApi } from './professional-availability.api';
 export { ProfessionalApi } from './professional.api';
 export { ProfessionalsPublicApi } from './professionals-public.api';
 export { PublicApi } from './public.api';
+export { SpecialtiesApi } from './specialties.api';
 export type * from './roles.api';
 export { RolesApi } from './roles.api';
 export type * from './users.api';

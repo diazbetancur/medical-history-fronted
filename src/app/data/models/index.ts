@@ -15,3 +15,4 @@ export * from './patient-profile.models';
 export * from './professional-absence.models';
 export * from './professional-schedule.models';
 export * from './public-page.models';
+export * from './specialty.models';

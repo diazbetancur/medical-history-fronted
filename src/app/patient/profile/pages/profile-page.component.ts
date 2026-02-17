@@ -109,11 +109,20 @@ export class ProfilePageComponent implements OnInit {
   }
 
   startEditSummary(): void {
-    const current = this.profile();
-    if (current) {
-      this.patchSummaryForm(current);
-    }
     this.isEditingSummary.set(true);
+
+    this.patientService.getMyProfile().subscribe({
+      next: (profile) => {
+        this.profile.set(profile);
+        this.patchSummaryForm(profile);
+      },
+      error: () => {
+        const current = this.profile();
+        if (current) {
+          this.patchSummaryForm(current);
+        }
+      },
+    });
   }
 
   cancelEditSummary(): void {
@@ -190,10 +199,40 @@ export class ProfilePageComponent implements OnInit {
       firstName: profile.firstName || '',
       lastName: profile.lastName || '',
       phone: profile.phone || '',
-      dateOfBirth: profile.dateOfBirth || '',
+      dateOfBirth: this.normalizeDateOnly(profile.dateOfBirth) || '',
       street: profile.address?.street || '',
       city: profile.address?.city || '',
       country: profile.address?.country || '',
     });
+  }
+
+  private normalizeDateOnly(value: unknown): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString().split('T')[0];
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return null;
+      }
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        return trimmed;
+      }
+
+      const parsed = new Date(trimmed);
+      if (Number.isNaN(parsed.getTime())) {
+        return null;
+      }
+
+      return parsed.toISOString().split('T')[0];
+    }
+
+    return null;
   }
 }

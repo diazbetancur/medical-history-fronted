@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authStoreGuard, contextGuard } from '@core/auth';
+import { authStoreGuard, contextGuard, permissionStoreGuard } from '@core/auth';
 
 /**
  * ============================================================================
@@ -121,6 +121,21 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/admin/pages/roles/roles.routes').then(
             (m) => m.rolesRoutes,
+          ),
+      },
+      {
+        path: 'specialties',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Catalog.ManageCategories',
+            'Profiles.View',
+            'Profiles.Update',
+          ],
+        },
+        loadChildren: () =>
+          import('./features/admin/pages/specialties/specialties.routes').then(
+            (m) => m.specialtiesRoutes,
           ),
       },
     ],

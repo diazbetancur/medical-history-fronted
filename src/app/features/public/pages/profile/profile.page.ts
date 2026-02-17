@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '@core/auth';
+import { AuthService, AuthStore } from '@core/auth';
 import { ProfileStore } from '@data/stores';
 import { AnalyticsService, SeoService } from '@shared/services';
 import { isNotFoundError } from '@shared/utils';
@@ -33,6 +33,7 @@ export class ProfilePageComponent {
   private readonly seoService = inject(SeoService);
   private readonly analytics = inject(AnalyticsService);
   private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
 
   readonly estimatedTariff = computed(() => {
@@ -136,7 +137,13 @@ export class ProfilePageComponent {
     const profile = this.store.profile();
     if (!profile) return;
 
-    if (this.authService.isAuthenticated() && this.authService.isClient()) {
+    const isAuthenticated =
+      this.authStore.isAuthenticated() || this.authService.isAuthenticated();
+    const hasPatientContext =
+      this.authStore.currentContext()?.type === 'PATIENT' ||
+      this.authStore.availableContexts().some((ctx) => ctx.type === 'PATIENT');
+
+    if (isAuthenticated && (hasPatientContext || this.authService.isClient())) {
       this.router.navigate(['/patient/wizard'], {
         queryParams: { professionalSlug: profile.slug },
       });

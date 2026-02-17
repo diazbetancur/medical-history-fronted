@@ -84,7 +84,14 @@ export class AuthService {
   readonly isProfessional = computed(() =>
     isProfessionalUser(this._session().roles),
   );
-  readonly isClient = computed(() => this._session().roles.includes('Client'));
+  readonly isClient = computed(() => {
+    const roles = this._session().roles;
+    return (
+      roles.includes('Client') ||
+      roles.includes('Patient') ||
+      roles.includes('PATIENT')
+    );
+  });
   readonly primaryRole = computed(() => getPrimaryRole(this._session().roles));
 
   // Professional profile info

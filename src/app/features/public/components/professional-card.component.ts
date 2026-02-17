@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { AuthService } from '@core/auth';
+import { AuthService, AuthStore } from '@core/auth';
 import { PublicHomeProfessionalCardDto } from '../../../public/models/public-home.dto';
 
 @Component({
@@ -149,6 +149,7 @@ export class ProfessionalCardComponent {
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
 
   get imageUrl(): string {
     return (
@@ -160,7 +161,10 @@ export class ProfessionalCardComponent {
   }
 
   onBookAppointment(): void {
-    if (!this.authService.isAuthenticated()) {
+    const isAuthenticated =
+      this.authStore.isAuthenticated() || this.authService.isAuthenticated();
+
+    if (!isAuthenticated) {
       this.router.navigate(['/login'], {
         queryParams: {
           returnUrl: `/patient/wizard?professionalSlug=${this.professional.slug}`,
@@ -169,7 +173,11 @@ export class ProfessionalCardComponent {
       return;
     }
 
-    if (this.authService.isClient()) {
+    const hasPatientContext =
+      this.authStore.currentContext()?.type === 'PATIENT' ||
+      this.authStore.availableContexts().some((ctx) => ctx.type === 'PATIENT');
+
+    if (hasPatientContext || this.authService.isClient()) {
       this.router.navigate(['/patient/wizard'], {
         queryParams: { professionalSlug: this.professional.slug },
       });
