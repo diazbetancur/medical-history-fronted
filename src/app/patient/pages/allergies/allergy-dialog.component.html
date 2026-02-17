@@ -35,9 +35,8 @@
 
     <!-- Severity -->
     <mat-form-field appearance="outline">
-      <mat-label>Severidad</mat-label>
-      <mat-select formControlName="severity">
-        <mat-option [value]="null">Sin especificar</mat-option>
+      <mat-label>Severidad *</mat-label>
+      <mat-select formControlName="severity" required>
         @for (option of severityOptions; track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
         }
@@ -59,16 +58,7 @@
     <!-- Onset Date -->
     <mat-form-field appearance="outline">
       <mat-label>Fecha de aparición</mat-label>
-      <input
-        matInput
-        [matDatepicker]="onsetDatePicker"
-        formControlName="onsetDate"
-      />
-      <mat-datepicker-toggle
-        matIconSuffix
-        [for]="onsetDatePicker"
-      ></mat-datepicker-toggle>
-      <mat-datepicker #onsetDatePicker></mat-datepicker>
+      <input matInput type="date" formControlName="onsetDate" />
       <mat-error>{{ getErrorMessage("onsetDate") }}</mat-error>
     </mat-form-field>
 

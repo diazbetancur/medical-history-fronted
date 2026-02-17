@@ -16,7 +16,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MedicationDto, MedicationStatus } from '@data/models';
+import {
+  CreateMedicationDto,
+  MedicationDto,
+  MedicationStatus,
+  UpdateMedicationDto,
+} from '@data/models';
 import { PatientMedicationsService } from '@patient/services/patient-medications.service';
 import { finalize } from 'rxjs';
 import { MedicationDialogComponent } from './medication-dialog.component';
@@ -119,11 +124,26 @@ export class PatientMedicationsPage implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.snackBar.open('Medicamento creado exitosamente', 'OK', {
-          duration: 3000,
-        });
-        this.medicationsService.invalidateAllCaches();
-        this.loadMedications();
+        this.isLoading.set(true);
+        this.medicationsService
+          .create(result as CreateMedicationDto)
+          .pipe(finalize(() => this.isLoading.set(false)))
+          .subscribe({
+            next: () => {
+              this.snackBar.open('Medicamento creado exitosamente', 'OK', {
+                duration: 3000,
+              });
+              this.medicationsService.invalidateAllCaches();
+              this.loadMedications();
+            },
+            error: (error) => {
+              this.snackBar.open(
+                error.message || 'Error al crear medicamento',
+                'Cerrar',
+                { duration: 5000 },
+              );
+            },
+          });
       }
     });
   }
@@ -140,11 +160,26 @@ export class PatientMedicationsPage implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.snackBar.open('Medicamento actualizado exitosamente', 'OK', {
-          duration: 3000,
-        });
-        this.medicationsService.invalidateAllCaches();
-        this.loadMedications();
+        this.isLoading.set(true);
+        this.medicationsService
+          .update(medication.id, result as UpdateMedicationDto)
+          .pipe(finalize(() => this.isLoading.set(false)))
+          .subscribe({
+            next: () => {
+              this.snackBar.open('Medicamento actualizado exitosamente', 'OK', {
+                duration: 3000,
+              });
+              this.medicationsService.invalidateAllCaches();
+              this.loadMedications();
+            },
+            error: (error) => {
+              this.snackBar.open(
+                error.message || 'Error al actualizar medicamento',
+                'Cerrar',
+                { duration: 5000 },
+              );
+            },
+          });
       }
     });
   }
@@ -196,7 +231,7 @@ export class PatientMedicationsPage implements OnInit {
       prescribedBy: medication.prescribedBy,
       startDate: medication.startDate,
       isOngoing: false,
-      endDate: new Date().toISOString(),
+      endDate: new Date().toISOString().split('T')[0],
       notes: medication.notes,
       status: 'Stopped' as MedicationStatus,
     };

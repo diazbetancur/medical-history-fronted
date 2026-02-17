@@ -13,8 +13,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -42,18 +40,16 @@ export interface ExamEditDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatDatepickerModule,
     MatProgressSpinnerModule,
-    MatNativeDateModule,
     MatIconModule,
   ],
   templateUrl: './exam-edit-dialog.component.html',
   styleUrl: './exam-edit-dialog.component.scss',
 })
 export class ExamEditDialogComponent implements OnInit {
-  private dialogRef = inject(MatDialogRef<ExamEditDialogComponent>);
-  private fb = inject(FormBuilder);
-  private examsService = inject(PatientExamsMvpService);
+  private readonly dialogRef = inject(MatDialogRef<ExamEditDialogComponent>);
+  private readonly fb = inject(FormBuilder);
+  private readonly examsService = inject(PatientExamsMvpService);
   public data = inject<ExamEditDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
@@ -68,7 +64,7 @@ export class ExamEditDialogComponent implements OnInit {
 
     this.form = this.fb.group({
       title: [exam.title, [Validators.required, Validators.maxLength(200)]],
-      examDate: [new Date(exam.examDate), [Validators.required]],
+      examDate: [this.normalizeDateOnly(exam.examDate), [Validators.required]],
       notes: [exam.notes || '', [Validators.maxLength(1000)]],
     });
   }
@@ -88,7 +84,7 @@ export class ExamEditDialogComponent implements OnInit {
     const formValue = this.form.value;
     const dto: UpdateExamDto = {
       title: formValue.title,
-      examDate: formValue.examDate.toISOString(),
+      examDate: this.normalizeDateOnly(formValue.examDate)!,
       notes: formValue.notes || undefined,
     };
 
@@ -119,5 +115,16 @@ export class ExamEditDialogComponent implements OnInit {
     }
 
     return '';
+  }
+
+  private normalizeDateOnly(value: unknown): string | null {
+    if (!value) return null;
+    if (typeof value === 'string') {
+      return value.length >= 10 ? value.slice(0, 10) : null;
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split('T')[0];
+    }
+    return null;
   }
 }

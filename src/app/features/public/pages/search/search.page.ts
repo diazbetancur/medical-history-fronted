@@ -1,4 +1,11 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -111,7 +118,8 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private loadMetadata(): void {
     this.publicApi.getMetadata().subscribe({
       next: (metadata) => this.metadata.set(metadata),
-      error: () => this.metadata.set({ countries: [], cities: [], categories: [] }),
+      error: () =>
+        this.metadata.set({ countries: [], cities: [], categories: [] }),
     });
   }
 
@@ -170,7 +178,9 @@ export class SearchPageComponent implements OnInit, OnDestroy {
           }
         }),
         catchError((error) => {
-          this.error.set(error?.error?.title || 'No se pudo cargar la búsqueda');
+          this.error.set(
+            error?.error?.title || 'No se pudo cargar la búsqueda',
+          );
           this.professionals.set([]);
           this.pagination.set(null);
           return of(null);

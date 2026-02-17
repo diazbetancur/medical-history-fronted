@@ -45,9 +45,9 @@ import {
   styleUrl: './patient-allergies.page.scss',
 })
 export class PatientAllergiesPage implements OnInit {
-  private allergiesService = inject(PatientAllergiesService);
-  private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
+  private readonly allergiesService = inject(PatientAllergiesService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   // State signals
   isLoading = signal(false);

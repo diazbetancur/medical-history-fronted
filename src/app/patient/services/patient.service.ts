@@ -6,7 +6,6 @@
 
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { AuthStore } from '@core/auth';
 import { ApiError, createApiError } from '@core/http/api-error';
 import { environment } from '@env';
 import { catchError, Observable, throwError } from 'rxjs';
@@ -21,16 +20,7 @@ import {
 })
 export class PatientService {
   private readonly http = inject(HttpClient);
-  private readonly authStore = inject(AuthStore);
   private readonly baseUrl = `${environment.apiBaseUrl}/patients`;
-
-  private getIdentityPayload(): { email?: string; fullName?: string } {
-    const user = this.authStore.user();
-    return {
-      email: user?.email,
-      fullName: user?.name,
-    };
-  }
 
   /**
    * Get current patient profile
@@ -39,14 +29,8 @@ export class PatientService {
    * Returns 404 if profile does not exist (new patient)
    */
   getMyProfile(): Observable<PatientProfileDto> {
-    const identity = this.getIdentityPayload();
     return this.http
-      .get<PatientProfileDto>(`${this.baseUrl}/me`, {
-        params: {
-          ...(identity.email ? { email: identity.email } : {}),
-          ...(identity.fullName ? { fullName: identity.fullName } : {}),
-        },
-      })
+      .get<PatientProfileDto>(`${this.baseUrl}/me`)
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -55,15 +39,8 @@ export class PatientService {
    * POST /api/patients/me
    */
   createProfile(dto: CreatePatientProfileDto): Observable<PatientProfileDto> {
-    const identity = this.getIdentityPayload();
-    const payload = {
-      ...dto,
-      ...(identity.email ? { email: identity.email } : {}),
-      ...(identity.fullName ? { fullName: identity.fullName } : {}),
-    };
-
     return this.http
-      .post<PatientProfileDto>(`${this.baseUrl}/me`, payload)
+      .post<PatientProfileDto>(`${this.baseUrl}/me`, dto)
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -72,15 +49,8 @@ export class PatientService {
    * PUT /api/patients/me
    */
   updateProfile(dto: UpdatePatientProfileDto): Observable<PatientProfileDto> {
-    const identity = this.getIdentityPayload();
-    const payload = {
-      ...dto,
-      ...(identity.email ? { email: identity.email } : {}),
-      ...(identity.fullName ? { fullName: identity.fullName } : {}),
-    };
-
     return this.http
-      .put<PatientProfileDto>(`${this.baseUrl}/me`, payload)
+      .put<PatientProfileDto>(`${this.baseUrl}/me`, dto)
       .pipe(catchError((error) => this.handleError(error)));
   }
 

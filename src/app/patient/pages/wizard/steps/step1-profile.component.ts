@@ -15,8 +15,6 @@ import {
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -41,8 +39,6 @@ import { WizardStore } from '../patient-wizard.page';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
     MatProgressSpinnerModule,
     MatCardModule,
   ],
@@ -89,16 +85,7 @@ import { WizardStore } from '../patient-wizard.page';
           <div class="form-row">
             <mat-form-field appearance="outline">
               <mat-label>Fecha de Nacimiento</mat-label>
-              <input
-                matInput
-                [matDatepicker]="picker"
-                formControlName="dateOfBirth"
-              />
-              <mat-datepicker-toggle
-                matIconSuffix
-                [for]="picker"
-              ></mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
+              <input matInput type="date" formControlName="dateOfBirth" />
               @if (form.get('dateOfBirth')?.hasError('required')) {
                 <mat-error>La fecha de nacimiento es requerida</mat-error>
               }
@@ -369,16 +356,13 @@ export class Step1ProfileComponent implements OnInit {
     const user = this.authStore.user();
     if (!user) return;
 
-    const nameParts = (user.name || '')
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
+    const nameParts = (user.name || '').trim().split(/\s+/).filter(Boolean);
     const firstName = nameParts[0] ?? '';
     const lastName = nameParts.slice(1).join(' ');
     const phone =
-      ((user as { phone?: string; phoneNumber?: string }).phone ??
-        (user as { phone?: string; phoneNumber?: string }).phoneNumber ??
-        '');
+      (user as { phone?: string; phoneNumber?: string }).phone ??
+      (user as { phone?: string; phoneNumber?: string }).phoneNumber ??
+      '';
 
     this.form.patchValue({
       firstName,

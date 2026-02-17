@@ -1,12 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiClient } from '@data/api';
-import { ExamDto, ExamDownloadUrlDto, PatientExamsResponseDto } from '@data/models';
-import { Observable } from 'rxjs';
+import {
+  ExamDownloadUrlDto,
+  ExamDto,
+  PatientExamsResponseDto,
+} from '@data/models';
+import { Observable, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type {
   CreateExamRequest,
   PaginatedExamsResponse,
-  PatientExamDto,
   PatientExamDto,
   UpdateExamRequest,
   UploadAttachmentsResponse,
@@ -116,16 +119,15 @@ export class PatientExamsService {
    * Current endpoint model stores a single file on create.
    */
   uploadAttachments(
-    examId: string,
+    _examId: string,
     files: File[],
   ): Observable<UploadAttachmentsResponse> {
-    void examId;
-    void files;
-    return this.api.post<UploadAttachmentsResponse>('/errors/not-supported', {
+    return of({
       uploaded: [],
       failed: files.map((file) => ({
         fileName: file.name,
-        reason: 'El endpoint actual no permite adjuntar archivos a un examen existente',
+        reason:
+          'El endpoint actual no permite adjuntar archivos a un examen existente',
       })),
     });
   }
@@ -147,17 +149,19 @@ export class PatientExamsService {
    *
    * Legacy method retained for compatibility.
    */
-  deleteAttachment(examId: string, attachmentId: string): Observable<void> {
-    void examId;
-    void attachmentId;
-    return this.api.delete<void>('/errors/not-supported');
+  deleteAttachment(_examId: string, _attachmentId: string): Observable<void> {
+    return throwError(
+      () =>
+        new Error(
+          'El endpoint actual no permite eliminar adjuntos individuales',
+        ),
+    );
   }
 
   /**
    * Keep method for compatibility with existing callers.
    */
-  getAttachmentPreviewUrl(examId: string, attachmentId: string): string {
-    void attachmentId;
+  getAttachmentPreviewUrl(examId: string, _attachmentId: string): string {
     return this.api.buildUrl(`${this.basePath}/${examId}/download-url`);
   }
 

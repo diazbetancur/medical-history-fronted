@@ -55,12 +55,99 @@
     padding: 0; // El componente ExamsList maneja su propio padding
   }
 
+  app-patient-medications,
+  app-patient-allergies,
+  app-patient-background {
+    display: block;
+  }
+
   .placeholder-text {
     text-align: center;
     padding: 64px 24px;
     font-size: 18px;
     color: var(--color-text-tertiary);
     margin: 0;
+  }
+}
+
+.summary-loading,
+.summary-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 16px;
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+}
+
+.summary-error {
+  mat-icon {
+    color: var(--color-error);
+  }
+}
+
+.summary-card {
+  border: 1px solid var(--color-border);
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    background: var(--color-background-alt);
+    border-radius: 8px;
+
+    &.full {
+      grid-column: 1 / -1;
+    }
+
+    .label {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .value {
+      font-size: 14px;
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+  }
+
+  .summary-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .summary-form {
+    .form-grid {
+      align-items: start;
+
+      mat-form-field {
+        width: 100%;
+      }
+
+      .full-field {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .edit-actions {
+      gap: 10px;
+    }
   }
 }
 
@@ -88,5 +175,22 @@
         padding: 0 12px;
       }
     }
+  }
+
+  .summary-card .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card .summary-actions {
+    justify-content: stretch;
+
+    a,
+    button {
+      width: 100%;
+    }
+  }
+
+  .summary-card .summary-form .edit-actions {
+    flex-direction: column-reverse;
   }
 }

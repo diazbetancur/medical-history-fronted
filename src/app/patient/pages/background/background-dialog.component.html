@@ -47,15 +47,10 @@
       <mat-label>Fecha del evento</mat-label>
       <input
         matInput
-        [matDatepicker]="eventDatePicker"
+        type="date"
         formControlName="eventDate"
         placeholder="Opcional"
       />
-      <mat-datepicker-toggle
-        matIconSuffix
-        [for]="eventDatePicker"
-      ></mat-datepicker-toggle>
-      <mat-datepicker #eventDatePicker></mat-datepicker>
       <mat-hint>Fecha aproximada en que ocurrió</mat-hint>
       <mat-error>{{ getErrorMessage("eventDate") }}</mat-error>
     </mat-form-field>

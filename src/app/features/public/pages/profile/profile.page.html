@@ -37,7 +37,11 @@
         <div class="profile-info">
           <div class="avatar">
             @if (profile.profileImageUrl) {
-            <img [src]="profile.profileImageUrl" [alt]="profile.businessName" title="Foto del profesional" />
+            <img
+              [src]="profile.profileImageUrl"
+              [alt]="profile.businessName"
+              title="Foto del profesional"
+            />
             } @else {
             <mat-icon>person</mat-icon>
             }
@@ -48,9 +52,7 @@
             <p class="location-line">{{ profile.cityName }}</p>
             <div class="badges">
               @for (specialty of profileSpecialties(); track specialty) {
-              <mat-chip>
-                {{ specialty }}
-              </mat-chip>
+              <mat-chip> {{ specialty }} </mat-chip>
               }
             </div>
           </div>
@@ -119,12 +121,17 @@
       <mat-card class="booking-card">
         <h3>Tarifa de consulta</h3>
         @if (estimatedTariff(); as fee) {
-          <p class="fee">Desde ${{ fee }}</p>
+        <p class="fee">Desde ${{ fee }}</p>
         } @else {
-          <p class="fee pending">Por confirmar</p>
+        <p class="fee pending">Por confirmar</p>
         }
 
-        <button mat-flat-button color="primary" class="book-btn" (click)="bookAppointment()">
+        <button
+          mat-flat-button
+          color="primary"
+          class="book-btn"
+          (click)="bookAppointment()"
+        >
           Agendar cita
         </button>
       </mat-card>

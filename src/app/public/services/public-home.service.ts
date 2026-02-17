@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HomePageResponse, MetadataResponse, PublicApi } from '@data/api';
-import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, tap } from 'rxjs';
 import {
   PublicHomeDataDto,
   PublicHomeProfessionalCardDto,
@@ -31,12 +31,16 @@ export class PublicHomeService {
     }
 
     return forkJoin({
-      home: this.publicApi.getHomePage(featuredLimit, popularCitiesLimit).pipe(
-        catchError(() => of(null)),
-      ),
-      metadata: this.publicApi.getMetadata().pipe(
-        catchError(() => of({ countries: [], cities: [] } as MetadataResponse)),
-      ),
+      home: this.publicApi
+        .getHomePage(featuredLimit, popularCitiesLimit)
+        .pipe(catchError(() => of(null))),
+      metadata: this.publicApi
+        .getMetadata()
+        .pipe(
+          catchError(() =>
+            of({ countries: [], cities: [] } as MetadataResponse),
+          ),
+        ),
     }).pipe(
       map(({ home, metadata }) => this.buildHomeData(home, metadata)),
       tap((data) => {
@@ -82,9 +86,12 @@ export class PublicHomeService {
     };
   }
 
-  private mapSpecialties(
-    specialties: PublicHomeSpecialtyDto[],
-  ): Array<{ id: string; name: string; icon?: string; professionalCount?: number }> {
+  private mapSpecialties(specialties: PublicHomeSpecialtyDto[]): Array<{
+    id: string;
+    name: string;
+    icon?: string;
+    professionalCount?: number;
+  }> {
     return specialties.map((specialty) => ({
       id: specialty.id,
       name: specialty.name,
@@ -101,7 +108,9 @@ export class PublicHomeService {
       const [firstName = fullName, ...restNames] = fullName.split(' ');
       const primarySpecialty =
         professional.specialties.find((specialty) => specialty.isPrimary)
-          ?.name ?? professional.specialties[0]?.name ?? 'Especialista';
+          ?.name ??
+        professional.specialties[0]?.name ??
+        'Especialista';
 
       return {
         id: professional.id,

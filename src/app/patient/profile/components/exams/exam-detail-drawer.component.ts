@@ -1,11 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  inject,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import {
@@ -19,11 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ToastService } from '@shared/services';
-import {
-  ALLOWED_FILE_EXTENSIONS,
-  EXAM_CATEGORY_LABELS,
-  MAX_FILE_SIZE,
-} from '../../../models/patient-exam.dto';
+import { firstValueFrom } from 'rxjs';
+import { EXAM_CATEGORY_LABELS } from '../../../models/patient-exam.dto';
 import { PatientExamsService } from '../../../services/patient-exams.service';
 import { PatientExamsStore } from '../../../stores/patient-exams.store';
 
@@ -88,10 +79,7 @@ export class ExamDetailDrawerComponent implements OnInit {
   private readonly examsService = inject(PatientExamsService);
   private readonly toastService = inject(ToastService);
 
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
-
   readonly categoryLabels = EXAM_CATEGORY_LABELS;
-  readonly uploading = false;
 
   ngOnInit(): void {
     // Load exam details
@@ -106,84 +94,14 @@ export class ExamDetailDrawerComponent implements OnInit {
   }
 
   /**
-   * Open file picker
-   */
-  openFilePicker(): void {
-    this.fileInput.nativeElement.click();
-  }
-
-  /**
-   * Handle file selection
-   */
-  async onFilesSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-
-    const files = Array.from(input.files);
-
-    // Validate files
-    const validFiles: File[] = [];
-    const errors: string[] = [];
-
-    for (const file of files) {
-      const ext = `.${file.name.split('.').pop()?.toLowerCase()}`;
-      const isValidType = ALLOWED_FILE_EXTENSIONS.includes(ext);
-      const isValidSize = file.size <= MAX_FILE_SIZE;
-
-      if (!isValidType) {
-        errors.push(`${file.name}: Tipo no permitido`);
-      } else if (!isValidSize) {
-        const sizeMB = (MAX_FILE_SIZE / 1024 / 1024).toFixed(0);
-        errors.push(`${file.name}: Supera ${sizeMB}MB`);
-      } else {
-        validFiles.push(file);
-      }
-    }
-
-    // Show errors
-    if (errors.length > 0) {
-      errors.forEach((err) => this.toastService.warning(err));
-    }
-
-    // Upload valid files
-    if (validFiles.length > 0) {
-      await this.store.uploadAttachments(this.data.examId, validFiles);
-    }
-
-    // Reset input
-    input.value = '';
-  }
-
-  /**
    * Download attachment
    */
-  downloadAttachment(attachmentId: string): void {
-    const url = this.examsService.downloadAttachment(
-      this.data.examId,
-      attachmentId,
-    );
-    window.open(url, '_blank');
-  }
-
-  /**
-   * Delete attachment with confirmation
-   */
-  async deleteAttachment(
-    attachmentId: string,
-    fileName: string,
-  ): Promise<void> {
-    const confirmRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Eliminar Archivo',
-        message: `¿Estás seguro de eliminar "${fileName}"?`,
-      },
+  downloadAttachment(): void {
+    this.examsService.getDownloadUrl(this.data.examId).subscribe({
+      next: (url) => window.open(url, '_blank'),
+      error: () =>
+        this.toastService.error('No se pudo generar el enlace de descarga'),
     });
-
-    const confirmed = await confirmRef.afterClosed().toPromise();
-    if (confirmed) {
-      await this.store.deleteAttachment(this.data.examId, attachmentId);
-    }
   }
 
   /**
@@ -201,7 +119,7 @@ export class ExamDetailDrawerComponent implements OnInit {
       },
     });
 
-    const confirmed = await confirmRef.afterClosed().toPromise();
+    const confirmed = await firstValueFrom(confirmRef.afterClosed());
     if (confirmed) {
       const deleted = await this.store.deleteExam(this.data.examId);
       if (deleted) {

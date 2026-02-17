@@ -70,7 +70,9 @@ export class PatientChangePasswordPage {
       })
       .subscribe({
         next: (result) => {
-          this.toast.success(result.message || 'Contraseña actualizada correctamente');
+          this.toast.success(
+            result.message || 'Contraseña actualizada correctamente',
+          );
           this.router.navigate(['/patient/profile']);
         },
         error: (error) => {

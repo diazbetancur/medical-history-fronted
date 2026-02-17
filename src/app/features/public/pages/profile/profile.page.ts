@@ -1,10 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, computed, effect, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -62,7 +56,9 @@ export class ProfilePageComponent {
       .map((service) => service.name?.trim())
       .filter((name): name is string => !!name);
 
-    const unique = [...new Set([...(category ? [category] : []), ...serviceNames])];
+    const unique = [
+      ...new Set([...(category ? [category] : []), ...serviceNames]),
+    ];
     return unique.slice(0, 6);
   });
 
@@ -148,7 +144,9 @@ export class ProfilePageComponent {
     }
 
     this.router.navigate(['/login'], {
-      queryParams: { returnUrl: `/patient/wizard?professionalSlug=${profile.slug}` },
+      queryParams: {
+        returnUrl: `/patient/wizard?professionalSlug=${profile.slug}`,
+      },
     });
   }
 }

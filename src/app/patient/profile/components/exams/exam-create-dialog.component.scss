@@ -13,6 +13,31 @@
     min-height: 80px;
   }
 
+  .file-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      font-size: 14px;
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    input[type="file"] {
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--color-surface);
+    }
+
+    .selected-file {
+      margin: 0;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+  }
+
   .help-text {
     margin: 0;
     font-size: 14px;

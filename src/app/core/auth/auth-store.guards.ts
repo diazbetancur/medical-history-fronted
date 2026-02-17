@@ -288,7 +288,9 @@ export function isContextAllowed(
     return true;
   }
 
-  const roles = new Set(authStore.userRoles().map((role) => role.toUpperCase()));
+  const roles = new Set(
+    authStore.userRoles().map((role) => role.toUpperCase()),
+  );
   const roleFallbackByContext: Record<ContextType, string[]> = {
     ADMIN: ['ADMIN', 'SUPERADMIN'],
     PROFESSIONAL: ['PROFESSIONAL'],

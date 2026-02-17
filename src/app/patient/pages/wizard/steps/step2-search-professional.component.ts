@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   DestroyRef,
-  Input,
   inject,
+  Input,
   input,
   OnInit,
   output,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -22,10 +23,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { ToastService } from '@shared/services/toast.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { AppointmentDto } from '../../../models/appointment.dto';
-import { AppointmentsService } from '../../../services/appointments.service';
 import {
   getInitials,
   ProfessionalSearchFiltersDto,
@@ -34,6 +32,8 @@ import {
 import { SpecialtyDto } from '../../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
+import { AppointmentDto } from '../../../models/appointment.dto';
+import { AppointmentsService } from '../../../services/appointments.service';
 import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
 
 @Component({
@@ -56,7 +56,8 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
     <div class="step-container">
       <h2>Buscar Profesional</h2>
       <p class="subtitle">
-        Busca por nombre o especialidad. Al seleccionar un profesional, pasarás al calendario.
+        Busca por nombre o especialidad. Al seleccionar un profesional, pasarás
+        al calendario.
       </p>
 
       @if (recentProfessionals().length > 0) {
@@ -64,8 +65,15 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
           <mat-card-content>
             <h3>Médicos con citas anteriores</h3>
             <div class="recent-list">
-              @for (prof of recentProfessionals(); track prof.professionalProfileId) {
-                <button mat-stroked-button type="button" (click)="selectProfessional(prof, true)">
+              @for (
+                prof of recentProfessionals();
+                track prof.professionalProfileId
+              ) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="selectProfessional(prof, true)"
+                >
                   <span class="name">{{ prof.fullName }}</span>
                   <span class="specialty">{{ getPrimarySpecialty(prof) }}</span>
                 </button>
@@ -140,13 +148,17 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
           </mat-card>
         } @else {
           <div class="results-section">
-            <p class="results-count">{{ totalResults() }} profesionales encontrados</p>
+            <p class="results-count">
+              {{ totalResults() }} profesionales encontrados
+            </p>
 
             <div class="professionals-list">
               @for (prof of professionals(); track prof.professionalProfileId) {
                 <mat-card
                   class="professional-card"
-                  [class.selected]="selectedProfessionalId() === prof.professionalProfileId"
+                  [class.selected]="
+                    selectedProfessionalId() === prof.professionalProfileId
+                  "
                   (click)="selectProfessional(prof)"
                 >
                   <mat-card-content>
@@ -155,7 +167,9 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
                         @if (prof.photoUrl) {
                           <img [src]="prof.photoUrl" [alt]="prof.fullName" />
                         } @else {
-                          <span class="initials">{{ getInitials(prof.fullName) }}</span>
+                          <span class="initials">{{
+                            getInitials(prof.fullName)
+                          }}</span>
                         }
                       </div>
 
@@ -166,14 +180,18 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
                         }
 
                         <div class="specialties">
-                          @for (specialty of prof.specialties; track specialty.id) {
+                          @for (
+                            specialty of prof.specialties;
+                            track specialty.id
+                          ) {
                             <mat-chip>{{ specialty.name }}</mat-chip>
                           }
                         </div>
-
                       </div>
 
-                      @if (selectedProfessionalId() === prof.professionalProfileId) {
+                      @if (
+                        selectedProfessionalId() === prof.professionalProfileId
+                      ) {
                         <div class="selection-indicator">
                           <mat-icon>check_circle</mat-icon>
                         </div>
@@ -414,7 +432,6 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
               height: 28px;
             }
           }
-
         }
 
         .selection-indicator {
@@ -529,23 +546,30 @@ export class Step2SearchProfessionalComponent implements OnInit {
   }
 
   private loadRecentProfessionals(): void {
-    this.appointmentsService.getMyAppointments({ page: 1, pageSize: 30 }).subscribe({
-      next: (response) => {
-        const uniqueByProfessional = new Map<string, ProfessionalSearchResultDto>();
+    this.appointmentsService
+      .getMyAppointments({ page: 1, pageSize: 30 })
+      .subscribe({
+        next: (response) => {
+          const uniqueByProfessional = new Map<
+            string,
+            ProfessionalSearchResultDto
+          >();
 
-        response.appointments.forEach((appointment) => {
-          const mapped = this.mapAppointmentToProfessional(appointment);
-          if (!uniqueByProfessional.has(mapped.professionalProfileId)) {
-            uniqueByProfessional.set(mapped.professionalProfileId, mapped);
-          }
-        });
+          response.appointments.forEach((appointment) => {
+            const mapped = this.mapAppointmentToProfessional(appointment);
+            if (!uniqueByProfessional.has(mapped.professionalProfileId)) {
+              uniqueByProfessional.set(mapped.professionalProfileId, mapped);
+            }
+          });
 
-        this.recentProfessionals.set([...uniqueByProfessional.values()].slice(0, 8));
-      },
-      error: () => {
-        this.recentProfessionals.set([]);
-      },
-    });
+          this.recentProfessionals.set(
+            [...uniqueByProfessional.values()].slice(0, 8),
+          );
+        },
+        error: () => {
+          this.recentProfessionals.set([]);
+        },
+      });
   }
 
   private setupRoutePrefill(): void {
@@ -559,7 +583,11 @@ export class Step2SearchProfessionalComponent implements OnInit {
 
   private setupSearchDebounce(): void {
     this.searchControl.valueChanges
-      .pipe(debounceTime(400), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe(() => {
         this.onSearch();
       });
@@ -593,7 +621,9 @@ export class Step2SearchProfessionalComponent implements OnInit {
 
         const pendingSlug = this.preselectedSlug();
         if (pendingSlug && !this.autoSelectedBySlug()) {
-          const matched = response.professionals.find((item) => item.slug === pendingSlug);
+          const matched = response.professionals.find(
+            (item) => item.slug === pendingSlug,
+          );
           if (matched) {
             this.autoSelectedBySlug.set(true);
             this.selectProfessional(matched, true);
@@ -614,7 +644,10 @@ export class Step2SearchProfessionalComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  selectProfessional(prof: ProfessionalSearchResultDto, autoAdvance = true): void {
+  selectProfessional(
+    prof: ProfessionalSearchResultDto,
+    autoAdvance = true,
+  ): void {
     this.selectedProfessional.set(prof);
     this.selectedProfessionalId.set(prof.professionalProfileId);
 

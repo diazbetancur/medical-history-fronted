@@ -34,7 +34,11 @@ import { AuthService, AuthStore } from '@core/auth';
 
         <div class="header-actions">
           @if (!isAuthenticated()) {
-            <button mat-stroked-button class="desktop-only" (click)="navigateToProfessional()">
+            <button
+              mat-stroked-button
+              class="desktop-only"
+              (click)="navigateToProfessional()"
+            >
               Soy Médico
             </button>
             <button mat-flat-button color="primary" (click)="navigateToLogin()">
@@ -45,7 +49,11 @@ import { AuthService, AuthStore } from '@core/auth';
               Cerrar Sesión
             </button>
           }
-          <button mat-icon-button class="mobile-only" [matMenuTriggerFor]="mobileMenu">
+          <button
+            mat-icon-button
+            class="mobile-only"
+            [matMenuTriggerFor]="mobileMenu"
+          >
             <mat-icon>menu</mat-icon>
           </button>
         </div>
@@ -88,93 +96,95 @@ import { AuthService, AuthStore } from '@core/auth';
       }
     </mat-menu>
   `,
-  styles: [`
-    .public-header {
-      background: var(--color-surface);
-      box-shadow: var(--shadow-1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      padding: 0;
-    }
-
-    .header-container {
-      width: 100%;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 58px;
-    }
-
-    .logo {
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .logo-text {
-      font-size: 20px;
-      font-weight: 600;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 24px;
-      flex: 1;
-      justify-content: center;
-    }
-
-    .nav-link {
-      color: var(--color-text-primary);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 8px 0;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-
-      &:hover {
-        color: var(--color-primary);
-        border-bottom-color: var(--color-primary);
-      }
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .desktop-only {
-      display: flex;
-    }
-
-    .mobile-only {
-      display: none;
-    }
-
-    @media (max-width: 768px) {
-      .desktop-only {
-        display: none;
-      }
-
-      .mobile-only {
-        display: flex;
+  styles: [
+    `
+      .public-header {
+        background: var(--color-surface);
+        box-shadow: var(--shadow-1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        padding: 0;
       }
 
       .header-container {
-        padding: 0 16px;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 58px;
       }
-    }
-  `],
+
+      .logo {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .logo-text {
+        font-size: 20px;
+        font-weight: 600;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 24px;
+        flex: 1;
+        justify-content: center;
+      }
+
+      .nav-link {
+        color: var(--color-text-primary);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 0;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+
+        &:hover {
+          color: var(--color-primary);
+          border-bottom-color: var(--color-primary);
+        }
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .desktop-only {
+        display: flex;
+      }
+
+      .mobile-only {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .desktop-only {
+          display: none;
+        }
+
+        .mobile-only {
+          display: flex;
+        }
+
+        .header-container {
+          padding: 0 16px;
+        }
+      }
+    `,
+  ],
 })
 export class PublicHeaderComponent {
   private readonly router = inject(Router);
@@ -196,7 +206,9 @@ export class PublicHeaderComponent {
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/professional']);
     } else {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/professional' } });
+      this.router.navigate(['/login'], {
+        queryParams: { returnUrl: '/professional' },
+      });
     }
   }
 

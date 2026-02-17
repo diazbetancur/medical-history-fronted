@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, catchError, of, tap } from 'rxjs';
 import { HomePageResponse, PublicApi } from '@data/api';
+import { Observable, catchError, of, tap } from 'rxjs';
 
 /**
  * Store state interface
@@ -31,9 +31,8 @@ export class HomeStore {
   private readonly publicApi = inject(PublicApi);
 
   // Private state signal
-  private readonly _state = signal<StoreState<HomePageResponse>>(
-    createInitialState()
-  );
+  private readonly _state =
+    signal<StoreState<HomePageResponse>>(createInitialState());
 
   // Cache TTL in milliseconds (5 minutes)
   private readonly CACHE_TTL = 5 * 60 * 1000;
@@ -47,13 +46,13 @@ export class HomeStore {
     () =>
       this._state().data?.featuredSpecialties ??
       this._state().data?.featuredCategories ??
-      []
+      [],
   );
   readonly featuredProfessionals = computed(
-    () => this._state().data?.featuredProfessionals ?? []
+    () => this._state().data?.featuredProfessionals ?? [],
   );
   readonly popularCities = computed(
-    () => this._state().data?.popularCities ?? []
+    () => this._state().data?.popularCities ?? [],
   );
   readonly totals = computed(() => this._state().data?.totals ?? null);
   readonly seo = computed(() => this._state().data?.seo ?? null);
@@ -106,7 +105,7 @@ export class HomeStore {
           error: errorMessage,
         }));
         throw err;
-      })
+      }),
     );
   }
 

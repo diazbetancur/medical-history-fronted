@@ -32,8 +32,14 @@ export class ResetPasswordPageComponent {
   private readonly fb = inject(FormBuilder);
 
   readonly form = this.fb.nonNullable.group({
-    email: [this.route.snapshot.queryParamMap.get('email') || '', [Validators.required, Validators.email]],
-    token: [this.route.snapshot.queryParamMap.get('token') || '', [Validators.required]],
+    email: [
+      this.route.snapshot.queryParamMap.get('email') || '',
+      [Validators.required, Validators.email],
+    ],
+    token: [
+      this.route.snapshot.queryParamMap.get('token') || '',
+      [Validators.required],
+    ],
     newPassword: [
       '',
       [

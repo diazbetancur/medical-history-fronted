@@ -10,272 +10,315 @@
 
 <!-- Main Content -->
 @if (!isInitialLoading) {
-  
-  <!-- Hero Section with Stats -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1 class="hero-title">Tu Salud, Nuestra Prioridad</h1>
-      <p class="hero-subtitle">
-        Conecta con los mejores profesionales médicos. Agenda citas fácilmente y recibe atención de calidad.
-      </p>
-      <div class="hero-actions">
-        <button mat-flat-button color="primary" class="hero-cta" (click)="navigateToSearch()">
-          <mat-icon>search</mat-icon>
-          Buscar Médico
-        </button>
-        @if (isPatientAuthenticated()) {
-          <button mat-stroked-button class="hero-secondary" (click)="navigateToNewAppointment()">
-            Nueva Cita
-          </button>
-        } @else {
-          <button mat-stroked-button class="hero-secondary" (click)="navigateToLogin()">
-            Iniciar Sesión
-          </button>
-        }
-      </div>
-    </div>
 
-    <!-- Stats Cards Overlay -->
-    <div class="stats-overlay">
-      <div class="stats-grid">
-        @if (stats(); as statsData) {
-          <mat-card class="stat-card">
-            <div class="stat-number">{{ statsData.totalDoctors }}+</div>
-            <div class="stat-label">Médicos Registrados</div>
-          </mat-card>
-          <mat-card class="stat-card">
-            <div class="stat-number">{{ statsData.totalPatients }}+</div>
-            <div class="stat-label">Pacientes Atendidos</div>
-          </mat-card>
-          <mat-card class="stat-card">
-            <div class="stat-number">{{ statsData.totalAppointments }}+</div>
-            <div class="stat-label">Citas Completadas</div>
-          </mat-card>
-          <mat-card class="stat-card">
-            <div class="stat-number">{{ statsData.averageRating.toFixed(1) }}</div>
-            <div class="stat-label">Calificación Promedio</div>
-          </mat-card>
-        } @else {
-          <mat-card class="stat-card">
-            <div class="stat-number">-</div>
-            <div class="stat-label">Médicos Registrados</div>
-          </mat-card>
-          <mat-card class="stat-card">
-            <div class="stat-number">-</div>
-            <div class="stat-label">Pacientes Atendidos</div>
-          </mat-card>
-          <mat-card class="stat-card">
-            <div class="stat-number">-</div>
-            <div class="stat-label">Citas Completadas</div>
-          </mat-card>
-          <mat-card class="stat-card">
-            <div class="stat-number">-</div>
-            <div class="stat-label">Calificación Promedio</div>
-          </mat-card>
-        }
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section class="features">
-    <div class="container">
-      <h2 class="section-title">¿Por Qué Elegirnos?</h2>
-      <div class="features-grid">
-        <div class="feature-item">
-          <div class="feature-icon">
-            <mat-icon class="large-icon">verified_user</mat-icon>
-          </div>
-          <h3 class="feature-title">Médicos Verificados</h3>
-          <p class="feature-description">
-            Todos nuestros profesionales están certificados y verificados. Tu seguridad es primero.
-          </p>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon">
-            <mat-icon class="large-icon">event_available</mat-icon>
-          </div>
-          <h3 class="feature-title">Agenda Fácil</h3>
-          <p class="feature-description">
-            Sistema de agendamiento simple y rápido. Confirma tu cita en segundos.
-          </p>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon">
-            <mat-icon class="large-icon">favorite</mat-icon>
-          </div>
-          <h3 class="feature-title">Atención de Calidad</h3>
-          <p class="feature-description">
-            Profesionales comprometidos con tu bienestar y calidad de atención.
-          </p>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon">
-            <mat-icon class="large-icon">schedule</mat-icon>
-          </div>
-          <h3 class="feature-title">Disponibilidad 24/7</h3>
-          <p class="feature-description">
-            Agenda citas en cualquier momento. Nuestro sistema está siempre disponible.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Specialties Section -->
-  <section class="specialties">
-    <div class="container">
-      <h2 class="section-title">Explora por Especialidad</h2>
-      <p class="section-subtitle">Encuentra el especialista que necesitas</p>
-      
-      @if (loadingSpecialties()) {
-        <div class="section-loading">
-          <mat-spinner diameter="32"></mat-spinner>
-          <p>Cargando especialidades...</p>
-        </div>
-      } @else if (specialties().length > 0) {
-        <div class="specialties-chips">
-          @for (specialty of specialties(); track specialty.id) {
-          <mat-chip 
-            class="specialty-chip" 
-            (click)="onSpecialtyClick(specialty)"
-            (keydown.enter)="onSpecialtyClick(specialty)"
-            tabindex="0">
-            @if (specialty.icon) {
-              <mat-icon>{{ specialty.icon }}</mat-icon>
-            }
-            {{ specialty.name }}
-            @if (specialty.professionalCount) {
-              <span class="chip-count">({{ specialty.professionalCount }})</span>
-            }
-          </mat-chip>
-          }
-        </div>
-        <div class="specialties-actions">
-          <button mat-stroked-button (click)="navigateToSearch()">
-            Ver Todas las Especialidades
-            <mat-icon>arrow_forward</mat-icon>
-          </button>
-        </div>
+<!-- Hero Section with Stats -->
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">Tu Salud, Nuestra Prioridad</h1>
+    <p class="hero-subtitle">
+      Conecta con los mejores profesionales médicos. Agenda citas fácilmente y
+      recibe atención de calidad.
+    </p>
+    <div class="hero-actions">
+      <button
+        mat-flat-button
+        color="primary"
+        class="hero-cta"
+        (click)="navigateToSearch()"
+      >
+        <mat-icon>search</mat-icon>
+        Buscar Médico
+      </button>
+      @if (isPatientAuthenticated()) {
+      <button
+        mat-stroked-button
+        class="hero-secondary"
+        (click)="navigateToNewAppointment()"
+      >
+        Nueva Cita
+      </button>
       } @else {
-        <div class="empty-state">
-          <mat-icon class="empty-icon">medical_services</mat-icon>
-          <p class="empty-text">No hay especialidades disponibles en este momento</p>
-          <button mat-stroked-button (click)="navigateToSearch()">
-            Explorar Médicos
-          </button>
-        </div>
+      <button
+        mat-stroked-button
+        class="hero-secondary"
+        (click)="navigateToLogin()"
+      >
+        Iniciar Sesión
+      </button>
       }
     </div>
-  </section>
+  </div>
 
-  <!-- Featured Doctors Section -->
-  <section class="featured-doctors">
-    <div class="container">
-      <h2 class="section-title">Médicos Destacados</h2>
-      <p class="section-subtitle">Profesionales mejor calificados y con mayor experiencia</p>
-      
-      @if (loadingProfessionals()) {
-        <div class="section-loading">
-          <mat-spinner diameter="32"></mat-spinner>
-          <p>Cargando médicos destacados...</p>
-        </div>
-      } @else if (professionals().length > 0) {
-        <div class="doctors-grid">
-          @for (professional of professionals(); track professional.id) {
-          <app-professional-card [professional]="professional"></app-professional-card>
-          }
-        </div>
-        <div class="doctors-actions">
-          <button mat-flat-button color="primary" (click)="navigateToSearch()">
-            Ver Todos los Médicos
-            <mat-icon>arrow_forward</mat-icon>
-          </button>
-        </div>
+  <!-- Stats Cards Overlay -->
+  <div class="stats-overlay">
+    <div class="stats-grid">
+      @if (stats(); as statsData) {
+      <mat-card class="stat-card">
+        <div class="stat-number">{{ statsData.totalDoctors }}+</div>
+        <div class="stat-label">Médicos Registrados</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-number">{{ statsData.totalPatients }}+</div>
+        <div class="stat-label">Pacientes Atendidos</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-number">{{ statsData.totalAppointments }}+</div>
+        <div class="stat-label">Citas Completadas</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-number">{{ statsData.averageRating.toFixed(1) }}</div>
+        <div class="stat-label">Calificación Promedio</div>
+      </mat-card>
       } @else {
-        <div class="empty-state">
-          <mat-icon class="empty-icon">person_search</mat-icon>
-          <p class="empty-text">No hay médicos destacados disponibles en este momento</p>
-          <button mat-flat-button color="primary" (click)="navigateToSearch()">
-            Buscar Médicos
-          </button>
-        </div>
+      <mat-card class="stat-card">
+        <div class="stat-number">-</div>
+        <div class="stat-label">Médicos Registrados</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-number">-</div>
+        <div class="stat-label">Pacientes Atendidos</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-number">-</div>
+        <div class="stat-label">Citas Completadas</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-number">-</div>
+        <div class="stat-label">Calificación Promedio</div>
+      </mat-card>
       }
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- CTA Section -->
-  <section class="cta-section">
-    <div class="cta-content">
-      <h2 class="cta-title">¿Listo para Cuidar Tu Salud?</h2>
-      <p class="cta-subtitle">
-        Únete a miles de pacientes que confían en nosotros para encontrar los mejores médicos
-      </p>
-      <div class="cta-actions">
-        <button mat-flat-button color="primary" class="cta-main" (click)="navigateToSearch()">
-          Buscar Médico Ahora
-        </button>
-        @if (isPatientAuthenticated()) {
-          <button mat-stroked-button class="cta-secondary" (click)="navigateToProfile()">
-            Mi Perfil
-          </button>
-          <button mat-stroked-button class="cta-secondary" (click)="navigateToNewAppointment()">
-            Nueva Cita
-          </button>
-        } @else {
-          <button mat-stroked-button class="cta-secondary" (click)="navigateToLogin()">
-            Registrarme
-          </button>
+<!-- Features Section -->
+<section class="features">
+  <div class="container">
+    <h2 class="section-title">¿Por Qué Elegirnos?</h2>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">
+          <mat-icon class="large-icon">verified_user</mat-icon>
+        </div>
+        <h3 class="feature-title">Médicos Verificados</h3>
+        <p class="feature-description">
+          Todos nuestros profesionales están certificados y verificados. Tu
+          seguridad es primero.
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">
+          <mat-icon class="large-icon">event_available</mat-icon>
+        </div>
+        <h3 class="feature-title">Agenda Fácil</h3>
+        <p class="feature-description">
+          Sistema de agendamiento simple y rápido. Confirma tu cita en segundos.
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">
+          <mat-icon class="large-icon">favorite</mat-icon>
+        </div>
+        <h3 class="feature-title">Atención de Calidad</h3>
+        <p class="feature-description">
+          Profesionales comprometidos con tu bienestar y calidad de atención.
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">
+          <mat-icon class="large-icon">schedule</mat-icon>
+        </div>
+        <h3 class="feature-title">Disponibilidad 24/7</h3>
+        <p class="feature-description">
+          Agenda citas en cualquier momento. Nuestro sistema está siempre
+          disponible.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Specialties Section -->
+<section class="specialties">
+  <div class="container">
+    <h2 class="section-title">Explora por Especialidad</h2>
+    <p class="section-subtitle">Encuentra el especialista que necesitas</p>
+
+    @if (loadingSpecialties()) {
+    <div class="section-loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <p>Cargando especialidades...</p>
+    </div>
+    } @else if (specialties().length > 0) {
+    <div class="specialties-chips">
+      @for (specialty of specialties(); track specialty.id) {
+      <mat-chip
+        class="specialty-chip"
+        (click)="onSpecialtyClick(specialty)"
+        (keydown.enter)="onSpecialtyClick(specialty)"
+        tabindex="0"
+      >
+        @if (specialty.icon) {
+        <mat-icon>{{ specialty.icon }}</mat-icon>
+        } {{ specialty.name }} @if (specialty.professionalCount) {
+        <span class="chip-count">({{ specialty.professionalCount }})</span>
         }
+      </mat-chip>
+      }
+    </div>
+    <div class="specialties-actions">
+      <button mat-stroked-button (click)="navigateToSearch()">
+        Ver Todas las Especialidades
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+    } @else {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">medical_services</mat-icon>
+      <p class="empty-text">
+        No hay especialidades disponibles en este momento
+      </p>
+      <button mat-stroked-button (click)="navigateToSearch()">
+        Explorar Médicos
+      </button>
+    </div>
+    }
+  </div>
+</section>
+
+<!-- Featured Doctors Section -->
+<section class="featured-doctors">
+  <div class="container">
+    <h2 class="section-title">Médicos Destacados</h2>
+    <p class="section-subtitle">
+      Profesionales mejor calificados y con mayor experiencia
+    </p>
+
+    @if (loadingProfessionals()) {
+    <div class="section-loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <p>Cargando médicos destacados...</p>
+    </div>
+    } @else if (professionals().length > 0) {
+    <div class="doctors-grid">
+      @for (professional of professionals(); track professional.id) {
+      <app-professional-card
+        [professional]="professional"
+      ></app-professional-card>
+      }
+    </div>
+    <div class="doctors-actions">
+      <button mat-flat-button color="primary" (click)="navigateToSearch()">
+        Ver Todos los Médicos
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+    } @else {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">person_search</mat-icon>
+      <p class="empty-text">
+        No hay médicos destacados disponibles en este momento
+      </p>
+      <button mat-flat-button color="primary" (click)="navigateToSearch()">
+        Buscar Médicos
+      </button>
+    </div>
+    }
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="cta-content">
+    <h2 class="cta-title">¿Listo para Cuidar Tu Salud?</h2>
+    <p class="cta-subtitle">
+      Únete a miles de pacientes que confían en nosotros para encontrar los
+      mejores médicos
+    </p>
+    <div class="cta-actions">
+      <button
+        mat-flat-button
+        color="primary"
+        class="cta-main"
+        (click)="navigateToSearch()"
+      >
+        Buscar Médico Ahora
+      </button>
+      @if (isPatientAuthenticated()) {
+      <button
+        mat-stroked-button
+        class="cta-secondary"
+        (click)="navigateToProfile()"
+      >
+        Mi Perfil
+      </button>
+      <button
+        mat-stroked-button
+        class="cta-secondary"
+        (click)="navigateToNewAppointment()"
+      >
+        Nueva Cita
+      </button>
+      } @else {
+      <button
+        mat-stroked-button
+        class="cta-secondary"
+        (click)="navigateToLogin()"
+      >
+        Registrarme
+      </button>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h3 class="footer-title">MediTigo</h3>
+        <p class="footer-description">
+          Tu directorio médico de confianza. Conectando pacientes con los
+          mejores profesionales de la salud.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Enlaces Rápidos</h4>
+        <ul class="footer-links">
+          <li><a routerLink="/">Inicio</a></li>
+          <li><a routerLink="/search">Buscar Médicos</a></li>
+          <li><a routerLink="/login">Iniciar Sesión</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Soporte</h4>
+        <ul class="footer-links">
+          <li><a href="#">Ayuda</a></li>
+          <li><a href="#">Términos de Servicio</a></li>
+          <li><a href="#">Política de Privacidad</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Contáctanos</h4>
+        <ul class="footer-links">
+          <li>
+            <a href="mailto:contacto@meditigo.com">contacto&#64;meditigo.com</a>
+          </li>
+        </ul>
       </div>
     </div>
-  </section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-col">
-          <h3 class="footer-title">MediTigo</h3>
-          <p class="footer-description">
-            Tu directorio médico de confianza. Conectando pacientes con los mejores profesionales de la salud.
-          </p>
-        </div>
-
-        <div class="footer-col">
-          <h4 class="footer-heading">Enlaces Rápidos</h4>
-          <ul class="footer-links">
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/search">Buscar Médicos</a></li>
-            <li><a routerLink="/login">Iniciar Sesión</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4 class="footer-heading">Soporte</h4>
-          <ul class="footer-links">
-            <li><a href="#">Ayuda</a></li>
-            <li><a href="#">Términos de Servicio</a></li>
-            <li><a href="#">Política de Privacidad</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4 class="footer-heading">Contáctanos</h4>
-          <ul class="footer-links">
-            <li><a href="mailto:contacto@meditigo.com">contacto&#64;meditigo.com</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; {{ 2024 }} MediTigo. Todos los derechos reservados.</p>
-      </div>
+    <div class="footer-bottom">
+      <p>&copy; {{ 2024 }} MediTigo. Todos los derechos reservados.</p>
     </div>
-  </footer>
+  </div>
+</footer>
 
 }
-

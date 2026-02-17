@@ -8,13 +8,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '@core/auth';
 import { SeoService } from '@shared/services';
-import { ProfessionalCardComponent } from '../../components/professional-card.component';
-import { PublicHeaderComponent } from '../../components/public-header.component';
 import {
   PublicHomeProfessionalCardDto,
   PublicHomeStatsDto,
 } from '../../../../public/models/public-home.dto';
 import { PublicHomeService } from '../../../../public/services/public-home.service';
+import { ProfessionalCardComponent } from '../../components/professional-card.component';
+import { PublicHeaderComponent } from '../../components/public-header.component';
 
 @Component({
   selector: 'app-home-page',
@@ -49,7 +49,12 @@ export class HomePageComponent implements OnInit {
   stats = signal<PublicHomeStatsDto | null>(null);
   professionals = signal<PublicHomeProfessionalCardDto[]>([]);
   specialties = signal<
-    Array<{ id: string; name: string; icon?: string; professionalCount?: number }>
+    Array<{
+      id: string;
+      name: string;
+      icon?: string;
+      professionalCount?: number;
+    }>
   >([]);
   loadingStats = signal(true);
   loadingProfessionals = signal(true);
@@ -80,12 +85,16 @@ export class HomePageComponent implements OnInit {
       }
 
       this.loadingStats.set(false);
-        this.loadingProfessionals.set(false);
+      this.loadingProfessionals.set(false);
       this.loadingSpecialties.set(false);
     });
   }
 
-  onSpecialtyClick(specialty: { id: string; name: string; icon?: string }): void {
+  onSpecialtyClick(specialty: {
+    id: string;
+    name: string;
+    icon?: string;
+  }): void {
     this.router.navigate(['/search'], {
       queryParams: { q: specialty.name },
     });
@@ -108,7 +117,11 @@ export class HomePageComponent implements OnInit {
   }
 
   get isInitialLoading(): boolean {
-    return this.loadingStats() && this.loadingProfessionals() && this.loadingSpecialties();
+    return (
+      this.loadingStats() &&
+      this.loadingProfessionals() &&
+      this.loadingSpecialties()
+    );
   }
 
   reload(): void {

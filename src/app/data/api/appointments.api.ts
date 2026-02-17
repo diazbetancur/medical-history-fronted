@@ -122,7 +122,6 @@ export class AppointmentsApi {
     dateFrom?: string; // YYYY-MM-DD
     dateTo?: string; // YYYY-MM-DD
   }): Observable<UpcomingAppointmentsResponse> {
-
     return this.api.get<UpcomingAppointmentsResponse>('/appointments/mine', {
       params,
     });

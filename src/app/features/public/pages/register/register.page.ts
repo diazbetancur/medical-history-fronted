@@ -1,5 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -44,7 +51,9 @@ export class RegisterPageComponent {
         [
           Validators.required,
           Validators.minLength(8),
-          Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/),
+          Validators.pattern(
+            /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/,
+          ),
         ],
       ],
       confirmPassword: ['', [Validators.required]],
@@ -79,12 +88,18 @@ export class RegisterPageComponent {
       })
       .subscribe({
         next: (response) => {
-          this.toast.success(response.message || 'Usuario registrado exitosamente');
-          this.router.navigate(['/login'], { queryParams: { registered: '1' } });
+          this.toast.success(
+            response.message || 'Usuario registrado exitosamente',
+          );
+          this.router.navigate(['/login'], {
+            queryParams: { registered: '1' },
+          });
         },
         error: (err) => {
           const problem = this.extractProblemDetails(err);
-          this.errorMessage.set(problem.title || 'No fue posible registrar el usuario');
+          this.errorMessage.set(
+            problem.title || 'No fue posible registrar el usuario',
+          );
           this.isLoading.set(false);
         },
         complete: () => {

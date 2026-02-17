@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
@@ -22,7 +22,9 @@ import {
 export class AuthApi {
   private readonly api = inject(ApiClient);
 
-  private normalizeContextType(type: string): 'ADMIN' | 'PROFESSIONAL' | 'PATIENT' {
+  private normalizeContextType(
+    type: string,
+  ): 'ADMIN' | 'PROFESSIONAL' | 'PATIENT' {
     const value = (type || '').toUpperCase();
     if (value === 'ADMIN') return 'ADMIN';
     if (value === 'PROFESSIONAL') return 'PROFESSIONAL';
@@ -43,7 +45,12 @@ export class AuthApi {
             type === 'PROFESSIONAL'
               ? (raw?.professionalProfileId ?? raw?.userId ?? raw?.id ?? '')
               : (raw?.patientProfileId ?? raw?.userId ?? raw?.id ?? ''),
-          name: raw?.fullName ?? raw?.name ?? raw?.userName ?? raw?.email ?? 'Usuario',
+          name:
+            raw?.fullName ??
+            raw?.name ??
+            raw?.userName ??
+            raw?.email ??
+            'Usuario',
           slug: raw?.professionalProfileSlug,
         };
       }
@@ -71,14 +78,16 @@ export class AuthApi {
         raw?.userId ??
         raw?.id ??
         '',
-      name: raw?.fullName ?? raw?.name ?? raw?.userName ?? raw?.email ?? 'Usuario',
+      name:
+        raw?.fullName ?? raw?.name ?? raw?.userName ?? raw?.email ?? 'Usuario',
       slug: raw?.professionalProfileSlug,
     };
 
     return {
       id: raw?.id ?? raw?.userId ?? '',
       email: raw?.email ?? '',
-      name: raw?.name ?? raw?.fullName ?? raw?.userName ?? raw?.email ?? 'Usuario',
+      name:
+        raw?.name ?? raw?.fullName ?? raw?.userName ?? raw?.email ?? 'Usuario',
       roles,
       permissions,
       contexts: contexts.length > 0 ? contexts : [fallbackContext],
@@ -90,7 +99,8 @@ export class AuthApi {
             name: string;
             slug?: string;
           }) =>
-            context.type === this.normalizeContextType(raw?.defaultContext ?? ''),
+            context.type ===
+            this.normalizeContextType(raw?.defaultContext ?? ''),
         ) ?? fallbackContext,
       professionalProfileId: raw?.professionalProfileId,
       professionalProfileSlug: raw?.professionalProfileSlug,
