@@ -17,6 +17,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExamDto } from '@data/models';
 import { PatientExamsMvpService } from '@patient/services/patient-exams-mvp.service';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { ExamEditDialogComponent } from './exam-edit-dialog.component';
 import { ExamUploadDialogComponent } from './exam-upload-dialog.component';
@@ -179,29 +180,37 @@ export class PatientExamsPage implements OnInit {
    * Delete exam with confirmation
    */
   deleteExam(exam: ExamDto): void {
-    if (
-      !confirm(
-        `¿Eliminar "${exam.title}"?\n\nEsta acción no se puede deshacer.`,
-      )
-    ) {
-      return;
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar examen',
+        message: `¿Eliminar "${exam.title}"?\n\nEsta acción no se puede deshacer.`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
 
-    this.examsService.delete(exam.id).subscribe({
-      next: () => {
-        this.snackBar.open('Examen eliminado exitosamente', 'OK', {
-          duration: 3000,
-        });
-        this.examsService.invalidateAllCaches();
-        this.loadExams();
-      },
-      error: (error) => {
-        this.snackBar.open(
-          error.message || 'Error al eliminar examen',
-          'Cerrar',
-          { duration: 5000 },
-        );
-      },
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.examsService.delete(exam.id).subscribe({
+        next: () => {
+          this.snackBar.open('Examen eliminado exitosamente', 'OK', {
+            duration: 3000,
+          });
+          this.examsService.invalidateAllCaches();
+          this.loadExams();
+        },
+        error: (error) => {
+          this.snackBar.open(
+            error.message || 'Error al eliminar examen',
+            'Cerrar',
+            { duration: 5000 },
+          );
+        },
+      });
     });
   }
 

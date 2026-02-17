@@ -23,6 +23,7 @@ import {
   UpdateMedicationDto,
 } from '@data/models';
 import { PatientMedicationsService } from '@patient/services/patient-medications.service';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { MedicationDialogComponent } from './medication-dialog.component';
 
@@ -188,29 +189,37 @@ export class PatientMedicationsPage implements OnInit {
    * Delete medication with confirmation
    */
   deleteMedication(medication: MedicationDto): void {
-    if (
-      !confirm(
-        `¿Eliminar "${medication.name}"?\n\nEsta acción no se puede deshacer.`,
-      )
-    ) {
-      return;
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar medicamento',
+        message: `¿Eliminar "${medication.name}"?\n\nEsta acción no se puede deshacer.`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
 
-    this.medicationsService.delete(medication.id).subscribe({
-      next: () => {
-        this.snackBar.open('Medicamento eliminado exitosamente', 'OK', {
-          duration: 3000,
-        });
-        this.medicationsService.invalidateAllCaches();
-        this.loadMedications();
-      },
-      error: (error) => {
-        this.snackBar.open(
-          error.message || 'Error al eliminar medicamento',
-          'Cerrar',
-          { duration: 5000 },
-        );
-      },
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.medicationsService.delete(medication.id).subscribe({
+        next: () => {
+          this.snackBar.open('Medicamento eliminado exitosamente', 'OK', {
+            duration: 3000,
+          });
+          this.medicationsService.invalidateAllCaches();
+          this.loadMedications();
+        },
+        error: (error) => {
+          this.snackBar.open(
+            error.message || 'Error al eliminar medicamento',
+            'Cerrar',
+            { duration: 5000 },
+          );
+        },
+      });
     });
   }
 
@@ -219,38 +228,50 @@ export class PatientMedicationsPage implements OnInit {
    * Sets Status=Stopped, IsOngoing=false, EndDate=today
    */
   suspendMedication(medication: MedicationDto): void {
-    if (!confirm(`¿Suspender el medicamento "${medication.name}"?`)) {
-      return;
-    }
-
-    const updateDto: any = {
-      name: medication.name,
-      dose: medication.dose,
-      frequency: medication.frequency,
-      route: medication.route,
-      prescribedBy: medication.prescribedBy,
-      startDate: medication.startDate,
-      isOngoing: false,
-      endDate: new Date().toISOString().split('T')[0],
-      notes: medication.notes,
-      status: 'Stopped' as MedicationStatus,
-    };
-
-    this.medicationsService.update(medication.id, updateDto).subscribe({
-      next: () => {
-        this.snackBar.open('Medicamento suspendido exitosamente', 'OK', {
-          duration: 3000,
-        });
-        this.medicationsService.invalidateAllCaches();
-        this.loadMedications();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Suspender medicamento',
+        message: `¿Suspender el medicamento "${medication.name}"?`,
+        confirmText: 'Suspender',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'pause_circle',
       },
-      error: (error) => {
-        this.snackBar.open(
-          error.message || 'Error al suspender medicamento',
-          'Cerrar',
-          { duration: 5000 },
-        );
-      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      const updateDto: any = {
+        name: medication.name,
+        dose: medication.dose,
+        frequency: medication.frequency,
+        route: medication.route,
+        prescribedBy: medication.prescribedBy,
+        startDate: medication.startDate,
+        isOngoing: false,
+        endDate: new Date().toISOString().split('T')[0],
+        notes: medication.notes,
+        status: 'Stopped' as MedicationStatus,
+      };
+
+      this.medicationsService.update(medication.id, updateDto).subscribe({
+        next: () => {
+          this.snackBar.open('Medicamento suspendido exitosamente', 'OK', {
+            duration: 3000,
+          });
+          this.medicationsService.invalidateAllCaches();
+          this.loadMedications();
+        },
+        error: (error) => {
+          this.snackBar.open(
+            error.message || 'Error al suspender medicamento',
+            'Cerrar',
+            { duration: 5000 },
+          );
+        },
+      });
     });
   }
 

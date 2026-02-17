@@ -30,6 +30,7 @@ import { ProfessionalPatientAllergiesTabComponent } from '@patient/pages/allergi
 import { ProfessionalPatientBackgroundTabComponent } from '@patient/pages/background/professional-patient-background-tab.component';
 import { ProfessionalPatientExamsTabComponent } from '@patient/pages/exams/professional-patient-exams-tab.component';
 import { ProfessionalPatientMedicationsTabComponent } from '@patient/pages/medications/professional-patient-medications-tab.component';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { ProfessionalPatientsService } from '../../services/professional-patients.service';
 import { AddAddendumDialogComponent } from './dialogs/add-addendum-dialog.component';
@@ -202,25 +203,37 @@ export class ProfessionalPatientDetailPage implements OnInit {
       return;
     }
 
-    if (!confirm('¿Cerrar esta atención? No podrás editarla después.')) {
-      return;
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Cerrar atención',
+        message: '¿Cerrar esta atención? No podrás editarla después.',
+        confirmText: 'Cerrar atención',
+        cancelText: 'Volver',
+        confirmColor: 'warn',
+        icon: 'lock',
+      },
+    });
 
-    this.patientsService.closeEncounter(encounter.id).subscribe({
-      next: () => {
-        this.snackBar.open('Atención cerrada exitosamente', 'OK', {
-          duration: 3000,
-        });
-        this.patientsService.invalidateAllCaches();
-        this.loadHistory();
-      },
-      error: (error) => {
-        this.snackBar.open(
-          error.message || 'Error al cerrar atención',
-          'Cerrar',
-          { duration: 5000 },
-        );
-      },
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.patientsService.closeEncounter(encounter.id).subscribe({
+        next: () => {
+          this.snackBar.open('Atención cerrada exitosamente', 'OK', {
+            duration: 3000,
+          });
+          this.patientsService.invalidateAllCaches();
+          this.loadHistory();
+        },
+        error: (error) => {
+          this.snackBar.open(
+            error.message || 'Error al cerrar atención',
+            'Cerrar',
+            { duration: 5000 },
+          );
+        },
+      });
     });
   }
 

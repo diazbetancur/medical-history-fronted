@@ -14,6 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import type { InstitutionDto } from '@data/models/institution.models';
 import { InstitutionsStore } from '@data/stores/institutions.store';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { InstitutionFormDialogComponent } from './institution-form-dialog.component';
 
 /**
@@ -464,12 +465,21 @@ export class InstitutionsListPage {
    * Delete institution with confirmation
    */
   deleteInstitution(institution: InstitutionDto): void {
-    const confirmed = confirm(
-      `¿Estás seguro de que deseas eliminar la institución "${institution.name}"?`,
-    );
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '460px',
+      data: {
+        title: 'Eliminar institución',
+        message: `¿Estás seguro de que deseas eliminar la institución "${institution.name}"?`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
 
-    if (confirmed) {
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
       this.store.deleteInstitution(institution.id, institution.name);
-    }
+    });
   }
 }

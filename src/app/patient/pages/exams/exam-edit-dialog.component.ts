@@ -22,6 +22,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ExamDto, UpdateExamDto } from '@data/models';
 import { PatientExamsMvpService } from '@patient/services/patient-exams-mvp.service';
@@ -50,6 +51,7 @@ export class ExamEditDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<ExamEditDialogComponent>);
   private readonly fb = inject(FormBuilder);
   private readonly examsService = inject(PatientExamsMvpService);
+  private readonly snackBar = inject(MatSnackBar);
   public data = inject<ExamEditDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
@@ -94,7 +96,11 @@ export class ExamEditDialogComponent implements OnInit {
       },
       error: (error) => {
         this.isSubmitting.set(false);
-        alert(error.message || 'Error al actualizar examen');
+        this.snackBar.open(
+          error.message || 'Error al actualizar examen',
+          'Cerrar',
+          { duration: 5000 },
+        );
       },
     });
   }
