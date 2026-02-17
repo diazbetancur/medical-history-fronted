@@ -1,0 +1,197 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Especialidades</h1>
+      <p class="page-subtitle">
+        CRUD de asignación de especialidades por profesional
+      </p>
+    </div>
+  </div>
+
+  @if (!canViewPage()) {
+    <mat-card class="warning-card">
+      <mat-card-content>
+        <div class="warning-content">
+          <mat-icon>lock</mat-icon>
+          <div>
+            <h3>Sin permisos de visualización</h3>
+            <p>
+              No cuentas con permisos para consultar especialidades en el módulo
+              de administración.
+            </p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card class="search-card">
+      <mat-card-content>
+        <div class="row-controls">
+          <mat-form-field class="search-input" appearance="outline">
+            <mat-label>Buscar profesional</mat-label>
+            <input
+              matInput
+              placeholder="Nombre comercial o correo"
+              [ngModel]="professionalSearch()"
+              (ngModelChange)="professionalSearch.set($event)"
+              (keyup.enter)="searchProfessionals()"
+            />
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" (click)="searchProfessionals()">
+            Buscar
+          </button>
+
+          <button mat-stroked-button (click)="clearSelection()">
+            Limpiar
+          </button>
+        </div>
+
+        <div class="row-controls second-row">
+          <mat-form-field class="select-input" appearance="outline">
+            <mat-label>Seleccionar profesional</mat-label>
+            <mat-select
+              [value]="store.selectedProfessional()?.id ?? null"
+              (valueChange)="onProfessionalSelected($event)"
+            >
+              <mat-option [value]="null">-- Selecciona un profesional --</mat-option>
+              @for (professional of store.professionalCandidates(); track professional.id) {
+                <mat-option [value]="professional.id">
+                  {{ professional.businessName }} · {{ professional.cityName }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          @if (store.professionalsLoading()) {
+            <div class="inline-loading">
+              <mat-spinner diameter="22"></mat-spinner>
+              <span>Buscando...</span>
+            </div>
+          }
+        </div>
+
+        @if (store.selectedProfessional(); as professional) {
+          <div class="selection-summary">
+            <mat-chip>
+              {{ professional.businessName }}
+            </mat-chip>
+            <span class="meta">
+              {{ professional.categoryName }} · {{ professional.cityName }}
+            </span>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="catalog-card">
+      <mat-card-content>
+        <div class="catalog-header">
+          <h2>Catálogo de especialidades activas</h2>
+          <div class="stats">
+            <span>{{ selectedCount() }}/10 seleccionadas</span>
+            @if (primarySpecialtyId()) {
+              <span class="primary-ok">Principal definida</span>
+            } @else {
+              <span class="primary-warning">Sin principal</span>
+            }
+          </div>
+        </div>
+
+        <mat-form-field class="catalog-filter" appearance="outline">
+          <mat-label>Filtrar catálogo</mat-label>
+          <input
+            matInput
+            placeholder="Nombre o slug"
+            [ngModel]="catalogFilter()"
+            (ngModelChange)="catalogFilter.set($event)"
+          />
+          <mat-icon matPrefix>filter_alt</mat-icon>
+        </mat-form-field>
+
+        @if (store.catalogLoading() || store.assignmentsLoading()) {
+          <div class="loading-area">
+            <mat-spinner diameter="44"></mat-spinner>
+            <p>Cargando especialidades...</p>
+          </div>
+        } @else if (filteredCatalog().length > 0) {
+          <div class="table-container">
+            <table mat-table [dataSource]="filteredCatalog()" class="catalog-table">
+              <ng-container matColumnDef="selected">
+                <th mat-header-cell *matHeaderCellDef>Asignada</th>
+                <td mat-cell *matCellDef="let specialty">
+                  <mat-checkbox
+                    [checked]="isSelected(specialty.id)"
+                    [disabled]="!store.selectedProfessional() || !canManageAssignments()"
+                    (change)="toggleSpecialty(specialty, $event.checked)"
+                  ></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="primary">
+                <th mat-header-cell *matHeaderCellDef>Principal</th>
+                <td mat-cell *matCellDef="let specialty">
+                  <mat-radio-button
+                    [checked]="primarySpecialtyId() === specialty.id"
+                    [disabled]="!isSelected(specialty.id) || !canManageAssignments()"
+                    (change)="setPrimary(specialty.id)"
+                  ></mat-radio-button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                <td mat-cell *matCellDef="let specialty">
+                  <strong>{{ specialty.name }}</strong>
+                  @if (specialty.description) {
+                    <p class="description">{{ specialty.description }}</p>
+                  }
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="slug">
+                <th mat-header-cell *matHeaderCellDef>Slug</th>
+                <td mat-cell *matCellDef="let specialty">{{ specialty.slug }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="stats">
+                <th mat-header-cell *matHeaderCellDef>Profesionales</th>
+                <td mat-cell *matCellDef="let specialty">
+                  {{ specialty.professionalsCount }}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
+
+          <div class="actions-row">
+            <button
+              mat-raised-button
+              color="primary"
+              [disabled]="!store.canSave() || store.saving() || !canManageAssignments()"
+              (click)="save()"
+            >
+              @if (store.saving()) {
+                Guardando...
+              } @else {
+                Guardar cambios
+              }
+            </button>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>category</mat-icon>
+            <h3>Sin especialidades disponibles</h3>
+            <p>
+              El backend actual expone el catálogo desde
+              <strong>/api/public/specialties</strong>.
+            </p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

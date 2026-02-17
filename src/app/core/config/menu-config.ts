@@ -67,6 +67,7 @@ export const ADMIN_PERMISSIONS = {
   // Institutions/Catalog
   CATALOG_MANAGE_INSTITUTIONS: 'Catalog.ManageInstitutions',
   CATALOG_VIEW_INSTITUTIONS: 'Catalog.ViewInstitutions',
+  CATALOG_MANAGE_CATEGORIES: 'Catalog.ManageCategories',
 
   // Users
   USERS_VIEW: 'Users.View',
@@ -147,6 +148,13 @@ export const MENU_ITEMS: MenuItem[] = [
       ADMIN_PERMISSIONS.CATALOG_MANAGE_INSTITUTIONS,
       ADMIN_PERMISSIONS.CATALOG_VIEW_INSTITUTIONS,
     ],
+  },
+  {
+    label: 'Especialidades',
+    icon: 'local_hospital',
+    route: '/admin/specialties',
+    context: 'ADMIN',
+    requiredPermissions: [ADMIN_PERMISSIONS.CATALOG_MANAGE_CATEGORIES],
   },
   {
     label: 'Usuarios',

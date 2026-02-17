@@ -124,8 +124,9 @@ export class PublicApi {
 
     if (params.q) {
       searchParams.set('q', params.q);
-    } else if (params.category) {
-      searchParams.set('q', params.category);
+    }
+    if (params.category) {
+      searchParams.set('category', params.category);
     }
     if (params.city) {
       searchParams.set('city', params.city);
@@ -136,7 +137,7 @@ export class PublicApi {
     if (params.page && params.page > 1) {
       searchParams.set('page', String(params.page));
     }
-    if (params.pageSize && params.pageSize !== 12) {
+    if (params.pageSize && params.pageSize > 0) {
       searchParams.set('pageSize', String(params.pageSize));
     }
 

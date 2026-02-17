@@ -1,0 +1,180 @@
+.page-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.search-card,
+.catalog-card,
+.warning-card {
+  margin-bottom: 20px;
+}
+
+.row-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.second-row {
+  margin-top: 12px;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 320px;
+}
+
+.select-input {
+  width: 100%;
+  max-width: 640px;
+}
+
+.inline-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+}
+
+.selection-summary {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .meta {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+  }
+}
+
+.catalog-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 8px;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+}
+
+.primary-ok {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.primary-warning {
+  color: var(--color-warning);
+  font-weight: 500;
+}
+
+.catalog-filter {
+  width: 100%;
+  max-width: 420px;
+}
+
+.table-container {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.catalog-table {
+  width: 100%;
+
+  th {
+    font-weight: 600;
+  }
+
+  .description {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+}
+
+.actions-row {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.loading-area,
+.empty-state,
+.warning-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 46px;
+    width: 46px;
+    height: 46px;
+    color: var(--color-text-secondary);
+  }
+
+  h3,
+  p {
+    margin: 0;
+  }
+}
+
+.warning-content {
+  flex-direction: row;
+  text-align: left;
+  justify-content: flex-start;
+
+  mat-icon {
+    color: var(--color-warning);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+  }
+
+  .search-input,
+  .select-input {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .catalog-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
