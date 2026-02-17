@@ -13,6 +13,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -33,6 +34,7 @@ import {
   type TimeBlock,
 } from '@data/models/professional-schedule.models';
 import { ProfessionalAvailabilityStore } from '@data/stores/professional-availability.store';
+import { ConfirmDialogComponent } from '@shared/ui';
 
 /**
  * Professional Availability Page
@@ -563,6 +565,7 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
 })
 export class ProfessionalAvailabilityPage implements OnInit {
   protected readonly store = inject(ProfessionalAvailabilityStore);
+  protected readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
 
   protected readonly daysOfWeek = DAYS_OF_WEEK;
@@ -688,9 +691,22 @@ export class ProfessionalAvailabilityPage implements OnInit {
   }
 
   protected deleteAbsence(absenceId: string): void {
-    if (confirm('¿Estás seguro de eliminar esta ausencia?')) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar ausencia',
+        message: '¿Estás seguro de eliminar esta ausencia?',
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
       this.store.deleteAbsence(absenceId);
-    }
+    });
   }
 
   protected cancelAbsenceForm(): void {

@@ -3,10 +3,12 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { ToastService } from '@shared/services/toast.service';
 import { AppointmentDto } from '../../models/appointment.dto';
 import { AppointmentsService } from '../../services/appointments.service';
@@ -498,6 +500,7 @@ export class PatientHomeComponent implements OnInit {
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   // State
   readonly isLoading = signal(false);
@@ -561,18 +564,30 @@ export class PatientHomeComponent implements OnInit {
    * Cancel appointment
    */
   cancelAppointment(appointmentId: string): void {
-    if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) {
-      return;
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Cancelar cita',
+        message: '¿Estás seguro de que deseas cancelar esta cita?',
+        confirmText: 'Cancelar cita',
+        cancelText: 'Volver',
+        confirmColor: 'warn',
+        icon: 'event_busy',
+      },
+    });
 
-    this.appointmentsService.cancelAppointment(appointmentId).subscribe({
-      next: () => {
-        this.toast.success('Cita cancelada exitosamente');
-        this.loadUpcomingAppointments(); // Reload list
-      },
-      error: (error: ApiError) => {
-        this.toast.error(getUserMessage(error));
-      },
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.appointmentsService.cancelAppointment(appointmentId).subscribe({
+        next: () => {
+          this.toast.success('Cita cancelada exitosamente');
+          this.loadUpcomingAppointments();
+        },
+        error: (error: ApiError) => {
+          this.toast.error(getUserMessage(error));
+        },
+      });
     });
   }
 

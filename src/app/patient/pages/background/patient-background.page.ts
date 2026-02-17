@@ -19,6 +19,7 @@ import {
   BackgroundDialogComponent,
   BackgroundDialogData,
 } from './background-dialog.component';
+import { ConfirmDialogComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-patient-background',
@@ -157,30 +158,38 @@ export class PatientBackgroundPage implements OnInit {
   }
 
   deleteBackground(background: BackgroundDto): void {
-    if (
-      !confirm(
-        `¿Estás seguro de que deseas eliminar el antecedente "${background.title}"?`,
-      )
-    ) {
-      return;
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar antecedente',
+        message: `¿Estás seguro de que deseas eliminar el antecedente "${background.title}"?`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
 
-    this.isLoading.set(true);
-    this.backgroundService.delete(background.id).subscribe({
-      next: () => {
-        this.snackBar.open('Antecedente eliminado exitosamente', 'OK', {
-          duration: 3000,
-        });
-        this.loadBackgrounds();
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.snackBar.open(
-          err.message || 'Error al eliminar antecedente',
-          'Cerrar',
-          { duration: 5000 },
-        );
-      },
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.isLoading.set(true);
+      this.backgroundService.delete(background.id).subscribe({
+        next: () => {
+          this.snackBar.open('Antecedente eliminado exitosamente', 'OK', {
+            duration: 3000,
+          });
+          this.loadBackgrounds();
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.snackBar.open(
+            err.message || 'Error al eliminar antecedente',
+            'Cerrar',
+            { duration: 5000 },
+          );
+        },
+      });
     });
   }
 

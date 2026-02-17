@@ -23,6 +23,7 @@ import {
   AllergyDialogComponent,
   AllergyDialogData,
 } from './allergy-dialog.component';
+import { ConfirmDialogComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-patient-allergies',
@@ -172,11 +173,21 @@ export class PatientAllergiesPage implements OnInit {
   }
 
   deleteAllergy(allergy: AllergyDto): void {
-    const confirmed = confirm(
-      `¿Estás seguro de eliminar la alergia "${allergy.allergen}"?`,
-    );
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar alergia',
+        message: `¿Estás seguro de eliminar la alergia "${allergy.allergen}"?`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
 
-    if (confirmed) {
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
       this.isLoading.set(true);
       this.allergiesService.delete(allergy.id).subscribe({
         next: () => {
@@ -194,7 +205,7 @@ export class PatientAllergiesPage implements OnInit {
           );
         },
       });
-    }
+    });
   }
 
   retry(): void {

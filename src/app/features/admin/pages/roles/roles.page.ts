@@ -12,6 +12,7 @@ import { AuthService } from '@core/auth';
 import type { Role } from '@data/api/roles.api';
 import { RolesStore } from '@data/stores/roles.store';
 import { ToastService } from '@shared/services';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { PERMISSIONS } from '../../admin-menu.config';
 
 @Component({
@@ -131,7 +132,21 @@ export class RolesPageComponent implements OnInit {
       return;
     }
 
-    if (confirm(`¿Estás seguro de eliminar el rol "${role.name}"?`)) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar rol',
+        message: `¿Estás seguro de eliminar el rol "${role.name}"?`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
       this.rolesStore.deleteRole(role.id).subscribe({
         next: () => {
           this.toast.success('Rol eliminado correctamente');
@@ -140,7 +155,7 @@ export class RolesPageComponent implements OnInit {
           this.toast.error('Error al eliminar el rol');
         },
       });
-    }
+    });
   }
 
   managePermissions(role: Role) {
