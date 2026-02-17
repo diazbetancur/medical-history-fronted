@@ -7,8 +7,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -42,17 +40,15 @@ export interface MedicationDialogData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatDatepickerModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
-    MatNativeDateModule,
   ],
   templateUrl: './medication-dialog.component.html',
   styleUrl: './medication-dialog.component.scss',
 })
 export class MedicationDialogComponent implements OnInit {
-  private dialogRef = inject(MatDialogRef<MedicationDialogComponent>);
-  private fb = inject(FormBuilder);
+  private readonly dialogRef = inject(MatDialogRef<MedicationDialogComponent>);
+  private readonly fb = inject(FormBuilder);
   public data = inject<MedicationDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
@@ -89,11 +85,11 @@ export class MedicationDialogComponent implements OnInit {
       route: [medication?.route || ''],
       prescribedBy: [medication?.prescribedBy || ''],
       startDate: [
-        medication?.startDate ? new Date(medication.startDate) : new Date(),
+        this.normalizeDateOnly(medication?.startDate) || this.todayDateOnly(),
         [Validators.required],
       ],
       isOngoing: [medication?.isOngoing ?? true],
-      endDate: [medication?.endDate ? new Date(medication.endDate) : null, []],
+      endDate: [this.normalizeDateOnly(medication?.endDate) || null, []],
       notes: [medication?.notes || ''],
       status: [medication?.status || 'Active', [Validators.required]],
     });
@@ -144,9 +140,9 @@ export class MedicationDialogComponent implements OnInit {
       frequency: formValue.frequency || undefined,
       route: formValue.route || undefined,
       prescribedBy: formValue.prescribedBy || undefined,
-      startDate: formValue.startDate.toISOString(),
+      startDate: this.normalizeDateOnly(formValue.startDate)!,
       isOngoing: formValue.isOngoing,
-      endDate: formValue.endDate ? formValue.endDate.toISOString() : undefined,
+      endDate: this.normalizeDateOnly(formValue.endDate) || undefined,
       notes: formValue.notes || undefined,
       status: formValue.status,
     };
@@ -165,5 +161,20 @@ export class MedicationDialogComponent implements OnInit {
     }
 
     return '';
+  }
+
+  private todayDateOnly(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  private normalizeDateOnly(value: unknown): string | null {
+    if (!value) return null;
+    if (typeof value === 'string') {
+      return value.length >= 10 ? value.slice(0, 10) : null;
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split('T')[0];
+    }
+    return null;
   }
 }

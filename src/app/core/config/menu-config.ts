@@ -324,6 +324,12 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PATIENT',
   },
   {
+    label: 'Cambiar Contraseña',
+    icon: 'lock_reset',
+    route: '/patient/change-password',
+    context: 'PATIENT',
+  },
+  {
     label: 'Configuración',
     icon: 'settings',
     route: '/patient/settings',

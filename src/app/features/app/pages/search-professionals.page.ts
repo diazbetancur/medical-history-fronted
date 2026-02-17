@@ -199,7 +199,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 
         .subtitle {
           margin: 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
           font-size: 16px;
         }
       }
@@ -233,7 +233,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 
         p {
           margin-top: 16px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -245,7 +245,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
           font-size: 64px;
           width: 64px;
           height: 64px;
-          color: rgba(0, 0, 0, 0.3);
+          color: var(--color-text-disabled);
           margin: 0 auto 16px;
         }
 
@@ -257,7 +257,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 
         p {
           margin: 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -274,11 +274,11 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 
         &:hover {
           transform: translateY(-4px);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+          box-shadow: 0 4px 20px var(--color-border);
         }
 
         .professional-avatar {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: var(--gradient-primary);
           color: white;
           display: flex;
           align-items: center;
@@ -311,7 +311,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
             align-items: center;
             gap: 8px;
             margin-bottom: 8px;
-            color: rgba(0, 0, 0, 0.7);
+            color: var(--color-text-primary);
 
             mat-icon {
               font-size: 18px;
@@ -321,7 +321,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 
             &.rating {
               .star-icon {
-                color: #ffa000;
+                color: var(--color-warning);
               }
             }
           }

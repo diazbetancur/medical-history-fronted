@@ -1,0 +1,21 @@
+# Ignore large unoptimized images
+*.psd
+*.ai
+*.sketch
+*.fig
+
+# Ignore very large files (>1MB)
+**/images/**/*.{jpg,jpeg,png,webp}
+!**/images/**/*-optimized.{jpg,jpeg,png,webp}
+
+# Keep SVGs and small files
+!**/images/**/*.svg
+!**/images/logo/**
+!**/images/**/README.md
+!**/images/**/.gitkeep
+
+# Temporary files
+*.tmp
+*~
+.DS_Store
+Thumbs.db

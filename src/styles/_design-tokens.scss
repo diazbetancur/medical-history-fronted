@@ -24,10 +24,10 @@
 // ============================================================================
 // Definición única de colores. Solo cambiar estos valores para rebranding.
 
-// Brand Colors (Core) - Nueva paleta de marca
-$color-brand-primary: #2563eb; // Primary / Brand Blue - Confiable, profesional
-$color-brand-accent: #ff6b35; // Accent / Brand Orange - Energético, CTA
-$color-brand-success: #10b981; // Success / Green - Verificado, éxito
+// Brand Colors (Core) - Medical Clean
+$color-brand-primary: #2563eb; // Primary / Clinical Blue
+$color-brand-accent: #14b8a6; // Secondary / Teal (keeps existing "accent" token names for compatibility)
+$color-brand-success: #16a34a; // Success / Green
 
 // Neutral Scale (Light → Dark) - Escala completa de grises
 $color-neutral-white: #ffffff;
@@ -44,9 +44,9 @@ $color-neutral-900: #0f172a; // Darkest
 $color-neutral-black: #000000; // Pure black (usar con moderación)
 
 // Semantic Status Colors - Feedback visual
-$color-warning: #f59e0b; // Amber - Alertas, pendientes
-$color-error: #dc2626; // Red - Errores, destructivo
-$color-info: #0ea5e9; // Sky Blue - Información, enlaces
+$color-warning: #d97706; // Warning / Amber
+$color-error: #dc2626; // Error / Red
+$color-info: #2563eb; // Info / Align with primary
 
 // ============================================================================
 // B) COLOR VARIATIONS (Auto-generated)
@@ -175,18 +175,24 @@ $color-white-alpha-90: rgba($color-neutral-white, 0.9);
   // Brand
   // ----------------------------------------------------------------------------
   --color-primary: #{$color-brand-primary};
+  --color-primary-soft: #dbeafe;
   --color-primary-light: #{$color-primary-300};
-  --color-primary-dark: #{$color-primary-700};
-  --color-primary-hover: #{$color-primary-600};
-  --color-primary-active: #{$color-primary-700};
+  --color-primary-dark: #1d4ed8;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-active: #1d4ed8;
   --color-primary-disabled: #{$color-primary-300};
   --color-primary-contrast: #{$color-neutral-white};
 
-  --color-accent: #{$color-brand-accent};
+  --color-secondary: #{$color-brand-accent};
+  --color-secondary-hover: #0f766e;
+  --color-secondary-soft: #ccfbf1;
+
+  // Backwards-compatible alias: existing code uses "accent" tokens
+  --color-accent: var(--color-secondary);
   --color-accent-light: #{$color-accent-300};
-  --color-accent-dark: #{$color-accent-700};
-  --color-accent-hover: #{$color-accent-600};
-  --color-accent-active: #{$color-accent-700};
+  --color-accent-dark: #0f766e;
+  --color-accent-hover: var(--color-secondary-hover);
+  --color-accent-active: #0f766e;
   --color-accent-disabled: #{$color-accent-300};
   --color-accent-contrast: #{$color-neutral-white};
 
@@ -224,9 +230,10 @@ $color-white-alpha-90: rgba($color-neutral-white, 0.9);
   // ----------------------------------------------------------------------------
   // Backgrounds & Surfaces
   // ----------------------------------------------------------------------------
-  --color-background: #{$color-neutral-white};
-  --color-background-alt: #{$color-neutral-50};
+  --color-background: #{$color-neutral-50};
+  --color-background-alt: #{$color-neutral-100};
   --color-surface: #{$color-neutral-white};
+  --color-surface-alt: #{$color-neutral-50};
   --color-surface-elevated: #{$color-neutral-white};
   --color-surface-hover: #{$color-neutral-50};
   --color-surface-pressed: #{$color-neutral-100};
@@ -235,13 +242,13 @@ $color-white-alpha-90: rgba($color-neutral-white, 0.9);
   // ----------------------------------------------------------------------------
   // Text
   // ----------------------------------------------------------------------------
-  --color-text-primary: #{$color-neutral-800};
-  --color-text-secondary: #{$color-neutral-600};
+  --color-text-primary: #{$color-neutral-900};
+  --color-text-secondary: #{$color-neutral-700};
   --color-text-tertiary: #{$color-neutral-500};
   --color-text-disabled: #{$color-neutral-400};
   --color-text-inverted: #{$color-neutral-white};
   --color-text-link: #{$color-brand-primary};
-  --color-text-link-hover: #{$color-primary-700};
+  --color-text-link-hover: #1d4ed8;
 
   // ----------------------------------------------------------------------------
   // Borders
@@ -257,7 +264,7 @@ $color-white-alpha-90: rgba($color-neutral-white, 0.9);
   // Focus & Interaction
   // ----------------------------------------------------------------------------
   --color-focus-ring: #{$color-primary-alpha-50};
-  --color-focus-outline: #{$color-brand-primary};
+  --color-focus-outline: rgba(37, 99, 235, 0.55);
   --color-overlay: #{$color-overlay-50};
   --color-overlay-light: #{$color-overlay-20};
   --color-backdrop: #{$color-overlay-70};
@@ -266,9 +273,10 @@ $color-white-alpha-90: rgba($color-neutral-white, 0.9);
   // Shadows (Semantic)
   // ----------------------------------------------------------------------------
   --shadow-color: #{$color-neutral-900};
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-2: 0 6px 16px rgba(15, 23, 42, 0.08);
+  --shadow-sm: var(--shadow-1);
+  --shadow-md: var(--shadow-2);
   --shadow-lg:
     0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl:

@@ -122,10 +122,13 @@ export class PatientExamsStore {
    * Create new exam
    * Invalidates cache
    */
-  createExam(request: CreateExamRequest): Promise<PatientExamDto | null> {
+  createExam(
+    request: CreateExamRequest,
+    file: File,
+  ): Promise<PatientExamDto | null> {
     return new Promise((resolve) => {
       this.examsService
-        .create(request)
+        .create(request, file)
         .pipe(
           tap((exam) => {
             this.toastService.success('Examen creado exitosamente');
@@ -212,75 +215,24 @@ export class PatientExamsStore {
    * Invalidates cache and reloads detail
    */
   uploadAttachments(
-    examId: string,
-    files: File[],
+    _examId: string,
+    _files: File[],
   ): Promise<UploadAttachmentsResponse | null> {
-    return new Promise((resolve) => {
-      this.examsService
-        .uploadAttachments(examId, files)
-        .pipe(
-          tap((response) => {
-            if (response.uploaded.length > 0) {
-              this.toastService.success(
-                `${response.uploaded.length} archivo(s) subido(s) exitosamente`,
-              );
-            }
-            if (response.failed.length > 0) {
-              response.failed.forEach((fail) => {
-                this.toastService.warning(`${fail.fileName}: ${fail.reason}`);
-              });
-            }
-            this.clearCache();
-            // Reload the exam detail to show new attachments
-            this.loadExamById(examId);
-            resolve(response);
-          }),
-          catchError((err) => {
-            let message = 'Error al subir los archivos';
-
-            if (err.status === 413) {
-              message = 'Archivo supera el límite permitido';
-            } else if (err.status === 415) {
-              message = 'Tipo de archivo no permitido';
-            } else if (err.error?.message) {
-              message = err.error.message;
-            }
-
-            this.toastService.error(message);
-            resolve(null);
-            return of(null);
-          }),
-        )
-        .subscribe();
-    });
+    this.toastService.warning(
+      'La API actual no permite adjuntar archivos a un examen existente. Crea un nuevo examen con su archivo.',
+    );
+    return Promise.resolve(null);
   }
 
   /**
    * Delete attachment
    * Invalidates cache and reloads detail
    */
-  deleteAttachment(examId: string, attachmentId: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      this.examsService
-        .deleteAttachment(examId, attachmentId)
-        .pipe(
-          tap(() => {
-            this.toastService.success('Archivo eliminado exitosamente');
-            this.clearCache();
-            // Reload the exam detail
-            this.loadExamById(examId);
-            resolve(true);
-          }),
-          catchError((err) => {
-            const message =
-              err.error?.message || 'Error al eliminar el archivo';
-            this.toastService.error(message);
-            resolve(false);
-            return of(null);
-          }),
-        )
-        .subscribe();
-    });
+  deleteAttachment(_examId: string, _attachmentId: string): Promise<boolean> {
+    this.toastService.warning(
+      'La API actual no permite eliminar adjuntos individuales. Elimina el examen completo si es necesario.',
+    );
+    return Promise.resolve(false);
   }
 
   /**

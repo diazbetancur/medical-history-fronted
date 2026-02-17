@@ -39,8 +39,23 @@ export class PatientLayoutComponent {
   // Menu items
   readonly menuItems = [
     {
-      label: 'Wizard',
-      icon: 'auto_awesome',
+      label: 'Home',
+      icon: 'home',
+      route: '/',
+    },
+    {
+      label: 'Buscar Médicos',
+      icon: 'search',
+      route: '/search',
+    },
+    {
+      label: 'Mi Perfil',
+      icon: 'person',
+      route: '/patient/profile',
+    },
+    {
+      label: 'Nueva Cita',
+      icon: 'event_available',
       route: '/patient/wizard',
     },
   ];

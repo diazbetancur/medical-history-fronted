@@ -138,7 +138,7 @@ import { WizardStore } from '../patient-wizard.page';
 
       .subtitle {
         margin: 0 0 24px 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
       }
 
       .date-picker-card {
@@ -173,7 +173,7 @@ import { WizardStore } from '../patient-wizard.page';
             font-size: 48px;
             width: 48px;
             height: 48px;
-            color: rgba(0, 0, 0, 0.38);
+            color: var(--color-text-disabled);
           }
 
           p {
@@ -184,7 +184,7 @@ import { WizardStore } from '../patient-wizard.page';
           .hint {
             margin: 0;
             font-size: 14px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
         }
 
@@ -255,10 +255,15 @@ export class Step3SlotsComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    // Auto-select today if no date selected
+    const professionalId = this.professionalId();
+    if (!professionalId) {
+      return;
+    }
+
     if (!this.selectedDate()) {
-      this.selectedDate.set(new Date());
-      this.loadSlots(new Date());
+      const today = new Date();
+      this.selectedDate.set(today);
+      this.loadSlots(today);
     }
   }
 
@@ -287,7 +292,6 @@ export class Step3SlotsComponent implements OnInit {
     const professionalId = this.professionalId();
 
     if (!professionalId) {
-      this.toast.error('Error: Profesional no seleccionado');
       return;
     }
 

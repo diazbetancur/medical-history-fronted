@@ -189,10 +189,11 @@ import { AppointmentsService } from '../../services/appointments.service';
 
       /* Hero Section */
       .hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 60px 40px;
-        border-radius: 16px;
+        background: var(--color-surface);
+        color: var(--color-text-primary);
+        border: 1px solid var(--color-border);
+        padding: 40px 32px;
+        border-radius: 14px;
         margin-bottom: 32px;
         text-align: center;
 
@@ -202,20 +203,21 @@ import { AppointmentsService } from '../../services/appointments.service';
 
           h1 {
             margin: 0 0 16px 0;
-            font-size: 42px;
-            font-weight: 700;
+            font-size: 30px;
+            font-weight: 600;
+            line-height: 1.2;
           }
 
           .subtitle {
             margin: 0 0 32px 0;
-            font-size: 18px;
-            opacity: 0.95;
+            font-size: 15px;
+            color: var(--color-text-secondary);
           }
 
           .cta-button {
-            height: 56px;
-            padding: 0 32px;
-            font-size: 16px;
+            height: 48px;
+            padding: 0 24px;
+            font-size: 14px;
             font-weight: 600;
 
             mat-icon {
@@ -234,7 +236,7 @@ import { AppointmentsService } from '../../services/appointments.service';
 
         h2 {
           margin: 0;
-          font-size: 28px;
+          font-size: 22px;
           font-weight: 600;
         }
 
@@ -250,7 +252,7 @@ import { AppointmentsService } from '../../services/appointments.service';
 
         p {
           margin-top: 16px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -263,7 +265,7 @@ import { AppointmentsService } from '../../services/appointments.service';
           font-size: 80px;
           width: 80px;
           height: 80px;
-          color: rgba(0, 0, 0, 0.38);
+          color: var(--color-text-disabled);
           margin-bottom: 16px;
         }
 
@@ -274,7 +276,7 @@ import { AppointmentsService } from '../../services/appointments.service';
 
         p {
           margin: 0 0 24px 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
 
         button mat-icon {
@@ -297,7 +299,7 @@ import { AppointmentsService } from '../../services/appointments.service';
 
         &:hover {
           transform: translateY(-4px);
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+          box-shadow: var(--shadow-2);
         }
 
         .appointment-header {
@@ -324,7 +326,7 @@ import { AppointmentsService } from '../../services/appointments.service';
           }
 
           mat-icon {
-            color: white;
+            color: var(--color-text-inverted);
             font-size: 32px;
             width: 32px;
             height: 32px;
@@ -343,7 +345,7 @@ import { AppointmentsService } from '../../services/appointments.service';
           .specialty {
             margin: 0 0 12px 0;
             font-size: 14px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
 
           .appointment-meta {
@@ -371,18 +373,18 @@ import { AppointmentsService } from '../../services/appointments.service';
 
           mat-chip {
             &.status-CONFIRMED {
-              background: #4caf50 !important;
-              color: white;
+              background: var(--color-success) !important;
+              color: var(--color-text-inverted);
             }
 
             &.status-PENDING {
-              background: #ff9800 !important;
-              color: white;
+              background: var(--color-warning) !important;
+              color: var(--color-text-inverted);
             }
 
             &.status-CANCELLED {
-              background: #f44336 !important;
-              color: white;
+              background: var(--color-error) !important;
+              color: var(--color-text-inverted);
             }
           }
         }
@@ -392,7 +394,7 @@ import { AppointmentsService } from '../../services/appointments.service';
           justify-content: flex-end;
           gap: 8px;
           padding-top: 12px;
-          border-top: 1px solid rgba(0, 0, 0, 0.12);
+          border-top: 1px solid var(--color-border);
 
           button mat-icon {
             margin-right: 4px;
@@ -407,7 +409,7 @@ import { AppointmentsService } from '../../services/appointments.service';
       .quick-actions {
         h2 {
           margin: 0 0 24px 0;
-          font-size: 28px;
+          font-size: 22px;
           font-weight: 600;
         }
 
@@ -426,7 +428,7 @@ import { AppointmentsService } from '../../services/appointments.service';
 
           &:hover:not([disabled]) {
             transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--shadow-2);
           }
 
           &[disabled] {
@@ -450,7 +452,7 @@ import { AppointmentsService } from '../../services/appointments.service';
 
           p {
             margin: 0;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
             font-size: 14px;
           }
         }
@@ -463,10 +465,15 @@ import { AppointmentsService } from '../../services/appointments.service';
         }
 
         .hero {
-          padding: 40px 24px;
+          padding: 28px 20px;
 
           .hero-content h1 {
-            font-size: 32px;
+            font-size: 24px;
+          }
+
+          .hero-content .subtitle {
+            font-size: 14px;
+            margin-bottom: 20px;
           }
 
           .cta-button {

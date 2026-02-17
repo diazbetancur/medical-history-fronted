@@ -52,6 +52,9 @@ export class AppointmentsApi {
     const params = {
       professionalId: request.professionalId,
       date: request.date,
+      ...(request.durationMinutes
+        ? { durationMinutes: request.durationMinutes }
+        : {}),
     };
 
     return this.api.get<GetAvailableSlotsResponse>('/appointments/slots', {
@@ -119,7 +122,6 @@ export class AppointmentsApi {
     dateFrom?: string; // YYYY-MM-DD
     dateTo?: string; // YYYY-MM-DD
   }): Observable<UpcomingAppointmentsResponse> {
-
     return this.api.get<UpcomingAppointmentsResponse>('/appointments/mine', {
       params,
     });
@@ -140,9 +142,9 @@ export class AppointmentsApi {
    * ```
    */
   exportIcs(appointmentId: string): void {
-    const url = this.api.buildUrl(`/appointments/${appointmentId}/export-ics`);
+    const url = this.api.buildUrl(`/appointments/${appointmentId}/calendar`);
 
     // Open download in new window
-    window.open(url, '_blank');
+    globalThis.open(url, '_blank');
   }
 }

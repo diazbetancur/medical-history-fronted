@@ -65,27 +65,8 @@
         <!-- Attachments -->
         <div class="detail-section attachments-section">
           <div class="section-header">
-            <h4>Archivos Adjuntos ({{ exam.attachments.length }})</h4>
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="openFilePicker()"
-              [disabled]="uploading"
-            >
-              <mat-icon>upload_file</mat-icon>
-              Subir Archivos
-            </button>
+            <h4>Archivo del Examen</h4>
           </div>
-
-          <!-- Hidden file input -->
-          <input
-            #fileInput
-            type="file"
-            multiple
-            accept=".pdf,.jpg,.jpeg,.png"
-            style="display: none"
-            (change)="onFilesSelected($event)"
-          />
 
           <!-- Attachments list -->
           @if (exam.attachments.length > 0) {
@@ -105,20 +86,10 @@
                   <div matListItemMeta class="attachment-actions">
                     <button
                       mat-icon-button
-                      (click)="downloadAttachment(attachment.id)"
+                      (click)="downloadAttachment()"
                       matTooltip="Descargar"
                     >
                       <mat-icon>download</mat-icon>
-                    </button>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      (click)="
-                        deleteAttachment(attachment.id, attachment.fileName)
-                      "
-                      matTooltip="Eliminar"
-                    >
-                      <mat-icon>delete</mat-icon>
                     </button>
                   </div>
                 </mat-list-item>
@@ -128,9 +99,9 @@
           } @else {
             <div class="empty-attachments">
               <mat-icon>attach_file</mat-icon>
-              <p>No hay archivos adjuntos</p>
+              <p>No hay archivo disponible para este examen</p>
               <p class="help-text">
-                Puedes subir archivos PDF, JPG, JPEG o PNG (máximo 10MB)
+                Para cambiar el archivo, crea un nuevo examen.
               </p>
             </div>
           }

@@ -13,8 +13,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -36,18 +34,16 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatDatepickerModule,
     MatProgressSpinnerModule,
-    MatNativeDateModule,
     MatIconModule,
   ],
   templateUrl: './exam-upload-dialog.component.html',
   styleUrl: './exam-upload-dialog.component.scss',
 })
 export class ExamUploadDialogComponent implements OnInit {
-  private dialogRef = inject(MatDialogRef<ExamUploadDialogComponent>);
-  private fb = inject(FormBuilder);
-  private examsService = inject(PatientExamsMvpService);
+  private readonly dialogRef = inject(MatDialogRef<ExamUploadDialogComponent>);
+  private readonly fb = inject(FormBuilder);
+  private readonly examsService = inject(PatientExamsMvpService);
 
   form!: FormGroup;
   isSubmitting = signal(false);
@@ -62,7 +58,7 @@ export class ExamUploadDialogComponent implements OnInit {
   private initForm(): void {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
-      examDate: [new Date(), [Validators.required]],
+      examDate: [new Date().toISOString().split('T')[0], [Validators.required]],
       notes: ['', [Validators.maxLength(1000)]],
     });
   }
@@ -148,7 +144,7 @@ export class ExamUploadDialogComponent implements OnInit {
     const formValue = this.form.value;
     const dto: CreateExamDto = {
       title: formValue.title,
-      examDate: formValue.examDate.toISOString(),
+      examDate: this.normalizeDateOnly(formValue.examDate)!,
       notes: formValue.notes || undefined,
     };
 
@@ -179,5 +175,16 @@ export class ExamUploadDialogComponent implements OnInit {
     }
 
     return '';
+  }
+
+  private normalizeDateOnly(value: unknown): string | null {
+    if (!value) return null;
+    if (typeof value === 'string') {
+      return value.length >= 10 ? value.slice(0, 10) : null;
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split('T')[0];
+    }
+    return null;
   }
 }

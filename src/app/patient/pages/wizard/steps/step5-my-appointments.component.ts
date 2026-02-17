@@ -204,7 +204,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
 
       .subtitle {
         margin: 0 0 24px 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
       }
 
       .loading {
@@ -224,7 +224,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
           font-size: 64px;
           width: 64px;
           height: 64px;
-          color: rgba(0, 0, 0, 0.38);
+          color: var(--color-text-disabled);
           margin-bottom: 16px;
         }
 
@@ -235,7 +235,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
 
         p {
           margin: 0 0 24px 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -247,7 +247,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
 
           th {
             font-weight: 500;
-            color: rgba(0, 0, 0, 0.87);
+            color: var(--color-text-primary);
           }
 
           .date-cell,
@@ -260,7 +260,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
               font-size: 18px;
               width: 18px;
               height: 18px;
-              color: rgba(0, 0, 0, 0.54);
+              color: var(--color-text-secondary);
             }
           }
 
@@ -274,7 +274,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
 
             .specialty {
               font-size: 12px;
-              color: rgba(0, 0, 0, 0.6);
+              color: var(--color-text-secondary);
             }
           }
 
@@ -285,7 +285,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
           }
 
           .no-actions {
-            color: rgba(0, 0, 0, 0.38);
+            color: var(--color-text-disabled);
           }
         }
       }
@@ -309,7 +309,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--color-text-tertiary);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -333,7 +333,7 @@ import { AppointmentsService } from '../../../services/appointments.service';
         }
 
         .warning {
-          color: #d32f2f;
+          color: var(--color-error);
           font-weight: 500;
         }
 
@@ -445,7 +445,7 @@ export class Step5MyAppointmentsComponent implements OnInit {
    * Get status color
    */
   getStatusColor(status: string): string {
-    return getStatusColor(status as any) || '#9e9e9e';
+    return getStatusColor(status as any) || 'var(--color-text-disabled)';
   }
 
   /**

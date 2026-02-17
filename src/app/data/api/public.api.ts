@@ -29,8 +29,17 @@ export class PublicApi {
    * GET /api/public/pages/home
    * Get home page data with featured content
    */
-  getHomePage(): Observable<HomePageResponse> {
-    return this.api.get<HomePageResponse>('/public/pages/home');
+  getHomePage(
+    featuredLimit = 8,
+    popularCitiesLimit = 6,
+  ): Observable<HomePageResponse> {
+    const params = new URLSearchParams();
+    params.set('featuredLimit', String(featuredLimit));
+    params.set('popularCitiesLimit', String(popularCitiesLimit));
+
+    return this.api.get<HomePageResponse>(
+      `/public/pages/home?${params.toString()}`,
+    );
   }
 
   /**
@@ -83,7 +92,7 @@ export class PublicApi {
 
   /**
    * GET /api/public/metadata
-   * Get catalogs for dropdowns (countries, cities, categories)
+   * Get catalogs for dropdowns (countries, cities)
    */
   getMetadata(): Observable<MetadataResponse> {
     return this.api.get<MetadataResponse>('/public/metadata');
@@ -115,9 +124,8 @@ export class PublicApi {
 
     if (params.q) {
       searchParams.set('q', params.q);
-    }
-    if (params.category) {
-      searchParams.set('category', params.category);
+    } else if (params.category) {
+      searchParams.set('q', params.category);
     }
     if (params.city) {
       searchParams.set('city', params.city);
@@ -128,7 +136,7 @@ export class PublicApi {
     if (params.page && params.page > 1) {
       searchParams.set('page', String(params.page));
     }
-    if (params.pageSize && params.pageSize !== 20) {
+    if (params.pageSize && params.pageSize !== 12) {
       searchParams.set('pageSize', String(params.pageSize));
     }
 

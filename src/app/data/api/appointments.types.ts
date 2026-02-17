@@ -145,6 +145,9 @@ export interface GetAvailableSlotsRequest {
 
   /** Date in ISO format (YYYY-MM-DD) or full ISO 8601 */
   date: string;
+
+  /** Optional slot duration filter in minutes */
+  durationMinutes?: number;
 }
 
 /**

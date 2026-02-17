@@ -7,8 +7,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -37,16 +35,14 @@ export interface AllergyDialogData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatDatepickerModule,
     MatProgressSpinnerModule,
-    MatNativeDateModule,
   ],
   templateUrl: './allergy-dialog.component.html',
   styleUrl: './allergy-dialog.component.scss',
 })
 export class AllergyDialogComponent implements OnInit {
-  private dialogRef = inject(MatDialogRef<AllergyDialogComponent>);
-  private fb = inject(FormBuilder);
+  private readonly dialogRef = inject(MatDialogRef<AllergyDialogComponent>);
+  private readonly fb = inject(FormBuilder);
   public data = inject<AllergyDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
@@ -88,9 +84,9 @@ export class AllergyDialogComponent implements OnInit {
         [Validators.required, Validators.maxLength(200)],
       ],
       reaction: [allergy?.reaction || '', [Validators.maxLength(500)]],
-      severity: [allergy?.severity || null],
+      severity: [allergy?.severity || null, [Validators.required]],
       status: [allergy?.status || 'Active', [Validators.required]],
-      onsetDate: [allergy?.onsetDate ? new Date(allergy.onsetDate) : null, []],
+      onsetDate: [this.normalizeDateOnly(allergy?.onsetDate), []],
       notes: [allergy?.notes || '', [Validators.maxLength(1000)]],
     });
   }
@@ -110,11 +106,9 @@ export class AllergyDialogComponent implements OnInit {
     const dto: CreateAllergyDto | UpdateAllergyDto = {
       allergen: formValue.allergen,
       reaction: formValue.reaction || undefined,
-      severity: formValue.severity || undefined,
+      severity: formValue.severity,
       status: formValue.status,
-      onsetDate: formValue.onsetDate
-        ? formValue.onsetDate.toISOString()
-        : undefined,
+      onsetDate: this.normalizeDateOnly(formValue.onsetDate) || undefined,
       notes: formValue.notes || undefined,
     };
 
@@ -136,5 +130,16 @@ export class AllergyDialogComponent implements OnInit {
     }
 
     return '';
+  }
+
+  private normalizeDateOnly(value: unknown): string | null {
+    if (!value) return null;
+    if (typeof value === 'string') {
+      return value.length >= 10 ? value.slice(0, 10) : null;
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split('T')[0];
+    }
+    return null;
   }
 }

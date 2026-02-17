@@ -21,17 +21,7 @@
     <!-- Exam Date -->
     <mat-form-field appearance="outline">
       <mat-label>Fecha del examen *</mat-label>
-      <input
-        matInput
-        [matDatepicker]="examDatePicker"
-        formControlName="examDate"
-        required
-      />
-      <mat-datepicker-toggle
-        matIconSuffix
-        [for]="examDatePicker"
-      ></mat-datepicker-toggle>
-      <mat-datepicker #examDatePicker></mat-datepicker>
+      <input matInput type="date" formControlName="examDate" required />
       <mat-error>{{ getErrorMessage("examDate") }}</mat-error>
     </mat-form-field>
 

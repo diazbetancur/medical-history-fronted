@@ -65,7 +65,7 @@ import { Router } from '@angular/router';
         align-items: center;
         min-height: 100vh;
         padding: 1rem;
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: var(--gradient-primary);
       }
 
       .error-card {
@@ -91,7 +91,7 @@ import { Router } from '@angular/router';
 
       .error-code {
         font-size: 1rem;
-        color: rgba(0, 0, 0, 0.54);
+        color: var(--color-text-secondary);
         margin: 0.5rem 0;
       }
 
@@ -102,7 +102,7 @@ import { Router } from '@angular/router';
 
       .error-hint {
         font-size: 0.9rem;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
         margin-bottom: 2rem;
       }
 

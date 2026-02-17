@@ -38,9 +38,9 @@ import {
   styleUrl: './patient-background.page.scss',
 })
 export class PatientBackgroundPage implements OnInit {
-  private backgroundService = inject(PatientBackgroundService);
-  private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
+  private readonly backgroundService = inject(PatientBackgroundService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   // State signals
   isLoading = signal(false);

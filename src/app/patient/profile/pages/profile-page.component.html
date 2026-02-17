@@ -1,16 +1,184 @@
 <div class="profile-page">
   <div class="profile-header">
-    <h1>Mi Perfil</h1>
-    <p class="subtitle">Gestiona tu información médica y resultados</p>
+    <div class="header-content">
+      <div>
+        <h1>Mi Perfil</h1>
+        <p class="subtitle">Gestiona tu información médica y resultados</p>
+      </div>
+
+      <a
+        mat-stroked-button
+        routerLink="/patient/change-password"
+        class="change-password-link"
+      >
+        <mat-icon>lock_reset</mat-icon>
+        Cambiar contraseña
+      </a>
+    </div>
   </div>
 
   <mat-tab-group class="profile-tabs" animationDuration="300ms">
     <!-- Tab: Resumen -->
     <mat-tab label="Resumen">
       <div class="tab-content">
-        <p class="placeholder-text">
-          🏗️ Próximamente: Resumen de tu perfil médico
-        </p>
+        @if (isLoadingSummary()) {
+          <div class="summary-loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Cargando resumen...</p>
+          </div>
+        } @else if (summaryError()) {
+          <div class="summary-error">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ summaryError() }}</p>
+            <button mat-stroked-button (click)="loadSummary()">
+              Reintentar
+            </button>
+          </div>
+        } @else {
+          <mat-card class="summary-card">
+            <mat-card-content>
+              @if (!isEditingSummary()) {
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <span class="label">Nombre</span>
+                    <span class="value">{{ fullName() }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Email</span>
+                    <span class="value">{{
+                      profile()?.email || "No disponible"
+                    }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Teléfono</span>
+                    <span class="value">{{
+                      profile()?.phone || "No disponible"
+                    }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Fecha de nacimiento</span>
+                    <span class="value">{{
+                      profile()?.dateOfBirth || "No disponible"
+                    }}</span>
+                  </div>
+                  <div class="summary-item full">
+                    <span class="label">Dirección</span>
+                    <span class="value">{{ completeAddress() }}</span>
+                  </div>
+                </div>
+
+                <div class="summary-actions">
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    (click)="startEditSummary()"
+                  >
+                    Editar perfil
+                  </button>
+                </div>
+              } @else {
+                <form class="summary-form" [formGroup]="summaryForm">
+                  <div class="summary-grid form-grid">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Nombre</mat-label>
+                      <input
+                        matInput
+                        formControlName="firstName"
+                        placeholder="Nombre"
+                        title="Nombre"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Apellido</mat-label>
+                      <input
+                        matInput
+                        formControlName="lastName"
+                        placeholder="Apellido"
+                        title="Apellido"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Teléfono</mat-label>
+                      <input
+                        matInput
+                        formControlName="phone"
+                        placeholder="Teléfono"
+                        title="Teléfono"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Fecha de nacimiento</mat-label>
+                      <input
+                        matInput
+                        formControlName="dateOfBirth"
+                        type="date"
+                        placeholder="Fecha de nacimiento"
+                        title="Fecha de nacimiento"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-field">
+                      <mat-label>Calle</mat-label>
+                      <input
+                        matInput
+                        formControlName="street"
+                        placeholder="Calle"
+                        title="Calle"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Ciudad</mat-label>
+                      <input
+                        matInput
+                        formControlName="city"
+                        placeholder="Ciudad"
+                        title="Ciudad"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>País</mat-label>
+                      <input
+                        matInput
+                        formControlName="country"
+                        placeholder="País"
+                        title="País"
+                      />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="summary-actions edit-actions">
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      (click)="cancelEditSummary()"
+                      [disabled]="isSavingSummary()"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      type="button"
+                      (click)="saveSummary()"
+                      [disabled]="summaryForm.invalid || isSavingSummary()"
+                    >
+                      @if (isSavingSummary()) {
+                        Guardando...
+                      } @else {
+                        Actualizar
+                      }
+                    </button>
+                  </div>
+                </form>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
       </div>
     </mat-tab>
 
@@ -24,9 +192,7 @@
     <!-- Tab: Medicamentos -->
     <mat-tab label="Medicamentos">
       <div class="tab-content">
-        <p class="placeholder-text">
-          🏗️ Próximamente: Tus medicamentos actuales y historial
-        </p>
+        <app-patient-medications />
       </div>
     </mat-tab>
 
@@ -40,18 +206,14 @@
     <!-- Tab: Alergias -->
     <mat-tab label="Alergias">
       <div class="tab-content">
-        <p class="placeholder-text">
-          🏗️ Próximamente: Registro de alergias y reacciones adversas
-        </p>
+        <app-patient-allergies />
       </div>
     </mat-tab>
 
     <!-- Tab: Antecedentes -->
     <mat-tab label="Antecedentes">
       <div class="tab-content">
-        <p class="placeholder-text">
-          🏗️ Próximamente: Antecedentes médicos familiares y personales
-        </p>
+        <app-patient-background />
       </div>
     </mat-tab>
 

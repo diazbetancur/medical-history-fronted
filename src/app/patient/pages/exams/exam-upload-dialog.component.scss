@@ -21,11 +21,11 @@
       margin: 0 0 12px 0;
       font-size: 16px;
       font-weight: 500;
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--color-text-primary);
     }
 
     .file-drop-zone {
-      border: 2px dashed rgba(0, 0, 0, 0.12);
+      border: 2px dashed var(--color-border);
       border-radius: 8px;
       padding: 32px;
       text-align: center;
@@ -33,7 +33,7 @@
       transition: all 0.3s ease;
 
       &:hover {
-        border-color: var(--primary-color, #1976d2);
+        border-color: var(--color-primary);
         background-color: rgba(25, 118, 210, 0.04);
       }
 
@@ -41,17 +41,17 @@
         font-size: 48px;
         width: 48px;
         height: 48px;
-        color: rgba(0, 0, 0, 0.3);
+        color: var(--color-text-disabled);
         margin-bottom: 16px;
       }
 
       p {
         margin: 8px 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
 
         &.file-hint {
           font-size: 12px;
-          color: rgba(0, 0, 0, 0.4);
+          color: var(--color-text-disabled);
         }
       }
 
@@ -69,7 +69,7 @@
     }
 
     .file-preview {
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--color-border);
       border-radius: 8px;
       padding: 16px;
       display: flex;
@@ -98,7 +98,7 @@
         height: 120px;
         border-radius: 4px;
         flex-shrink: 0;
-        background-color: #f44336;
+        background-color: var(--color-error);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -136,14 +136,14 @@
             font-size: 20px;
             width: 20px;
             height: 20px;
-            color: rgba(0, 0, 0, 0.54);
+            color: var(--color-text-secondary);
             flex-shrink: 0;
           }
         }
 
         .file-size {
           font-size: 12px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
 
         button {
@@ -159,9 +159,9 @@
       gap: 8px;
       margin-top: 8px;
       padding: 12px;
-      background-color: #ffebee;
+      background-color: var(--color-error-light);
       border-radius: 4px;
-      color: #c62828;
+      color: var(--color-error);
 
       mat-icon {
         font-size: 20px;

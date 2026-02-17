@@ -4,7 +4,7 @@
   align-items: center;
   min-height: 100vh;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
 }
 
 .login-card {
@@ -26,7 +26,7 @@ mat-card-header {
   }
 
   mat-card-subtitle {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--color-text-secondary);
   }
 }
 
@@ -45,10 +45,10 @@ form {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  background-color: #fee;
-  border: 1px solid #fcc;
+  background-color: var(--color-error-light);
+  border: 1px solid var(--color-error);
   border-radius: 4px;
-  color: #c33;
+  color: var(--color-error-dark);
   font-size: 0.875rem;
 
   mat-icon {
@@ -70,18 +70,42 @@ button[type="submit"] {
   }
 }
 
+.forgot-link {
+  text-align: right;
+  margin-top: 0.5rem;
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 mat-card-actions {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
   margin-top: 1.5rem;
+
+  .back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 0;
+  }
 
   .register-link {
     margin: 0;
     font-size: 0.875rem;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--color-text-secondary);
 
     a {
-      color: #667eea;
+      color: var(--color-primary);
       text-decoration: none;
       font-weight: 500;
 

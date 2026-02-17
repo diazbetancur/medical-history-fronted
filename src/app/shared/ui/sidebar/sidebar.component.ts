@@ -57,25 +57,25 @@ import { MenuItem } from '@core/config/menu-config';
     }
 
     a[mat-list-item] {
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--color-text-primary);
       transition: background-color 0.2s ease;
 
       &:hover {
-        background-color: rgba(0, 0, 0, 0.04);
+        background-color: var(--color-surface-hover);
       }
 
       &.active {
         background-color: rgba(63, 81, 181, 0.08);
-        color: #3f51b5;
+        color: var(--color-primary);
 
         mat-icon {
-          color: #3f51b5;
+          color: var(--color-primary);
         }
       }
     }
 
     mat-icon {
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--color-text-secondary);
     }
 
     mat-divider {

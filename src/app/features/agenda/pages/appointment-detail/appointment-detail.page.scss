@@ -26,7 +26,7 @@
   gap: 16px;
 
   p {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--color-text-secondary);
   }
 }
 
@@ -47,7 +47,7 @@
 
     p {
       margin: 0;
-      color: rgba(0, 0, 0, 0.7);
+      color: var(--color-text-primary);
     }
   }
 }
@@ -79,13 +79,13 @@
       margin: 0 0 16px;
       font-size: 18px;
       font-weight: 500;
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--color-text-primary);
 
       mat-icon {
         font-size: 24px;
         width: 24px;
         height: 24px;
-        color: rgba(0, 0, 0, 0.54);
+        color: var(--color-text-secondary);
       }
     }
 
@@ -106,24 +106,24 @@
         &.name {
           font-size: 18px;
           font-weight: 500;
-          color: rgba(0, 0, 0, 0.87);
+          color: var(--color-text-primary);
         }
 
         &.primary-info {
           font-size: 20px;
           font-weight: 500;
-          color: rgba(0, 0, 0, 0.87);
+          color: var(--color-text-primary);
         }
 
         &.secondary {
           font-size: 14px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
 
         &.notes {
           font-size: 14px;
           line-height: 1.6;
-          color: rgba(0, 0, 0, 0.87);
+          color: var(--color-text-primary);
           white-space: pre-wrap;
         }
       }

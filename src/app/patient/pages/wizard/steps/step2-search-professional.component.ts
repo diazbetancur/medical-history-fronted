@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  DestroyRef,
   inject,
+  Input,
   input,
   OnInit,
   output,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -17,11 +20,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { ActivatedRoute } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { ToastService } from '@shared/services/toast.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import {
-  formatRating,
   getInitials,
   ProfessionalSearchFiltersDto,
   ProfessionalSearchResultDto,
@@ -29,6 +32,8 @@ import {
 import { SpecialtyDto } from '../../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
+import { AppointmentDto } from '../../../models/appointment.dto';
+import { AppointmentsService } from '../../../services/appointments.service';
 import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
 
 @Component({
@@ -51,14 +56,36 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
     <div class="step-container">
       <h2>Buscar Profesional</h2>
       <p class="subtitle">
-        Encuentra el profesional de salud que mejor se ajuste a tus necesidades
+        Busca por nombre o especialidad. Al seleccionar un profesional, pasarás
+        al calendario.
       </p>
 
-      <!-- Filters Section -->
+      @if (recentProfessionals().length > 0) {
+        <mat-card class="recent-card">
+          <mat-card-content>
+            <h3>Médicos con citas anteriores</h3>
+            <div class="recent-list">
+              @for (
+                prof of recentProfessionals();
+                track prof.professionalProfileId
+              ) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="selectProfessional(prof, true)"
+                >
+                  <span class="name">{{ prof.fullName }}</span>
+                  <span class="specialty">{{ getPrimarySpecialty(prof) }}</span>
+                </button>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
       <mat-card class="filters-card">
         <mat-card-content>
           <div class="filters-grid">
-            <!-- Specialty Filter -->
             <mat-form-field appearance="outline">
               <mat-label>Especialidad</mat-label>
               <mat-select [formControl]="specialtyControl">
@@ -71,13 +98,12 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
               </mat-select>
             </mat-form-field>
 
-            <!-- Text Search -->
             <mat-form-field appearance="outline">
-              <mat-label>Buscar por nombre</mat-label>
+              <mat-label>Buscar por nombre o especialidad</mat-label>
               <input
                 matInput
                 [formControl]="searchControl"
-                placeholder="Ej: Dr. García"
+                placeholder="Ej: Dra. García, Pediatría"
               />
               @if (searchControl.value) {
                 <button
@@ -90,13 +116,12 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
               }
             </mat-form-field>
 
-            <!-- Search Button -->
             <button
               mat-raised-button
               color="primary"
-              (click)="onSearch()"
-              [disabled]="isLoading()"
               class="search-button"
+              [disabled]="isLoading()"
+              (click)="onSearch()"
             >
               <mat-icon>search</mat-icon>
               Buscar
@@ -105,7 +130,6 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
         </mat-card-content>
       </mat-card>
 
-      <!-- Loading State -->
       @if (isLoading()) {
         <div class="loading">
           <mat-spinner diameter="40"></mat-spinner>
@@ -113,19 +137,16 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
         </div>
       }
 
-      <!-- Results Section -->
       @if (!isLoading() && hasSearched()) {
         @if (professionals().length === 0) {
-          <!-- Empty State -->
           <mat-card class="empty-state">
             <mat-card-content>
               <mat-icon>person_search</mat-icon>
               <h3>No se encontraron profesionales</h3>
-              <p>Intenta ajustar los filtros o buscar con otros criterios.</p>
+              <p>Prueba con otra especialidad, ciudad o nombre.</p>
             </mat-card-content>
           </mat-card>
         } @else {
-          <!-- Results List -->
           <div class="results-section">
             <p class="results-count">
               {{ totalResults() }} profesionales encontrados
@@ -142,7 +163,6 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
                 >
                   <mat-card-content>
                     <div class="professional-header">
-                      <!-- Avatar -->
                       <div class="avatar">
                         @if (prof.photoUrl) {
                           <img [src]="prof.photoUrl" [alt]="prof.fullName" />
@@ -153,14 +173,12 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
                         }
                       </div>
 
-                      <!-- Info -->
                       <div class="professional-info">
                         <h3>{{ prof.fullName }}</h3>
                         @if (prof.professionalTitle) {
                           <p class="title">{{ prof.professionalTitle }}</p>
                         }
 
-                        <!-- Specialties -->
                         <div class="specialties">
                           @for (
                             specialty of prof.specialties;
@@ -169,37 +187,8 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
                             <mat-chip>{{ specialty.name }}</mat-chip>
                           }
                         </div>
-
-                        <!-- Location & Rating -->
-                        <div class="metadata">
-                          @if (prof.city) {
-                            <span class="location">
-                              <mat-icon>place</mat-icon>
-                              {{ prof.city }}
-                              @if (prof.country) {
-                                , {{ prof.country }}
-                              }
-                            </span>
-                          }
-                          @if (prof.rating) {
-                            <span class="rating">
-                              <mat-icon>star</mat-icon>
-                              {{ formatRating(prof.rating) }}
-                              @if (prof.reviewCount) {
-                                ({{ prof.reviewCount }})
-                              }
-                            </span>
-                          }
-                          @if (prof.yearsOfExperience) {
-                            <span class="experience">
-                              <mat-icon>workspace_premium</mat-icon>
-                              {{ prof.yearsOfExperience }} años
-                            </span>
-                          }
-                        </div>
                       </div>
 
-                      <!-- Selection Indicator -->
                       @if (
                         selectedProfessionalId() === prof.professionalProfileId
                       ) {
@@ -213,7 +202,6 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
               }
             </div>
 
-            <!-- Paginator -->
             <mat-paginator
               [length]="totalResults()"
               [pageSize]="pageSize()"
@@ -221,29 +209,25 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
               [pageSizeOptions]="[10, 25, 50]"
               (page)="onPageChange($event)"
               showFirstLastButtons
-            >
-            </mat-paginator>
+            ></mat-paginator>
           </div>
         }
       }
 
-      <!-- Initial State (no search yet) -->
       @if (!hasSearched() && !isLoading()) {
         <mat-card class="initial-state">
           <mat-card-content>
             <mat-icon>assignment_ind</mat-icon>
-            <h3>Encuentra tu profesional ideal</h3>
-            <p>
-              Usa los filtros arriba para buscar profesionales por especialidad
-              o nombre.
-            </p>
+            <h3>Selecciona tu profesional</h3>
+            <p>Filtra por especialidad y ciudad para encontrar más rápido.</p>
           </mat-card-content>
         </mat-card>
       }
 
-      <!-- Actions -->
       <div class="actions">
-        <button mat-button (click)="back.emit()">Atrás</button>
+        @if (showBack) {
+          <button mat-button (click)="back.emit()">Atrás</button>
+        }
         <button
           mat-raised-button
           color="primary"
@@ -271,16 +255,46 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
 
       .subtitle {
         margin: 0 0 24px 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
       }
 
-      /* Filters */
+      .recent-card {
+        margin-bottom: 16px;
+
+        h3 {
+          margin: 0 0 12px;
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .recent-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+
+          button {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+
+            .name {
+              font-weight: 600;
+            }
+
+            .specialty {
+              color: var(--color-text-secondary);
+              font-size: 12px;
+            }
+          }
+        }
+      }
+
       .filters-card {
         margin-bottom: 24px;
 
         .filters-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr auto;
+          grid-template-columns: 1fr 2fr auto;
           gap: 16px;
           align-items: start;
 
@@ -299,7 +313,6 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
         }
       }
 
-      /* Loading */
       .loading {
         text-align: center;
         padding: 48px;
@@ -309,7 +322,6 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
         }
       }
 
-      /* Empty & Initial State */
       .empty-state,
       .initial-state {
         text-align: center;
@@ -320,7 +332,7 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
           font-size: 64px;
           width: 64px;
           height: 64px;
-          color: rgba(0, 0, 0, 0.38);
+          color: var(--color-text-disabled);
           margin-bottom: 16px;
         }
 
@@ -331,15 +343,14 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
 
         p {
           margin: 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
-      /* Results Section */
       .results-section {
         .results-count {
           margin: 0 0 16px 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
           font-size: 14px;
         }
 
@@ -351,18 +362,17 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
         }
       }
 
-      /* Professional Card */
       .professional-card {
         cursor: pointer;
         transition: all 0.2s;
 
         &:hover {
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: var(--shadow-2);
         }
 
         &.selected {
-          border: 2px solid var(--mat-sys-primary);
-          background: rgba(var(--mat-sys-primary-rgb), 0.05);
+          border: 2px solid var(--color-primary);
+          background: var(--color-surface-hover);
         }
 
         .professional-header {
@@ -377,7 +387,7 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
           width: 64px;
           height: 64px;
           border-radius: 50%;
-          background: var(--mat-sys-primary);
+          background: var(--color-primary);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -390,7 +400,7 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
           }
 
           .initials {
-            color: white;
+            color: var(--color-text-inverted);
             font-size: 24px;
             font-weight: 500;
           }
@@ -408,7 +418,7 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
           .title {
             margin: 0 0 8px 0;
             font-size: 14px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
 
           .specialties {
@@ -422,35 +432,6 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
               height: 28px;
             }
           }
-
-          .metadata {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            font-size: 14px;
-            color: rgba(0, 0, 0, 0.6);
-
-            > span {
-              display: flex;
-              align-items: center;
-              gap: 4px;
-
-              mat-icon {
-                font-size: 18px;
-                width: 18px;
-                height: 18px;
-              }
-            }
-
-            .rating {
-              color: #f9a825;
-              font-weight: 500;
-
-              mat-icon {
-                color: #f9a825;
-              }
-            }
-          }
         }
 
         .selection-indicator {
@@ -459,7 +440,7 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
           right: 0;
 
           mat-icon {
-            color: var(--mat-sys-primary);
+            color: var(--color-primary);
             font-size: 32px;
             width: 32px;
             height: 32px;
@@ -467,14 +448,18 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
         }
       }
 
-      /* Actions */
       .actions {
         display: flex;
         justify-content: space-between;
         margin-top: 24px;
       }
 
-      /* Responsive */
+      @media (max-width: 1024px) {
+        .filters-card .filters-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
       @media (max-width: 768px) {
         .filters-card .filters-grid {
           grid-template-columns: 1fr;
@@ -509,41 +494,46 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
   ],
 })
 export class Step2SearchProfessionalComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
   private readonly catalogService = inject(PublicCatalogService);
   private readonly professionalsService = inject(PublicProfessionalsService);
+  private readonly appointmentsService = inject(AppointmentsService);
   private readonly toast = inject(ToastService);
 
-  // Inputs/Outputs
   readonly wizardStore = input.required<WizardStore>();
+  @Input() showBack = true;
   readonly completed = output<void>();
   readonly back = output<void>();
 
-  // Form Controls
   readonly specialtyControl = new FormControl<string | null>(null);
   readonly searchControl = new FormControl<string>('');
 
-  // State
   readonly isLoading = signal(false);
   readonly hasSearched = signal(false);
   readonly specialties = signal<SpecialtyDto[]>([]);
+  readonly recentProfessionals = signal<ProfessionalSearchResultDto[]>([]);
   readonly professionals = signal<ProfessionalSearchResultDto[]>([]);
+  readonly selectedProfessional = signal<ProfessionalSearchResultDto | null>(
+    null,
+  );
   readonly selectedProfessionalId = signal<string | null>(null);
   readonly totalResults = signal(0);
   readonly currentPage = signal(1);
   readonly pageSize = signal(10);
+  readonly preselectedSlug = signal<string | null>(null);
+  readonly autoSelectedBySlug = signal(false);
 
-  // Helpers
   readonly getInitials = getInitials;
-  readonly formatRating = formatRating;
 
   ngOnInit(): void {
     this.loadSpecialties();
+    this.loadRecentProfessionals();
+    this.setupRoutePrefill();
     this.setupSearchDebounce();
+    this.searchProfessionals();
   }
 
-  /**
-   * Load specialties catalog
-   */
   private loadSpecialties(): void {
     this.catalogService.getSpecialties().subscribe({
       next: (specialties) => {
@@ -555,38 +545,63 @@ export class Step2SearchProfessionalComponent implements OnInit {
     });
   }
 
-  /**
-   * Setup search debounce (400ms)
-   */
-  private setupSearchDebounce(): void {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(400), distinctUntilChanged())
-      .subscribe(() => {
-        // Auto-search on text change
-        if (this.hasSearched()) {
-          this.onSearch();
-        }
-      });
+  private loadRecentProfessionals(): void {
+    this.appointmentsService
+      .getMyAppointments({ page: 1, pageSize: 30 })
+      .subscribe({
+        next: (response) => {
+          const uniqueByProfessional = new Map<
+            string,
+            ProfessionalSearchResultDto
+          >();
 
-    this.specialtyControl.valueChanges.subscribe(() => {
-      // Auto-search on specialty change
-      if (this.hasSearched()) {
-        this.onSearch();
-      }
-    });
+          response.appointments.forEach((appointment) => {
+            const mapped = this.mapAppointmentToProfessional(appointment);
+            if (!uniqueByProfessional.has(mapped.professionalProfileId)) {
+              uniqueByProfessional.set(mapped.professionalProfileId, mapped);
+            }
+          });
+
+          this.recentProfessionals.set(
+            [...uniqueByProfessional.values()].slice(0, 8),
+          );
+        },
+        error: () => {
+          this.recentProfessionals.set([]);
+        },
+      });
   }
 
-  /**
-   * Execute search
-   */
+  private setupRoutePrefill(): void {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const slug = params.get('professionalSlug');
+        this.preselectedSlug.set(slug);
+      });
+  }
+
+  private setupSearchDebounce(): void {
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.onSearch();
+      });
+
+    this.specialtyControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.onSearch());
+  }
+
   onSearch(): void {
-    this.currentPage.set(1); // Reset to first page
+    this.currentPage.set(1);
     this.searchProfessionals();
   }
 
-  /**
-   * Search professionals with current filters
-   */
   private searchProfessionals(): void {
     const filters: ProfessionalSearchFiltersDto = {
       q: this.searchControl.value || undefined,
@@ -603,6 +618,17 @@ export class Step2SearchProfessionalComponent implements OnInit {
         this.professionals.set(response.professionals);
         this.totalResults.set(response.total);
         this.isLoading.set(false);
+
+        const pendingSlug = this.preselectedSlug();
+        if (pendingSlug && !this.autoSelectedBySlug()) {
+          const matched = response.professionals.find(
+            (item) => item.slug === pendingSlug,
+          );
+          if (matched) {
+            this.autoSelectedBySlug.set(true);
+            this.selectProfessional(matched, true);
+          }
+        }
       },
       error: (error: ApiError) => {
         this.isLoading.set(false);
@@ -611,45 +637,62 @@ export class Step2SearchProfessionalComponent implements OnInit {
     });
   }
 
-  /**
-   * Page change event
-   */
   onPageChange(event: PageEvent): void {
     this.currentPage.set(event.pageIndex + 1);
     this.pageSize.set(event.pageSize);
     this.searchProfessionals();
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /**
-   * Select professional
-   */
-  selectProfessional(prof: ProfessionalSearchResultDto): void {
+  selectProfessional(
+    prof: ProfessionalSearchResultDto,
+    autoAdvance = true,
+  ): void {
+    this.selectedProfessional.set(prof);
     this.selectedProfessionalId.set(prof.professionalProfileId);
+
+    if (autoAdvance) {
+      this.onNext();
+    }
   }
 
-  /**
-   * Go to next step
-   */
   onNext(): void {
-    const professionalId = this.selectedProfessionalId();
-    if (!professionalId) return;
+    const selected = this.selectedProfessional();
 
-    const selected = this.professionals().find(
-      (p) => p.professionalProfileId === professionalId,
-    );
+    if (!selected) return;
 
-    if (selected) {
-      const selectedProfessional: SelectedProfessional = {
-        professionalProfileId: selected.professionalProfileId,
-        slug: selected.slug,
-        name: selected.fullName,
-        specialty: selected.specialties[0]?.name,
-      };
+    const selectedProfessional: SelectedProfessional = {
+      professionalProfileId: selected.professionalProfileId,
+      slug: selected.slug,
+      name: selected.fullName,
+      specialty: selected.specialties[0]?.name,
+    };
 
-      this.wizardStore().setProfessional(selectedProfessional);
-      this.completed.emit();
-    }
+    this.wizardStore().setProfessional(selectedProfessional);
+    this.completed.emit();
+  }
+
+  getPrimarySpecialty(prof: ProfessionalSearchResultDto): string {
+    return prof.specialties[0]?.name || 'Especialidad no disponible';
+  }
+
+  private mapAppointmentToProfessional(
+    appointment: AppointmentDto,
+  ): ProfessionalSearchResultDto {
+    return {
+      professionalProfileId: appointment.professionalProfileId,
+      slug: '',
+      userId: appointment.professional.id,
+      fullName: appointment.professional.name,
+      professionalTitle: undefined,
+      photoUrl: appointment.professional.photoUrl,
+      specialties: [
+        {
+          id: appointment.professional.specialty || 'specialty',
+          name: appointment.professional.specialty || 'Especialidad',
+        },
+      ],
+      isAvailableForAppointments: true,
+    };
   }
 }

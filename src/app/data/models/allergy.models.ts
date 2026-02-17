@@ -35,7 +35,7 @@ export interface AllergyDto {
 export interface CreateAllergyDto {
   allergen: string;
   reaction?: string;
-  severity?: AllergySeverity;
+  severity: AllergySeverity;
   status: AllergyStatus;
   onsetDate?: string; // ISO date
   notes?: string;
@@ -44,7 +44,7 @@ export interface CreateAllergyDto {
 export interface UpdateAllergyDto {
   allergen: string;
   reaction?: string;
-  severity?: AllergySeverity;
+  severity: AllergySeverity;
   status: AllergyStatus;
   onsetDate?: string; // ISO date
   notes?: string;

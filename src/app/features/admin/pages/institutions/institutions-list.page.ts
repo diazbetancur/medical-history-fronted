@@ -237,7 +237,7 @@ import { InstitutionFormDialogComponent } from './institution-form-dialog.compon
 
       .page-subtitle {
         margin: 0;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--color-text-secondary);
         font-size: 14px;
       }
 
@@ -276,7 +276,7 @@ import { InstitutionFormDialogComponent } from './institution-form-dialog.compon
 
         th {
           font-weight: 600;
-          color: rgba(0, 0, 0, 0.87);
+          color: var(--color-text-primary);
         }
 
         td {
@@ -291,12 +291,12 @@ import { InstitutionFormDialogComponent } from './institution-form-dialog.compon
       }
 
       .chip-active {
-        background-color: #4caf50 !important;
+        background-color: var(--color-success) !important;
         color: white !important;
       }
 
       .chip-inactive {
-        background-color: #9e9e9e !important;
+        background-color: var(--color-text-disabled) !important;
         color: white !important;
       }
 
@@ -310,7 +310,7 @@ import { InstitutionFormDialogComponent } from './institution-form-dialog.compon
 
         p {
           margin: 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -326,7 +326,7 @@ import { InstitutionFormDialogComponent } from './institution-form-dialog.compon
           font-size: 64px;
           width: 64px;
           height: 64px;
-          color: rgba(0, 0, 0, 0.26);
+          color: var(--color-text-disabled);
           margin-bottom: 16px;
         }
 
@@ -338,7 +338,7 @@ import { InstitutionFormDialogComponent } from './institution-form-dialog.compon
 
         p {
           margin: 0 0 24px 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
 
         button mat-icon {
@@ -350,7 +350,7 @@ import { InstitutionFormDialogComponent } from './institution-form-dialog.compon
       }
 
       mat-paginator {
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        border-top: 1px solid var(--color-border);
       }
 
       @media (max-width: 768px) {

@@ -7,8 +7,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -43,17 +41,15 @@ export interface BackgroundDialogData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatDatepickerModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
-    MatNativeDateModule,
   ],
   templateUrl: './background-dialog.component.html',
   styleUrl: './background-dialog.component.scss',
 })
 export class BackgroundDialogComponent implements OnInit {
-  private dialogRef = inject(MatDialogRef<BackgroundDialogComponent>);
-  private fb = inject(FormBuilder);
+  private readonly dialogRef = inject(MatDialogRef<BackgroundDialogComponent>);
+  private readonly fb = inject(FormBuilder);
   public data = inject<BackgroundDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
@@ -97,9 +93,7 @@ export class BackgroundDialogComponent implements OnInit {
         background?.description || '',
         [Validators.maxLength(1000)],
       ],
-      eventDate: [
-        background?.eventDate ? new Date(background.eventDate) : null,
-      ],
+      eventDate: [this.normalizeDateOnly(background?.eventDate)],
       isChronic: [background?.isChronic || false],
     });
   }
@@ -116,9 +110,7 @@ export class BackgroundDialogComponent implements OnInit {
       type: formValue.type,
       title: formValue.title.trim(),
       description: formValue.description?.trim() || null,
-      eventDate: formValue.eventDate
-        ? formValue.eventDate.toISOString().split('T')[0]
-        : null,
+      eventDate: this.normalizeDateOnly(formValue.eventDate),
       isChronic: formValue.isChronic,
     };
 
@@ -148,5 +140,16 @@ export class BackgroundDialogComponent implements OnInit {
     const value = this.form.get(field)?.value || '';
     const remaining = maxLength - value.length;
     return `${remaining} caracteres restantes`;
+  }
+
+  private normalizeDateOnly(value: unknown): string | null {
+    if (!value) return null;
+    if (typeof value === 'string') {
+      return value.length >= 10 ? value.slice(0, 10) : null;
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split('T')[0];
+    }
+    return null;
   }
 }

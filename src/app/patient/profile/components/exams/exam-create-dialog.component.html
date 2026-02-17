@@ -5,9 +5,13 @@
     <!-- Title -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Título del Examen *</mat-label>
-      <input matInput formControlName="title" placeholder="Ej: Análisis de Sangre" />
-      @if (form.get('title')?.invalid && form.get('title')?.touched) {
-        <mat-error>{{ getErrorMessage('title') }}</mat-error>
+      <input
+        matInput
+        formControlName="title"
+        placeholder="Ej: Análisis de Sangre"
+      />
+      @if (form.get("title")?.invalid && form.get("title")?.touched) {
+        <mat-error>{{ getErrorMessage("title") }}</mat-error>
       }
     </mat-form-field>
 
@@ -29,12 +33,10 @@
       <mat-label>Fecha del Examen</mat-label>
       <input
         matInput
-        [matDatepicker]="picker"
+        type="date"
         formControlName="examDate"
         placeholder="Selecciona una fecha"
       />
-      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
 
     <!-- Notes -->
@@ -46,13 +48,27 @@
         rows="4"
         placeholder="Observaciones, instrucciones del médico, etc."
       ></textarea>
-      @if (form.get('notes')?.invalid && form.get('notes')?.touched) {
-        <mat-error>{{ getErrorMessage('notes') }}</mat-error>
+      @if (form.get("notes")?.invalid && form.get("notes")?.touched) {
+        <mat-error>{{ getErrorMessage("notes") }}</mat-error>
       }
     </mat-form-field>
 
+    <div class="file-field">
+      <label for="examFile">Archivo del examen *</label>
+      <input
+        id="examFile"
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        (change)="onFileSelected($event)"
+      />
+      @if (selectedFile) {
+        <p class="selected-file">Seleccionado: {{ selectedFile.name }}</p>
+      }
+    </div>
+
     <p class="help-text">
-      * Campos requeridos. Podrás agregar archivos adjuntos después de crear el examen.
+      * Campos requeridos. El archivo debe ser PDF/JPG/JPEG/PNG/WEBP y máximo
+      10MB.
     </p>
   </form>
 </mat-dialog-content>
@@ -63,7 +79,7 @@
     mat-raised-button
     color="primary"
     (click)="create()"
-    [disabled]="form.invalid || creating"
+    [disabled]="form.invalid || creating || !selectedFile"
   >
     @if (creating) {
       <mat-spinner diameter="20"></mat-spinner>

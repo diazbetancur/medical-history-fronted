@@ -12,22 +12,7 @@
 
     <mat-card-content>
       <mat-stepper orientation="horizontal" linear #stepper>
-        <!-- Step 1: Profile -->
-        <mat-step [completed]="isStep1Complete()">
-          <ng-template matStepLabel>
-            <span class="step-label">
-              <mat-icon>person</mat-icon>
-              Perfil
-            </span>
-          </ng-template>
-
-          <app-step1-profile
-            [wizardStore]="wizardStore"
-            (completed)="stepper.next()"
-          ></app-step1-profile>
-        </mat-step>
-
-        <!-- Step 2: Search Professional -->
+        <!-- Step 1: Search Professional -->
         <mat-step [completed]="isStep2Complete()">
           <ng-template matStepLabel>
             <span class="step-label">
@@ -39,11 +24,11 @@
           <app-step2-search-professional
             [wizardStore]="wizardStore"
             (completed)="stepper.next()"
-            (back)="stepper.previous()"
+            [showBack]="false"
           ></app-step2-search-professional>
         </mat-step>
 
-        <!-- Step 3: Select Slot -->
+        <!-- Step 2: Select Slot -->
         <mat-step [completed]="isStep3Complete()">
           <ng-template matStepLabel>
             <span class="step-label">
@@ -59,7 +44,7 @@
           ></app-step3-slots>
         </mat-step>
 
-        <!-- Step 4: Confirm -->
+        <!-- Step 3: Confirm -->
         <mat-step>
           <ng-template matStepLabel>
             <span class="step-label">
@@ -76,7 +61,7 @@
           ></app-step4-confirm>
         </mat-step>
 
-        <!-- Step 5: My Appointments -->
+        <!-- Step 4: My Appointments -->
         <mat-step>
           <ng-template matStepLabel>
             <span class="step-label">

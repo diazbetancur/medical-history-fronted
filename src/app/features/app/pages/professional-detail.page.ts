@@ -186,7 +186,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
         p {
           margin-top: 16px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -202,7 +202,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
         margin-bottom: 24px;
 
         .professional-avatar {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: var(--gradient-primary);
           color: white;
           display: flex;
           align-items: center;
@@ -245,7 +245,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
             gap: 8px;
             margin-bottom: 12px;
             font-size: 16px;
-            color: rgba(0, 0, 0, 0.7);
+            color: var(--color-text-primary);
 
             mat-icon {
               font-size: 20px;
@@ -255,7 +255,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
             &.rating {
               .star-icon {
-                color: #ffa000;
+                color: var(--color-warning);
               }
             }
           }
@@ -279,7 +279,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
         .section-description {
           margin: 0 0 16px 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
 
         .date-picker {
@@ -298,7 +298,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
           .slots-hint {
             margin: 0 0 16px 0;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
             font-size: 14px;
           }
 
@@ -307,7 +307,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
             align-items: center;
             gap: 16px;
             padding: 24px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
           }
 
           .action-buttons {
@@ -322,14 +322,14 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
           .no-slots {
             text-align: center;
             padding: 32px;
-            color: rgba(0, 0, 0, 0.6);
+            color: var(--color-text-secondary);
 
             mat-icon {
               font-size: 48px;
               width: 48px;
               height: 48px;
               margin-bottom: 16px;
-              color: rgba(0, 0, 0, 0.3);
+              color: var(--color-text-disabled);
             }
 
             p {
@@ -338,7 +338,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
             .hint {
               font-size: 14px;
-              color: rgba(0, 0, 0, 0.4);
+              color: var(--color-text-disabled);
             }
           }
         }
@@ -352,7 +352,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
           font-size: 64px;
           width: 64px;
           height: 64px;
-          color: #f44336;
+          color: var(--color-error);
           margin: 0 auto 16px;
         }
 
@@ -364,7 +364,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 
         p {
           margin: 0 0 24px 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 

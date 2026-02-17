@@ -25,11 +25,38 @@ export interface RegisterRequest {
   confirmPassword: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
 }
 
 export interface RegisterResponse {
+  success?: boolean;
   message: string;
-  userId: string;
+  userId?: string;
+  errors?: string[];
+}
+
+export interface UserOperationResultDto {
+  success: boolean;
+  message: string;
+  userId?: string | null;
+  errors?: string[];
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+  confirmNewPassword: string;
 }
 
 export interface LoginResponse {
@@ -126,7 +153,7 @@ export interface Category {
 export interface MetadataResponse {
   countries: Country[];
   cities: City[];
-  categories: Category[];
+  categories?: Category[];
 }
 
 // =============================================================================
@@ -141,18 +168,34 @@ export interface FeaturedCategory {
   professionalCount?: number;
 }
 
+export interface FeaturedSpecialty {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  professionalCount?: number;
+}
+
+export interface ProfessionalSpecialty {
+  id: string;
+  name: string;
+  slug: string;
+  isPrimary: boolean;
+}
+
 export interface FeaturedProfessional {
   id: string;
   slug: string;
   businessName: string;
   profileImageUrl?: string;
-  categoryName: string;
-  categorySlug: string;
+  specialties: ProfessionalSpecialty[];
   cityName: string;
   citySlug: string;
   isVerified: boolean;
   isFeatured: boolean;
   priceFrom?: number;
+  categoryName?: string;
+  categorySlug?: string;
 }
 
 export interface PopularCity {
@@ -167,12 +210,15 @@ export interface PopularCity {
 
 export interface HomePageTotals {
   totalProfessionals: number;
-  totalCategories: number;
+  totalPatients: number;
+  totalAppointments: number;
   totalCities: number;
+  totalCategories?: number;
 }
 
 export interface HomePageResponse {
-  featuredCategories: FeaturedCategory[];
+  featuredSpecialties: FeaturedSpecialty[];
+  featuredCategories?: FeaturedCategory[];
   featuredProfessionals: FeaturedProfessional[];
   popularCities: PopularCity[];
   totals: HomePageTotals;
@@ -213,9 +259,9 @@ export interface SearchFilterItem {
 }
 
 export interface SearchFilters {
-  categories: SearchFilterItem[];
   cities: SearchFilterItem[];
-  priceRange: { min: number; max: number };
+  categories?: SearchFilterItem[];
+  priceRange?: { min: number; max: number };
 }
 
 export interface AppliedFilters {

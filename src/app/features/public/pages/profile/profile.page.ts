@@ -1,29 +1,22 @@
-import { isPlatformBrowser } from '@angular/common';
-import {
-  Component,
-  effect,
-  inject,
-  input,
-  OnInit,
-  PLATFORM_ID,
-} from '@angular/core';
+import { Component, computed, effect, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '@core/auth';
 import { ProfileStore } from '@data/stores';
 import { AnalyticsService, SeoService } from '@shared/services';
-import { ContactDialogComponent, ContactDialogData } from '@shared/ui';
 import { isNotFoundError } from '@shared/utils';
+import { PublicHeaderComponent } from '../../components/public-header.component';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
   imports: [
+    PublicHeaderComponent,
     RouterLink,
     MatCardModule,
     MatButtonModule,
@@ -31,32 +24,53 @@ import { isNotFoundError } from '@shared/utils';
     MatTabsModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    MatDialogModule,
   ],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',
 })
-export class ProfilePageComponent implements OnInit {
+export class ProfilePageComponent {
   readonly store = inject(ProfileStore);
   private readonly seoService = inject(SeoService);
   private readonly analytics = inject(AnalyticsService);
-  private readonly dialog = inject(MatDialog);
-  private readonly platformId = inject(PLATFORM_ID);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+  readonly estimatedTariff = computed(() => {
+    const prices = this.store
+      .services()
+      .map((service) => service.priceFrom)
+      .filter((price): price is number => !!price);
+
+    if (prices.length === 0) {
+      return null;
+    }
+
+    return Math.min(...prices);
+  });
+
+  readonly profileSpecialties = computed(() => {
+    const profile = this.store.profile();
+    const category = profile?.categoryName?.trim();
+    const serviceNames = this.store
+      .services()
+      .map((service) => service.name?.trim())
+      .filter((name): name is string => !!name);
+
+    const unique = [
+      ...new Set([...(category ? [category] : []), ...serviceNames]),
+    ];
+    return unique.slice(0, 6);
+  });
 
   // Route param via input binding
   slug = input.required<string>();
 
-  private slugEffect = effect(() => {
+  private readonly slugEffect = effect(() => {
     const currentSlug = this.slug();
     if (currentSlug) {
       this.loadProfile(currentSlug);
     }
   });
-
-  ngOnInit(): void {
-    // Profile loads via effect when slug changes
-  }
 
   private loadProfile(slug: string): void {
     this.store.load(slug).subscribe({
@@ -114,47 +128,25 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
-  /**
-   * Track contact click event and open modal for form
-   */
-  onContactClick(channel: 'whatsapp' | 'phone' | 'form'): void {
-    const profile = this.store.profile();
-    if (!profile) return;
-
-    // Track click event
-    this.analytics.trackClickContact({
-      professionalId: profile.id,
-      channel,
-      professionalName: profile.businessName,
-    });
-
-    // Open contact dialog for form channel (only in browser)
-    if (channel === 'form' && isPlatformBrowser(this.platformId)) {
-      this.openContactDialog();
-    }
+  goToSearch(): void {
+    this.router.navigate(['/search']);
   }
 
-  /**
-   * Open contact dialog modal
-   */
-  private openContactDialog(): void {
+  bookAppointment(): void {
     const profile = this.store.profile();
     if (!profile) return;
 
-    const services = this.store.services();
+    if (this.authService.isAuthenticated() && this.authService.isClient()) {
+      this.router.navigate(['/patient/wizard'], {
+        queryParams: { professionalSlug: profile.slug },
+      });
+      return;
+    }
 
-    const dialogData: ContactDialogData = {
-      professionalId: profile.id,
-      professionalName: profile.businessName,
-      professionalSlug: profile.slug,
-      services: services.length > 0 ? services : undefined,
-    };
-
-    this.dialog.open(ContactDialogComponent, {
-      data: dialogData,
-      width: '480px',
-      maxWidth: '95vw',
-      disableClose: false,
+    this.router.navigate(['/login'], {
+      queryParams: {
+        returnUrl: `/patient/wizard?professionalSlug=${profile.slug}`,
+      },
     });
   }
 }

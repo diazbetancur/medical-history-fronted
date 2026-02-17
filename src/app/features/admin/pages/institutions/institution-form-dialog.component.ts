@@ -174,7 +174,7 @@ export interface InstitutionFormDialogData {
         padding: 24px 24px 16px;
 
         mat-icon {
-          color: var(--primary-color, #3f51b5);
+          color: var(--primary-color, var(--color-primary));
         }
       }
 
@@ -214,7 +214,7 @@ export interface InstitutionFormDialogData {
         .toggle-hint {
           margin: 0;
           font-size: 12px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
           padding-left: 4px;
         }
       }

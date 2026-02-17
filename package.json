@@ -4,7 +4,14 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:dev": "ng serve --configuration development",
+    "start:qa": "ng serve --configuration qa",
+    "start:prod": "ng serve --configuration production",
     "build": "ng build",
+    "build:dev": "ng build --configuration development",
+    "build:qa": "ng build --configuration qa",
+    "build:prod": "ng build --configuration production",
+    "build:vercel": "node ./scripts/vercel-build.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:pro-directory": "node dist/pro-directory/server/server.mjs"

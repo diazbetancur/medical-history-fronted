@@ -60,7 +60,7 @@ import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
         align-items: center;
         height: 100vh;
         font-size: 1.2rem;
-        color: #666;
+        color: var(--color-text-secondary);
       }
     `,
   ],

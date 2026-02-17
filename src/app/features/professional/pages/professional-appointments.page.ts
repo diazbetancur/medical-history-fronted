@@ -326,7 +326,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
 
         p {
           margin-top: 16px;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -340,7 +340,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
           font-size: 64px;
           width: 64px;
           height: 64px;
-          color: rgba(0, 0, 0, 0.3);
+          color: var(--color-text-disabled);
           margin: 0 auto 16px;
         }
 
@@ -352,7 +352,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
 
         p {
           margin: 0;
-          color: rgba(0, 0, 0, 0.6);
+          color: var(--color-text-secondary);
         }
       }
 
@@ -364,7 +364,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
 
           .badge {
             margin-left: 8px;
-            background: #f44336;
+            background: var(--color-error);
             color: white;
             border-radius: 10px;
             padding: 2px 8px;
@@ -384,7 +384,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
           margin: 0 0 16px 0;
           font-size: 18px;
           font-weight: 500;
-          color: rgba(0, 0, 0, 0.7);
+          color: var(--color-text-primary);
 
           mat-icon {
             font-size: 20px;
@@ -394,7 +394,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
 
           .count {
             font-size: 14px;
-            color: rgba(0, 0, 0, 0.5);
+            color: var(--color-text-tertiary);
             font-weight: 400;
           }
         }
@@ -407,7 +407,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
 
       .appointment-card {
         .appointment-avatar {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: var(--gradient-primary);
           color: white;
           display: flex;
           align-items: center;
@@ -438,7 +438,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
             align-items: flex-start;
             gap: 8px;
             margin-bottom: 8px;
-            color: rgba(0, 0, 0, 0.7);
+            color: var(--color-text-primary);
 
             mat-icon {
               font-size: 18px;
@@ -457,27 +457,27 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
 
             mat-chip {
               &.status-pending {
-                background: #ff9800;
+                background: var(--color-warning);
                 color: white;
               }
 
               &.status-confirmed {
-                background: #4caf50;
+                background: var(--color-success);
                 color: white;
               }
 
               &.status-cancelled {
-                background: #f44336;
+                background: var(--color-error);
                 color: white;
               }
 
               &.status-completed {
-                background: #2196f3;
+                background: var(--color-primary);
                 color: white;
               }
 
               &.status-no_show {
-                background: #9e9e9e;
+                background: var(--color-text-disabled);
                 color: white;
               }
             }
