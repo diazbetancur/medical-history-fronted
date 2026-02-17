@@ -1,0 +1,126 @@
+<div class="professional-patients-list">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Mis Pacientes</h1>
+      <p class="subtitle">Lista de pacientes que has atendido</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando pacientes...</p>
+  </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+  <mat-card class="error-card">
+    <mat-card-content>
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <p class="error-message">{{ error() }}</p>
+      <button mat-raised-button color="primary" (click)="retry()">
+        Reintentar
+      </button>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Empty State -->
+  @else if (patients().length === 0) {
+  <mat-card class="empty-card">
+    <mat-card-content>
+      <mat-icon class="empty-icon">people_outline</mat-icon>
+      <p class="empty-message">Aún no tienes pacientes registrados</p>
+      <p class="empty-subtitle">
+        Los pacientes aparecerán aquí cuando registres atenciones médicas
+      </p>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Content -->
+  @else {
+  <div class="patients-grid">
+    @for (patient of patients(); track patient.patientProfileId) {
+    <mat-card class="patient-card" (click)="viewPatient(patient)">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="patient-avatar">person</mat-icon>
+        <mat-card-title>{{ patient.fullName }}</mat-card-title>
+        <mat-card-subtitle> {{ patient.email }} </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="patient-info">
+          @if (patient.phone) {
+          <div class="info-item">
+            <mat-icon>phone</mat-icon>
+            <div class="info-text">
+              <span class="info-label">Teléfono:</span>
+              <span class="info-value">{{ patient.phone }}</span>
+            </div>
+          </div>
+          } @if (patient.lastAppointmentUtc) {
+          <div class="info-item">
+            <mat-icon>event</mat-icon>
+            <div class="info-text">
+              <span class="info-label">Última cita:</span>
+              <span class="info-value"
+                >{{ patient.lastAppointmentUtc | date: 'dd/MM/yyyy' }}</span
+              >
+            </div>
+          </div>
+          } @if (patient.nextAppointmentUtc) {
+          <div class="info-item">
+            <mat-icon>event_upcoming</mat-icon>
+            <div class="info-text">
+              <span class="info-label">Próxima cita:</span>
+              <span class="info-value"
+                >{{ patient.nextAppointmentUtc | date: 'dd/MM/yyyy' }}</span
+              >
+            </div>
+          </div>
+          }
+
+          <div class="info-item">
+            <mat-icon
+              >{{ patient.shareFullHistoryFlag ? 'visibility' : 'visibility_off'
+              }}</mat-icon
+            >
+            <div class="info-text">
+              <span class="info-label">Historial completo:</span>
+              <span
+                class="info-value"
+                [class.shared]="patient.shareFullHistoryFlag"
+                [class.private]="!patient.shareFullHistoryFlag"
+              >
+                {{ patient.shareFullHistoryFlag ? 'Sí' : 'No' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button color="primary">
+          Ver Historia
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+    }
+  </div>
+
+  <!-- Pagination -->
+  <mat-paginator
+    [length]="totalItems()"
+    [pageSize]="pageSize()"
+    [pageIndex]="currentPage()"
+    [pageSizeOptions]="[10, 20, 50]"
+    (page)="onPageChange($event)"
+    showFirstLastButtons
+  >
+  </mat-paginator>
+  }
+</div>

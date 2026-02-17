@@ -1,0 +1,95 @@
+<div class="wizard-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>auto_awesome</mat-icon>
+        Asistente de Reserva de Citas
+      </mat-card-title>
+      <mat-card-subtitle>
+        Sigue estos pasos para reservar tu cita médica
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-stepper orientation="horizontal" linear #stepper>
+        <!-- Step 1: Profile -->
+        <mat-step [completed]="isStep1Complete()">
+          <ng-template matStepLabel>
+            <span class="step-label">
+              <mat-icon>person</mat-icon>
+              Perfil
+            </span>
+          </ng-template>
+
+          <app-step1-profile
+            [wizardStore]="wizardStore"
+            (completed)="stepper.next()"
+          ></app-step1-profile>
+        </mat-step>
+
+        <!-- Step 2: Search Professional -->
+        <mat-step [completed]="isStep2Complete()">
+          <ng-template matStepLabel>
+            <span class="step-label">
+              <mat-icon>search</mat-icon>
+              Profesional
+            </span>
+          </ng-template>
+
+          <app-step2-search-professional
+            [wizardStore]="wizardStore"
+            (completed)="stepper.next()"
+            (back)="stepper.previous()"
+          ></app-step2-search-professional>
+        </mat-step>
+
+        <!-- Step 3: Select Slot -->
+        <mat-step [completed]="isStep3Complete()">
+          <ng-template matStepLabel>
+            <span class="step-label">
+              <mat-icon>schedule</mat-icon>
+              Fecha y Hora
+            </span>
+          </ng-template>
+
+          <app-step3-slots
+            [wizardStore]="wizardStore"
+            (completed)="stepper.next()"
+            (back)="stepper.previous()"
+          ></app-step3-slots>
+        </mat-step>
+
+        <!-- Step 4: Confirm -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <span class="step-label">
+              <mat-icon>check_circle</mat-icon>
+              Confirmar
+            </span>
+          </ng-template>
+
+          <app-step4-confirm
+            [wizardStore]="wizardStore"
+            (completed)="stepper.next()"
+            (back)="stepper.previous()"
+            (slotUnavailable)="stepper.selectedIndex = 2"
+          ></app-step4-confirm>
+        </mat-step>
+
+        <!-- Step 5: My Appointments -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <span class="step-label">
+              <mat-icon>event</mat-icon>
+              Mis Citas
+            </span>
+          </ng-template>
+
+          <app-step5-my-appointments
+            (bookAnother)="stepper.reset(); wizardStore.reset()"
+          ></app-step5-my-appointments>
+        </mat-step>
+      </mat-stepper>
+    </mat-card-content>
+  </mat-card>
+</div>

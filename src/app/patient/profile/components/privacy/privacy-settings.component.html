@@ -1,0 +1,70 @@
+<div class="privacy-settings">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando configuración...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <p class="error-message">{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="retry()">
+          Reintentar
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Content -->
+  @else {
+    <mat-card class="settings-card">
+      <mat-card-header>
+        <mat-card-title>Privacidad de Historia Clínica</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="privacy-info">
+          <p class="info-text">
+            Controla quién puede ver tu historia clínica completa.
+          </p>
+        </div>
+
+        <div class="privacy-option">
+          <mat-slide-toggle
+            [checked]="shareFullHistory()"
+            [disabled]="isSaving()"
+            (change)="onToggleChange($event.checked)"
+            color="primary"
+          >
+            <span class="toggle-label">
+              Compartir historial completo con médicos tratantes
+            </span>
+          </mat-slide-toggle>
+
+          @if (isSaving()) {
+            <mat-spinner diameter="20" class="saving-spinner"></mat-spinner>
+          }
+        </div>
+
+        <div class="privacy-explanation">
+          @if (shareFullHistory()) {
+            <p class="explanation-text enabled">
+              ✅ Tus médicos tratantes pueden ver tu historia clínica completa,
+              incluyendo atenciones registradas por otros profesionales.
+            </p>
+          } @else {
+            <p class="explanation-text disabled">
+              🔒 Tus médicos solo podrán ver las atenciones que ellos han
+              registrado contigo. Tu historial de otros profesionales permanece
+              privado.
+            </p>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

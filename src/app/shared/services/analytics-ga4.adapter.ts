@@ -45,7 +45,6 @@ export class GA4Adapter implements AnalyticsProvider {
 
     const measurementId = this.config.measurementId;
     if (!measurementId) {
-      console.warn('[GA4] No measurementId configured');
       return;
     }
 
@@ -83,7 +82,7 @@ export class GA4Adapter implements AnalyticsProvider {
       this.debugLog('GA4 script loaded dynamically');
     };
     script.onerror = () => {
-      console.error('[GA4] Failed to load gtag script');
+      // Failed to load gtag script
     };
     document.head.appendChild(script);
   }
@@ -109,7 +108,7 @@ export class GA4Adapter implements AnalyticsProvider {
    */
   trackEvent<K extends AnalyticsEventName>(
     name: K,
-    params: AnalyticsEventMap[K]
+    params: AnalyticsEventMap[K],
   ): void {
     if (!this.canTrack()) return;
 
@@ -139,7 +138,7 @@ export class GA4Adapter implements AnalyticsProvider {
    * Set user properties
    */
   setUserProperties(
-    properties: Record<string, string | number | boolean>
+    properties: Record<string, string | number | boolean>,
   ): void {
     if (!this.canTrack()) return;
 
@@ -187,7 +186,7 @@ export class GA4Adapter implements AnalyticsProvider {
    */
   private mapEventParams<K extends AnalyticsEventName>(
     name: K,
-    params: AnalyticsEventMap[K]
+    params: AnalyticsEventMap[K],
   ): Record<string, unknown> {
     // Base params with our custom data
     const baseParams: Record<string, unknown> = { ...params };
@@ -232,11 +231,9 @@ export class GA4Adapter implements AnalyticsProvider {
   }
 
   /**
-   * Debug logging
+   * Debug logging (removed - use external analytics dashboard)
    */
-  private debugLog(event: string, data?: unknown): void {
-    if (this.config?.debug) {
-      console.log(`[GA4] ${event}`, data);
-    }
+  private debugLog(_event: string, _data?: unknown): void {
+    // Debug logging removed
   }
 }

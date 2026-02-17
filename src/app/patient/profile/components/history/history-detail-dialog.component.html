@@ -1,0 +1,151 @@
+<div class="history-detail-dialog">
+  <div mat-dialog-title>
+    <h2>Detalle de Atención Médica</h2>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando detalle...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @else if (error()) {
+      <div class="error-container">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <p class="error-message">{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="retry()">
+          Reintentar
+        </button>
+      </div>
+    }
+
+    <!-- Content -->
+    @else {
+      @if (encounter(); as enc) {
+        <div class="encounter-detail">
+          <!-- Professional Info -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>Profesional</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="professional-info">
+                <div class="info-row">
+                  <mat-icon>person</mat-icon>
+                  <span class="info-label">Nombre:</span>
+                  <span class="info-value">{{ enc.professionalName }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Encounter Info -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>Información de la Atención</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="encounter-info">
+                <div class="info-row">
+                  <mat-icon>event</mat-icon>
+                  <span class="info-label">Fecha:</span>
+                  <span class="info-value">{{
+                    enc.encounterDateUtc | date: "dd/MM/yyyy"
+                  }}</span>
+                </div>
+                <div class="info-row">
+                  <mat-icon>label</mat-icon>
+                  <span class="info-label">Estado:</span>
+                  <span
+                    class="info-value status"
+                    [class.draft]="enc.status === 'Draft'"
+                    [class.closed]="enc.status === 'Closed'"
+                  >
+                    {{ enc.status === "Draft" ? "Borrador" : "Cerrada" }}
+                  </span>
+                </div>
+                @if (enc.summary) {
+                  <div class="info-row summary">
+                    <mat-icon>summarize</mat-icon>
+                    <span class="info-label">Resumen:</span>
+                    <span class="info-value">{{ enc.summary }}</span>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Notes -->
+          <mat-card class="info-card notes-card">
+            <mat-card-header>
+              <mat-card-title>Notas Clínicas</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (enc.notes.length === 0) {
+                <p class="empty-notes">No hay notas registradas</p>
+              } @else {
+                <div class="notes-list">
+                  @for (note of enc.notes; track note.id) {
+                    <div class="note-item">
+                      <div class="note-header">
+                        @if (note.title) {
+                          <strong>{{ note.title }}</strong>
+                        }
+                        <span
+                          class="note-type"
+                          [class.note]="note.type === 'Note'"
+                          [class.addendum]="note.type === 'Addendum'"
+                        >
+                          {{
+                            note.type === "Note" ? "Nota Inicial" : "Addendum"
+                          }}
+                        </span>
+                        <span class="note-date">
+                          {{ note.createdAtUtc | date: "dd/MM/yyyy HH:mm" }}
+                        </span>
+                      </div>
+                      <div class="note-author">
+                        <mat-icon>person_outline</mat-icon>
+                        {{ note.createdByProfessionalName }}
+                      </div>
+                      <mat-divider></mat-divider>
+                      <div class="note-content">
+                        {{ note.text }}
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Metadata -->
+          <div class="metadata">
+            <span class="metadata-item">
+              <mat-icon>schedule</mat-icon>
+              Fecha de atención:
+              {{ enc.encounterDateUtc | date: "dd/MM/yyyy HH:mm" }}
+            </span>
+            @if (enc.closedAtUtc) {
+              <span class="metadata-item">
+                <mat-icon>check_circle</mat-icon>
+                Cerrada: {{ enc.closedAtUtc | date: "dd/MM/yyyy HH:mm" }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-raised-button mat-dialog-close>Cerrar</button>
+  </mat-dialog-actions>
+</div>

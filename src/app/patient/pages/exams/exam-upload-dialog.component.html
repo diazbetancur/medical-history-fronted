@@ -1,0 +1,140 @@
+<h2 mat-dialog-title>Subir Examen</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="exam-upload-form">
+    <!-- Title -->
+    <mat-form-field appearance="outline">
+      <mat-label>Título del examen *</mat-label>
+      <input
+        matInput
+        formControlName="title"
+        placeholder="Ej: Análisis de sangre"
+        required
+        maxlength="200"
+      />
+      <mat-hint align="end"
+        >{{ form.get("title")?.value?.length || 0 }}/200</mat-hint
+      >
+      <mat-error>{{ getErrorMessage("title") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Exam Date -->
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha del examen *</mat-label>
+      <input
+        matInput
+        [matDatepicker]="examDatePicker"
+        formControlName="examDate"
+        required
+      />
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="examDatePicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #examDatePicker></mat-datepicker>
+      <mat-error>{{ getErrorMessage("examDate") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="notes-field">
+      <mat-label>Notas adicionales</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        rows="3"
+        placeholder="Observaciones, comentarios, etc."
+        maxlength="1000"
+      ></textarea>
+      <mat-hint align="end"
+        >{{ form.get("notes")?.value?.length || 0 }}/1000</mat-hint
+      >
+    </mat-form-field>
+
+    <!-- File Upload -->
+    <div class="file-upload-section">
+      <h3>Archivo *</h3>
+
+      @if (!selectedFile()) {
+        <div class="file-drop-zone">
+          <input
+            type="file"
+            #fileInput
+            (change)="onFileSelected($event)"
+            accept=".pdf,.jpg,.jpeg,.png"
+            aria-label="Seleccionar archivo de examen"
+            hidden
+          />
+          <mat-icon>cloud_upload</mat-icon>
+          <p>Haz clic para seleccionar un archivo</p>
+          <p class="file-hint">PDF o imágenes (JPG, PNG) - Máx. 10MB</p>
+          <button
+            mat-raised-button
+            type="button"
+            color="primary"
+            (click)="fileInput.click()"
+          >
+            <mat-icon>attach_file</mat-icon>
+            Seleccionar Archivo
+          </button>
+        </div>
+      } @else {
+        <div class="file-preview">
+          @if (previewUrl()) {
+            <div class="image-preview">
+              <img [src]="previewUrl()" alt="Preview" />
+            </div>
+          } @else {
+            <div class="pdf-preview">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>PDF</span>
+            </div>
+          }
+          <div class="file-info">
+            <div class="file-name">
+              <mat-icon>insert_drive_file</mat-icon>
+              <span>{{ selectedFile()!.name }}</span>
+            </div>
+            <div class="file-size">
+              {{ formatFileSize(selectedFile()!.size) }}
+            </div>
+            <button
+              mat-icon-button
+              type="button"
+              color="warn"
+              (click)="removeFile()"
+              matTooltip="Quitar archivo"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (fileError()) {
+        <div class="file-error">
+          <mat-icon>error</mat-icon>
+          <span>{{ fileError() }}</span>
+        </div>
+      }
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSubmitting()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || !selectedFile() || isSubmitting()"
+  >
+    @if (isSubmitting()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      <mat-icon>upload</mat-icon>
+    }
+    Subir Examen
+  </button>
+</mat-dialog-actions>

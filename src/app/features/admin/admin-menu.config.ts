@@ -77,6 +77,8 @@ export const PERMISSIONS = {
   CATALOG_MANAGE_COUNTRIES: 'Catalog.ManageCountries',
   CATALOG_MANAGE_CITIES: 'Catalog.ManageCities',
   CATALOG_MANAGE_CATEGORIES: 'Catalog.ManageCategories',
+  CATALOG_MANAGE_INSTITUTIONS: 'Catalog.ManageInstitutions',
+  CATALOG_VIEW_INSTITUTIONS: 'Catalog.ViewInstitutions',
 
   // Users Management
   USERS_VIEW: 'Users.View',

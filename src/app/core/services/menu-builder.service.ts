@@ -7,6 +7,14 @@ import {
   ADMIN_FOOTER_MENU,
   ADMIN_MENU,
 } from '../../features/admin/admin-menu.config';
+import type {
+  ProfessionalMenuItem,
+  ProfessionalMenuSection,
+} from '../../features/professional/professional-menu.config';
+import {
+  PROFESSIONAL_FOOTER_MENU,
+  PROFESSIONAL_MENU,
+} from '../../features/professional/professional-menu.config';
 import { AuthService } from '../auth/auth.service';
 import {
   hasAllPermissions,
@@ -23,6 +31,14 @@ export interface FilteredMenuItem extends AdminMenuItem {
 }
 
 /**
+ * Filtered professional menu item with visibility info
+ */
+export interface FilteredProfessionalMenuItem extends ProfessionalMenuItem {
+  /** Whether item is visible to current user */
+  visible: boolean;
+}
+
+/**
  * Filtered menu section with visibility info
  */
 export interface FilteredMenuSection extends Omit<AdminMenuSection, 'items'> {
@@ -32,10 +48,26 @@ export interface FilteredMenuSection extends Omit<AdminMenuSection, 'items'> {
 }
 
 /**
+ * Filtered professional menu section with visibility info
+ */
+export interface FilteredProfessionalMenuSection extends Omit<
+  ProfessionalMenuSection,
+  'items'
+> {
+  items: FilteredProfessionalMenuItem[];
+  /** Whether any item in section is visible */
+  hasVisibleItems: boolean;
+}
+
+/**
  * Menu Builder Service
  *
  * Dynamically builds navigation menus based on user permissions.
  * Uses signals for reactive updates when session changes.
+ *
+ * **Supported Menus:**
+ * - Admin menu: For users with admin permissions
+ * - Professional menu: For users with professional permissions
  *
  * @example Usage in component:
  * ```typescript
@@ -79,6 +111,25 @@ export class MenuBuilderService {
   });
 
   /**
+   * Check if user has professional access
+   * Use this to determine if professional area should be accessible
+   */
+  readonly hasProfessionalAccess = computed(() => {
+    const roles = this.authService.roles();
+
+    // Professional role grants access
+    if (roles.includes('Professional')) return true;
+
+    // Or if user has any professional-level permission
+    const permissions = this.userPermissions();
+    const professionalPrefixes = ['Profiles.', 'ServiceRequests.'];
+
+    return permissions.some((p) =>
+      professionalPrefixes.some((prefix) => p.startsWith(prefix)),
+    );
+  });
+
+  /**
    * Filtered admin menu based on user permissions
    */
   readonly adminMenu = computed<FilteredMenuSection[]>(() => {
@@ -89,13 +140,33 @@ export class MenuBuilderService {
       ...section,
       items: section.items.map((item) => ({
         ...item,
-        visible: this.isItemVisible(item, permissions, isSuperAdmin),
+        visible: this.isAdminItemVisible(item, permissions, isSuperAdmin),
       })),
       hasVisibleItems: section.items.some((item) =>
-        this.isItemVisible(item, permissions, isSuperAdmin),
+        this.isAdminItemVisible(item, permissions, isSuperAdmin),
       ),
     }));
   });
+
+  /**
+   * Filtered professional menu based on user permissions
+   */
+  readonly professionalMenu = computed<FilteredProfessionalMenuSection[]>(
+    () => {
+      const permissions = this.userPermissions();
+
+      return PROFESSIONAL_MENU.map((section) => ({
+        ...section,
+        items: section.items.map((item) => ({
+          ...item,
+          visible: this.isProfessionalItemVisible(item, permissions),
+        })),
+        hasVisibleItems: section.items.some((item) =>
+          this.isProfessionalItemVisible(item, permissions),
+        ),
+      }));
+    },
+  );
 
   /**
    * Flat list of visible menu items (useful for mobile/simple menus)
@@ -108,6 +179,18 @@ export class MenuBuilderService {
   });
 
   /**
+   * Flat list of visible professional menu items
+   */
+  readonly visibleProfessionalMenuItems = computed<ProfessionalMenuItem[]>(
+    () => {
+      const menu = this.professionalMenu();
+      return menu
+        .flatMap((section) => section.items)
+        .filter((item) => item.visible);
+    },
+  );
+
+  /**
    * Footer menu items (navigation back, etc.)
    */
   readonly footerMenu = computed<FilteredMenuItem[]>(() => {
@@ -116,9 +199,23 @@ export class MenuBuilderService {
 
     return ADMIN_FOOTER_MENU.map((item) => ({
       ...item,
-      visible: this.isItemVisible(item, permissions, isSuperAdmin),
+      visible: this.isAdminItemVisible(item, permissions, isSuperAdmin),
     }));
   });
+
+  /**
+   * Professional footer menu items
+   */
+  readonly professionalFooterMenu = computed<FilteredProfessionalMenuItem[]>(
+    () => {
+      const permissions = this.userPermissions();
+
+      return PROFESSIONAL_FOOTER_MENU.map((item) => ({
+        ...item,
+        visible: this.isProfessionalItemVisible(item, permissions),
+      }));
+    },
+  );
 
   /**
    * Count of visible menu items (useful for UI decisions)
@@ -126,10 +223,29 @@ export class MenuBuilderService {
   readonly visibleItemCount = computed(() => this.visibleMenuItems().length);
 
   /**
+   * Count of visible professional menu items
+   */
+  readonly visibleProfessionalItemCount = computed(
+    () => this.visibleProfessionalMenuItems().length,
+  );
+
+  /**
    * Check if a specific menu item is visible to the user
    */
   isMenuItemVisible(itemId: string): boolean {
     const menu = this.adminMenu();
+    for (const section of menu) {
+      const item = section.items.find((i) => i.id === itemId);
+      if (item) return item.visible;
+    }
+    return false;
+  }
+
+  /**
+   * Check if a specific professional menu item is visible
+   */
+  isProfessionalMenuItemVisible(itemId: string): boolean {
+    const menu = this.professionalMenu();
     for (const section of menu) {
       const item = section.items.find((i) => i.id === itemId);
       if (item) return item.visible;
@@ -165,9 +281,17 @@ export class MenuBuilderService {
   }
 
   /**
-   * Internal: Check if menu item is visible
+   * Get the first accessible professional route
    */
-  private isItemVisible(
+  getFirstAccessibleProfessionalRoute(): string {
+    const items = this.visibleProfessionalMenuItems();
+    return items.length > 0 ? items[0].route : '/dashboard';
+  }
+
+  /**
+   * Internal: Check if admin menu item is visible
+   */
+  private isAdminItemVisible(
     item: AdminMenuItem,
     userPermissions: readonly string[],
     isSuperAdmin: boolean,
@@ -198,5 +322,21 @@ export class MenuBuilderService {
     }
 
     return true;
+  }
+
+  /**
+   * Internal: Check if professional menu item is visible
+   */
+  private isProfessionalItemVisible(
+    item: ProfessionalMenuItem,
+    userPermissions: readonly string[],
+  ): boolean {
+    // No permissions required = visible to all professionals
+    if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
+      return true;
+    }
+
+    // Check if user has any of the required permissions
+    return hasAnyPermission(userPermissions, item.requiredPermissions);
   }
 }

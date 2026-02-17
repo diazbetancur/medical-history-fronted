@@ -6,7 +6,6 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { TokenStorage } from '@core/auth';
-import { environment } from '@env';
 import { catchError, throwError } from 'rxjs';
 
 /**
@@ -18,6 +17,8 @@ const AUTH_REQUIRED_PATTERNS = [
   '/api/auth/me',
   '/api/professional/',
   '/api/admin/',
+  '/api/patients/',
+  '/api/appointments',
 ];
 
 /**
@@ -64,11 +65,6 @@ export const jwtInterceptor: HttpInterceptorFn = (
       if (error.status === 401 && requiresAuth(req.url)) {
         // Clear invalid token
         tokenStorage.clearToken();
-
-        // Log only in development
-        if (!environment.production) {
-          console.warn('[JWT Interceptor] Unauthorized - Token cleared');
-        }
       }
 
       return throwError(() => error);

@@ -7,6 +7,9 @@
  * the centralized roles module for any role logic.
  */
 
+// Re-export current user models from core
+export type { ContextDto, CurrentUserDto } from '@core/models';
+
 // =============================================================================
 // Auth Models
 // =============================================================================
@@ -474,8 +477,7 @@ export interface ProfessionalRequestsParams {
   to?: string;
 }
 
-export interface ProfessionalRequestsResponse
-  extends PaginatedResponse<ServiceRequest> {}
+export interface ProfessionalRequestsResponse extends PaginatedResponse<ServiceRequest> {}
 
 export interface UpdateRequestStatusPayload {
   status: RequestStatus;
@@ -527,8 +529,7 @@ export interface AdminProfessionalListItem {
   phone?: string;
 }
 
-export interface AdminProfessionalsResponse
-  extends PaginatedResponse<AdminProfessionalListItem> {}
+export interface AdminProfessionalsResponse extends PaginatedResponse<AdminProfessionalListItem> {}
 
 export interface AdminProfessionalDetail extends AdminProfessionalListItem {
   description?: string;
@@ -574,8 +575,7 @@ export interface AdminRequestsParams {
   to?: string;
 }
 
-export interface AdminRequestsResponse
-  extends PaginatedResponse<AdminRequestListItem> {}
+export interface AdminRequestsResponse extends PaginatedResponse<AdminRequestListItem> {}
 
 export interface ModerateRequestPayload {
   status?: 'Rejected';
@@ -634,7 +634,7 @@ export function isProblemDetails(error: unknown): error is ProblemDetails {
  * Type guard to check if error has field errors
  */
 export function hasFieldErrors(
-  error: unknown
+  error: unknown,
 ): error is ProblemDetails & { errors: Record<string, string[]> } {
   return (
     isProblemDetails(error) &&

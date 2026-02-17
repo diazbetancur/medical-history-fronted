@@ -1,0 +1,49 @@
+h2[mat-dialog-title] {
+  margin: 0;
+  padding: 24px 24px 16px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+mat-dialog-content {
+  padding: 0 24px 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+
+  .allergy-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 500px;
+
+    @media (max-width: 768px) {
+      min-width: 300px;
+    }
+
+    mat-form-field {
+      width: 100%;
+
+      &.notes-field {
+        textarea {
+          resize: vertical;
+          min-height: 60px;
+        }
+      }
+    }
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  gap: 8px;
+
+  button {
+    min-width: 100px;
+
+    mat-spinner {
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+  }
+}

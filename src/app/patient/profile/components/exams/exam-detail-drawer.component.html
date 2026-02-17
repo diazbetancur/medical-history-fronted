@@ -1,0 +1,161 @@
+<div class="exam-detail-container">
+  <!-- Header -->
+  <div class="detail-header">
+    <h2 mat-dialog-title>Detalle del Examen</h2>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <!-- Loading state -->
+    @if (store.loadingDetail()) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando detalles...</p>
+      </div>
+    }
+
+    <!-- Exam details -->
+    @if (store.currentExam(); as exam) {
+      <div class="exam-details">
+        <!-- Title and Category -->
+        <div class="detail-section">
+          <h3>{{ exam.title }}</h3>
+          @if (exam.category) {
+            <mat-chip class="category-chip">
+              {{ categoryLabels[exam.category] }}
+            </mat-chip>
+          }
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Metadata -->
+        <div class="detail-section">
+          <div class="metadata-grid">
+            <div class="metadata-item">
+              <span class="label">Fecha del Examen:</span>
+              <span class="value">{{ formatDate(exam.examDate) }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="label">Creado:</span>
+              <span class="value">{{ formatDate(exam.createdAt) }}</span>
+            </div>
+            @if (exam.updatedAt !== exam.createdAt) {
+              <div class="metadata-item">
+                <span class="label">Última actualización:</span>
+                <span class="value">{{ formatDate(exam.updatedAt) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Notes -->
+        @if (exam.notes) {
+          <mat-divider></mat-divider>
+          <div class="detail-section">
+            <h4>Notas</h4>
+            <p class="notes-text">{{ exam.notes }}</p>
+          </div>
+        }
+
+        <mat-divider></mat-divider>
+
+        <!-- Attachments -->
+        <div class="detail-section attachments-section">
+          <div class="section-header">
+            <h4>Archivos Adjuntos ({{ exam.attachments.length }})</h4>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="openFilePicker()"
+              [disabled]="uploading"
+            >
+              <mat-icon>upload_file</mat-icon>
+              Subir Archivos
+            </button>
+          </div>
+
+          <!-- Hidden file input -->
+          <input
+            #fileInput
+            type="file"
+            multiple
+            accept=".pdf,.jpg,.jpeg,.png"
+            style="display: none"
+            (change)="onFilesSelected($event)"
+          />
+
+          <!-- Attachments list -->
+          @if (exam.attachments.length > 0) {
+            <mat-list class="attachments-list">
+              @for (attachment of exam.attachments; track attachment.id) {
+                <mat-list-item>
+                  <mat-icon matListItemIcon [class]="'file-icon'">
+                    {{ getFileIcon(attachment.mimeType) }}
+                  </mat-icon>
+                  <div matListItemTitle class="attachment-name">
+                    {{ attachment.fileName }}
+                  </div>
+                  <div matListItemLine class="attachment-meta">
+                    {{ formatFileSize(attachment.fileSize) }} •
+                    {{ formatDate(attachment.uploadedAt) }}
+                  </div>
+                  <div matListItemMeta class="attachment-actions">
+                    <button
+                      mat-icon-button
+                      (click)="downloadAttachment(attachment.id)"
+                      matTooltip="Descargar"
+                    >
+                      <mat-icon>download</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      (click)="
+                        deleteAttachment(attachment.id, attachment.fileName)
+                      "
+                      matTooltip="Eliminar"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </mat-list-item>
+                <mat-divider></mat-divider>
+              }
+            </mat-list>
+          } @else {
+            <div class="empty-attachments">
+              <mat-icon>attach_file</mat-icon>
+              <p>No hay archivos adjuntos</p>
+              <p class="help-text">
+                Puedes subir archivos PDF, JPG, JPEG o PNG (máximo 10MB)
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Error state -->
+    @if (!store.loadingDetail() && !store.currentExam()) {
+      <div class="error-container">
+        <mat-icon color="warn">error</mat-icon>
+        <p>No se pudo cargar el examen</p>
+        <button mat-raised-button (click)="close()">Cerrar</button>
+      </div>
+    }
+  </mat-dialog-content>
+
+  <!-- Footer Actions -->
+  @if (store.currentExam()) {
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="close()">Cerrar</button>
+      <button mat-button color="warn" (click)="deleteExam()">
+        <mat-icon>delete</mat-icon>
+        Eliminar Examen
+      </button>
+    </mat-dialog-actions>
+  }
+</div>

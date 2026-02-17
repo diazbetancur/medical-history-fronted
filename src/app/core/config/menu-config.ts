@@ -1,54 +1,59 @@
+import { ContextType } from '@core/auth/auth-store.guards';
+
 /**
- * Admin Menu Configuration
+ * ============================================================================
+ * Menu Configuration for Multi-Context Application
+ * ============================================================================
  *
- * Centralized menu configuration with permission-based visibility.
- * Menu items are only shown if user has at least one of the required permissions.
+ * Centralized menu configuration for Admin, Professional, and Patient contexts.
  *
- * Permission naming convention: admin.<module>.<action>
- * - admin.dashboard.view
- * - admin.professionals.view, admin.professionals.edit, admin.professionals.verify
- * - admin.requests.view, admin.requests.manage
- * - admin.stats.view, admin.stats.export
- * - admin.settings.view, admin.settings.edit
- * - admin.users.view, admin.users.edit, admin.users.delete
+ * Menu items are filtered by:
+ * 1. Current context (must match item.context)
+ * 2. User permissions (must have AT LEAST ONE of requiredPermissions - OR logic)
+ *
+ * Permission naming convention:
+ * - Admin: Users.View, Roles.View, Catalog.ViewInstitutions, etc.
+ * - Professional: Appointments.View, Availability.Manage, Patients.View, etc.
+ * - Patient: No permissions required (public patient features)
  */
 
 /**
- * Menu item configuration
+ * Menu Item Configuration
  */
 export interface MenuItem {
-  /** Unique identifier */
-  id: string;
   /** Display label */
   label: string;
+
   /** Material icon name */
   icon: string;
+
   /** Router link path */
   route: string;
-  /** Permissions required (user needs ANY of these) */
-  requiredPermissions: string[];
-  /** Whether route should match exactly for active state */
-  exactMatch?: boolean;
-  /** Badge count (optional, for notifications) */
-  badge?: number;
-  /** Submenu items (optional) */
-  children?: MenuItem[];
-  /** Whether item is disabled */
-  disabled?: boolean;
-  /** Tooltip text */
-  tooltip?: string;
-}
 
-/**
- * Menu section configuration
- */
-export interface MenuSection {
-  /** Section title (optional, for grouped menus) */
-  title?: string;
-  /** Items in this section */
-  items: MenuItem[];
-  /** Divider after section */
-  dividerAfter?: boolean;
+  /** Required context to display this item */
+  context: ContextType;
+
+  /**
+   * Required permissions to display this item
+   * If empty/undefined, item is always visible for the context
+   * If provided, user must have AT LEAST ONE permission (OR logic)
+   */
+  requiredPermissions?: string[];
+
+  /**
+   * If true, route must match exactly for active state
+   */
+  exactMatch?: boolean;
+
+  /**
+   * If true, this item is a divider (no route/icon/permissions)
+   */
+  isDivider?: boolean;
+
+  /**
+   * Children items (for nested menus)
+   */
+  children?: MenuItem[];
 }
 
 // =============================================================================
@@ -56,184 +61,279 @@ export interface MenuSection {
 // =============================================================================
 
 /**
- * All admin permissions - single source of truth
+ * Admin Permissions
  */
 export const ADMIN_PERMISSIONS = {
-  // Dashboard
-  DASHBOARD_VIEW: 'admin.dashboard.view',
+  // Institutions/Catalog
+  CATALOG_MANAGE_INSTITUTIONS: 'Catalog.ManageInstitutions',
+  CATALOG_VIEW_INSTITUTIONS: 'Catalog.ViewInstitutions',
 
-  // Professionals Management
-  PROFESSIONALS_VIEW: 'admin.professionals.view',
-  PROFESSIONALS_EDIT: 'admin.professionals.edit',
-  PROFESSIONALS_VERIFY: 'admin.professionals.verify',
-  PROFESSIONALS_DELETE: 'admin.professionals.delete',
+  // Users
+  USERS_VIEW: 'Users.View',
+  USERS_VIEW_ALL: 'Users.ViewAll',
+  USERS_CREATE: 'Users.Create',
+  USERS_EDIT: 'Users.Edit',
+  USERS_DELETE: 'Users.Delete',
 
-  // Requests/Leads Management
-  REQUESTS_VIEW: 'admin.requests.view',
-  REQUESTS_MANAGE: 'admin.requests.manage',
-  REQUESTS_EXPORT: 'admin.requests.export',
+  // Roles
+  ROLES_VIEW: 'Roles.View',
+  ROLES_VIEW_ALL: 'Roles.ViewAll',
+  ROLES_CREATE: 'Roles.Create',
+  ROLES_EDIT: 'Roles.Edit',
 
-  // Statistics & Reports
-  STATS_VIEW: 'admin.stats.view',
-  STATS_EXPORT: 'admin.stats.export',
+  // Service Requests
+  SERVICE_REQUESTS_VIEW_ALL: 'ServiceRequests.ViewAll',
+  SERVICE_REQUESTS_MANAGE: 'ServiceRequests.Manage',
 
-  // Settings
-  SETTINGS_VIEW: 'admin.settings.view',
-  SETTINGS_EDIT: 'admin.settings.edit',
-
-  // User Management (SuperAdmin)
-  USERS_VIEW: 'admin.users.view',
-  USERS_EDIT: 'admin.users.edit',
-  USERS_DELETE: 'admin.users.delete',
-
-  // System (SuperAdmin)
-  SYSTEM_LOGS: 'admin.system.logs',
-  SYSTEM_CONFIG: 'admin.system.config',
+  // Reports
+  REPORTS_VIEW: 'Reports.View',
+  REPORTS_VIEW_ALL: 'Reports.ViewAll',
+  REPORTS_EXPORT: 'Reports.Export',
 } as const;
 
-export type AdminPermission =
-  (typeof ADMIN_PERMISSIONS)[keyof typeof ADMIN_PERMISSIONS];
+/**
+ * Professional Permissions
+ */
+export const PROFESSIONAL_PERMISSIONS = {
+  // Appointments
+  APPOINTMENTS_VIEW: 'Appointments.View',
+  APPOINTMENTS_CREATE: 'Appointments.Create',
+  APPOINTMENTS_EDIT: 'Appointments.Edit',
+  APPOINTMENTS_CANCEL: 'Appointments.Cancel',
+
+  // Availability
+  AVAILABILITY_VIEW: 'Availability.View',
+  AVAILABILITY_MANAGE: 'Availability.Manage',
+
+  // Patients
+  PATIENTS_VIEW: 'Patients.View',
+  PATIENTS_EDIT: 'Patients.Edit',
+
+  // Notes
+  NOTES_VIEW: 'Notes.View',
+  NOTES_CREATE: 'Notes.Create',
+  NOTES_EDIT: 'Notes.Edit',
+
+  // Files
+  FILES_VIEW: 'Files.View',
+  FILES_UPLOAD: 'Files.Upload',
+  FILES_DELETE: 'Files.Delete',
+} as const;
 
 // =============================================================================
 // Menu Configuration
 // =============================================================================
 
 /**
- * Main admin navigation menu
+ * All menu items for Admin, Professional, and Patient contexts
  */
-export const ADMIN_MENU: MenuSection[] = [
+export const MENU_ITEMS: MenuItem[] = [
+  // ==========================================================================
+  // ADMIN MENU
+  // ==========================================================================
   {
-    items: [
-      {
-        id: 'dashboard',
-        label: 'Panel Principal',
-        icon: 'dashboard',
-        route: '/admin',
-        requiredPermissions: [ADMIN_PERMISSIONS.DASHBOARD_VIEW],
-        exactMatch: true,
-      },
+    label: 'Dashboard',
+    icon: 'dashboard',
+    route: '/admin',
+    context: 'ADMIN',
+    exactMatch: true,
+  },
+  {
+    label: 'Instituciones',
+    icon: 'business',
+    route: '/admin/institutions',
+    context: 'ADMIN',
+    requiredPermissions: [
+      ADMIN_PERMISSIONS.CATALOG_MANAGE_INSTITUTIONS,
+      ADMIN_PERMISSIONS.CATALOG_VIEW_INSTITUTIONS,
     ],
   },
   {
-    title: 'Gestión',
-    items: [
-      {
-        id: 'professionals',
-        label: 'Profesionales',
-        icon: 'people',
-        route: '/admin/professionals',
-        requiredPermissions: [
-          ADMIN_PERMISSIONS.PROFESSIONALS_VIEW,
-          ADMIN_PERMISSIONS.PROFESSIONALS_EDIT,
-          ADMIN_PERMISSIONS.PROFESSIONALS_VERIFY,
-        ],
-        tooltip: 'Revisar y verificar profesionales',
-      },
-      {
-        id: 'requests',
-        label: 'Solicitudes',
-        icon: 'mail',
-        route: '/admin/requests',
-        requiredPermissions: [
-          ADMIN_PERMISSIONS.REQUESTS_VIEW,
-          ADMIN_PERMISSIONS.REQUESTS_MANAGE,
-        ],
-        tooltip: 'Gestionar solicitudes de servicio',
-      },
+    label: 'Usuarios',
+    icon: 'people',
+    route: '/admin/users',
+    context: 'ADMIN',
+    requiredPermissions: [
+      ADMIN_PERMISSIONS.USERS_VIEW,
+      ADMIN_PERMISSIONS.USERS_VIEW_ALL,
     ],
-    dividerAfter: true,
   },
   {
-    title: 'Análisis',
-    items: [
-      {
-        id: 'stats',
-        label: 'Estadísticas',
-        icon: 'analytics',
-        route: '/admin/stats',
-        requiredPermissions: [
-          ADMIN_PERMISSIONS.STATS_VIEW,
-          ADMIN_PERMISSIONS.STATS_EXPORT,
-        ],
-        tooltip: 'Ver métricas y reportes',
-      },
+    label: 'Roles',
+    icon: 'admin_panel_settings',
+    route: '/admin/roles',
+    context: 'ADMIN',
+    requiredPermissions: [
+      ADMIN_PERMISSIONS.ROLES_VIEW,
+      ADMIN_PERMISSIONS.ROLES_VIEW_ALL,
     ],
-    dividerAfter: true,
   },
   {
-    title: 'Configuración',
-    items: [
-      {
-        id: 'settings',
-        label: 'Configuración',
-        icon: 'settings',
-        route: '/admin/settings',
-        requiredPermissions: [
-          ADMIN_PERMISSIONS.SETTINGS_VIEW,
-          ADMIN_PERMISSIONS.SETTINGS_EDIT,
-        ],
-      },
-      {
-        id: 'users',
-        label: 'Usuarios',
-        icon: 'manage_accounts',
-        route: '/admin/users',
-        requiredPermissions: [
-          ADMIN_PERMISSIONS.USERS_VIEW,
-          ADMIN_PERMISSIONS.USERS_EDIT,
-        ],
-        tooltip: 'Gestionar usuarios del sistema',
-      },
+    label: 'Solicitudes',
+    icon: 'assignment',
+    route: '/admin/requests',
+    context: 'ADMIN',
+    requiredPermissions: [ADMIN_PERMISSIONS.SERVICE_REQUESTS_VIEW_ALL],
+  },
+  {
+    label: 'Reportes',
+    icon: 'assessment',
+    route: '/admin/reports',
+    context: 'ADMIN',
+    requiredPermissions: [
+      ADMIN_PERMISSIONS.REPORTS_VIEW,
+      ADMIN_PERMISSIONS.REPORTS_VIEW_ALL,
     ],
+  },
+  {
+    isDivider: true,
+    label: '',
+    icon: '',
+    route: '',
+    context: 'ADMIN',
+  },
+  {
+    label: 'Configuración',
+    icon: 'settings',
+    route: '/admin/settings',
+    context: 'ADMIN',
+  },
+
+  // ==========================================================================
+  // PROFESSIONAL MENU
+  // ==========================================================================
+  {
+    label: 'Dashboard',
+    icon: 'dashboard',
+    route: '/professional',
+    context: 'PROFESSIONAL',
+    exactMatch: true,
+  },
+  {
+    label: 'Agenda',
+    icon: 'event',
+    route: '/professional/agenda',
+    context: 'PROFESSIONAL',
+    requiredPermissions: [PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW],
+  },
+  {
+    label: 'Mis Citas',
+    icon: 'assignment',
+    route: '/professional/appointments',
+    context: 'PROFESSIONAL',
+    requiredPermissions: [PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW],
+  },
+  {
+    label: 'Disponibilidad',
+    icon: 'event_available',
+    route: '/professional/availability',
+    context: 'PROFESSIONAL',
+    requiredPermissions: [
+      PROFESSIONAL_PERMISSIONS.AVAILABILITY_MANAGE,
+      PROFESSIONAL_PERMISSIONS.AVAILABILITY_VIEW,
+    ],
+  },
+  {
+    label: 'Pacientes',
+    icon: 'people',
+    route: '/professional/patients',
+    context: 'PROFESSIONAL',
+    requiredPermissions: [PROFESSIONAL_PERMISSIONS.PATIENTS_VIEW],
+  },
+  {
+    label: 'Notas',
+    icon: 'note',
+    route: '/professional/notes',
+    context: 'PROFESSIONAL',
+    requiredPermissions: [PROFESSIONAL_PERMISSIONS.NOTES_VIEW],
+  },
+  {
+    label: 'Archivos',
+    icon: 'attach_file',
+    route: '/professional/files',
+    context: 'PROFESSIONAL',
+    requiredPermissions: [PROFESSIONAL_PERMISSIONS.FILES_VIEW],
+  },
+  {
+    isDivider: true,
+    label: '',
+    icon: '',
+    route: '',
+    context: 'PROFESSIONAL',
+  },
+  {
+    label: 'Mi Perfil',
+    icon: 'person',
+    route: '/professional/profile',
+    context: 'PROFESSIONAL',
+  },
+  {
+    label: 'Configuración',
+    icon: 'settings',
+    route: '/professional/settings',
+    context: 'PROFESSIONAL',
+  },
+
+  // ==========================================================================
+  // PATIENT MENU
+  // ==========================================================================
+  {
+    label: 'Dashboard',
+    icon: 'dashboard',
+    route: '/patient',
+    context: 'PATIENT',
+    exactMatch: true,
+  },
+  {
+    label: 'Buscar Profesionales',
+    icon: 'search',
+    route: '/patient/professionals',
+    context: 'PATIENT',
+    // No requiere permisos - siempre visible
+  },
+  {
+    label: 'Mis Citas',
+    icon: 'event',
+    route: '/patient/appointments',
+    context: 'PATIENT',
+    // No requiere permisos - siempre visible
+  },
+  {
+    label: 'Mi Historial',
+    icon: 'history',
+    route: '/patient/history',
+    context: 'PATIENT',
+  },
+  {
+    label: 'Mis Documentos',
+    icon: 'folder',
+    route: '/patient/documents',
+    context: 'PATIENT',
+  },
+  {
+    isDivider: true,
+    label: '',
+    icon: '',
+    route: '',
+    context: 'PATIENT',
+  },
+  {
+    label: 'Mi Perfil',
+    icon: 'person',
+    route: '/patient/profile',
+    context: 'PATIENT',
+  },
+  {
+    label: 'Configuración',
+    icon: 'settings',
+    route: '/patient/settings',
+    context: 'PATIENT',
   },
 ];
 
 /**
- * Footer navigation items (always visible if user has admin access)
+ * Get menu items for a specific context
  */
-export const ADMIN_FOOTER_MENU: MenuItem[] = [
-  {
-    id: 'back-dashboard',
-    label: 'Volver al Dashboard',
-    icon: 'arrow_back',
-    route: '/dashboard',
-    requiredPermissions: [], // Always visible
-  },
-  {
-    id: 'back-home',
-    label: 'Ir al Inicio',
-    icon: 'home',
-    route: '/',
-    requiredPermissions: [], // Always visible
-  },
-];
-
-/**
- * Get all unique permissions required by menu items
- * Useful for pre-fetching or permission validation
- */
-export function getAllMenuPermissions(): string[] {
-  const permissions = new Set<string>();
-
-  ADMIN_MENU.forEach((section) => {
-    section.items.forEach((item) => {
-      item.requiredPermissions.forEach((p) => permissions.add(p));
-    });
-  });
-
-  return Array.from(permissions);
-}
-
-/**
- * Get permissions required for a specific route
- */
-export function getRoutePermissions(route: string): string[] {
-  for (const section of ADMIN_MENU) {
-    for (const item of section.items) {
-      if (item.route === route) {
-        return [...item.requiredPermissions];
-      }
-    }
-  }
-  return [];
+export function getMenuItemsByContext(context: ContextType): MenuItem[] {
+  return MENU_ITEMS.filter((item) => item.context === context);
 }

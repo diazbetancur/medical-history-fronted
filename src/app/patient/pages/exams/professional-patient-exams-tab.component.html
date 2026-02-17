@@ -1,0 +1,148 @@
+<div class="professional-exams-tab">
+  <div class="tab-header">
+    <h2>Exámenes del Paciente</h2>
+    @if (!noRelation() && !isLoading() && exams().length > 0) {
+      <div class="summary-info">
+        <mat-chip class="total-chip">
+          <mat-icon>description</mat-icon>
+          {{ totalItems() }} {{ totalItems() === 1 ? "examen" : "exámenes" }}
+        </mat-chip>
+      </div>
+    }
+  </div>
+
+  <!-- No Relation Banner -->
+  @if (noRelation()) {
+    <mat-card class="no-relation-banner">
+      <mat-card-content>
+        <mat-icon class="no-relation-icon">info</mat-icon>
+        <div class="no-relation-content">
+          <h3>Sin relación terapéutica</h3>
+          <p>
+            No tienes relación terapéutica con este paciente. Solo puedes ver
+            exámenes de pacientes con los que tienes una relación establecida.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Loading State -->
+  @else if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando exámenes...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <p class="error-message">{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="retry()">
+          Reintentar
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Empty State -->
+  @else if (exams().length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <mat-icon class="empty-icon">description</mat-icon>
+        <p class="empty-message">Este paciente no tiene exámenes registrados</p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Content -->
+  @else {
+    <!-- Exams List -->
+    <div class="exams-list">
+      @for (exam of sortedExams(); track exam.id) {
+        <mat-card class="exam-card">
+          <mat-card-header>
+            <mat-icon
+              mat-card-avatar
+              [ngClass]="{
+                'file-icon': true,
+                pdf: exam.fileType === 'PDF',
+                image: exam.fileType === 'IMAGE',
+              }"
+            >
+              {{ getFileTypeIcon(exam.fileType) }}
+            </mat-icon>
+            <mat-card-title>{{ exam.title }}</mat-card-title>
+            <mat-card-subtitle>
+              <div class="exam-meta">
+                <mat-chip class="file-type-chip">
+                  {{ getFileTypeLabel(exam.fileType) }}
+                </mat-chip>
+                <span class="exam-date">
+                  {{ exam.examDate | date: "dd/MM/yyyy" }}
+                </span>
+              </div>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="exam-details">
+              <div class="detail-item">
+                <mat-icon>attachment</mat-icon>
+                <span class="detail-label">Archivo:</span>
+                <span class="detail-value">{{ exam.fileName }}</span>
+              </div>
+
+              <div class="detail-item">
+                <mat-icon>data_usage</mat-icon>
+                <span class="detail-label">Tamaño:</span>
+                <span class="detail-value">{{
+                  formatFileSize(exam.fileSizeBytes)
+                }}</span>
+              </div>
+
+              <div class="detail-item">
+                <mat-icon>upload</mat-icon>
+                <span class="detail-label">Subido el:</span>
+                <span class="detail-value">
+                  {{ exam.uploadedAtUtc | date: "dd/MM/yyyy HH:mm" }}
+                </span>
+              </div>
+
+              @if (exam.notes) {
+                <div class="detail-item notes">
+                  <mat-icon>notes</mat-icon>
+                  <span class="detail-label">Notas:</span>
+                  <span class="detail-value">{{ exam.notes }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-button color="primary" (click)="viewExam(exam)">
+              <mat-icon>visibility</mat-icon>
+              Ver
+            </button>
+            <button mat-button (click)="downloadExam(exam)">
+              <mat-icon>download</mat-icon>
+              Descargar
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator
+      [length]="totalItems()"
+      [pageSize]="pageSize()"
+      [pageIndex]="currentPage()"
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
+  }
+</div>

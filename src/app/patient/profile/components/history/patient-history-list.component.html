@@ -1,0 +1,105 @@
+<div class="patient-history-list">
+  <div class="list-header">
+    <h2>Mi Historia Clínica</h2>
+    <p class="subtitle">Registro de todas tus atenciones médicas</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando historia clínica...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <p class="error-message">{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="retry()">
+          Reintentar
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Empty State -->
+  @else if (encounters().length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <mat-icon class="empty-icon">medical_information</mat-icon>
+        <p class="empty-message">Aún no tienes atenciones registradas</p>
+        <p class="empty-subtitle">
+          Tus consultas médicas aparecerán aquí cuando los profesionales las
+          registren
+        </p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Content -->
+  @else {
+    <div class="encounters-list">
+      @for (encounter of encounters(); track encounter.id) {
+        <mat-card class="encounter-card" (click)="openDetail(encounter)">
+          <mat-card-header>
+            <mat-card-title>
+              <div class="encounter-title">
+                <span class="professional-name">
+                  {{ encounter.professionalName }}
+                </span>
+              </div>
+            </mat-card-title>
+            <mat-card-subtitle>
+              <div class="encounter-date">
+                <mat-icon>event</mat-icon>
+                {{ encounter.encounterDateUtc | date: "dd/MM/yyyy" }}
+              </div>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            @if (encounter.summary) {
+              <p class="encounter-summary">{{ encounter.summary }}</p>
+            }
+
+            <div class="encounter-meta">
+              <span
+                class="status"
+                [class.draft]="encounter.status === 'Draft'"
+                [class.closed]="encounter.status === 'Closed'"
+              >
+                {{ encounter.status === "Draft" ? "Borrador" : "Cerrada" }}
+              </span>
+              <span class="notes-count">
+                <mat-icon>description</mat-icon>
+                {{ encounter.notesCount }}
+                {{ encounter.notesCount === 1 ? "nota" : "notas" }}
+              </span>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-button color="primary">
+              Ver Detalle
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator
+      [length]="totalItems()"
+      [pageSize]="pageSize()"
+      [pageIndex]="currentPage()"
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  }
+</div>

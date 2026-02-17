@@ -1,0 +1,74 @@
+<h2 mat-dialog-title>Nuevo Examen</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="exam-form">
+    <!-- Title -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Título del Examen *</mat-label>
+      <input matInput formControlName="title" placeholder="Ej: Análisis de Sangre" />
+      @if (form.get('title')?.invalid && form.get('title')?.touched) {
+        <mat-error>{{ getErrorMessage('title') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Category -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Categoría</mat-label>
+      <mat-select formControlName="category">
+        <mat-option [value]="''">Sin categoría</mat-option>
+        @for (category of categories; track category) {
+          <mat-option [value]="category">
+            {{ categoryLabels[category] }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Exam Date -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fecha del Examen</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="examDate"
+        placeholder="Selecciona una fecha"
+      />
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        rows="4"
+        placeholder="Observaciones, instrucciones del médico, etc."
+      ></textarea>
+      @if (form.get('notes')?.invalid && form.get('notes')?.touched) {
+        <mat-error>{{ getErrorMessage('notes') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <p class="help-text">
+      * Campos requeridos. Podrás agregar archivos adjuntos después de crear el examen.
+    </p>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="creating">Cancelar</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="create()"
+    [disabled]="form.invalid || creating"
+  >
+    @if (creating) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      Crear Examen
+    }
+  </button>
+</mat-dialog-actions>

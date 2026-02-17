@@ -1,0 +1,135 @@
+<h2 mat-dialog-title>{{ dialogTitle }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="medication-form">
+    <!-- Name -->
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre del medicamento *</mat-label>
+      <input
+        matInput
+        formControlName="name"
+        placeholder="Ej: Ibuprofeno 600mg"
+        required
+      />
+      <mat-error>{{ getErrorMessage("name") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Dose -->
+    <mat-form-field appearance="outline">
+      <mat-label>Dosis</mat-label>
+      <input matInput formControlName="dose" placeholder="Ej: 1 comprimido" />
+    </mat-form-field>
+
+    <!-- Frequency -->
+    <mat-form-field appearance="outline">
+      <mat-label>Frecuencia</mat-label>
+      <input
+        matInput
+        formControlName="frequency"
+        placeholder="Ej: Cada 8 horas"
+      />
+    </mat-form-field>
+
+    <!-- Route -->
+    <mat-form-field appearance="outline">
+      <mat-label>Vía de administración</mat-label>
+      <input
+        matInput
+        formControlName="route"
+        placeholder="Ej: Oral, Intravenosa, Tópica"
+      />
+    </mat-form-field>
+
+    <!-- Prescribed By -->
+    <mat-form-field appearance="outline">
+      <mat-label>Prescrito por</mat-label>
+      <input
+        matInput
+        formControlName="prescribedBy"
+        placeholder="Nombre del profesional"
+      />
+    </mat-form-field>
+
+    <!-- Start Date -->
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de inicio *</mat-label>
+      <input
+        matInput
+        [matDatepicker]="startDatePicker"
+        formControlName="startDate"
+        required
+      />
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="startDatePicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #startDatePicker></mat-datepicker>
+      <mat-error>{{ getErrorMessage("startDate") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Is Ongoing Toggle -->
+    <div class="toggle-field">
+      <mat-slide-toggle formControlName="isOngoing" color="primary">
+        Tratamiento en curso (sin fecha de fin)
+      </mat-slide-toggle>
+    </div>
+
+    <!-- End Date (conditional) -->
+    @if (!form.get("isOngoing")?.value) {
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de fin *</mat-label>
+        <input
+          matInput
+          [matDatepicker]="endDatePicker"
+          formControlName="endDate"
+          required
+        />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="endDatePicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #endDatePicker></mat-datepicker>
+        <mat-error>{{ getErrorMessage("endDate") }}</mat-error>
+      </mat-form-field>
+    }
+
+    <!-- Status -->
+    <mat-form-field appearance="outline">
+      <mat-label>Estado *</mat-label>
+      <mat-select formControlName="status" required>
+        @for (option of statusOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>{{ getErrorMessage("status") }}</mat-error>
+    </mat-form-field>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="notes-field">
+      <mat-label>Notas adicionales</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        rows="3"
+        placeholder="Observaciones, efectos secundarios, etc."
+      ></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSubmitting()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || isSubmitting()"
+  >
+    @if (isSubmitting()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    }
+    {{ submitButtonText }}
+  </button>
+</mat-dialog-actions>

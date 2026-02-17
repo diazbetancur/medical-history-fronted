@@ -1,0 +1,138 @@
+<div class="patient-background-page">
+  <div class="page-header">
+    <h1>Mis Antecedentes</h1>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="createBackground()"
+      [disabled]="isLoading()"
+    >
+      <mat-icon>add</mat-icon>
+      Agregar Antecedente
+    </button>
+  </div>
+
+  <!-- Summary Card -->
+  @if (!isLoading() && backgrounds().length > 0) {
+  <mat-card class="summary-card">
+    <mat-card-content>
+      <div class="summary-stats">
+        <div class="stat-item">
+          <mat-icon>medical_information</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ totalItems() }}</span>
+            <span class="stat-label">Total</span>
+          </div>
+        </div>
+        <div class="stat-item chronic">
+          <mat-icon>autorenew</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ chronicCount() }}</span>
+            <span class="stat-label">Crónicos</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando antecedentes...</p>
+  </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+  <mat-card class="error-card">
+    <mat-card-content>
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <p class="error-message">{{ error() }}</p>
+      <button mat-raised-button color="primary" (click)="retry()">
+        Reintentar
+      </button>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Empty State -->
+  @else if (backgrounds().length === 0) {
+  <mat-card class="empty-card">
+    <mat-card-content>
+      <mat-icon class="empty-icon">medical_information</mat-icon>
+      <p class="empty-message">No tienes antecedentes registrados</p>
+      <p class="empty-subtitle">
+        Agrega información sobre cirugías, enfermedades previas,
+        hospitalizaciones u otros antecedentes médicos
+      </p>
+      <button mat-raised-button color="primary" (click)="createBackground()">
+        <mat-icon>add</mat-icon>
+        Agregar Primer Antecedente
+      </button>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Background List -->
+  @else {
+  <div class="backgrounds-list">
+    @for (background of sortedBackgrounds(); track background.id) {
+    <mat-card class="background-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="background-icon">history_edu</mat-icon>
+        <mat-card-title>{{ background.title }}</mat-card-title>
+        <mat-card-subtitle>
+          <div class="background-meta">
+            <mat-chip class="type-chip">
+              {{ getTypeLabel(background.type) }}
+            </mat-chip>
+            @if (background.isChronic) {
+            <mat-chip class="chronic-chip">
+              <mat-icon>autorenew</mat-icon>
+              Crónico
+            </mat-chip>
+            } @if (background.eventDate) {
+            <mat-chip class="date-chip">
+              <mat-icon>event</mat-icon>
+              {{ background.eventDate | date: 'dd/MM/yyyy' }}
+            </mat-chip>
+            }
+          </div>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (background.description) {
+        <div class="background-description">
+          <p>{{ background.description }}</p>
+        </div>
+        }
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-button
+          color="primary"
+          (click)="editBackground(background)"
+          matTooltip="Editar"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        <button
+          mat-button
+          color="warn"
+          (click)="deleteBackground(background)"
+          matTooltip="Eliminar"
+        >
+          <mat-icon>delete</mat-icon>
+          Eliminar
+        </button>
+      </mat-card-actions>
+    </mat-card>
+    }
+  </div>
+  }
+</div>

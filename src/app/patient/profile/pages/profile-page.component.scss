@@ -1,0 +1,76 @@
+.profile-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.profile-header {
+  margin-bottom: 32px;
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 32px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.profile-tabs {
+  ::ng-deep {
+    .mat-mdc-tab-labels {
+      flex-wrap: wrap;
+    }
+
+    .mat-mdc-tab-label {
+      min-width: 120px;
+    }
+  }
+}
+
+.tab-content {
+  padding: 24px 0;
+
+  &.exams-tab {
+    padding: 0; // El componente ExamsList maneja su propio padding
+  }
+
+  .placeholder-text {
+    text-align: center;
+    padding: 64px 24px;
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.5);
+    margin: 0;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .profile-header {
+    h1 {
+      font-size: 24px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+    }
+  }
+
+  .profile-tabs {
+    ::ng-deep {
+      .mat-mdc-tab-label {
+        min-width: 80px;
+        padding: 0 12px;
+      }
+    }
+  }
+}

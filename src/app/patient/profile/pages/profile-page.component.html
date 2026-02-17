@@ -1,0 +1,65 @@
+<div class="profile-page">
+  <div class="profile-header">
+    <h1>Mi Perfil</h1>
+    <p class="subtitle">Gestiona tu información médica y resultados</p>
+  </div>
+
+  <mat-tab-group class="profile-tabs" animationDuration="300ms">
+    <!-- Tab: Resumen -->
+    <mat-tab label="Resumen">
+      <div class="tab-content">
+        <p class="placeholder-text">
+          🏗️ Próximamente: Resumen de tu perfil médico
+        </p>
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Historia Clínica -->
+    <mat-tab label="Historia">
+      <div class="tab-content">
+        <app-patient-history-list />
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Medicamentos -->
+    <mat-tab label="Medicamentos">
+      <div class="tab-content">
+        <p class="placeholder-text">
+          🏗️ Próximamente: Tus medicamentos actuales y historial
+        </p>
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Resultados/Exámenes (IMPLEMENTADO) -->
+    <mat-tab label="Resultados">
+      <div class="tab-content exams-tab">
+        <app-exams-list />
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Alergias -->
+    <mat-tab label="Alergias">
+      <div class="tab-content">
+        <p class="placeholder-text">
+          🏗️ Próximamente: Registro de alergias y reacciones adversas
+        </p>
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Antecedentes -->
+    <mat-tab label="Antecedentes">
+      <div class="tab-content">
+        <p class="placeholder-text">
+          🏗️ Próximamente: Antecedentes médicos familiares y personales
+        </p>
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Privacidad -->
+    <mat-tab label="Privacidad">
+      <div class="tab-content">
+        <app-privacy-settings />
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

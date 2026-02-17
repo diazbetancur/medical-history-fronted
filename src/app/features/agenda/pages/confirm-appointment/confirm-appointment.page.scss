@@ -1,0 +1,194 @@
+.confirm-appointment-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 24px;
+}
+
+.confirm-card {
+  max-width: 600px;
+  width: 100%;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 48px 24px;
+    gap: 16px;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 500;
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .loading-content {
+    mat-spinner {
+      margin-bottom: 16px;
+    }
+  }
+
+  .success-content {
+    mat-icon {
+      color: #4caf50;
+    }
+
+    .appointment-summary {
+      width: 100%;
+      margin-top: 24px;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 8px;
+      text-align: left;
+
+      .summary-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 20px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+          color: rgba(0, 0, 0, 0.54);
+          margin-top: 2px;
+        }
+
+        div {
+          flex: 1;
+
+          strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.6);
+          }
+
+          p {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.87);
+            text-align: left;
+          }
+        }
+      }
+    }
+  }
+
+  .error-content {
+    mat-icon {
+      color: #f44336;
+    }
+
+    .error-hints {
+      width: 100%;
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(244, 67, 54, 0.05);
+      border-radius: 8px;
+      text-align: left;
+
+      p {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.87);
+        text-align: left;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.7);
+        text-align: left;
+
+        li {
+          margin: 4px 0;
+        }
+      }
+    }
+  }
+
+  mat-card-actions {
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .confirm-appointment-container {
+    padding: 16px;
+    min-height: 50vh;
+  }
+
+  .confirm-card {
+    mat-card-content {
+      padding: 32px 16px;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+    }
+
+    mat-card-actions {
+      flex-direction: column;
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}
