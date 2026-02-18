@@ -6,14 +6,12 @@
 
 /**
  * Specialty catalog item
+ * Response from GET /api/public/specialties
  */
 export interface SpecialtyDto {
   id: string;
   name: string;
-  description?: string;
-  icon?: string;
-  isActive: boolean;
-  professionalCount?: number; // Optional: number of professionals with this specialty
+  description?: string | null;
 }
 
 /**

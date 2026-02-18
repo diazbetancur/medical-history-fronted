@@ -3,10 +3,16 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { AppointmentsApi, type Appointment } from '@data/api';
+import {
+  RequestAppointmentDialogComponent,
+  SelectedProfessionalForBooking,
+} from '../../../../patient/pages/home/request-appointment-dialog.component';
+import { BookAppointmentDialogComponent } from '../../../public/components/book-appointment-dialog.component';
 
 /**
  * Appointments List Page
@@ -33,12 +39,14 @@ import { AppointmentsApi, type Appointment } from '@data/api';
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+    MatDialogModule,
   ],
   templateUrl: './appointments-list.page.html',
   styleUrl: './appointments-list.page.scss',
 })
 export class AppointmentsListPageComponent implements OnInit {
   private readonly appointmentsApi = inject(AppointmentsApi);
+  private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
   // State
@@ -74,7 +82,33 @@ export class AppointmentsListPageComponent implements OnInit {
    * Navigate to booking page
    */
   bookNewAppointment(): void {
-    this.router.navigate(['/dashboard/agenda/book']);
+    const selectorRef = this.dialog.open(RequestAppointmentDialogComponent, {
+      width: '980px',
+      maxWidth: '96vw',
+      data: {
+        pageSize: 12,
+      },
+    });
+
+    selectorRef
+      .afterClosed()
+      .subscribe((selected: SelectedProfessionalForBooking | null) => {
+        if (!selected) {
+          return;
+        }
+
+        this.dialog.open(BookAppointmentDialogComponent, {
+          width: '760px',
+          maxWidth: '96vw',
+          data: {
+            slug: selected.slug,
+            professionalId: selected.professionalProfileId,
+            name: selected.fullName,
+            imageUrl: selected.photoUrl,
+            specialties: selected.specialty ? [selected.specialty] : [],
+          },
+        });
+      });
   }
 
   /**

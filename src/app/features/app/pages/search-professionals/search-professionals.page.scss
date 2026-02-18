@@ -1,0 +1,180 @@
+.search-professionals-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 32px;
+    font-weight: 500;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 16px;
+  }
+}
+
+.filters-card {
+  margin-bottom: 24px;
+
+  .filters-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+
+    .filter-field {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .clear-btn {
+      margin-top: 8px;
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+
+  p {
+    margin-top: 16px;
+    color: var(--color-text-secondary);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+
+  .empty-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--color-text-disabled);
+    margin: 0 auto 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+}
+
+.professionals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.professional-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px var(--color-border);
+  }
+
+  .professional-avatar {
+    background: var(--gradient-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  mat-card-header {
+    mat-card-subtitle {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .specialty-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+
+  mat-card-content {
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--color-text-primary);
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      &.rating {
+        .star-icon {
+          color: var(--color-warning);
+        }
+      }
+    }
+
+    .inactive-chip {
+      margin-top: 8px;
+    }
+  }
+
+  mat-card-actions {
+    padding: 0 16px 16px;
+
+    button {
+      width: 100%;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .search-professionals-page {
+    padding: 16px;
+  }
+
+  .filters-card .filters-row {
+    flex-direction: column;
+
+    .filter-field,
+    .clear-btn {
+      width: 100%;
+    }
+  }
+
+  .professionals-grid {
+    grid-template-columns: 1fr;
+  }
+}

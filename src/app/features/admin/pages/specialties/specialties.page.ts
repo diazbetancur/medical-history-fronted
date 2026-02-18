@@ -3,20 +3,24 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { AuthStore } from '@core/auth';
-import type { SpecialtyDto } from '@data/models';
-import { SpecialtiesAdminStore } from '@data/stores';
+import type {
+  CreateSpecialtyDto,
+  SpecialtyDto,
+  UpdateSpecialtyDto,
+} from '@data/models';
+import { SpecialtiesAdminStore } from '@data/stores/specialties-admin.store';
 import { ToastService } from '@shared/services';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { PERMISSIONS } from '../../admin-menu.config';
+import { SpecialtyFormDialogComponent } from './specialty-form-dialog.component';
 
 @Component({
   selector: 'app-specialties-page',
@@ -30,9 +34,6 @@ import { PERMISSIONS } from '../../admin-menu.config';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatCheckboxModule,
-    MatRadioModule,
-    MatSelectModule,
     MatProgressSpinnerModule,
     MatChipsModule,
   ],
@@ -43,8 +44,8 @@ export class SpecialtiesPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   readonly store = inject(SpecialtiesAdminStore);
   private readonly toast = inject(ToastService);
+  private readonly dialog = inject(MatDialog);
 
-  readonly professionalSearch = signal('');
   readonly catalogFilter = signal('');
 
   readonly userPermissions = this.authStore.userPermissions;
@@ -54,8 +55,6 @@ export class SpecialtiesPageComponent implements OnInit {
   ]);
   private readonly managePermissions = new Set<string>([
     PERMISSIONS.CATALOG_MANAGE_CATEGORIES,
-    PERMISSIONS.PROFILES_UPDATE,
-    PERMISSIONS.PROFILES_VERIFY,
   ]);
 
   readonly canViewPage = computed(() =>
@@ -64,7 +63,7 @@ export class SpecialtiesPageComponent implements OnInit {
     ),
   );
 
-  readonly canManageAssignments = computed(() =>
+  readonly canManageCatalog = computed(() =>
     this.userPermissions().some((permission) =>
       this.managePermissions.has(permission),
     ),
@@ -72,88 +71,91 @@ export class SpecialtiesPageComponent implements OnInit {
 
   readonly filteredCatalog = computed(() => {
     const filter = this.catalogFilter().trim().toLowerCase();
-    const catalog = this.store.catalog();
+    const catalog = this.store.specialties();
 
     if (!filter) {
       return catalog;
     }
 
-    return catalog.filter(
-      (item) =>
-        item.name.toLowerCase().includes(filter) ||
-        item.slug.toLowerCase().includes(filter),
-    );
+    return catalog.filter((item) => item.name.toLowerCase().includes(filter));
   });
 
-  readonly selectedCount = this.store.selectedCount;
-  readonly primarySpecialtyId = this.store.primarySpecialtyId;
-  readonly displayedColumns = ['selected', 'primary', 'name', 'slug', 'stats'];
+  readonly displayedColumns = ['name', 'isActive', 'stats', 'actions'];
 
   ngOnInit(): void {
     if (!this.canViewPage()) {
       return;
     }
 
-    this.store.loadCatalog();
+    this.store.loadSpecialties();
   }
 
-  searchProfessionals(): void {
-    if (!this.professionalSearch().trim()) {
-      this.toast.warning('Ingresa nombre o correo del profesional');
+  openCreateDialog(): void {
+    if (!this.canManageCatalog()) {
+      this.toast.error('No tienes permisos para crear especialidades');
       return;
     }
 
-    this.store.searchProfessionals(this.professionalSearch());
+    const dialogRef = this.dialog.open(SpecialtyFormDialogComponent, {
+      width: '560px',
+      data: { mode: 'create' },
+    });
+
+    dialogRef
+      .afterClosed()
+      .subscribe((result: CreateSpecialtyDto | undefined) => {
+        if (result) {
+          this.store.createSpecialty(result).subscribe();
+        }
+      });
   }
 
-  onProfessionalSelected(professionalId: string | null): void {
-    if (!professionalId) {
-      this.store.clearSelection();
+  openEditDialog(specialty: SpecialtyDto): void {
+    if (!this.canManageCatalog()) {
+      this.toast.error('No tienes permisos para editar especialidades');
       return;
     }
 
-    const selected = this.store
-      .professionalCandidates()
-      .find((item) => item.id === professionalId);
+    const dialogRef = this.dialog.open(SpecialtyFormDialogComponent, {
+      width: '560px',
+      data: { mode: 'edit', specialty },
+    });
 
-    if (selected) {
-      this.store.selectProfessional(selected);
-    }
+    dialogRef
+      .afterClosed()
+      .subscribe((result: UpdateSpecialtyDto | undefined) => {
+        if (result) {
+          this.store.updateSpecialty(specialty.id, result).subscribe();
+        }
+      });
   }
 
-  isSelected(specialtyId: string): boolean {
-    return this.store.selectedIds().has(specialtyId);
-  }
-
-  toggleSpecialty(specialty: SpecialtyDto, checked: boolean): void {
-    if (!this.canManageAssignments()) {
-      this.toast.error('No tienes permisos para modificar especialidades');
+  deleteSpecialty(specialty: SpecialtyDto): void {
+    if (!this.canManageCatalog()) {
+      this.toast.error('No tienes permisos para eliminar especialidades');
       return;
     }
 
-    this.store.toggleSpecialty(specialty, checked);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: 'Eliminar especialidad',
+        message: `¿Deseas eliminar la especialidad "${specialty.name}"?`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.store.deleteSpecialty(specialty.id, specialty.name).subscribe();
+      }
+    });
   }
 
-  setPrimary(specialtyId: string): void {
-    if (!this.canManageAssignments()) {
-      this.toast.error('No tienes permisos para modificar especialidades');
-      return;
-    }
-
-    this.store.setPrimary(specialtyId);
-  }
-
-  save(): void {
-    if (!this.canManageAssignments()) {
-      this.toast.error('No tienes permisos para actualizar especialidades');
-      return;
-    }
-
-    this.store.saveAssignments().subscribe();
-  }
-
-  clearSelection(): void {
-    this.store.clearSelection();
-    this.professionalSearch.set('');
+  reload(): void {
+    this.store.loadSpecialties();
   }
 }

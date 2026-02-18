@@ -6,11 +6,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
+import { BookAppointmentDialogComponent } from '@features/public/components/book-appointment-dialog.component';
 import { PatientAppointmentsStore } from '@data/stores/patient-appointments.store';
 import { ProfessionalsSearchStore } from '@data/stores/professionals-search.store';
 
@@ -31,6 +33,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
     MatChipsModule,
     MatProgressSpinnerModule,
     MatDatepickerModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
   ],
@@ -76,7 +79,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
               @if (professional()!.rating) {
                 <div class="info-row rating">
                   <mat-icon class="star-icon">star</mat-icon>
-                  <span>{{ professional()!.rating.toFixed(1) }} / 5.0</span>
+                  <span>{{ professional()!.rating!.toFixed(1) }} / 5.0</span>
                 </div>
               }
 
@@ -390,6 +393,7 @@ import { ProfessionalsSearchStore } from '@data/stores/professionals-search.stor
 export class ProfessionalDetailPage implements OnInit, OnDestroy {
   protected readonly searchStore = inject(ProfessionalsSearchStore);
   protected readonly appointmentsStore = inject(PatientAppointmentsStore);
+  private readonly dialog = inject(MatDialog);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -440,15 +444,17 @@ export class ProfessionalDetailPage implements OnInit, OnDestroy {
   }
 
   protected bookAppointment(): void {
-    const date = this.dateControl.value;
-    if (!date || !this.professional()) return;
+    const professional = this.professional();
+    if (!professional?.slug) return;
 
-    const dateStr = this.formatDateISO(date);
-    this.router.navigate(['/patient/appointments/new'], {
-      queryParams: {
-        professional: this.professional()!.slug,
-        date: dateStr,
-      },
+    this.dialog.open(BookAppointmentDialogComponent, {
+      width: '760px',
+      maxWidth: '96vw',
+      data: {
+        slug: professional.slug,
+        professionalId: professional.id,
+        name: professional.name,
+        specialties: professional.specialty ? [professional.specialty] : [],
     });
   }
 

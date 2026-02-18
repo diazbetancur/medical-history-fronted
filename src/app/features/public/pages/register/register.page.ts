@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -26,6 +27,7 @@ import { ToastService } from '@shared/services';
     RouterLink,
     MatButtonModule,
     MatCardModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
@@ -57,6 +59,7 @@ export class RegisterPageComponent {
         ],
       ],
       confirmPassword: ['', [Validators.required]],
+      asProfessional: [false],
     },
     {
       validators: [this.passwordMatchValidator()],
@@ -92,7 +95,11 @@ export class RegisterPageComponent {
             response.message || 'Usuario registrado exitosamente',
           );
           this.router.navigate(['/login'], {
-            queryParams: { registered: '1' },
+            queryParams: {
+              registered: '1',
+              professional: value.asProfessional ? '1' : undefined,
+              email: value.email,
+            },
           });
         },
         error: (err) => {

@@ -19,11 +19,11 @@ import {
   UpdateAllergyDto,
 } from '@data/models';
 import { PatientAllergiesService } from '@patient/services/patient-allergies.service';
+import { ConfirmDialogComponent } from '@shared/ui';
 import {
   AllergyDialogComponent,
   AllergyDialogData,
 } from './allergy-dialog.component';
-import { ConfirmDialogComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-patient-allergies',

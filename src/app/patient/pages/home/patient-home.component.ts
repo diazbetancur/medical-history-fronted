@@ -3,15 +3,20 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
-import { ConfirmDialogComponent } from '@shared/ui';
+import { BookAppointmentDialogComponent } from '@features/public/components/book-appointment-dialog.component';
 import { ToastService } from '@shared/services/toast.service';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { AppointmentDto } from '../../models/appointment.dto';
 import { AppointmentsService } from '../../services/appointments.service';
+import {
+  RequestAppointmentDialogComponent,
+  SelectedProfessionalForBooking,
+} from './request-appointment-dialog.component';
 
 @Component({
   selector: 'app-patient-home',
@@ -20,6 +25,7 @@ import { AppointmentsService } from '../../services/appointments.service';
     CommonModule,
     MatButtonModule,
     MatCardModule,
+    MatDialogModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
@@ -37,7 +43,7 @@ import { AppointmentsService } from '../../services/appointments.service';
             mat-raised-button
             color="primary"
             class="cta-button"
-            (click)="navigateToWizard()"
+            (click)="openRequestAppointment()"
           >
             <mat-icon>add_circle_outline</mat-icon>
             Agendar Nueva Cita
@@ -75,7 +81,7 @@ import { AppointmentsService } from '../../services/appointments.service';
               <button
                 mat-raised-button
                 color="primary"
-                (click)="navigateToWizard()"
+                (click)="openRequestAppointment()"
               >
                 <mat-icon>add</mat-icon>
                 Agendar Ahora
@@ -154,7 +160,7 @@ import { AppointmentsService } from '../../services/appointments.service';
       <section class="quick-actions">
         <h2>Acciones Rápidas</h2>
         <div class="actions-grid">
-          <mat-card class="action-card" (click)="navigateToWizard()">
+          <mat-card class="action-card" (click)="openRequestAppointment()">
             <mat-card-content>
               <mat-icon>add_circle</mat-icon>
               <h3>Agendar Cita</h3>
@@ -549,6 +555,36 @@ export class PatientHomeComponent implements OnInit {
    */
   navigateToWizard(): void {
     this.router.navigate(['/patient/wizard']);
+  }
+
+  openRequestAppointment(): void {
+    const selectorRef = this.dialog.open(RequestAppointmentDialogComponent, {
+      width: '980px',
+      maxWidth: '96vw',
+      data: {
+        pageSize: 12,
+      },
+    });
+
+    selectorRef
+      .afterClosed()
+      .subscribe((selected: SelectedProfessionalForBooking | null) => {
+        if (!selected) {
+          return;
+        }
+
+        this.dialog.open(BookAppointmentDialogComponent, {
+          width: '760px',
+          maxWidth: '96vw',
+          data: {
+            slug: selected.slug,
+            professionalId: selected.professionalProfileId,
+            name: selected.fullName,
+            imageUrl: selected.photoUrl,
+            specialties: selected.specialty ? [selected.specialty] : [],
+          },
+        });
+      });
   }
 
   /**

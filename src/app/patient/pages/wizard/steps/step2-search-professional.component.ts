@@ -537,7 +537,7 @@ export class Step2SearchProfessionalComponent implements OnInit {
   private loadSpecialties(): void {
     this.catalogService.getSpecialties().subscribe({
       next: (specialties) => {
-        this.specialties.set(specialties.filter((s) => s.isActive));
+        this.specialties.set(specialties);
       },
       error: (error: ApiError) => {
         this.toast.error(getUserMessage(error));

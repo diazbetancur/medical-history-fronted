@@ -42,6 +42,10 @@ export interface UserOperationResultDto {
   errors?: string[];
 }
 
+export interface BecomeProfessionalRequest {
+  reason?: string;
+}
+
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
@@ -643,6 +647,14 @@ export interface AdminCatalogsResponse {
   categories: Array<
     Category & { sortOrder: number; isActive: boolean; profilesCount: number }
   >;
+}
+
+export interface AdminDashboardSummaryResponse {
+  activePatients: number;
+  activeProfessionalsNonAdmin: number;
+  appointmentsRequestedThisMonth: number;
+  pendingProfessionalActivationRequests: number;
+  generatedAtUtc: string;
 }
 
 // =============================================================================
