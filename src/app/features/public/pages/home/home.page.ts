@@ -3,6 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
@@ -13,8 +14,13 @@ import {
   PublicHomeStatsDto,
 } from '../../../../public/models/public-home.dto';
 import { PublicHomeService } from '../../../../public/services/public-home.service';
+import {
+  AuthModalComponent,
+  AuthModalData,
+} from '../../components/auth-modal/auth-modal.component';
 import { ProfessionalCardComponent } from '../../components/professional-card.component';
 import { PublicHeaderComponent } from '../../components/public-header.component';
+import { AuthIntentService } from '../../services/auth-intent.service';
 
 @Component({
   selector: 'app-home-page',
@@ -38,6 +44,8 @@ export class HomePageComponent implements OnInit {
   private readonly seoService = inject(SeoService);
   private readonly router = inject(Router);
   private readonly authStore = inject(AuthStore);
+  private readonly dialog = inject(MatDialog);
+  private readonly authIntent = inject(AuthIntentService);
 
   readonly isAuthenticated = this.authStore.isAuthenticated;
   readonly isPatientAuthenticated = computed(() =>
@@ -104,8 +112,19 @@ export class HomePageComponent implements OnInit {
     this.router.navigate(['/search']);
   }
 
+  openAuthModal(asProfessional = false): void {
+    this.authIntent.setAsProfessional(asProfessional);
+    this.dialog.open<AuthModalComponent, AuthModalData>(AuthModalComponent, {
+      data: { asProfessional },
+      width: '440px',
+      maxWidth: '100vw',
+      panelClass: 'auth-modal-panel',
+      autoFocus: 'first-tabbable',
+    });
+  }
+
   navigateToLogin(): void {
-    this.router.navigate(['/login']);
+    this.openAuthModal(false);
   }
 
   navigateToProfile(): void {

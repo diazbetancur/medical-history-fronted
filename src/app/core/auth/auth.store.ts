@@ -187,11 +187,11 @@ export class AuthStore {
   }
 
   /**
-   * Logout: clear token, user, context, and redirect to login
+   * Logout: clear token, user, context, and redirect to home
    */
   logout(): void {
     this.clearAuth();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
     // this.debugLog('[AuthStore] User logged out');
   }
 

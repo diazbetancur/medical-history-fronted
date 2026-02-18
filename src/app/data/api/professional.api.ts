@@ -4,6 +4,7 @@ import { ApiClient } from './api-client';
 import {
   CreateProfessionalProfilePayload,
   CreateServicePayload,
+  ProfessionalDashboardResponse,
   ProfessionalProfile,
   ProfessionalRequestsParams,
   ProfessionalRequestsResponse,
@@ -40,7 +41,7 @@ export class ProfessionalApi {
    * Create professional profile (onboarding)
    */
   createProfile(
-    payload: CreateProfessionalProfilePayload
+    payload: CreateProfessionalProfilePayload,
   ): Observable<ProfessionalProfile> {
     return this.api.post<ProfessionalProfile>('/professional/profile', payload);
   }
@@ -50,7 +51,7 @@ export class ProfessionalApi {
    * Update professional profile
    */
   updateProfile(
-    payload: UpdateProfessionalProfilePayload
+    payload: UpdateProfessionalProfilePayload,
   ): Observable<ProfessionalProfile> {
     return this.api.put<ProfessionalProfile>('/professional/profile', payload);
   }
@@ -82,7 +83,7 @@ export class ProfessionalApi {
    */
   updateService(
     id: string,
-    payload: UpdateServicePayload
+    payload: UpdateServicePayload,
   ): Observable<Service> {
     return this.api.put<Service>(`/professional/services/${id}`, payload);
   }
@@ -104,7 +105,7 @@ export class ProfessionalApi {
    * List contact requests received by the professional
    */
   getRequests(
-    params: ProfessionalRequestsParams = {}
+    params: ProfessionalRequestsParams = {},
   ): Observable<ProfessionalRequestsResponse> {
     const queryParams = this.buildRequestParams(params);
     const queryString = queryParams.toString();
@@ -120,11 +121,28 @@ export class ProfessionalApi {
    */
   updateRequestStatus(
     id: string,
-    payload: UpdateRequestStatusPayload
+    payload: UpdateRequestStatusPayload,
   ): Observable<UpdateRequestResponse> {
     return this.api.patch<UpdateRequestResponse>(
       `/professional/requests/${id}`,
-      payload
+      payload,
+    );
+  }
+
+  // ===========================================================================
+  // Dashboard
+  // ===========================================================================
+
+  /**
+   * GET /api/professional/dashboard/{professionalProfileId}
+   * Returns aggregated dashboard metrics for the professional.
+   * Policy: Profiles.View
+   */
+  getDashboard(
+    professionalProfileId: string,
+  ): Observable<ProfessionalDashboardResponse> {
+    return this.api.get<ProfessionalDashboardResponse>(
+      `/professional/dashboard/${professionalProfileId}`,
     );
   }
 
@@ -133,7 +151,7 @@ export class ProfessionalApi {
   // ===========================================================================
 
   private buildRequestParams(
-    params: ProfessionalRequestsParams
+    params: ProfessionalRequestsParams,
   ): URLSearchParams {
     const searchParams = new URLSearchParams();
 

@@ -1,0 +1,200 @@
+.auth-modal {
+  width: 100%;
+  max-width: 440px;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+  gap: 8px;
+}
+
+.modal-brand {
+  .brand-text {
+    font-size: 22px;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.professional-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border-radius: 20px;
+  padding: 4px 10px;
+  flex: 1;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.close-btn {
+  color: var(--color-text-secondary);
+  margin-left: auto;
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+.auth-tabs {
+  ::ng-deep .mat-mdc-tab-header {
+    padding: 0 24px;
+  }
+
+  ::ng-deep .mat-mdc-tab-label-container {
+    border-bottom: 1px solid var(--color-border);
+  }
+}
+
+.tab-content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+// ─── Fields ───────────────────────────────────────────────────────────────────
+.full-width {
+  width: 100%;
+}
+
+.name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+// ─── Professional checkbox ────────────────────────────────────────────────────
+.professional-check {
+  margin: 4px 0 12px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+
+  .check-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 2px;
+    color: var(--color-primary);
+  }
+}
+
+// ─── Banners ──────────────────────────────────────────────────────────────────
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--color-error, #f44336) 10%, transparent);
+  color: var(--color-error, #d32f2f);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 8px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.success-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: color-mix(
+    in srgb,
+    var(--color-success, #4caf50) 12%,
+    transparent
+  );
+  color: var(--color-success, #2e7d32);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-bottom: 12px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+// ─── Submit button ────────────────────────────────────────────────────────────
+.submit-btn {
+  height: 48px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+
+  mat-spinner {
+    display: inline-flex;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ─── Forgot link ──────────────────────────────────────────────────────────────
+.forgot-link {
+  text-align: center;
+  margin-top: 12px;
+  padding-bottom: 4px;
+
+  a {
+    font-size: 13px;
+    color: var(--color-primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .name-row {
+    grid-template-columns: 1fr;
+  }
+
+  .tab-content {
+    padding: 16px;
+  }
+}

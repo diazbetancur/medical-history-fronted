@@ -1,0 +1,209 @@
+<div class="onboarding-wrapper">
+  <!-- Header -->
+  <div class="onboarding-header">
+    <div class="brand">
+      <mat-icon class="brand-icon">medical_services</mat-icon>
+      <span class="brand-text">MediTigo</span>
+    </div>
+    <h1 class="onboarding-title">Configura tu perfil profesional</h1>
+    <p class="onboarding-subtitle">
+      Completa tu información para comenzar a recibir pacientes
+    </p>
+  </div>
+
+  <!-- Card form -->
+  <mat-card class="onboarding-card">
+    @if (loadingCatalogs()) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Cargando datos...</span>
+    </div>
+    } @else {
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" novalidate>
+      <!-- ── Sección: Información principal ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <mat-icon>person</mat-icon>
+          <span>Información principal</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre profesional / Consultorio *</mat-label>
+          <mat-icon matPrefix>storefront</mat-icon>
+          <input
+            matInput
+            formControlName="businessName"
+            placeholder="Ej. Dr. Juan Pérez - Medicina Interna"
+            autocomplete="organization"
+          />
+          <mat-hint>Cómo aparecerás en el directorio público</mat-hint>
+          @if (profileForm.controls.businessName.hasError('required')) {
+          <mat-error>Este campo es requerido</mat-error>
+          } @if (profileForm.controls.businessName.hasError('maxlength')) {
+          <mat-error>Máximo 200 caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción / Presentación</mat-label>
+          <mat-icon matPrefix>description</mat-icon>
+          <textarea
+            matInput
+            formControlName="description"
+            placeholder="Cuéntale a tus pacientes quién eres, tu experiencia y especialidad..."
+            rows="4"
+            autocomplete="off"
+          ></textarea>
+          <mat-hint>Opcional — hasta 2000 caracteres</mat-hint>
+          @if (profileForm.controls.description.hasError('maxlength')) {
+          <mat-error>Máximo 2000 caracteres</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- ── Sección: Ubicación ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <mat-icon>location_on</mat-icon>
+          <span>Ubicación</span>
+        </div>
+
+        <div class="row-2">
+          <mat-form-field appearance="outline">
+            <mat-label>País *</mat-label>
+            <mat-select formControlName="countryId">
+              @for (country of countries(); track country.id) {
+              <mat-option [value]="country.id">{{ country.name }}</mat-option>
+              }
+            </mat-select>
+            @if (profileForm.controls.countryId.hasError('required')) {
+            <mat-error>Selecciona un país</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Ciudad *</mat-label>
+            <mat-select
+              formControlName="cityId"
+              [disabled]="!profileForm.controls.countryId.value"
+            >
+              @for (city of filteredCities(); track city.id) {
+              <mat-option [value]="city.id">{{ city.name }}</mat-option>
+              } @if (filteredCities().length === 0) {
+              <mat-option disabled>Selecciona un país primero</mat-option>
+              }
+            </mat-select>
+            @if (profileForm.controls.cityId.hasError('required')) {
+            <mat-error>Selecciona una ciudad</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Dirección del consultorio</mat-label>
+          <mat-icon matPrefix>place</mat-icon>
+          <input
+            matInput
+            formControlName="address"
+            placeholder="Ej. Calle 80 # 45-23, Consultorio 301"
+            autocomplete="street-address"
+          />
+          @if (profileForm.controls.address.hasError('maxlength')) {
+          <mat-error>Máximo 500 caracteres</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- ── Sección: Contacto ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <mat-icon>contact_phone</mat-icon>
+          <span>Contacto público</span>
+        </div>
+
+        <div class="row-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+            <mat-icon matPrefix>phone</mat-icon>
+            <input
+              matInput
+              formControlName="phone"
+              placeholder="+57 300 123 4567"
+              type="tel"
+              autocomplete="tel"
+            />
+            @if (profileForm.controls.phone.hasError('maxlength')) {
+            <mat-error>Máximo 20 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>WhatsApp</mat-label>
+            <mat-icon matPrefix>chat</mat-icon>
+            <input
+              matInput
+              formControlName="whatsApp"
+              placeholder="+57 300 123 4567"
+              type="tel"
+              autocomplete="tel"
+            />
+            @if (profileForm.controls.whatsApp.hasError('maxlength')) {
+            <mat-error>Máximo 20 caracteres</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email profesional</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input
+            matInput
+            formControlName="email"
+            type="email"
+            placeholder="consultorio@ejemplo.com"
+            autocomplete="email"
+          />
+          <mat-hint>Se mostrará en tu perfil público</mat-hint>
+          @if (profileForm.controls.email.hasError('email')) {
+          <mat-error>Email inválido</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- ── Error banner ── -->
+      @if (submitError()) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ submitError() }}</span>
+      </div>
+      }
+
+      <!-- ── Actions ── -->
+      <div class="form-actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="isSubmitting()"
+          class="submit-btn"
+        >
+          @if (isSubmitting()) {
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Creando perfil...</span>
+          } @else {
+          <ng-container>
+            <mat-icon>rocket_launch</mat-icon>
+            <span>Publicar mi perfil</span>
+          </ng-container>
+          }
+        </button>
+        <p class="terms-note">
+          Al publicar tu perfil aceptas nuestros
+          <a href="/terms" target="_blank">Términos y condiciones</a>. Podrás
+          editarlo en cualquier momento desde tu panel.
+        </p>
+      </div>
+    </form>
+    }
+  </mat-card>
+</div>

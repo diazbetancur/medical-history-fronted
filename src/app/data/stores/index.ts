@@ -9,6 +9,9 @@ export * from './admin-requests.store';
 export * from './professional-requests.store';
 export * from './request-form.store';
 
+// Admin feature stores
+export * from './admin-professionals.store';
+
 // RBAC stores
 export * from './admin-users.store';
 export * from './institutions.store';
