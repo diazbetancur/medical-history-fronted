@@ -430,7 +430,7 @@ export interface CreateProfessionalProfilePayload {
   businessName: string;
   slug?: string;
   description?: string;
-  categoryId: string;
+  categoryId?: string;
   cityId: string;
   countryId: string;
   phone?: string;
@@ -528,6 +528,35 @@ export interface ProfessionalRequestsParams {
 }
 
 export interface ProfessionalRequestsResponse extends PaginatedResponse<ServiceRequest> {}
+
+// =============================================================================
+// Professional Dashboard
+// =============================================================================
+
+export interface ProfessionalDashboardAppointment {
+  id: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone?: string;
+  timeSlot: string;
+  startUtc: string;
+  endUtc: string;
+  durationMinutes: number;
+  status: string;
+  reason?: string;
+  serviceId?: string | null;
+  institutionName?: string | null;
+}
+
+export interface ProfessionalDashboardResponse {
+  appointmentsTodayCount: number;
+  appointmentsToday: ProfessionalDashboardAppointment[];
+  activePatientsCount: number;
+  pendingEncountersCount: number;
+  monthlyRevenue: number;
+  completedAppointmentsThisMonth: number;
+  revenueMonth: string;
+}
 
 export interface UpdateRequestStatusPayload {
   status: RequestStatus;

@@ -142,6 +142,20 @@ export const routes: Routes = [
   },
 
   // ============================================================================
+  // PROFESSIONAL ONBOARDING (standalone, only requires auth)
+  // Accessible right after become-professional before context switches
+  // ============================================================================
+  {
+    path: 'professional/onboarding',
+    canActivate: [authStoreGuard],
+    loadComponent: () =>
+      import('./features/professional/pages/onboarding/professional-onboarding.page').then(
+        (m) => m.ProfessionalOnboardingPage,
+      ),
+    title: 'Configura tu Perfil - Directory Pro',
+  },
+
+  // ============================================================================
   // PROFESSIONAL AREA (/professional/*)
   // Guards: authStoreGuard + contextGuard('PROFESSIONAL')
   // ============================================================================

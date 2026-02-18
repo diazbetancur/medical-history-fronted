@@ -248,39 +248,6 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PROFESSIONAL',
     requiredPermissions: [PROFESSIONAL_PERMISSIONS.PATIENTS_VIEW],
   },
-  {
-    label: 'Notas',
-    icon: 'note',
-    route: '/professional/notes',
-    context: 'PROFESSIONAL',
-    requiredPermissions: [PROFESSIONAL_PERMISSIONS.NOTES_VIEW],
-  },
-  {
-    label: 'Archivos',
-    icon: 'attach_file',
-    route: '/professional/files',
-    context: 'PROFESSIONAL',
-    requiredPermissions: [PROFESSIONAL_PERMISSIONS.FILES_VIEW],
-  },
-  {
-    isDivider: true,
-    label: '',
-    icon: '',
-    route: '',
-    context: 'PROFESSIONAL',
-  },
-  {
-    label: 'Mi Perfil',
-    icon: 'person',
-    route: '/professional/profile',
-    context: 'PROFESSIONAL',
-  },
-  {
-    label: 'Configuración',
-    icon: 'settings',
-    route: '/professional/settings',
-    context: 'PROFESSIONAL',
-  },
 
   // ==========================================================================
   // PATIENT MENU

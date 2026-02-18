@@ -1,0 +1,86 @@
+<mat-toolbar color="primary" class="topbar">
+  <!-- Menu toggle (mobile) -->
+  <button mat-icon-button class="menu-toggle" (click)="menuToggle.emit()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- App title -->
+  <span class="app-title">MediTigo</span>
+
+  <span class="spacer"></span>
+
+  <!-- Indicador de área activa -->
+  <div class="context-badge">
+    <mat-icon>{{ contextIcon() }}</mat-icon>
+    <span>{{ contextLabel() }}</span>
+  </div>
+
+  <!-- User Menu (perfil + switch contexto + logout) -->
+  <button
+    mat-icon-button
+    [matMenuTriggerFor]="userMenu"
+    class="user-avatar-btn"
+    [matTooltip]="userName()"
+  >
+    <mat-icon>account_circle</mat-icon>
+  </button>
+
+  <mat-menu #userMenu="matMenu" class="user-dropdown-menu">
+    <!-- Información del usuario -->
+    <div class="user-info" (click)="$event.stopPropagation()">
+      <div class="user-avatar-large">
+        <mat-icon>account_circle</mat-icon>
+      </div>
+      <div class="user-details">
+        <div class="user-name">{{ userName() }}</div>
+        <div class="user-email">{{ userEmail() }}</div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Perfil según contexto -->
+    @if (isProfessionalContext()) {
+      <button mat-menu-item routerLink="/professional/profile">
+        <mat-icon>manage_accounts</mat-icon>
+        <span>Mi Perfil Profesional</span>
+      </button>
+    }
+    @if (isPatientContext()) {
+      <button mat-menu-item routerLink="/patient/profile">
+        <mat-icon>account_box</mat-icon>
+        <span>Mi Perfil</span>
+      </button>
+    }
+
+    <!-- Cambio de contexto: SOLO si tiene múltiples -->
+    @if (hasMultipleContexts()) {
+      <mat-divider></mat-divider>
+      <div class="section-label" (click)="$event.stopPropagation()">
+        Cambiar área
+      </div>
+      @for (ctx of availableContexts(); track ctx.id) {
+        <button
+          mat-menu-item
+          class="context-item"
+          [class.active-context]="ctx.id === currentContext()?.id"
+          [disabled]="ctx.id === currentContext()?.id"
+          (click)="switchContext(ctx)"
+        >
+          <mat-icon>{{ getContextIcon(ctx.type) }}</mat-icon>
+          <span>{{ getContextLabel(ctx.type) }}</span>
+          @if (ctx.id === currentContext()?.id) {
+            <mat-icon class="check-icon">check_circle</mat-icon>
+          }
+        </button>
+      }
+    }
+
+    <mat-divider></mat-divider>
+
+    <button mat-menu-item (click)="handleLogout()" class="logout-item">
+      <mat-icon>logout</mat-icon>
+      <span>Cerrar Sesión</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>

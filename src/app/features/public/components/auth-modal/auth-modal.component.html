@@ -1,0 +1,239 @@
+<div class="auth-modal">
+  <!-- Header -->
+  <div class="modal-header">
+    <div class="modal-brand">
+      <span class="brand-text">MediTigo</span>
+    </div>
+    @if (data.asProfessional) {
+      <div class="professional-badge">
+        <mat-icon>medical_services</mat-icon>
+        <span>Acceso para Médicos</span>
+      </div>
+    }
+    <button mat-icon-button class="close-btn" (click)="dialogRef.close(false)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group
+    [(selectedIndex)]="selectedTabIndex"
+    animationDuration="200ms"
+    class="auth-tabs"
+  >
+    <!-- ═══════════════════════ LOGIN TAB ═══════════════════════ -->
+    <mat-tab label="Iniciar Sesión">
+      <div class="tab-content">
+        <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <mat-icon matPrefix>email</mat-icon>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="ejemplo@correo.com"
+              autocomplete="email"
+            />
+            @if (loginForm.controls.email.hasError("required")) {
+              <mat-error>El email es requerido</mat-error>
+            }
+            @if (loginForm.controls.email.hasError("email")) {
+              <mat-error>Email inválido</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contraseña</mat-label>
+            <mat-icon matPrefix>lock</mat-icon>
+            <input
+              matInput
+              type="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            @if (loginForm.controls.password.hasError("required")) {
+              <mat-error>La contraseña es requerida</mat-error>
+            }
+            @if (loginForm.controls.password.hasError("minlength")) {
+              <mat-error>Mínimo 6 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          @if (loginError()) {
+            <div class="error-banner">
+              <mat-icon>error_outline</mat-icon>
+              <span>{{ loginError() }}</span>
+            </div>
+          }
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="isLoginLoading()"
+            class="full-width submit-btn"
+          >
+            @if (isLoginLoading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Ingresando...</span>
+            } @else {
+              <ng-container>
+                <mat-icon>login</mat-icon>
+                <span>Ingresar</span>
+              </ng-container>
+            }
+          </button>
+
+          <div class="forgot-link">
+            <a routerLink="/forgot-password" (click)="dialogRef.close(false)">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+
+    <!-- ═══════════════════════ REGISTER TAB ═══════════════════════ -->
+    <mat-tab label="Crear Cuenta">
+      <div class="tab-content">
+        @if (registerSuccess()) {
+          <div class="success-banner">
+            <mat-icon>check_circle</mat-icon>
+            <p>¡Cuenta creada! Ingresa tus credenciales para iniciar sesión.</p>
+          </div>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
+          <div class="name-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="firstName"
+                autocomplete="given-name"
+                placeholder="Tu nombre"
+              />
+              @if (registerForm.controls.firstName.hasError("required")) {
+                <mat-error>Requerido</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Apellido</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="lastName"
+                autocomplete="family-name"
+                placeholder="Tu apellido"
+              />
+              @if (registerForm.controls.lastName.hasError("required")) {
+                <mat-error>Requerido</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <mat-icon matPrefix>email</mat-icon>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              placeholder="ejemplo@correo.com"
+            />
+            @if (registerForm.controls.email.hasError("required")) {
+              <mat-error>El email es requerido</mat-error>
+            }
+            @if (registerForm.controls.email.hasError("email")) {
+              <mat-error>Email inválido</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Teléfono (opcional)</mat-label>
+            <mat-icon matPrefix>phone</mat-icon>
+            <input
+              matInput
+              type="tel"
+              formControlName="phoneNumber"
+              autocomplete="tel"
+              placeholder="+57 3000000000"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contraseña</mat-label>
+            <mat-icon matPrefix>lock</mat-icon>
+            <input
+              matInput
+              type="password"
+              formControlName="password"
+              autocomplete="new-password"
+              placeholder="••••••••"
+            />
+            @if (registerForm.controls.password.hasError("required")) {
+              <mat-error>La contraseña es requerida</mat-error>
+            }
+            @if (
+              registerForm.controls.password.hasError("minlength") ||
+              registerForm.controls.password.hasError("pattern")
+            ) {
+              <mat-error
+                >Mínimo 8 caracteres: mayúscula, minúscula, número y
+                símbolo</mat-error
+              >
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirmar contraseña</mat-label>
+            <mat-icon matPrefix>lock_reset</mat-icon>
+            <input
+              matInput
+              type="password"
+              formControlName="confirmPassword"
+              autocomplete="new-password"
+              placeholder="••••••••"
+            />
+            @if (registerForm.controls.confirmPassword.hasError("required")) {
+              <mat-error>La confirmación es requerida</mat-error>
+            }
+            @if (registerForm.hasError("passwordMismatch")) {
+              <mat-error>Las contraseñas no coinciden</mat-error>
+            }
+          </mat-form-field>
+
+          @if (registerError()) {
+            <div class="error-banner">
+              <mat-icon>error_outline</mat-icon>
+              <span>{{ registerError() }}</span>
+            </div>
+          }
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="isRegisterLoading()"
+            class="full-width submit-btn"
+          >
+            @if (isRegisterLoading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Creando cuenta...</span>
+            } @else {
+              <ng-container>
+                <mat-icon>person_add</mat-icon>
+                <span>Crear cuenta</span>
+              </ng-container>
+            }
+          </button>
+        </form>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

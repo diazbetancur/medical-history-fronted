@@ -105,6 +105,11 @@ export class AuthApi {
         ) ?? fallbackContext,
       professionalProfileId: raw?.professionalProfileId,
       professionalProfileSlug: raw?.professionalProfileSlug,
+      hasProfessionalProfile:
+        raw?.hasProfessionalProfile === true ||
+        (!!raw?.professionalProfileId &&
+          raw.professionalProfileId !== '' &&
+          raw.professionalProfileId !== null),
     };
   }
 

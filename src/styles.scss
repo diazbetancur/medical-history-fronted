@@ -177,3 +177,102 @@ p {
   --mdc-snackbar-supporting-text-color: white;
   --mat-snack-bar-button-color: white;
 }
+
+// ============================================================================
+// Auth Modal Panel (global — applica al overlay del dialog)
+// ============================================================================
+
+.auth-modal-panel {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .mdc-dialog__surface {
+    border-radius: 16px !important;
+  }
+}
+
+// ============================================================================
+// User Dropdown Menu (topbar) — overlay fuera del componente
+// ============================================================================
+
+.user-dropdown-menu {
+  min-width: 260px !important;
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    pointer-events: none;
+
+    .user-avatar-large {
+      mat-icon {
+        font-size: 44px;
+        width: 44px;
+        height: 44px;
+        color: var(--color-primary, #1976d2);
+      }
+    }
+
+    .user-details {
+      overflow: hidden;
+
+      .user-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .user-email {
+        font-size: 0.78rem;
+        color: #6b7280;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .section-label {
+    padding: 6px 16px 2px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9ca3af;
+    pointer-events: none;
+  }
+
+  .context-item {
+    &.active-context {
+      color: var(--color-primary, #1976d2);
+      font-weight: 500;
+
+      mat-icon:first-child {
+        color: var(--color-primary, #1976d2);
+      }
+    }
+
+    .check-icon {
+      margin-left: auto;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--color-primary, #1976d2);
+    }
+  }
+
+  .logout-item {
+    color: #dc2626;
+
+    mat-icon {
+      color: #dc2626;
+    }
+  }
+}

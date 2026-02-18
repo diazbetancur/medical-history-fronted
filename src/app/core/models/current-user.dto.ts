@@ -48,4 +48,7 @@ export interface CurrentUserDto {
 
   /** Professional profile slug (if user has a professional profile) */
   professionalProfileSlug?: string;
+
+  /** True when the user already has a created professional profile */
+  hasProfessionalProfile: boolean;
 }

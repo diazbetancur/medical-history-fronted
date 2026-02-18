@@ -1,0 +1,234 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h1>Dashboard</h1>
+      <p>Resumen de tu actividad</p>
+    </div>
+    <button
+      mat-icon-button
+      matTooltip="Recargar"
+      (click)="reload()"
+      [disabled]="loading()"
+    >
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading state -->
+  @if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando dashboard...</p>
+  </div>
+  }
+
+  <!-- Error state -->
+  @if (error() && !loading()) {
+  <div class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error() }}</span>
+    <button mat-stroked-button (click)="reload()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+  }
+
+  <!-- Content -->
+  <!-- ── Metric cards (always visible, show – while loading/error) ───────── -->
+  <div class="metrics-grid">
+    <!-- Citas hoy -->
+    <mat-card class="metric-card">
+      <mat-card-content>
+        <div class="metric-icon appointments">
+          <mat-icon>calendar_today</mat-icon>
+        </div>
+        <div class="metric-info">
+          <span class="metric-value"
+            >{{ dashboard()?.appointmentsTodayCount ?? '–' }}</span
+          >
+          <span class="metric-label">Citas hoy</span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button routerLink="/dashboard/appointments">
+          Ver agenda <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </a>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Pacientes activos -->
+    <mat-card class="metric-card">
+      <mat-card-content>
+        <div class="metric-icon patients">
+          <mat-icon>group</mat-icon>
+        </div>
+        <div class="metric-info">
+          <span class="metric-value"
+            >{{ dashboard()?.activePatientsCount ?? '–' }}</span
+          >
+          <span class="metric-label">Pacientes activos</span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button routerLink="/dashboard/patients">
+          Ver pacientes <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </a>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Encuentros pendientes -->
+    <mat-card class="metric-card">
+      <mat-card-content>
+        <div class="metric-icon encounters">
+          <mat-icon>assignment_late</mat-icon>
+        </div>
+        <div class="metric-info">
+          <span class="metric-value"
+            >{{ dashboard()?.pendingEncountersCount ?? '–' }}</span
+          >
+          <span class="metric-label">Encuentros pendientes</span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button routerLink="/dashboard/patients">
+          Revisar <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </a>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Ingresos del mes -->
+    <mat-card class="metric-card">
+      <mat-card-content>
+        <div class="metric-icon revenue">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div class="metric-info">
+          @if (dashboard(); as data) {
+          <span class="metric-value"
+            >{{ data.monthlyRevenue | currency: 'COP' : 'symbol-narrow' :
+            '1.0-0' }}</span
+          >
+          <span class="metric-label">
+            Ingresos — {{ data.completedAppointmentsThisMonth }} citas
+            completadas
+          </span>
+          } @else {
+          <span class="metric-value">–</span>
+          <span class="metric-label">Ingresos del mes</span>
+          }
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        @if (dashboard()?.revenueMonth) {
+        <span class="revenue-month">
+          <mat-icon>date_range</mat-icon>
+          {{ dashboard()!.revenueMonth }}
+        </span>
+        }
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- ── Appointments today ─────────────────────────────────────────────── -->
+  @if (dashboard(); as data) {
+  <mat-card class="appointments-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>today</mat-icon>
+        Citas de hoy
+        <span class="count-badge">{{ data.appointmentsTodayCount }}</span>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (data.appointmentsToday.length === 0) {
+      <div class="empty-appointments">
+        <mat-icon>event_available</mat-icon>
+        <p>No tienes citas programadas para hoy</p>
+      </div>
+      } @else {
+      <div class="table-container">
+        <table
+          mat-table
+          [dataSource]="data.appointmentsToday"
+          [trackBy]="trackById"
+        >
+          <!-- Time Column -->
+          <ng-container matColumnDef="time">
+            <th mat-header-cell *matHeaderCellDef>Hora</th>
+            <td mat-cell *matCellDef="let apt">
+              <div class="time-cell">
+                <span class="time-slot">{{ apt.timeSlot }}</span>
+                <span class="duration">{{ apt.durationMinutes }} min</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Patient Column -->
+          <ng-container matColumnDef="patient">
+            <th mat-header-cell *matHeaderCellDef>Paciente</th>
+            <td mat-cell *matCellDef="let apt">
+              <div class="patient-cell">
+                <mat-icon>person</mat-icon>
+                <div class="patient-info">
+                  <span class="patient-name">{{ apt.patientName }}</span>
+                  <span class="patient-contact">{{ apt.patientEmail }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Duration Column -->
+          <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef>Hora UTC</th>
+            <td mat-cell *matCellDef="let apt">
+              <span class="utc-time">
+                {{ apt.startUtc | date: 'HH:mm' : 'UTC' }} – {{ apt.endUtc |
+                date: 'HH:mm' : 'UTC' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Reason Column -->
+          <ng-container matColumnDef="reason">
+            <th mat-header-cell *matHeaderCellDef>Motivo</th>
+            <td mat-cell *matCellDef="let apt">
+              <span class="reason-text">{{ apt.reason ?? '—' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let apt">
+              <mat-chip
+                class="status-chip"
+                [class]="getAppointmentStatusChip(apt.status).css"
+              >
+                <mat-icon
+                  >{{ getAppointmentStatusChip(apt.status).icon }}</mat-icon
+                >
+                {{ getAppointmentStatusChip(apt.status).label }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="appointmentColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: appointmentColumns"></tr>
+        </table>
+      </div>
+      }
+    </mat-card-content>
+
+    @if (data.appointmentsToday.length > 0) {
+    <mat-card-actions align="end">
+      <a mat-button routerLink="/dashboard/appointments">
+        Ver agenda completa <mat-icon iconPositionEnd>open_in_new</mat-icon>
+      </a>
+    </mat-card-actions>
+    }
+  </mat-card>
+  }
+</div>
