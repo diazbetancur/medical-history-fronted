@@ -465,7 +465,7 @@ export class RequestAppointmentDialogComponent {
 
   private loadCatalogs(): void {
     this.catalogService.getSpecialties().subscribe({
-      next: (items) => this.specialties.set(items.filter((x) => x.isActive)),
+      next: (items) => this.specialties.set(items),
       error: () => this.specialties.set([]),
     });
 
