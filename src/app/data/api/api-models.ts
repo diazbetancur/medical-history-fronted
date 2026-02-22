@@ -160,6 +160,12 @@ export interface MetadataResponse {
   categories?: Category[];
 }
 
+export interface PublicSpecialtyCatalogItem {
+  id: string;
+  name: string;
+  description?: string | null;
+}
+
 // =============================================================================
 // Public Pages Models
 // =============================================================================
