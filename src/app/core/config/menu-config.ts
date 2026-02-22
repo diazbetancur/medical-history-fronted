@@ -315,57 +315,6 @@ export const MENU_ITEMS: MenuItem[] = [
     requiredPermissions: ['Appointments.Create', 'Appointments.Slots.View'],
   },
   {
-    label: 'Mi Historial',
-    icon: 'history',
-    route: '/patient/profile',
-    context: 'PATIENT',
-    requiredPermissions: ['Patients.History.ViewOwn'],
-  },
-  {
-    label: 'Alergias',
-    icon: 'warning',
-    route: '/patient/allergies',
-    context: 'PATIENT',
-    requiredPermissions: [
-      'Patients.Allergies.ViewOwn',
-      'Patients.Allergies.ManageOwn',
-    ],
-  },
-  {
-    label: 'Antecedentes',
-    icon: 'medical_information',
-    route: '/patient/background',
-    context: 'PATIENT',
-    requiredPermissions: [
-      'Patients.Background.ViewOwn',
-      'Patients.Background.ManageOwn',
-    ],
-  },
-  {
-    label: 'Medicamentos',
-    icon: 'medication',
-    route: '/patient/medications',
-    context: 'PATIENT',
-    requiredPermissions: [
-      'Patients.Medications.ViewOwn',
-      'Patients.Medications.ManageOwn',
-    ],
-  },
-  {
-    label: 'Exámenes',
-    icon: 'biotech',
-    route: '/patient/exams',
-    context: 'PATIENT',
-    requiredPermissions: ['Patients.Exams.ViewOwn', 'Patients.Exams.ManageOwn'],
-  },
-  {
-    isDivider: true,
-    label: '',
-    icon: '',
-    route: '',
-    context: 'PATIENT',
-  },
-  {
     label: 'Mi Perfil',
     icon: 'person',
     route: '/patient/profile',
