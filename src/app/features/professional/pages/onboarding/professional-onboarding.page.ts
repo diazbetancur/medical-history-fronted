@@ -19,11 +19,11 @@ import {
   City,
   Country,
   CreateProfessionalProfilePayload,
-  PublicSpecialtyCatalogItem,
   ProfessionalEducationSummary,
   ProfessionalLocation,
   ProfessionalSpecialty,
   ProfessionalSpecialtyProposal,
+  PublicSpecialtyCatalogItem,
   UpdateProfessionalProfilePayload,
 } from '@data/api/api-models';
 import { ToastService } from '@shared/services';
