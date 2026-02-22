@@ -75,32 +75,32 @@ export class LoginPageComponent {
         password: credentials.password,
       })
       .subscribe({
-      next: (response) => {
-        // Step 1: Save token
-        this.authStore.setToken(response.token, response.expiresAt);
+        next: (response) => {
+          // Step 1: Save token
+          this.authStore.setToken(response.token, response.expiresAt);
 
-        // Step 2: Load user (calls GET /api/auth/me)
-        this.authStore.loadMe().subscribe({
-          next: (user) => {
-            if (user) {
-              this.handlePostLogin(user, credentials.asProfessional);
-            } else {
-              this.errorMessage.set('Error al cargar la sesión');
+          // Step 2: Load user (calls GET /api/auth/me)
+          this.authStore.loadMe().subscribe({
+            next: (user) => {
+              if (user) {
+                this.handlePostLogin(user, credentials.asProfessional);
+              } else {
+                this.errorMessage.set('Error al cargar la sesión');
+                this.isLoading.set(false);
+              }
+            },
+            error: (err) => {
+              const problem = this.extractProblemDetails(err);
+              this.errorMessage.set(problem.title);
               this.isLoading.set(false);
-            }
-          },
-          error: (err) => {
-            const problem = this.extractProblemDetails(err);
-            this.errorMessage.set(problem.title);
-            this.isLoading.set(false);
-          },
-        });
-      },
-      error: (err) => {
-        const problem = this.extractProblemDetails(err);
-        this.errorMessage.set(problem.title || 'Credenciales inválidas');
-        this.isLoading.set(false);
-      },
+            },
+          });
+        },
+        error: (err) => {
+          const problem = this.extractProblemDetails(err);
+          this.errorMessage.set(problem.title || 'Credenciales inválidas');
+          this.isLoading.set(false);
+        },
       });
   }
 

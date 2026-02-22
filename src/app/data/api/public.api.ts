@@ -7,6 +7,7 @@ import {
   HomePageResponse,
   MetadataResponse,
   ProfilePageResponse,
+  PublicSpecialtyCatalogItem,
   SearchPageResponse,
   SearchParams,
   SuggestResponse,
@@ -96,6 +97,14 @@ export class PublicApi {
    */
   getMetadata(): Observable<MetadataResponse> {
     return this.api.get<MetadataResponse>('/public/metadata');
+  }
+
+  /**
+   * GET /api/public/specialties
+   * Get specialties catalog for selectors
+   */
+  getSpecialties(): Observable<PublicSpecialtyCatalogItem[]> {
+    return this.api.get<PublicSpecialtyCatalogItem[]>('/public/specialties');
   }
 
   // ===========================================================================

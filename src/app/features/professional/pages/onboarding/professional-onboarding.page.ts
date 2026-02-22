@@ -8,10 +8,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Router } from '@angular/router';
 import { AuthStore } from '@core/auth';
 import { ProblemDetails } from '@core/models';
 import { ProfessionalApi, PublicApi } from '@data/api';
@@ -20,6 +19,7 @@ import {
   City,
   Country,
   CreateProfessionalProfilePayload,
+  PublicSpecialtyCatalogItem,
   ProfessionalEducationSummary,
   ProfessionalLocation,
   ProfessionalSpecialty,
@@ -53,7 +53,6 @@ export class ProfessionalOnboardingPage implements OnInit {
   private readonly professionalApi = inject(ProfessionalApi);
   private readonly publicApi = inject(PublicApi);
   private readonly authStore = inject(AuthStore);
-  private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
   // ─── Catalog data ──────────────────────────────────────────────────────────
@@ -73,6 +72,7 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly profileImageUrl = signal<string | null>(null);
   readonly isUploadingPhoto = signal(false);
   readonly specialties = signal<ProfessionalSpecialty[]>([]);
+  readonly availableSpecialties = signal<PublicSpecialtyCatalogItem[]>([]);
   readonly specialtyProposals = signal<ProfessionalSpecialtyProposal[]>([]);
   readonly education = signal<ProfessionalEducationSummary[]>([]);
   readonly locations = signal<ProfessionalLocation[]>([]);
@@ -80,7 +80,10 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly editingEducationId = signal<string | null>(null);
   readonly editingLocationId = signal<string | null>(null);
   readonly sectionsTab = signal(0);
+  readonly selectedSpecialtyIds = signal<string[]>([]);
+  readonly showSpecialtyProposal = signal(false);
   readonly specialtiesLoaded = signal(false);
+  readonly specialtiesCatalogLoaded = signal(false);
   readonly proposalsLoaded = signal(false);
   readonly educationLoaded = signal(false);
   readonly locationsLoaded = signal(false);
@@ -185,7 +188,6 @@ export class ProfessionalOnboardingPage implements OnInit {
           { emitEvent: false },
         );
         this.profileImageUrl.set(profile.profileImageUrl ?? null);
-        this.loadSpecialtiesBlock();
         this.loadingCatalogs.set(false);
       },
       error: () => {
@@ -216,13 +218,29 @@ export class ProfessionalOnboardingPage implements OnInit {
     });
   }
 
+  private loadSpecialtiesCatalog(force = false): void {
+    if (this.specialtiesCatalogLoaded() && !force) return;
+
+    this.publicApi.getSpecialties().subscribe({
+      next: (items) => {
+        this.availableSpecialties.set(items ?? []);
+        this.specialtiesCatalogLoaded.set(true);
+      },
+      error: () => {
+        this.availableSpecialties.set([]);
+      },
+    });
+  }
+
   private loadSpecialtiesBlock(force = false): void {
     if (this.specialtiesLoaded() && this.proposalsLoaded() && !force) return;
 
+    this.loadSpecialtiesCatalog(force);
     this.sectionBusy.set(true);
     this.professionalApi.getSpecialties().subscribe({
       next: (specialties) => {
         this.specialties.set(specialties);
+        this.selectedSpecialtyIds.set(specialties.map((item) => item.id));
         this.specialtiesLoaded.set(true);
         this.professionalApi.getSpecialtyProposals().subscribe({
           next: (proposals) => {
@@ -236,6 +254,36 @@ export class ProfessionalOnboardingPage implements OnInit {
         });
       },
       error: () => {
+        this.sectionBusy.set(false);
+      },
+    });
+  }
+
+  onSpecialtiesSelectionChange(event: MatSelectChange): void {
+    const selected = (event.value ?? []) as string[];
+    const hasOther = selected.includes('OTHER_OPTION');
+    this.showSpecialtyProposal.set(hasOther);
+    this.selectedSpecialtyIds.set(
+      selected.filter((id) => id !== 'OTHER_OPTION'),
+    );
+  }
+
+  saveSpecialties(): void {
+    const payload: AssignProfessionalSpecialtiesPayload = {
+      specialtyIds: this.selectedSpecialtyIds(),
+    };
+
+    this.sectionBusy.set(true);
+    this.professionalApi.assignSpecialties(payload).subscribe({
+      next: (result) => {
+        this.specialties.set(result);
+        this.selectedSpecialtyIds.set(result.map((item) => item.id));
+        this.specialtiesLoaded.set(true);
+        this.toast.success('Especialidades guardadas');
+        this.sectionBusy.set(false);
+      },
+      error: () => {
+        this.toast.error('No fue posible guardar las especialidades');
         this.sectionBusy.set(false);
       },
     });
@@ -275,18 +323,20 @@ export class ProfessionalOnboardingPage implements OnInit {
 
   onSectionsTabChange(index: number): void {
     this.sectionsTab.set(index);
-    if (index === 0) {
+    if (index === 1) {
       this.loadSpecialtiesBlock();
       return;
     }
-    if (index === 1) {
+    if (index === 2) {
       this.loadEducationBlock();
       return;
     }
-    this.loadLocationsBlock();
+    if (index === 3) {
+      this.loadLocationsBlock();
+    }
   }
 
-  onSubmit(): void {
+  saveProfile(): void {
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
@@ -318,17 +368,20 @@ export class ProfessionalOnboardingPage implements OnInit {
         this.toast.success(
           this.hasExistingProfile()
             ? 'Perfil actualizado exitosamente.'
-            : '¡Perfil creado! Ya puedes empezar a trabajar.',
+            : 'Perfil creado. Continúa con especialidades, formación y sedes.',
         );
-        // Reload user session to get updated contexts/hasProfessionalProfile
         this.authStore.loadMe().subscribe({
           next: () => {
             this.isSubmitting.set(false);
-            this.router.navigate(['/professional']);
+            this.hasExistingProfile.set(true);
+            this.sectionsTab.set(1);
+            this.loadSpecialtiesBlock(true);
           },
           error: () => {
             this.isSubmitting.set(false);
-            this.router.navigate(['/professional']);
+            this.hasExistingProfile.set(true);
+            this.sectionsTab.set(1);
+            this.loadSpecialtiesBlock(true);
           },
         });
       },
@@ -374,30 +427,6 @@ export class ProfessionalOnboardingPage implements OnInit {
       error: () => {
         this.toast.error('No fue posible eliminar la foto');
         this.isUploadingPhoto.set(false);
-      },
-    });
-  }
-
-  removeSpecialty(specialtyId: string): void {
-    const remainingIds = this.specialties()
-      .filter((item) => item.id !== specialtyId)
-      .map((item) => item.id);
-
-    const payload: AssignProfessionalSpecialtiesPayload = {
-      specialtyIds: remainingIds,
-    };
-
-    this.sectionBusy.set(true);
-    this.professionalApi.assignSpecialties(payload).subscribe({
-      next: (result) => {
-        this.specialties.set(result);
-        this.toast.success('Especialidades actualizadas');
-        this.specialtiesLoaded.set(true);
-        this.sectionBusy.set(false);
-      },
-      error: () => {
-        this.toast.error('No fue posible actualizar especialidades');
-        this.sectionBusy.set(false);
       },
     });
   }

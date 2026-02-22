@@ -55,7 +55,7 @@
 // ─── Card ─────────────────────────────────────────────────────────────────
 .onboarding-card {
   width: 100%;
-  max-width: 660px;
+  max-width: 980px;
   border-radius: 20px !important;
   padding: 32px;
   box-shadow: 0 4px 32px rgba(0 0 0 / 0.08) !important;
@@ -156,6 +156,10 @@
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 4px;
+}
+
+.tab-save-actions {
+  margin-top: 14px;
 }
 
 .items-grid {
@@ -277,6 +281,10 @@ mat-form-field {
       text-decoration: underline;
     }
   }
+}
+
+.standalone-note {
+  margin-top: 12px;
 }
 
 // ─── Responsive ───────────────────────────────────────────────────────────
