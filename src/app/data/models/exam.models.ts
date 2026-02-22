@@ -25,6 +25,8 @@ export interface ExamDto {
   uploadedAtUtc: string;
   updatedAtUtc: string;
   isActive: boolean;
+  downloadUrl?: string;
+  downloadUrlExpiresAtUtc?: string;
 }
 
 // =============================================================================

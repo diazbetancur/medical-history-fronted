@@ -10,10 +10,15 @@
  */
 export interface SlotDto {
   id: string;
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
+  startTime: string; // HH:mm (local)
+  endTime: string; // HH:mm (local)
+  startUtc: string; // ISO UTC
+  endUtc: string; // ISO UTC
   isAvailable: boolean;
   professionalProfileId: string;
+  professionalLocationId: string | null;
+  professionalLocationName: string | null;
+  professionalLocationAddress: string | null;
 }
 
 /**
@@ -22,6 +27,9 @@ export interface SlotDto {
  */
 export interface SlotsResponseDto {
   date: string; // YYYY-MM-DD
+  timeZone: string;
+  slotMinutes: number;
+  totalSlots: number;
   slots: SlotDto[];
   professionalProfileId: string;
 }

@@ -33,7 +33,7 @@ export class ProfessionalAppointmentsApi {
     if (filters?.pageSize) params.pageSize = filters.pageSize;
 
     return this.apiClient.get<PaginatedAppointmentsResponse>(
-      '/api/professional/appointments',
+      '/professional/appointments',
       { params },
     );
   }
@@ -43,7 +43,7 @@ export class ProfessionalAppointmentsApi {
    */
   getAppointmentById(appointmentId: string): Observable<AppointmentDto> {
     return this.apiClient.get<AppointmentDto>(
-      `/api/professional/appointments/${appointmentId}`,
+      `/professional/appointments/${appointmentId}`,
     );
   }
 
@@ -52,7 +52,7 @@ export class ProfessionalAppointmentsApi {
    */
   confirmAppointment(appointmentId: string): Observable<AppointmentDto> {
     return this.apiClient.post<AppointmentDto>(
-      `/api/professional/appointments/${appointmentId}/confirm`,
+      `/professional/appointments/${appointmentId}/confirm`,
       {},
     );
   }
@@ -65,7 +65,7 @@ export class ProfessionalAppointmentsApi {
     reason?: string,
   ): Observable<AppointmentDto> {
     return this.apiClient.post<AppointmentDto>(
-      `/api/professional/appointments/${appointmentId}/cancel`,
+      `/professional/appointments/${appointmentId}/cancel`,
       { reason },
     );
   }
@@ -75,7 +75,7 @@ export class ProfessionalAppointmentsApi {
    */
   completeAppointment(appointmentId: string): Observable<AppointmentDto> {
     return this.apiClient.post<AppointmentDto>(
-      `/api/professional/appointments/${appointmentId}/complete`,
+      `/professional/appointments/${appointmentId}/complete`,
       {},
     );
   }
@@ -85,7 +85,7 @@ export class ProfessionalAppointmentsApi {
    */
   markAsNoShow(appointmentId: string): Observable<AppointmentDto> {
     return this.apiClient.post<AppointmentDto>(
-      `/api/professional/appointments/${appointmentId}/no-show`,
+      `/professional/appointments/${appointmentId}/no-show`,
       {},
     );
   }

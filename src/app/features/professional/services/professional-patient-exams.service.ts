@@ -50,7 +50,7 @@ export class ProfessionalPatientExamsService {
    * @param pageSize Number of items per page
    */
   getByPatient(
-    patientProfileId: number,
+    patientProfileId: string,
     page: number = 1,
     pageSize: number = 10,
   ): Observable<ProfessionalPatientExamsResponseDto> {
@@ -87,7 +87,7 @@ export class ProfessionalPatientExamsService {
    * @param examId Exam ID
    */
   getDownloadUrl(
-    patientProfileId: number,
+    patientProfileId: string,
     examId: string,
   ): Observable<ExamDownloadUrlDto> {
     return this.http
@@ -135,9 +135,9 @@ export class ProfessionalPatientExamsService {
   /**
    * Invalidate all caches for a specific patient
    */
-  public invalidatePatientCaches(patientProfileId: number): void {
+  public invalidatePatientCaches(patientProfileId: string): void {
     const keysToDelete = Array.from(this.cache.keys()).filter((key) =>
-      key.includes(patientProfileId.toString()),
+      key.includes(patientProfileId),
     );
     keysToDelete.forEach((key) => this.cache.delete(key));
   }

@@ -14,7 +14,7 @@ import {
   UpdatePatientPrivacyDto,
 } from '@data/models';
 import { environment } from '@env';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -39,7 +39,33 @@ export class PatientHistoryService {
       .set('pageSize', pageSize.toString());
 
     return this.http
-      .get<PatientHistoryResponseDto>(`${this.baseUrl}/history`, { params })
+      .get<any>(`${this.baseUrl}/history`, { params })
+      .pipe(
+        map(
+          (response) =>
+            ({
+              items: (response?.items ?? []).map((item: any) => ({
+                id: item.id,
+                encounterDateUtc: item.visitDate ?? item.encounterDateUtc,
+                status: 'Closed',
+                professionalName: item.professionalName,
+                summary: item.diagnosis ?? item.notes,
+                notesCount: 0,
+              })),
+              totalCount: response?.total ?? response?.totalCount ?? 0,
+              page: response?.page ?? page,
+              pageSize: response?.pageSize ?? pageSize,
+              totalPages:
+                response?.totalPages ??
+                Math.max(
+                  1,
+                  Math.ceil(
+                    (response?.total ?? 0) / (response?.pageSize ?? pageSize),
+                  ),
+                ),
+            }) as PatientHistoryResponseDto,
+        ),
+      )
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -51,7 +77,34 @@ export class PatientHistoryService {
    */
   getHistoryDetail(encounterId: string): Observable<MedicalEncounterDto> {
     return this.http
-      .get<MedicalEncounterDto>(`${this.baseUrl}/history/${encounterId}`)
+      .get<any>(`${this.baseUrl}/history/${encounterId}`)
+      .pipe(
+        map(
+          (item) =>
+            ({
+              id: item.id,
+              patientProfileId: '',
+              professionalProfileId: item.professionalProfileId,
+              professionalName: item.professionalName,
+              encounterDateUtc: item.visitDate ?? item.encounterDateUtc,
+              summary: item.diagnosis ?? item.notes,
+              status: 'Closed',
+              notes: item.notes
+                ? [
+                    {
+                      id: `${item.id}-note`,
+                      type: 'Note',
+                      text: item.notes,
+                      createdAtUtc: item.dateCreated ?? item.visitDate,
+                      createdByProfessionalProfileId:
+                        item.professionalProfileId ?? '',
+                      createdByProfessionalName: item.professionalName ?? '',
+                    },
+                  ]
+                : [],
+            }) as MedicalEncounterDto,
+        ),
+      )
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -61,7 +114,18 @@ export class PatientHistoryService {
    */
   getPrivacySettings(): Observable<PatientPrivacyDto> {
     return this.http
-      .get<PatientPrivacyDto>(`${this.baseUrl}/privacy`)
+      .get<any>(`${this.baseUrl}/privacy`)
+      .pipe(
+        map(
+          (response) =>
+            ({
+              shareFullHistoryWithTreatingProfessionals:
+                response?.allowHistorySharing ??
+                response?.shareFullHistoryWithTreatingProfessionals ??
+                false,
+            }) as PatientPrivacyDto,
+        ),
+      )
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -75,7 +139,19 @@ export class PatientHistoryService {
     dto: UpdatePatientPrivacyDto,
   ): Observable<PatientPrivacyDto> {
     return this.http
-      .put<PatientPrivacyDto>(`${this.baseUrl}/privacy`, dto)
+      .put<any>(`${this.baseUrl}/privacy`, {
+        allowHistorySharing: dto.shareFullHistoryWithTreatingProfessionals,
+        allowAnonymousResearch: false,
+      })
+      .pipe(
+        map(
+          () =>
+            ({
+              shareFullHistoryWithTreatingProfessionals:
+                dto.shareFullHistoryWithTreatingProfessionals,
+            }) as PatientPrivacyDto,
+        ),
+      )
       .pipe(catchError((error) => this.handleError(error)));
   }
 

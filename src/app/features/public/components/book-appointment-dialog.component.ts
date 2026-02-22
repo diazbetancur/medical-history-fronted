@@ -18,9 +18,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { formatDateOnly } from '@core/http/http-utils';
 import { PublicApi } from '@data/api';
+import { PatientAppointmentsStore } from '@data/stores/patient-appointments.store';
 import { SlotDto } from '@patient/models/slot.dto';
 import { SlotsService } from '@patient/services/slots.service';
 
@@ -43,6 +45,7 @@ export interface BookAppointmentDialogData {
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
@@ -95,6 +98,19 @@ export interface BookAppointmentDialogData {
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
 
+        <mat-form-field appearance="outline" class="duration-input">
+          <mat-label>Duración</mat-label>
+          <mat-select
+            [value]="durationMinutes()"
+            (valueChange)="onDurationChange($event)"
+          >
+            @for (duration of durationOptions(); track duration) {
+              <mat-option [value]="duration">{{ duration }} min</mat-option>
+            }
+          </mat-select>
+          <mat-hint>Duraciones válidas según agenda del profesional</mat-hint>
+        </mat-form-field>
+
         @if (loadingSlots()) {
           <div class="state-block">
             <mat-spinner diameter="28"></mat-spinner>
@@ -110,7 +126,19 @@ export interface BookAppointmentDialogData {
           <div class="slots-list">
             @for (slot of availableSlots(); track slot.id) {
               <div class="slot-item">
-                {{ slot.startTime }} - {{ slot.endTime }}
+                <div class="slot-time">
+                  {{ slot.startTime }} - {{ slot.endTime }}
+                </div>
+                @if (slot.professionalLocationName) {
+                  <div class="slot-location">
+                    {{ slot.professionalLocationName }}
+                  </div>
+                }
+                @if (slot.professionalLocationAddress) {
+                  <div class="slot-address">
+                    {{ slot.professionalLocationAddress }}
+                  </div>
+                }
               </div>
             }
           </div>
@@ -180,6 +208,10 @@ export interface BookAppointmentDialogData {
         width: 100%;
       }
 
+      .duration-input {
+        width: 220px;
+      }
+
       .state-block {
         display: flex;
         align-items: center;
@@ -204,8 +236,20 @@ export interface BookAppointmentDialogData {
         padding: 10px;
         border: 1px solid var(--color-border);
         border-radius: 8px;
-        text-align: center;
-        font-weight: 500;
+
+        .slot-time {
+          text-align: center;
+          font-weight: 500;
+          margin-bottom: 4px;
+        }
+
+        .slot-location,
+        .slot-address {
+          font-size: 12px;
+          color: var(--color-text-secondary);
+          text-align: left;
+          line-height: 1.35;
+        }
       }
 
       @media (max-width: 860px) {
@@ -219,6 +263,7 @@ export interface BookAppointmentDialogData {
 export class BookAppointmentDialogComponent {
   private readonly publicApi = inject(PublicApi);
   private readonly slotsService = inject(SlotsService);
+  private readonly appointmentsStore = inject(PatientAppointmentsStore);
   private readonly dialogRef = inject(
     MatDialogRef<BookAppointmentDialogComponent>,
   );
@@ -236,6 +281,10 @@ export class BookAppointmentDialogComponent {
 
   readonly selectedDate = signal<Date | null>(null);
   readonly availableSlots = signal<SlotDto[]>([]);
+  readonly durationMinutes = signal<number>(
+    this.appointmentsStore.durationMinutes(),
+  );
+  readonly durationOptions = signal<number[]>([15, 30, 45, 60]);
 
   readonly minDate = this.getTomorrowDate();
 
@@ -253,6 +302,14 @@ export class BookAppointmentDialogComponent {
     selected.setHours(0, 0, 0, 0);
     this.selectedDate.set(selected);
     this.loadSlots(formatDateOnly(selected));
+  }
+
+  onDurationChange(duration: number): void {
+    this.durationMinutes.set(duration);
+    this.appointmentsStore.setDurationMinutes(duration);
+    const selectedDate = this.selectedDate();
+    if (!selectedDate) return;
+    this.loadSlots(formatDateOnly(selectedDate));
   }
 
   close(): void {
@@ -296,18 +353,55 @@ export class BookAppointmentDialogComponent {
     this.slotsError.set(null);
     this.availableSlots.set([]);
 
-    this.slotsService.getSlots(professionalId, dateValue).subscribe({
-      next: (response) => {
-        this.availableSlots.set(
-          (response.slots ?? []).filter((slot) => slot.isAvailable),
-        );
-        this.loadingSlots.set(false);
-      },
-      error: (error: ApiError) => {
-        this.slotsError.set(getUserMessage(error));
-        this.loadingSlots.set(false);
-      },
-    });
+    this.slotsService
+      .getSlots(professionalId, dateValue, this.durationMinutes())
+      .subscribe({
+        next: (response) => {
+          const allowedDurations = this.buildDurationOptions(
+            response.slotMinutes,
+          );
+          this.durationOptions.set(allowedDurations);
+
+          if (!allowedDurations.includes(this.durationMinutes())) {
+            const nextDuration = allowedDurations[0] ?? response.slotMinutes;
+            const currentDuration = this.durationMinutes();
+            this.durationMinutes.set(nextDuration);
+            this.appointmentsStore.setDurationMinutes(nextDuration);
+            if (nextDuration !== currentDuration) {
+              this.loadSlots(dateValue);
+              return;
+            }
+          }
+
+          this.availableSlots.set(
+            (response.slots ?? []).filter((slot) => slot.isAvailable),
+          );
+          this.loadingSlots.set(false);
+        },
+        error: (error: ApiError) => {
+          this.slotsError.set(getUserMessage(error));
+          this.loadingSlots.set(false);
+        },
+      });
+  }
+
+  private buildDurationOptions(slotMinutes: number): number[] {
+    const options = new Set<number>();
+    const base = Math.max(15, slotMinutes || 30);
+
+    for (let factor = 1; factor <= 8; factor += 1) {
+      const value = base * factor;
+      if (value >= 15 && value <= 480) {
+        options.add(value);
+      }
+    }
+
+    const current = this.durationMinutes();
+    if (current >= 15 && current <= 480 && current % base === 0) {
+      options.add(current);
+    }
+
+    return Array.from(options).sort((a, b) => a - b);
   }
 
   private getTomorrowDate(): Date {

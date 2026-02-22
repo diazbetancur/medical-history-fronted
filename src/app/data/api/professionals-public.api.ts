@@ -5,7 +5,7 @@ import type {
   ProfessionalPublicProfile,
   SearchProfessionalsFilters,
 } from '@data/models/availability.models';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 
 /**
@@ -19,6 +19,32 @@ import { ApiClient } from './api-client';
 })
 export class ProfessionalsPublicApi {
   private readonly api = inject(ApiClient);
+
+  private mapSlotResponse(
+    professionalId: string,
+    response: any,
+  ): AvailabilitySlotsResponse {
+    const items = Array.isArray(response?.items) ? response.items : [];
+    return {
+      date: response?.date ?? '',
+      timeZone: response?.timeZone ?? 'America/Bogota',
+      slotMinutes: response?.slotMinutes ?? 30,
+      totalSlots: response?.totalSlots ?? items.length,
+      slots: items.map((item: any) => ({
+        startTime: item.startLocal,
+        endTime: item.endLocal,
+        startUtc: item.startUtc,
+        endUtc: item.endUtc,
+        duration: response?.slotMinutes ?? 30,
+        isAvailable: true,
+        professionalId,
+        date: response?.date ?? '',
+        professionalLocationId: item.professionalLocationId ?? null,
+        professionalLocationName: item.professionalLocationName ?? null,
+        professionalLocationAddress: item.professionalLocationAddress ?? null,
+      })),
+    };
+  }
 
   /**
    * Search professionals with filters
@@ -71,12 +97,14 @@ export class ProfessionalsPublicApi {
   getAvailabilitySlots(
     professionalIdOrSlug: string,
     date: string,
+    durationMinutes = 30,
   ): Observable<AvailabilitySlotsResponse> {
-    return this.api.get<AvailabilitySlotsResponse>(
-      `/public/professionals/${professionalIdOrSlug}/slots`,
-      {
-        params: { date },
-      },
-    );
+    return this.api
+      .get<any>(`/professional/${professionalIdOrSlug}/availability/slots`, {
+        params: { date, durationMinutes },
+      })
+      .pipe(
+        map((response) => this.mapSlotResponse(professionalIdOrSlug, response)),
+      );
   }
 }

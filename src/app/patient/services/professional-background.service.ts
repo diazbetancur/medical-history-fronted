@@ -29,7 +29,7 @@ export class ProfessionalBackgroundService {
    * @param patientProfileId Patient Profile ID
    */
   getByPatient(
-    patientProfileId: number,
+    patientProfileId: string,
   ): Observable<ProfessionalPatientBackgroundResponseDto> {
     return this.http
       .get<ProfessionalPatientBackgroundResponseDto>(

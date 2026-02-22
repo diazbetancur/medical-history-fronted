@@ -1,70 +1,97 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
+import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '@core/auth/auth.service';
+import { RouterOutlet } from '@angular/router';
+import { MenuService } from '@core/services/menu.service';
+import { LayoutTopbarComponent } from '@shared/ui/layout-topbar/layout-topbar.component';
+import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-patient-layout',
   standalone: true,
   imports: [
-    CommonModule,
-    RouterModule,
-    MatToolbarModule,
+    RouterOutlet,
     MatSidenavModule,
-    MatListModule,
     MatIconModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatDividerModule,
+    LayoutTopbarComponent,
+    SidebarComponent,
   ],
-  templateUrl: './patient-layout.component.html',
-  styleUrl: './patient-layout.component.scss',
+  template: `
+    <mat-sidenav-container class="layout-container">
+      <!-- Sidebar -->
+      <mat-sidenav #drawer mode="side" opened class="layout-sidenav">
+        <div class="sidenav-header">
+          <mat-icon>person</mat-icon>
+          <h2>Área Paciente</h2>
+        </div>
+
+        <app-sidebar [items]="menuService.filteredMenuItems()" />
+      </mat-sidenav>
+
+      <!-- Main Content -->
+      <mat-sidenav-content>
+        <app-layout-topbar (menuToggle)="drawer.toggle()" />
+
+        <main class="layout-content">
+          <router-outlet />
+        </main>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  `,
+  styles: [
+    `
+      .layout-container {
+        height: 100vh;
+      }
+
+      .layout-sidenav {
+        width: 260px;
+        border-right: 1px solid var(--color-border);
+      }
+
+      .sidenav-header {
+        padding: 24px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid var(--color-border);
+
+        mat-icon {
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
+          color: var(--primary-color);
+        }
+
+        h2 {
+          margin: 0;
+          font-size: 1.25rem;
+          font-weight: 500;
+        }
+      }
+
+      app-sidebar {
+        display: block;
+        padding-top: 8px;
+      }
+
+      .layout-content {
+        padding: 24px;
+        min-height: calc(100vh - 64px);
+      }
+
+      @media (max-width: 768px) {
+        .layout-sidenav {
+          width: 220px;
+        }
+
+        .layout-content {
+          padding: 16px;
+        }
+      }
+    `,
+  ],
 })
 export class PatientLayoutComponent {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-
-  // User info
-  readonly userName = computed(() => this.authService.userName() ?? 'Usuario');
-  readonly userEmail = computed(() => this.authService.email() ?? '');
-  readonly userRoles = computed(() => this.authService.roles());
-
-  // Menu items
-  readonly menuItems = [
-    {
-      label: 'Home',
-      icon: 'home',
-      route: '/',
-    },
-    {
-      label: 'Buscar Médicos',
-      icon: 'search',
-      route: '/search',
-    },
-    {
-      label: 'Mi Perfil',
-      icon: 'person',
-      route: '/patient/profile',
-    },
-    {
-      label: 'Nueva Cita',
-      icon: 'event_available',
-      route: '/patient/wizard',
-    },
-  ];
-
-  /**
-   * Logout
-   */
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+  readonly menuService = inject(MenuService);
 }

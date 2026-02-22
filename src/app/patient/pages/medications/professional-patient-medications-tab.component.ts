@@ -43,7 +43,7 @@ export class ProfessionalPatientMedicationsTabComponent {
   private medicationsService = inject(ProfessionalPatientMedicationsService);
 
   // Input: Patient profile ID
-  patientProfileId = input.required<number>();
+  patientProfileId = input.required<string>();
 
   // State signals
   isLoading = signal(false);

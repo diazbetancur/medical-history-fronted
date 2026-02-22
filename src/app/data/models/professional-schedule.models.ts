@@ -21,6 +21,12 @@ export interface TimeBlock {
   startTime: string;
   /** Hora de fin (formato HH:mm, ej: "13:00") */
   endTime: string;
+  /** ID de sede profesional asociada al bloque (null = consultorio privado) */
+  professionalLocationId?: string | null;
+  /** Nombre de la sede (solo lectura) */
+  professionalLocationName?: string | null;
+  /** Dirección de la sede (solo lectura) */
+  professionalLocationAddress?: string | null;
 }
 
 /**
@@ -47,8 +53,10 @@ export interface WeeklyScheduleDto {
   days: DaySchedule[];
   /** Duración estándar de slots en minutos (default: 30) */
   defaultSlotDuration: number;
-  /** Tiempo de buffer entre citas en minutos (default: 0) */
-  bufferTime: number;
+  /** Zona horaria IANA */
+  timeZone: string;
+  /** Estado activo de la plantilla de disponibilidad */
+  isActive: boolean;
   /** Fecha de creación */
   createdAt?: string;
   /** Fecha de última actualización */
@@ -61,7 +69,8 @@ export interface WeeklyScheduleDto {
 export interface UpdateWeeklyScheduleDto {
   days: DaySchedule[];
   defaultSlotDuration?: number;
-  bufferTime?: number;
+  timeZone?: string;
+  isActive?: boolean;
 }
 
 /**

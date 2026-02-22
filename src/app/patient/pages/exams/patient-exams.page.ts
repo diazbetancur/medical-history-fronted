@@ -20,6 +20,7 @@ import { PatientExamsMvpService } from '@patient/services/patient-exams-mvp.serv
 import { ConfirmDialogComponent } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { ExamEditDialogComponent } from './exam-edit-dialog.component';
+import { ExamPreviewDialogComponent } from './exam-preview-dialog.component';
 import { ExamUploadDialogComponent } from './exam-upload-dialog.component';
 
 @Component({
@@ -141,17 +142,10 @@ export class PatientExamsPage implements OnInit {
    * View exam file in new tab
    */
   viewExam(exam: ExamDto): void {
-    this.examsService.getDownloadUrl(exam.id).subscribe({
-      next: (response) => {
-        window.open(response.downloadUrl, '_blank');
-      },
-      error: (error) => {
-        this.snackBar.open(
-          error.message || 'Error al obtener URL de descarga',
-          'Cerrar',
-          { duration: 5000 },
-        );
-      },
+    this.dialog.open(ExamPreviewDialogComponent, {
+      width: 'min(92vw, 980px)',
+      maxWidth: '98vw',
+      data: { exam },
     });
   }
 
@@ -226,6 +220,14 @@ export class PatientExamsPage implements OnInit {
    */
   getFileTypeIcon(exam: ExamDto): string {
     return exam.fileType === 'PDF' ? 'picture_as_pdf' : 'image';
+  }
+
+  /**
+   * Show inline thumbnail only for images with available URL.
+   * Falls back to icon for PDFs or when URL is not present in list response.
+   */
+  showImageThumb(exam: ExamDto): boolean {
+    return exam.fileType === 'IMAGE' && !!exam.downloadUrl;
   }
 
   /**

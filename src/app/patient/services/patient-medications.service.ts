@@ -15,7 +15,7 @@ import {
   UpdateMedicationDto,
 } from '@data/models';
 import { environment } from '@env';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
 
 /**
  * Simple in-memory cache for medications list
@@ -75,12 +75,32 @@ export class PatientMedicationsService {
       params = params.set('status', status);
     }
 
-    return this.http
-      .get<PatientMedicationsResponseDto>(this.baseUrl, { params })
-      .pipe(
-        tap((data) => this.setCache(cacheKey, data)),
-        catchError((error) => this.handleError(error)),
-      );
+    return this.http.get<any>(this.baseUrl, { params }).pipe(
+      map(
+        (response) =>
+          ({
+            items: response?.items ?? [],
+            totalCount: response?.total ?? response?.totalCount ?? 0,
+            page: response?.page ?? page,
+            pageSize: response?.pageSize ?? pageSize,
+            totalPages:
+              response?.totalPages ??
+              Math.max(
+                1,
+                Math.ceil(
+                  (response?.total ?? 0) / (response?.pageSize ?? pageSize),
+                ),
+              ),
+            activeCount:
+              response?.activeCount ??
+              (response?.items ?? []).filter(
+                (item: any) => item.status === 'Active',
+              ).length,
+          }) as PatientMedicationsResponseDto,
+      ),
+      tap((data) => this.setCache(cacheKey, data)),
+      catchError((error) => this.handleError(error)),
+    );
   }
 
   // ==========================================================================
@@ -94,10 +114,26 @@ export class PatientMedicationsService {
    * @param dto Medication data
    */
   create(dto: CreateMedicationDto): Observable<MedicationDto> {
-    return this.http.post<MedicationDto>(this.baseUrl, dto).pipe(
-      tap(() => this.invalidateAllCaches()),
-      catchError((error) => this.handleError(error)),
-    );
+    return this.http
+      .post<MedicationDto>(this.baseUrl, {
+        name: dto.name,
+        dose: dto.dose,
+        frequency: dto.frequency,
+        route: dto.route,
+        startDate: dto.startDate,
+        endDate: dto.endDate ?? null,
+        prescribedBy: dto.prescribedBy,
+        notes: dto.notes,
+      })
+      .pipe(
+        map((medication) => ({
+          ...medication,
+          isOngoing:
+            (medication as any).isOngoing ?? !(medication as any).endDate,
+        })),
+        tap(() => this.invalidateAllCaches()),
+        catchError((error) => this.handleError(error)),
+      );
   }
 
   /**
@@ -108,10 +144,26 @@ export class PatientMedicationsService {
    * @param dto Updated medication data
    */
   update(id: string, dto: UpdateMedicationDto): Observable<MedicationDto> {
-    return this.http.put<MedicationDto>(`${this.baseUrl}/${id}`, dto).pipe(
-      tap(() => this.invalidateAllCaches()),
-      catchError((error) => this.handleError(error)),
-    );
+    return this.http
+      .put<MedicationDto>(`${this.baseUrl}/${id}`, {
+        name: dto.name,
+        dose: dto.dose,
+        frequency: dto.frequency,
+        route: dto.route,
+        startDate: dto.startDate,
+        endDate: dto.endDate ?? null,
+        prescribedBy: dto.prescribedBy,
+        notes: dto.notes,
+      })
+      .pipe(
+        map((medication) => ({
+          ...medication,
+          isOngoing:
+            (medication as any).isOngoing ?? !(medication as any).endDate,
+        })),
+        tap(() => this.invalidateAllCaches()),
+        catchError((error) => this.handleError(error)),
+      );
   }
 
   /**

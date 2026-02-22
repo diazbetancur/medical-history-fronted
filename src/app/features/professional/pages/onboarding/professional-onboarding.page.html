@@ -20,6 +20,57 @@
     </div>
     } @else {
     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-section photo-section">
+        <div class="section-header">
+          <mat-icon>photo_camera</mat-icon>
+          <span>Foto de perfil</span>
+        </div>
+
+        <div class="photo-row">
+          <div class="photo-preview">
+            @if (profileImageUrl()) {
+            <img [src]="profileImageUrl()!" alt="Foto de perfil" />
+            } @else {
+            <mat-icon>person</mat-icon>
+            }
+          </div>
+
+          <div class="photo-actions">
+            <input
+              #photoInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              (change)="onPhotoSelected($event)"
+              hidden
+            />
+
+            <button
+              mat-stroked-button
+              color="primary"
+              type="button"
+              [disabled]="isUploadingPhoto()"
+              (click)="photoInput.click()"
+            >
+              <mat-icon>upload</mat-icon>
+              Subir foto
+            </button>
+
+            <button
+              mat-button
+              color="warn"
+              type="button"
+              [disabled]="isUploadingPhoto() || !profileImageUrl()"
+              (click)="removePhoto()"
+            >
+              <mat-icon>delete</mat-icon>
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
       <!-- ── Sección: Información principal ── -->
       <div class="form-section">
         <div class="section-header">
@@ -169,6 +220,404 @@
           }
         </mat-form-field>
       </div>
+
+      @if (hasExistingProfile()) {
+      <mat-divider></mat-divider>
+
+      <mat-tab-group
+        class="profile-sections-tabs"
+        [selectedIndex]="sectionsTab()"
+        (selectedTabChange)="onSectionsTabChange($event.index)"
+      >
+        <mat-tab label="Especialidades">
+          <div class="form-section nested-section">
+            <div class="section-header">
+              <mat-icon>workspace_premium</mat-icon>
+              <span>Especialidades</span>
+            </div>
+
+            @if (sectionBusy() && !specialtiesLoaded()) {
+            <div class="loading-state inline-loading">
+              <mat-spinner diameter="24"></mat-spinner>
+              <span>Cargando especialidades...</span>
+            </div>
+            } @else { @if (specialties().length > 0) {
+            <mat-chip-set>
+              @for (specialty of specialties(); track specialty.id) {
+              <mat-chip>
+                {{ specialty.name }}
+                <button
+                  mat-icon-button
+                  type="button"
+                  [disabled]="sectionBusy()"
+                  (click)="removeSpecialty(specialty.id)"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-chip>
+              }
+            </mat-chip-set>
+            } @else {
+            <p class="empty-hint">Aún no tienes especialidades asignadas.</p>
+            }
+
+            <form
+              class="inline-form"
+              [formGroup]="specialtyProposalForm"
+              (ngSubmit)="submitSpecialtyProposal()"
+            >
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Proponer nueva especialidad</mat-label>
+                <input
+                  matInput
+                  formControlName="name"
+                  placeholder="Ej. Medicina del Sueño"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Justificación</mat-label>
+                <textarea
+                  matInput
+                  formControlName="justification"
+                  rows="2"
+                  placeholder="Describe por qué debería incluirse"
+                ></textarea>
+              </mat-form-field>
+
+              <button
+                mat-stroked-button
+                color="primary"
+                type="submit"
+                [disabled]="sectionBusy()"
+              >
+                Enviar propuesta
+              </button>
+            </form>
+
+            @if (specialtyProposals().length > 0) {
+            <div class="items-grid">
+              @for (proposal of specialtyProposals(); track proposal.id) {
+              <div class="item-card">
+                <div class="item-title-row">
+                  <strong>{{ proposal.name }}</strong>
+                  <span class="status-chip">{{ proposal.status }}</span>
+                </div>
+                @if (proposal.justification) {
+                <p>{{ proposal.justification }}</p>
+                }
+              </div>
+              }
+            </div>
+            } }
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Formación">
+          <div class="form-section nested-section">
+            <div class="section-header">
+              <mat-icon>school</mat-icon>
+              <span>Formación</span>
+            </div>
+
+            @if (sectionBusy() && !educationLoaded()) {
+            <div class="loading-state inline-loading">
+              <mat-spinner diameter="24"></mat-spinner>
+              <span>Cargando formación...</span>
+            </div>
+            } @else {
+            <form
+              class="inline-form"
+              [formGroup]="educationForm"
+              (ngSubmit)="saveEducation()"
+            >
+              <div class="row-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Institución *</mat-label>
+                  <input
+                    matInput
+                    formControlName="institution"
+                    placeholder="Ej. Universidad Nacional"
+                  />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Título *</mat-label>
+                  <input
+                    matInput
+                    formControlName="degree"
+                    placeholder="Ej. Médico Cirujano"
+                  />
+                </mat-form-field>
+              </div>
+
+              <div class="row-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Tipo</mat-label>
+                  <mat-select formControlName="educationType">
+                    @for (type of educationTypeOptions; track type.value) {
+                    <mat-option [value]="type.value"
+                      >{{ type.label }}</mat-option
+                    >
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>País</mat-label>
+                  <input
+                    matInput
+                    formControlName="country"
+                    placeholder="Ej. Colombia"
+                  />
+                </mat-form-field>
+              </div>
+
+              <div class="row-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Año inicio</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    formControlName="startYear"
+                    placeholder="Ej. 2016"
+                  />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Año fin</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    formControlName="endYear"
+                    placeholder="Ej. 2021"
+                  />
+                </mat-form-field>
+              </div>
+
+              <div class="inline-actions">
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  type="submit"
+                  [disabled]="sectionBusy()"
+                >
+                  {{ editingEducationId() ? 'Actualizar formación' : 'Agregar
+                  formación' }}
+                </button>
+                @if (editingEducationId()) {
+                <button
+                  mat-button
+                  type="button"
+                  (click)="cancelEducationEdit()"
+                >
+                  Cancelar
+                </button>
+                }
+              </div>
+            </form>
+
+            @if (education().length > 0) {
+            <div class="items-grid">
+              @for (item of education(); track item.id) {
+              <div class="item-card">
+                <div class="item-title-row">
+                  <strong>{{ item.degree }}</strong>
+                  <span>{{ item.educationTypeName }}</span>
+                </div>
+                <p>{{ item.institution }}</p>
+                <p class="muted">
+                  {{ item.startYear ?? '—' }} - {{ item.endYear ?? 'Actual' }}
+                  @if (item.country) { · {{ item.country }} }
+                </p>
+
+                <div class="inline-actions">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="editEducation(item)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    mat-button
+                    color="warn"
+                    type="button"
+                    (click)="deleteEducation(item.id)"
+                  >
+                    Eliminar
+                  </button>
+
+                  <input
+                    #diplomaInput
+                    type="file"
+                    accept="application/pdf,image/jpeg,image/png"
+                    hidden
+                    (change)="onDiplomaSelected($event, item.id)"
+                  />
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="diplomaInput.click()"
+                  >
+                    Subir diploma
+                  </button>
+
+                  @if (item.hasDiploma) {
+                  <button
+                    mat-button
+                    color="warn"
+                    type="button"
+                    (click)="deleteDiploma(item.id)"
+                  >
+                    Quitar diploma
+                  </button>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+            } @else {
+            <p class="empty-hint">Aún no has agregado formación.</p>
+            } }
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Sedes">
+          <div class="form-section nested-section">
+            <div class="section-header">
+              <mat-icon>apartment</mat-icon>
+              <span>Sedes</span>
+            </div>
+
+            @if (sectionBusy() && !locationsLoaded()) {
+            <div class="loading-state inline-loading">
+              <mat-spinner diameter="24"></mat-spinner>
+              <span>Cargando sedes...</span>
+            </div>
+            } @else {
+            <form
+              class="inline-form"
+              [formGroup]="locationForm"
+              (ngSubmit)="saveLocation()"
+            >
+              <div class="row-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nombre sede *</mat-label>
+                  <input
+                    matInput
+                    formControlName="name"
+                    placeholder="Ej. Sede Norte"
+                  />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Teléfono</mat-label>
+                  <input
+                    matInput
+                    formControlName="phone"
+                    placeholder="Ej. +57 300 123 4567"
+                  />
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Dirección</mat-label>
+                <input
+                  matInput
+                  formControlName="address"
+                  placeholder="Ej. Calle 80 #45-23"
+                />
+              </mat-form-field>
+
+              <div class="row-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>País *</mat-label>
+                  <mat-select formControlName="countryId">
+                    @for (country of countries(); track country.id) {
+                    <mat-option [value]="country.id"
+                      >{{ country.name }}</mat-option
+                    >
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Ciudad *</mat-label>
+                  <mat-select
+                    formControlName="cityId"
+                    [disabled]="!locationForm.controls.countryId.value"
+                  >
+                    @for (city of filteredLocationCities(); track city.id) {
+                    <mat-option [value]="city.id">{{ city.name }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="inline-actions">
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  type="submit"
+                  [disabled]="sectionBusy()"
+                >
+                  {{ editingLocationId() ? 'Actualizar sede' : 'Agregar sede' }}
+                </button>
+                @if (editingLocationId()) {
+                <button mat-button type="button" (click)="cancelLocationEdit()">
+                  Cancelar
+                </button>
+                }
+              </div>
+            </form>
+
+            @if (locations().length > 0) {
+            <div class="items-grid">
+              @for (location of locations(); track location.id) {
+              <div class="item-card">
+                <div class="item-title-row">
+                  <strong>{{ location.name }}</strong>
+                  @if (location.isDefault) {
+                  <span class="status-chip">Principal</span>
+                  }
+                </div>
+                <p>{{ location.cityName }}, {{ location.countryName }}</p>
+                @if (location.address) {
+                <p>{{ location.address }}</p>
+                }
+
+                <div class="inline-actions">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="editLocation(location)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    mat-button
+                    type="button"
+                    [disabled]="location.isDefault"
+                    (click)="setDefaultLocation(location.id)"
+                  >
+                    Marcar principal
+                  </button>
+                  <button
+                    mat-button
+                    color="warn"
+                    type="button"
+                    (click)="deleteLocation(location.id)"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+            } @else {
+            <p class="empty-hint">Aún no has agregado sedes.</p>
+            } }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+      }
 
       <!-- ── Error banner ── -->
       @if (submitError()) {

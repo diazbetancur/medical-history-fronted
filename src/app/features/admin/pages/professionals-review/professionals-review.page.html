@@ -27,17 +27,6 @@
       </mat-card-header>
 
       <mat-card-content>
-        <!-- Stats row -->
-        <div class="stats-row">
-          <div class="stat-card">
-            <mat-icon>people</mat-icon>
-            <div class="stat-info">
-              <span class="stat-value">{{ store.totalItems() }}</span>
-              <span class="stat-label">En esta vista</span>
-            </div>
-          </div>
-        </div>
-
         <!-- Status Tabs -->
         <mat-tab-group
           class="status-tabs"
@@ -185,13 +174,13 @@
                   </button>
 
                   <!-- Verify (only for pending) -->
-                  @if (p.isActive && !p.isVerified && canVerify()) {
+                  @if (p.isActive && !p.isVerified) {
                   <button
                     mat-icon-button
                     color="primary"
-                    matTooltip="Verificar profesional"
+                    [matTooltip]="canVerify() ? 'Verificar profesional' : 'No tienes permisos para verificar'"
                     (click)="verifyProfessional(p, $event)"
-                    [disabled]="store.saving()"
+                    [disabled]="store.saving() || !canVerify()"
                   >
                     <mat-icon>verified</mat-icon>
                   </button>
@@ -436,12 +425,13 @@
           Ver perfil público
         </a>
 
-        @if (pro.isActive && !pro.isVerified && canVerify()) {
+        @if (pro.isActive && !pro.isVerified) {
         <button
           mat-raised-button
           color="primary"
+          [matTooltip]="canVerify() ? 'Verificar profesional' : 'No tienes permisos para verificar'"
           (click)="verifyProfessional(pro)"
-          [disabled]="store.saving()"
+          [disabled]="store.saving() || !canVerify()"
         >
           <mat-icon>verified</mat-icon>
           Verificar

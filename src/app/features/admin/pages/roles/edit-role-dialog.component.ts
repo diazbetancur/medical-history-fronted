@@ -45,9 +45,14 @@ interface DialogData {
             name="roleName"
             required
             placeholder="Ej: Editor de Contenido"
-            [disabled]="saving()"
+            [disabled]="saving() || isSystemRole"
           />
           <mat-icon matPrefix>badge</mat-icon>
+          @if (isSystemRole) {
+            <mat-hint>
+              Los roles del sistema no pueden cambiar su nombre
+            </mat-hint>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -164,11 +169,13 @@ export class EditRoleDialogComponent {
 
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
+  readonly isSystemRole: boolean;
 
   private originalName: string;
   private originalDescription: string;
 
   constructor() {
+    this.isSystemRole = this.data.role.isSystem;
     this.roleName = this.data.role.name;
     this.roleDescription = this.data.role.description || '';
     this.originalName = this.data.role.name;
@@ -176,9 +183,11 @@ export class EditRoleDialogComponent {
   }
 
   hasChanges(): boolean {
+    const nameChanged =
+      !this.isSystemRole && this.roleName.trim() !== this.originalName;
+
     return (
-      this.roleName.trim() !== this.originalName ||
-      this.roleDescription.trim() !== this.originalDescription
+      nameChanged || this.roleDescription.trim() !== this.originalDescription
     );
   }
 
@@ -190,7 +199,7 @@ export class EditRoleDialogComponent {
 
     const payload: { name?: string; description?: string } = {};
 
-    if (this.roleName.trim() !== this.originalName) {
+    if (!this.isSystemRole && this.roleName.trim() !== this.originalName) {
       payload.name = this.roleName.trim();
     }
 

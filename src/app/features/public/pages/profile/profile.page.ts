@@ -6,12 +6,13 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService, AuthStore } from '@core/auth';
 import { ProfileStore } from '@data/stores';
 import { AnalyticsService, SeoService } from '@shared/services';
 import { isNotFoundError } from '@shared/utils';
 import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog.component';
+import { PublicFooterComponent } from '../../components/public-footer.component';
 import { PublicHeaderComponent } from '../../components/public-header.component';
 
 @Component({
@@ -19,7 +20,6 @@ import { PublicHeaderComponent } from '../../components/public-header.component'
   standalone: true,
   imports: [
     PublicHeaderComponent,
-    RouterLink,
     MatCardModule,
     MatButtonModule,
     MatDialogModule,
@@ -27,6 +27,7 @@ import { PublicHeaderComponent } from '../../components/public-header.component'
     MatTabsModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    PublicFooterComponent,
   ],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',

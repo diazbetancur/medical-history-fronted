@@ -40,7 +40,7 @@ export class ProfessionalPatientExamsTabComponent {
   private snackBar = inject(MatSnackBar);
 
   // Input: Patient profile ID
-  patientProfileId = input.required<number>();
+  patientProfileId = input.required<string>();
 
   // State signals
   isLoading = signal(false);

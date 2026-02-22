@@ -4,12 +4,7 @@
  * Modelos para gestionar ausencias del profesional (vacaciones, días no disponibles).
  */
 
-export type AbsenceType =
-  | 'VACATION'
-  | 'SICK_LEAVE'
-  | 'CONFERENCE'
-  | 'PERSONAL'
-  | 'OTHER';
+export type AbsenceType = 'Absent' | 'Override';
 
 /**
  * Ausencia/vacación del profesional
@@ -21,14 +16,20 @@ export interface AbsenceDto {
   professionalProfileId: string;
   /** Tipo de ausencia */
   type: AbsenceType;
-  /** Fecha de inicio (ISO YYYY-MM-DD) */
-  startDate: string;
-  /** Fecha de fin (ISO YYYY-MM-DD, inclusive) */
-  endDate: string;
+  /** Fecha/hora inicio (ISO UTC) */
+  startDateTime: string;
+  /** Fecha/hora fin (ISO UTC) */
+  endDateTime: string;
+  /** Hora inicio override (HH:mm) */
+  overrideStartTime?: string | null;
+  /** Hora fin override (HH:mm) */
+  overrideEndTime?: string | null;
+  /** Sede asociada (opcional) */
+  professionalLocationId?: string | null;
+  /** Nombre de sede asociada (solo lectura) */
+  professionalLocationName?: string | null;
   /** Motivo/nota (opcional) */
   reason?: string;
-  /** Si se repite anualmente (ej: festivos) */
-  isRecurring?: boolean;
   /** Fecha de creación */
   createdAt?: string;
 }
@@ -39,14 +40,20 @@ export interface AbsenceDto {
 export interface CreateAbsenceDto {
   /** Tipo de ausencia */
   type: AbsenceType;
-  /** Fecha de inicio (YYYY-MM-DD) */
-  startDate: string;
-  /** Fecha de fin (YYYY-MM-DD) */
-  endDate: string;
+  /** Fecha/hora inicio (ISO UTC) */
+  startDateTime: string;
+  /** Fecha/hora fin (ISO UTC) */
+  endDateTime: string;
+  /** Hora inicio override (HH:mm) */
+  overrideStartTime?: string | null;
+  /** Hora fin override (HH:mm) */
+  overrideEndTime?: string | null;
+  /** Sede para excepción (opcional) */
+  professionalLocationId?: string | null;
+  /** Institución de catálogo admin (legacy) */
+  institutionId?: string | null;
   /** Motivo/nota (opcional) */
   reason?: string;
-  /** Si se repite anualmente */
-  isRecurring?: boolean;
 }
 
 /**
@@ -55,14 +62,20 @@ export interface CreateAbsenceDto {
 export interface UpdateAbsenceDto {
   /** Tipo de ausencia */
   type?: AbsenceType;
-  /** Fecha de inicio */
-  startDate?: string;
-  /** Fecha de fin */
-  endDate?: string;
+  /** Fecha/hora inicio */
+  startDateTime?: string;
+  /** Fecha/hora fin */
+  endDateTime?: string;
+  /** Hora inicio override (HH:mm) */
+  overrideStartTime?: string | null;
+  /** Hora fin override (HH:mm) */
+  overrideEndTime?: string | null;
+  /** Sede para excepción (opcional) */
+  professionalLocationId?: string | null;
+  /** Institución de catálogo admin (legacy) */
+  institutionId?: string | null;
   /** Motivo/nota */
   reason?: string;
-  /** Si se repite anualmente */
-  isRecurring?: boolean;
 }
 
 /**
@@ -70,9 +83,9 @@ export interface UpdateAbsenceDto {
  */
 export interface AbsenceFilters {
   /** Filtrar por rango de fechas (desde) */
-  startDate?: string;
+  startDateTime?: string;
   /** Filtrar por rango de fechas (hasta) */
-  endDate?: string;
+  endDateTime?: string;
   /** Filtrar por tipo */
   type?: AbsenceType;
 }
@@ -89,9 +102,6 @@ export interface PaginatedAbsencesResponse {
  * Nombres legibles de tipos de ausencia
  */
 export const ABSENCE_TYPE_NAMES: Record<AbsenceType, string> = {
-  VACATION: 'Vacaciones',
-  SICK_LEAVE: 'Licencia Médica',
-  CONFERENCE: 'Conferencia',
-  PERSONAL: 'Personal',
-  OTHER: 'Otro',
+  Absent: 'Ausente',
+  Override: 'Horario especial',
 };

@@ -138,6 +138,23 @@ export const routes: Routes = [
             (m) => m.specialtiesRoutes,
           ),
       },
+      {
+        path: 'solicitudes',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Profiles.View',
+            'Profiles.Verify',
+            'Profiles.Update',
+          ],
+          defaultFilter: 'pending',
+        },
+        loadComponent: () =>
+          import('./features/admin/pages/professionals-review/professionals-review.page').then(
+            (m) => m.ProfessionalsReviewPageComponent,
+          ),
+        title: 'Solicitudes de Activación - Admin',
+      },
     ],
   },
 
@@ -147,12 +164,8 @@ export const routes: Routes = [
   // ============================================================================
   {
     path: 'professional/onboarding',
-    canActivate: [authStoreGuard],
-    loadComponent: () =>
-      import('./features/professional/pages/onboarding/professional-onboarding.page').then(
-        (m) => m.ProfessionalOnboardingPage,
-      ),
-    title: 'Configura tu Perfil - Directory Pro',
+    redirectTo: 'professional/profile',
+    pathMatch: 'full',
   },
 
   // ============================================================================
@@ -180,6 +193,10 @@ export const routes: Routes = [
       },
       {
         path: 'appointments',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Appointments.ViewOwn', 'Appointments.Create'],
+        },
         loadComponent: () =>
           import('./features/professional/pages/professional-appointments.page').then(
             (m) => m.ProfessionalAppointmentsPage,
@@ -187,7 +204,31 @@ export const routes: Routes = [
         title: 'Mis Citas - Directory Pro',
       },
       {
+        path: 'profile',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Profiles.View',
+            'Profiles.Create',
+            'Profiles.Update',
+          ],
+        },
+        loadComponent: () =>
+          import('./features/professional/pages/onboarding/professional-onboarding.page').then(
+            (m) => m.ProfessionalOnboardingPage,
+          ),
+        title: 'Mi Perfil Profesional - Directory Pro',
+      },
+      {
         path: 'availability',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Appointments.Slots.View',
+            'Profiles.View',
+            'Profiles.Update',
+          ],
+        },
         loadComponent: () =>
           import('./features/professional/pages/professional-availability.page').then(
             (m) => m.ProfessionalAvailabilityPage,
@@ -196,6 +237,16 @@ export const routes: Routes = [
       },
       {
         path: 'patients',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.History.ViewOwn',
+            'Patients.Medications.ViewOwn',
+            'Patients.Allergies.ViewOwn',
+            'Patients.Exams.ViewOwn',
+            'Patients.Background.ViewOwn',
+          ],
+        },
         children: [
           {
             path: '',
@@ -216,9 +267,24 @@ export const routes: Routes = [
         ],
       },
       {
+        path: 'requests',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'ServiceRequests.View',
+            'ServiceRequests.Update',
+          ],
+        },
+        loadComponent: () =>
+          import('./features/professional/pages/professional-requests.page').then(
+            (m) => m.ProfessionalRequestsPage,
+          ),
+        title: 'Solicitudes - Directory Pro',
+      },
+      {
         path: 'agenda',
-        loadChildren: () =>
-          import('./features/agenda/agenda.routes').then((m) => m.agendaRoutes),
+        redirectTo: 'appointments',
+        pathMatch: 'full',
       },
     ],
   },
@@ -248,6 +314,13 @@ export const routes: Routes = [
       },
       {
         path: 'wizard',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Appointments.Create',
+            'Appointments.Slots.View',
+          ],
+        },
         loadComponent: () =>
           import('./patient/pages/wizard/patient-wizard.page').then(
             (m) => m.PatientWizardPage,
@@ -256,6 +329,10 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Patients.History.ViewOwn'],
+        },
         loadComponent: () =>
           import('./patient/profile/pages/profile-page.component').then(
             (m) => m.ProfilePageComponent,
@@ -272,6 +349,13 @@ export const routes: Routes = [
       },
       {
         path: 'medications',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.Medications.ViewOwn',
+            'Patients.Medications.ManageOwn',
+          ],
+        },
         loadComponent: () =>
           import('./patient/pages/medications/patient-medications.page').then(
             (m) => m.PatientMedicationsPage,
@@ -280,6 +364,13 @@ export const routes: Routes = [
       },
       {
         path: 'allergies',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.Allergies.ViewOwn',
+            'Patients.Allergies.ManageOwn',
+          ],
+        },
         loadComponent: () =>
           import('./patient/pages/allergies/patient-allergies.page').then(
             (m) => m.PatientAllergiesPage,
@@ -288,6 +379,13 @@ export const routes: Routes = [
       },
       {
         path: 'background',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.Background.ViewOwn',
+            'Patients.Background.ManageOwn',
+          ],
+        },
         loadComponent: () =>
           import('./patient/pages/background/patient-background.page').then(
             (m) => m.PatientBackgroundPage,
@@ -296,11 +394,38 @@ export const routes: Routes = [
       },
       {
         path: 'exams',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.Exams.ViewOwn',
+            'Patients.Exams.ManageOwn',
+          ],
+        },
         loadComponent: () =>
           import('./patient/pages/exams/patient-exams.page').then(
             (m) => m.PatientExamsPage,
           ),
         title: 'Mis Exámenes - Directory Pro',
+      },
+      {
+        path: 'appointments',
+        redirectTo: 'wizard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'history',
+        redirectTo: 'profile',
+        pathMatch: 'full',
+      },
+      {
+        path: 'documents',
+        redirectTo: 'exams',
+        pathMatch: 'full',
+      },
+      {
+        path: 'settings',
+        redirectTo: 'profile',
+        pathMatch: 'full',
       },
     ],
   },
@@ -310,19 +435,13 @@ export const routes: Routes = [
   // ============================================================================
   {
     path: 'unauthorized',
-    loadComponent: () =>
-      import('./features/errors/pages/unauthorized.page').then(
-        (m) => m.UnauthorizedPage,
-      ),
-    title: 'No Autorizado - Directory Pro',
+    redirectTo: '',
+    pathMatch: 'full',
   },
   {
     path: 'forbidden',
-    loadComponent: () =>
-      import('./features/errors/pages/forbidden.page').then(
-        (m) => m.ForbiddenPage,
-      ),
-    title: 'Acceso Denegado - Directory Pro',
+    redirectTo: '',
+    pathMatch: 'full',
   },
   {
     path: '**',
