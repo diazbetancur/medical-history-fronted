@@ -8,19 +8,21 @@
  * Background Type
  */
 export type BackgroundType =
-  | 'Surgery'
-  | 'ChronicDisease'
-  | 'Trauma'
-  | 'FamilyHistory'
-  | 'Hospitalization'
+  | 'Chronic'
+  | 'Surgical'
+  | 'Traumatic'
+  | 'Allergic'
+  | 'Hereditary'
+  | 'Perinatal'
+  | 'Pharmacological'
   | 'Other';
 
 /**
  * Background DTO (full entity)
  */
 export interface BackgroundDto {
-  id: number;
-  patientProfileId: number;
+  id: string;
+  patientProfileId: string;
   type: BackgroundType;
   title: string;
   description: string | null;

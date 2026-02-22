@@ -33,7 +33,7 @@ export class ProfessionalPatientBackgroundTabComponent {
   private backgroundService = inject(ProfessionalBackgroundService);
 
   // Input: Patient profile ID
-  patientProfileId = input.required<number>();
+  patientProfileId = input.required<string>();
 
   // State signals
   isLoading = signal(false);

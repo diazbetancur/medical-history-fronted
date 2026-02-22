@@ -39,7 +39,7 @@ export class ProfessionalPatientAllergiesTabComponent {
   private allergiesService = inject(ProfessionalAllergiesService);
 
   // Input: Patient profile ID
-  patientProfileId = input.required<number>();
+  patientProfileId = input.required<string>();
 
   // State signals
   isLoading = signal(false);

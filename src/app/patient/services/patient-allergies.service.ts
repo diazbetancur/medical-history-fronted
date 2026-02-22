@@ -14,7 +14,7 @@ import {
   UpdateAllergyDto,
 } from '@data/models';
 import { environment } from '@env';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
 
 /**
  * Simple in-memory cache for patient allergies
@@ -71,12 +71,32 @@ export class PatientAllergiesService {
       params = params.set('status', status);
     }
 
-    return this.http
-      .get<PatientAllergiesResponseDto>(this.baseUrl, { params })
-      .pipe(
-        tap((data) => this.setCache(cacheKey, data)),
-        catchError((error) => this.handleError(error)),
-      );
+    return this.http.get<any>(this.baseUrl, { params }).pipe(
+      map(
+        (response) =>
+          ({
+            items: response?.items ?? [],
+            totalCount: response?.total ?? response?.totalCount ?? 0,
+            page: response?.page ?? page,
+            pageSize: response?.pageSize ?? pageSize,
+            totalPages:
+              response?.totalPages ??
+              Math.max(
+                1,
+                Math.ceil(
+                  (response?.total ?? 0) / (response?.pageSize ?? pageSize),
+                ),
+              ),
+            activeCount:
+              response?.activeCount ??
+              (response?.items ?? []).filter(
+                (item: any) => item.status === 'Active',
+              ).length,
+          }) as PatientAllergiesResponseDto,
+      ),
+      tap((data) => this.setCache(cacheKey, data)),
+      catchError((error) => this.handleError(error)),
+    );
   }
 
   // ==========================================================================
@@ -89,7 +109,8 @@ export class PatientAllergiesService {
    */
   create(dto: CreateAllergyDto): Observable<{ id: string; message: string }> {
     return this.http
-      .post<{ id: string; message: string }>(this.baseUrl, dto)
+      .post<any>(this.baseUrl, dto)
+      .pipe(map((response) => ({ id: response?.id ?? '', message: 'OK' })))
       .pipe(
         tap(() => this.invalidateAllCaches()),
         catchError((error) => this.handleError(error)),
@@ -106,7 +127,8 @@ export class PatientAllergiesService {
    */
   update(id: string, dto: UpdateAllergyDto): Observable<{ message: string }> {
     return this.http
-      .put<{ message: string }>(`${this.baseUrl}/${id}`, dto)
+      .put<any>(`${this.baseUrl}/${id}`, dto)
+      .pipe(map(() => ({ message: 'OK' })))
       .pipe(
         tap(() => this.invalidateAllCaches()),
         catchError((error) => this.handleError(error)),
@@ -122,10 +144,13 @@ export class PatientAllergiesService {
    * DELETE /api/patient/allergies/{id}
    */
   delete(id: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.baseUrl}/${id}`).pipe(
-      tap(() => this.invalidateAllCaches()),
-      catchError((error) => this.handleError(error)),
-    );
+    return this.http
+      .delete<void>(`${this.baseUrl}/${id}`)
+      .pipe(map(() => ({ message: 'OK' })))
+      .pipe(
+        tap(() => this.invalidateAllCaches()),
+        catchError((error) => this.handleError(error)),
+      );
   }
 
   // ==========================================================================

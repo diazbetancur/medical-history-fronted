@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -32,15 +32,11 @@ import {
   DEFAULT_WEEKLY_SCHEDULE,
   type DaySchedule,
   type TimeBlock,
+  type WeeklyScheduleDto,
 } from '@data/models/professional-schedule.models';
 import { ProfessionalAvailabilityStore } from '@data/stores/professional-availability.store';
 import { ConfirmDialogComponent } from '@shared/ui';
 
-/**
- * Professional Availability Page
- *
- * Permite editar horario semanal y gestionar ausencias.
- */
 @Component({
   selector: 'app-professional-availability-page',
   standalone: true,
@@ -72,7 +68,6 @@ import { ConfirmDialogComponent } from '@shared/ui';
           <p>Cargando información...</p>
         </div>
       } @else {
-        <!-- HORARIO SEMANAL -->
         <mat-card class="schedule-card">
           <mat-card-header>
             <mat-card-title>
@@ -103,9 +98,9 @@ import { ConfirmDialogComponent } from '@shared/ui';
                         @if (
                           getDayScheduleFormGroup(i).get('isWorkingDay')?.value
                         ) {
-                          <span class="working-hours">
-                            {{ getWorkingHoursSummary(i) }}
-                          </span>
+                          <span class="working-hours">{{
+                            getWorkingHoursSummary(i)
+                          }}</span>
                         } @else {
                           <span class="no-work">No laborable</span>
                         }
@@ -115,7 +110,10 @@ import { ConfirmDialogComponent } from '@shared/ui';
                     @if (
                       getDayScheduleFormGroup(i).get('isWorkingDay')?.value
                     ) {
-                      <div class="time-blocks">
+                      <div
+                        class="time-blocks"
+                        [formGroup]="getDayScheduleFormGroup(i)"
+                      >
                         <h4>Bloques de tiempo</h4>
 
                         <div formArrayName="timeBlocks">
@@ -143,6 +141,25 @@ import { ConfirmDialogComponent } from '@shared/ui';
                                   type="time"
                                   formControlName="endTime"
                                 />
+                              </mat-form-field>
+
+                              <mat-form-field
+                                appearance="outline"
+                                class="location-field"
+                              >
+                                <mat-label>Sede</mat-label>
+                                <mat-select
+                                  formControlName="professionalLocationId"
+                                >
+                                  @for (
+                                    location of store.locations();
+                                    track location.id
+                                  ) {
+                                    <mat-option [value]="location.id">
+                                      {{ location.name }}
+                                    </mat-option>
+                                  }
+                                </mat-select>
                               </mat-form-field>
 
                               <button
@@ -179,23 +196,21 @@ import { ConfirmDialogComponent } from '@shared/ui';
                     matInput
                     type="number"
                     formControlName="defaultSlotDuration"
-                    min="15"
-                    step="15"
+                    min="5"
+                    max="240"
+                    step="5"
                   />
-                  <mat-hint>Duración estándar de cada cita</mat-hint>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                  <mat-label>Tiempo de buffer (minutos)</mat-label>
-                  <input
-                    matInput
-                    type="number"
-                    formControlName="bufferTime"
-                    min="0"
-                    step="5"
-                  />
-                  <mat-hint>Tiempo entre citas para preparación</mat-hint>
+                  <mat-label>Zona horaria</mat-label>
+                  <input matInput type="text" formControlName="timeZone" />
+                  <mat-hint>Ejemplo: America/Bogota</mat-hint>
                 </mat-form-field>
+
+                <mat-slide-toggle formControlName="isActive"
+                  >Plantilla activa</mat-slide-toggle
+                >
               </div>
             </form>
           </mat-card-content>
@@ -220,17 +235,15 @@ import { ConfirmDialogComponent } from '@shared/ui';
           </mat-card-actions>
         </mat-card>
 
-        <!-- AUSENCIAS -->
         <mat-card class="absences-card">
           <mat-card-header>
             <mat-card-title>
               <mat-icon>event_busy</mat-icon>
-              Ausencias y Vacaciones
+              Excepciones de Disponibilidad
             </mat-card-title>
           </mat-card-header>
 
           <mat-card-content>
-            <!-- Formulario crear ausencia -->
             @if (!showAbsenceForm()) {
               <button
                 mat-raised-button
@@ -238,20 +251,20 @@ import { ConfirmDialogComponent } from '@shared/ui';
                 (click)="showAbsenceForm.set(true)"
               >
                 <mat-icon>add</mat-icon>
-                Agregar Ausencia
+                Agregar Excepción
               </button>
             } @else {
               <div class="absence-form">
-                <h4>Nueva Ausencia</h4>
+                <h4>Nueva Excepción</h4>
                 <form [formGroup]="absenceForm">
                   <div class="form-row">
                     <mat-form-field appearance="outline">
                       <mat-label>Tipo</mat-label>
                       <mat-select formControlName="type">
                         @for (type of absenceTypes; track type) {
-                          <mat-option [value]="type">
-                            {{ absenceTypeNames[type] }}
-                          </mat-option>
+                          <mat-option [value]="type">{{
+                            absenceTypeNames[type]
+                          }}</mat-option>
                         }
                       </mat-select>
                     </mat-form-field>
@@ -285,6 +298,42 @@ import { ConfirmDialogComponent } from '@shared/ui';
                     </mat-form-field>
                   </div>
 
+                  @if (isOverrideType()) {
+                    <div class="form-row">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Hora inicio (override)</mat-label>
+                        <input
+                          matInput
+                          type="time"
+                          formControlName="overrideStartTime"
+                        />
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>Hora fin (override)</mat-label>
+                        <input
+                          matInput
+                          type="time"
+                          formControlName="overrideEndTime"
+                        />
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>Sede</mat-label>
+                        <mat-select formControlName="professionalLocationId">
+                          @for (
+                            location of store.locations();
+                            track location.id
+                          ) {
+                            <mat-option [value]="location.id">{{
+                              location.name
+                            }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  }
+
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Motivo (opcional)</mat-label>
                     <textarea
@@ -317,10 +366,9 @@ import { ConfirmDialogComponent } from '@shared/ui';
               </div>
             }
 
-            <!-- Lista de ausencias -->
             @if (store.futureAbsences().length > 0) {
               <div class="absences-list">
-                <h4>Ausencias Programadas</h4>
+                <h4>Excepciones Programadas</h4>
                 @for (absence of store.futureAbsences(); track absence.id) {
                   <mat-card class="absence-item">
                     <mat-card-content>
@@ -340,10 +388,23 @@ import { ConfirmDialogComponent } from '@shared/ui';
                       <div class="absence-dates">
                         <mat-icon>event</mat-icon>
                         <span>
-                          {{ formatDate(absence.startDate) }} -
-                          {{ formatDate(absence.endDate) }}
+                          {{ formatDateTime(absence.startDateTime) }} -
+                          {{ formatDateTime(absence.endDateTime) }}
                         </span>
                       </div>
+
+                      @if (absence.type === 'Override') {
+                        <div class="absence-reason">
+                          <mat-icon>schedule</mat-icon>
+                          <span>
+                            Horario: {{ absence.overrideStartTime }} -
+                            {{ absence.overrideEndTime }}
+                            @if (absence.professionalLocationName) {
+                              · {{ absence.professionalLocationName }}
+                            }
+                          </span>
+                        </div>
+                      }
 
                       @if (absence.reason) {
                         <div class="absence-reason">
@@ -358,7 +419,7 @@ import { ConfirmDialogComponent } from '@shared/ui';
             } @else if (!showAbsenceForm()) {
               <div class="empty-absences">
                 <mat-icon>check_circle</mat-icon>
-                <p>No tienes ausencias programadas</p>
+                <p>No tienes excepciones programadas</p>
               </div>
             }
           </mat-card-content>
@@ -428,14 +489,11 @@ import { ConfirmDialogComponent } from '@shared/ui';
         }
 
         .time-block {
-          display: flex;
+          display: grid;
+          grid-template-columns: 1fr auto 1fr 1.4fr auto;
           align-items: center;
           gap: 12px;
           margin-bottom: 12px;
-
-          mat-form-field {
-            flex: 1;
-          }
 
           .arrow {
             color: var(--color-text-disabled);
@@ -444,13 +502,11 @@ import { ConfirmDialogComponent } from '@shared/ui';
       }
 
       .slot-config {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
         gap: 16px;
         margin-top: 24px;
-
-        mat-form-field {
-          flex: 1;
-        }
+        align-items: center;
       }
 
       mat-card-actions {
@@ -477,13 +533,10 @@ import { ConfirmDialogComponent } from '@shared/ui';
         }
 
         .form-row {
-          display: flex;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 16px;
           margin-bottom: 16px;
-
-          mat-form-field {
-            flex: 1;
-          }
         }
 
         .full-width {
@@ -555,9 +608,10 @@ import { ConfirmDialogComponent } from '@shared/ui';
           padding: 16px;
         }
 
+        .time-blocks .time-block,
         .slot-config,
         .absence-form .form-row {
-          flex-direction: column;
+          grid-template-columns: 1fr;
         }
       }
     `,
@@ -570,13 +624,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
 
   protected readonly daysOfWeek = DAYS_OF_WEEK;
   protected readonly dayNames = DAY_NAMES;
-  protected readonly absenceTypes: AbsenceType[] = [
-    'VACATION',
-    'SICK_LEAVE',
-    'CONFERENCE',
-    'PERSONAL',
-    'OTHER',
-  ];
+  protected readonly absenceTypes: AbsenceType[] = ['Absent', 'Override'];
   protected readonly absenceTypeNames = ABSENCE_TYPE_NAMES;
 
   protected readonly showAbsenceForm = signal(false);
@@ -585,20 +633,54 @@ export class ProfessionalAvailabilityPage implements OnInit {
   protected absenceForm!: FormGroup;
 
   ngOnInit(): void {
-    this.store.initialize();
     this.initScheduleForm();
     this.initAbsenceForm();
+    this.store.initialize();
+
+    effect(() => {
+      const schedule = this.store.weeklySchedule();
+      if (schedule) {
+        this.patchScheduleForm(schedule);
+      }
+    });
+  }
+
+  protected isOverrideType(): boolean {
+    return this.absenceForm.get('type')?.value === 'Override';
+  }
+
+  protected getLocationName(locationId: string | null | undefined): string {
+    if (!locationId) return 'Consultorio privado';
+    const location = this.store
+      .locations()
+      .find((item) => item.id === locationId);
+    return location?.name ?? 'Sede';
   }
 
   private initScheduleForm(): void {
-    // Usar schedule existente o default
-    const schedule = this.store.weeklySchedule();
-    const days = schedule?.days || DEFAULT_WEEKLY_SCHEDULE;
-
     this.scheduleForm = this.fb.group({
-      days: this.fb.array(days.map((day) => this.createDayFormGroup(day))),
-      defaultSlotDuration: [schedule?.defaultSlotDuration || 30],
-      bufferTime: [schedule?.bufferTime || 0],
+      days: this.fb.array(
+        DEFAULT_WEEKLY_SCHEDULE.map((day) => this.createDayFormGroup(day)),
+      ),
+      defaultSlotDuration: [
+        30,
+        [Validators.required, Validators.min(5), Validators.max(240)],
+      ],
+      timeZone: ['America/Bogota', Validators.required],
+      isActive: [true],
+    });
+  }
+
+  private patchScheduleForm(schedule: WeeklyScheduleDto): void {
+    this.scheduleForm.setControl(
+      'days',
+      this.fb.array(schedule.days.map((day) => this.createDayFormGroup(day))),
+    );
+
+    this.scheduleForm.patchValue({
+      defaultSlotDuration: schedule.defaultSlotDuration,
+      timeZone: schedule.timeZone,
+      isActive: schedule.isActive,
     });
   }
 
@@ -607,7 +689,15 @@ export class ProfessionalAvailabilityPage implements OnInit {
       dayOfWeek: [day.dayOfWeek],
       isWorkingDay: [day.isWorkingDay],
       timeBlocks: this.fb.array(
-        day.timeBlocks.map((block) => this.createTimeBlockFormGroup(block)),
+        day.timeBlocks.length > 0
+          ? day.timeBlocks.map((block) => this.createTimeBlockFormGroup(block))
+          : [
+              this.createTimeBlockFormGroup({
+                startTime: '09:00',
+                endTime: '10:00',
+                professionalLocationId: null,
+              }),
+            ],
       ),
     });
   }
@@ -616,16 +706,50 @@ export class ProfessionalAvailabilityPage implements OnInit {
     return this.fb.group({
       startTime: [block.startTime, Validators.required],
       endTime: [block.endTime, Validators.required],
+      professionalLocationId: [
+        block.professionalLocationId ?? null,
+        Validators.required,
+      ],
     });
   }
 
   private initAbsenceForm(): void {
     this.absenceForm = this.fb.group({
-      type: ['VACATION', Validators.required],
+      type: ['Absent', Validators.required],
       startDate: [null, Validators.required],
       endDate: [null, Validators.required],
+      overrideStartTime: [null],
+      overrideEndTime: [null],
+      professionalLocationId: [null],
       reason: [''],
     });
+
+    this.absenceForm
+      .get('type')
+      ?.valueChanges.subscribe((type: AbsenceType) =>
+        this.updateOverrideValidators(type),
+      );
+
+    this.updateOverrideValidators('Absent');
+  }
+
+  private updateOverrideValidators(type: AbsenceType): void {
+    const startControl = this.absenceForm.get('overrideStartTime');
+    const endControl = this.absenceForm.get('overrideEndTime');
+
+    if (type === 'Override') {
+      startControl?.setValidators([Validators.required]);
+      endControl?.setValidators([Validators.required]);
+    } else {
+      startControl?.clearValidators();
+      endControl?.clearValidators();
+      startControl?.setValue(null);
+      endControl?.setValue(null);
+      this.absenceForm.get('professionalLocationId')?.setValue(null);
+    }
+
+    startControl?.updateValueAndValidity();
+    endControl?.updateValueAndValidity();
   }
 
   protected getDayScheduleFormGroup(index: number): FormGroup {
@@ -647,7 +771,11 @@ export class ProfessionalAvailabilityPage implements OnInit {
   protected addTimeBlock(dayIndex: number): void {
     const timeBlocks = this.getTimeBlocksFormArray(dayIndex);
     timeBlocks.push(
-      this.createTimeBlockFormGroup({ startTime: '09:00', endTime: '10:00' }),
+      this.createTimeBlockFormGroup({
+        startTime: '09:00',
+        endTime: '10:00',
+        professionalLocationId: null,
+      }),
     );
   }
 
@@ -659,8 +787,16 @@ export class ProfessionalAvailabilityPage implements OnInit {
   protected getWorkingHoursSummary(dayIndex: number): string {
     const timeBlocks = this.getTimeBlocksFormArray(dayIndex).value;
     if (!timeBlocks || timeBlocks.length === 0) return '';
+
     return timeBlocks
-      .map((b: TimeBlock) => `${b.startTime}-${b.endTime}`)
+      .map(
+        (block: TimeBlock) =>
+          `${block.startTime}-${block.endTime}${
+            block.professionalLocationId
+              ? ` (${this.getLocationName(block.professionalLocationId)})`
+              : ''
+          }`,
+      )
       .join(', ');
   }
 
@@ -671,7 +807,8 @@ export class ProfessionalAvailabilityPage implements OnInit {
     this.store.updateWeeklySchedule(
       value.days,
       value.defaultSlotDuration,
-      value.bufferTime,
+      value.timeZone,
+      value.isActive,
     );
   }
 
@@ -679,11 +816,29 @@ export class ProfessionalAvailabilityPage implements OnInit {
     if (this.absenceForm.invalid) return;
 
     const value = this.absenceForm.value;
+
+    if (
+      value.type === 'Override' &&
+      value.overrideStartTime &&
+      value.overrideEndTime &&
+      value.overrideEndTime <= value.overrideStartTime
+    ) {
+      return;
+    }
+
     const dto: CreateAbsenceDto = {
       type: value.type,
-      startDate: this.formatDateISO(value.startDate),
-      endDate: this.formatDateISO(value.endDate),
+      startDateTime: this.toUtcRangeStart(value.startDate),
+      endDateTime: this.toUtcRangeEnd(value.endDate),
+      overrideStartTime:
+        value.type === 'Override' ? value.overrideStartTime : null,
+      overrideEndTime: value.type === 'Override' ? value.overrideEndTime : null,
+      professionalLocationId:
+        value.type === 'Override'
+          ? (value.professionalLocationId ?? null)
+          : null,
       reason: value.reason || undefined,
+      institutionId: null,
     };
 
     this.store.createAbsence(dto);
@@ -694,8 +849,8 @@ export class ProfessionalAvailabilityPage implements OnInit {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Eliminar ausencia',
-        message: '¿Estás seguro de eliminar esta ausencia?',
+        title: 'Eliminar excepción',
+        message: '¿Estás seguro de eliminar esta excepción?',
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         confirmColor: 'warn',
@@ -711,34 +866,45 @@ export class ProfessionalAvailabilityPage implements OnInit {
 
   protected cancelAbsenceForm(): void {
     this.showAbsenceForm.set(false);
-    this.absenceForm.reset({ type: 'VACATION' });
+    this.absenceForm.reset({
+      type: 'Absent',
+      startDate: null,
+      endDate: null,
+      overrideStartTime: null,
+      overrideEndTime: null,
+      professionalLocationId: null,
+      reason: '',
+    });
+    this.updateOverrideValidators('Absent');
   }
 
   protected getAbsenceChipColor(type: AbsenceType): string {
-    const colors: Record<AbsenceType, string> = {
-      VACATION: 'primary',
-      SICK_LEAVE: 'warn',
-      CONFERENCE: 'accent',
-      PERSONAL: '',
-      OTHER: '',
-    };
-    return colors[type];
+    return type === 'Override' ? 'accent' : 'primary';
   }
 
-  protected formatDate(dateStr: string): string {
-    const [year, month, day] = dateStr.split('-');
-    const date = new Date(+year, +month - 1, +day);
-    return date.toLocaleDateString('es-ES', {
+  protected formatDateTime(dateTime: string): string {
+    const date = new Date(dateTime);
+    return date.toLocaleString('es-CO', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
     });
   }
 
-  private formatDateISO(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  private toUtcRangeStart(date: Date): string {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}T00:00:00Z`;
+  }
+
+  private toUtcRangeEnd(date: Date): string {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}T23:59:59Z`;
   }
 }

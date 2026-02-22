@@ -24,6 +24,7 @@ import type {
   ModerateProfilePayload,
   ModerateProfileResponse,
   PaginationMeta,
+  ProfessionalActivationResponse,
 } from '../api/api-models';
 
 // =============================================================================
@@ -276,13 +277,23 @@ export class AdminProfessionalsStore {
    * Verify (approve) a professional profile.
    * Sets isVerified=true, isActive=true.
    */
-  verifyProfessional(id: string, adminNotes?: string) {
-    const payload: ModerateProfilePayload = {
-      isVerified: true,
-      isActive: true,
-      adminNotes,
-    };
-    return this._moderate(id, payload);
+  verifyProfessional(id: string, adminNotes?: string, isFeatured?: boolean) {
+    this.updateState({ saving: true });
+
+    return this.adminApi
+      .approveProfessional(id, {
+        adminNotes,
+        isFeatured,
+      })
+      .pipe(
+        tap((response: ProfessionalActivationResponse) => {
+          this.applyActivationResponse(id, response);
+        }),
+        catchError((err) => {
+          this.updateState({ saving: false });
+          throw err;
+        }),
+      );
   }
 
   /**
@@ -290,11 +301,21 @@ export class AdminProfessionalsStore {
    * Sets isActive=false.
    */
   disableProfessional(id: string, adminNotes?: string) {
-    const payload: ModerateProfilePayload = {
-      isActive: false,
-      adminNotes,
-    };
-    return this._moderate(id, payload);
+    this.updateState({ saving: true });
+
+    return this.adminApi
+      .rejectProfessional(id, {
+        reason: adminNotes,
+      })
+      .pipe(
+        tap((response: ProfessionalActivationResponse) => {
+          this.applyActivationResponse(id, response);
+        }),
+        catchError((err) => {
+          this.updateState({ saving: false });
+          throw err;
+        }),
+      );
   }
 
   /**
@@ -325,43 +346,58 @@ export class AdminProfessionalsStore {
 
     return this.adminApi.moderateProfile(id, payload).pipe(
       tap((response: ModerateProfileResponse) => {
-        // Update professional in the list
-        this.updateState({
-          saving: false,
-          professionals: this._state().professionals.map((p) =>
-            p.id === id
-              ? {
-                  ...p,
-                  isActive: response.isActive,
-                  isVerified: response.isVerified,
-                  isFeatured: response.isFeatured,
-                  adminNotes: response.adminNotes,
-                  dateUpdated: response.dateUpdated,
-                }
-              : p,
-          ),
+        this.applyProfessionalUpdate(id, {
+          isActive: response.isActive,
+          isVerified: response.isVerified,
+          isFeatured: response.isFeatured,
+          adminNotes: response.adminNotes,
+          dateUpdated: response.dateUpdated,
         });
-
-        // Update selected professional detail if it's the same
-        const sel = this._state().selectedProfessional;
-        if (sel?.id === id) {
-          this.updateState({
-            selectedProfessional: {
-              ...sel,
-              isActive: response.isActive,
-              isVerified: response.isVerified,
-              isFeatured: response.isFeatured,
-              adminNotes: response.adminNotes,
-              dateUpdated: response.dateUpdated,
-            },
-          });
-        }
       }),
       catchError((err) => {
         this.updateState({ saving: false });
         throw err;
       }),
     );
+  }
+
+  private applyActivationResponse(
+    id: string,
+    response: ProfessionalActivationResponse,
+  ): void {
+    this.applyProfessionalUpdate(id, {
+      isActive: response.isActive,
+      isVerified: response.isVerified,
+      adminNotes: response.adminNotes,
+      dateUpdated: response.dateUpdated,
+    });
+  }
+
+  private applyProfessionalUpdate(
+    id: string,
+    patch: Partial<AdminProfessionalListItem>,
+  ): void {
+    this.updateState({
+      saving: false,
+      professionals: this._state().professionals.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              ...patch,
+            }
+          : p,
+      ),
+    });
+
+    const selectedProfessional = this._state().selectedProfessional;
+    if (selectedProfessional?.id === id) {
+      this.updateState({
+        selectedProfessional: {
+          ...selectedProfessional,
+          ...patch,
+        },
+      });
+    }
   }
 
   // ---------------------------------------------------------------------------

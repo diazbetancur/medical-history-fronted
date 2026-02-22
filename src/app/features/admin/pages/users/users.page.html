@@ -28,23 +28,16 @@
       </mat-card-header>
 
       <mat-card-content>
-        <!-- Stats Summary -->
-        <div class="stats-row">
-          <div class="stat-card">
-            <mat-icon>people</mat-icon>
-            <div class="stat-info">
-              <span class="stat-value">{{ totalUsers() }}</span>
-              <span class="stat-label">Total Usuarios</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <mat-icon>check_circle</mat-icon>
-            <div class="stat-info">
-              <span class="stat-value">{{ activeUsersCount() }}</span>
-              <span class="stat-label">Activos</span>
-            </div>
-          </div>
-        </div>
+        <!-- Segmented Tabs -->
+        <mat-tab-group
+          class="users-tabs"
+          [selectedIndex]="currentTabIndex()"
+          (selectedIndexChange)="onTabChange($event)"
+        >
+          @for (tab of userTabs; track tab.segment) {
+          <mat-tab [label]="tab.label"></mat-tab>
+          }
+        </mat-tab-group>
 
         <!-- Search Bar -->
         <div class="search-bar">

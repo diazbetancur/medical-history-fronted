@@ -18,9 +18,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { formatDateOnly } from '@core/http/http-utils';
 import { ToastService } from '@core/ui/toast.service';
+import { PatientAppointmentsStore } from '@data/stores/patient-appointments.store';
 import { formatSlotTime, SlotDto } from '../../../models/slot.dto';
 import { SlotsService } from '../../../services/slots.service';
 import { WizardStore } from '../patient-wizard.page';
@@ -38,6 +40,7 @@ import { WizardStore } from '../patient-wizard.page';
     MatNativeDateModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatChipsModule,
     MatProgressSpinnerModule,
   ],
@@ -52,21 +55,38 @@ import { WizardStore } from '../patient-wizard.page';
       <!-- Date Picker -->
       <mat-card class="date-picker-card">
         <mat-card-content>
-          <mat-form-field appearance="outline">
-            <mat-label>Selecciona una fecha</mat-label>
-            <input
-              matInput
-              [matDatepicker]="picker"
-              [min]="minDate"
-              [(ngModel)]="selectedDate"
-              (dateChange)="onDateChange($event.value)"
-            />
-            <mat-datepicker-toggle
-              matIconSuffix
-              [for]="picker"
-            ></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
+          <div class="date-config">
+            <mat-form-field appearance="outline">
+              <mat-label>Selecciona una fecha</mat-label>
+              <input
+                matInput
+                [matDatepicker]="picker"
+                [min]="minDate"
+                [(ngModel)]="selectedDate"
+                (dateChange)="onDateChange($event.value)"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="picker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Duración de cita</mat-label>
+              <mat-select
+                [ngModel]="durationMinutes()"
+                (ngModelChange)="onDurationChange($event)"
+              >
+                @for (duration of durationOptions(); track duration) {
+                  <mat-option [value]="duration">{{ duration }} min</mat-option>
+                }
+              </mat-select>
+              <mat-hint
+                >Duraciones válidas según agenda del profesional</mat-hint
+              >
+            </mat-form-field>
+          </div>
         </mat-card-content>
       </mat-card>
 
@@ -103,6 +123,23 @@ import { WizardStore } from '../patient-wizard.page';
                   <mat-icon matChipAvatar>schedule</mat-icon>
                   {{ formatSlotTime(slot) }}
                 </mat-chip>
+
+                @if (
+                  slot.professionalLocationName ||
+                  slot.professionalLocationAddress
+                ) {
+                  <div
+                    class="slot-location"
+                    [class.selected]="selectedSlot()?.id === slot.id"
+                  >
+                    @if (slot.professionalLocationName) {
+                      <strong>{{ slot.professionalLocationName }}</strong>
+                    }
+                    @if (slot.professionalLocationAddress) {
+                      <span>{{ slot.professionalLocationAddress }}</span>
+                    }
+                  </div>
+                }
               }
             </div>
           }
@@ -144,8 +181,14 @@ import { WizardStore } from '../patient-wizard.page';
       .date-picker-card {
         margin-bottom: 24px;
 
-        mat-form-field {
-          width: 100%;
+        .date-config {
+          display: grid;
+          grid-template-columns: 1fr 220px;
+          gap: 12px;
+
+          mat-form-field {
+            width: 100%;
+          }
         }
       }
 
@@ -207,6 +250,21 @@ import { WizardStore } from '../patient-wizard.page';
               font-weight: 500;
             }
           }
+
+          .slot-location {
+            grid-column: span 1;
+            margin-top: -4px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+
+            &.selected {
+              color: var(--color-primary);
+            }
+          }
         }
       }
 
@@ -226,6 +284,7 @@ import { WizardStore } from '../patient-wizard.page';
 })
 export class Step3SlotsComponent implements OnInit {
   private readonly slotsService = inject(SlotsService);
+  private readonly appointmentsStore = inject(PatientAppointmentsStore);
   private readonly toast = inject(ToastService);
 
   // Inputs/Outputs
@@ -238,6 +297,10 @@ export class Step3SlotsComponent implements OnInit {
   readonly allSlots = signal<SlotDto[]>([]);
   readonly selectedDate = signal<Date | null>(null);
   readonly selectedSlot = signal<SlotDto | null>(null);
+  readonly durationMinutes = signal<number>(
+    this.appointmentsStore.durationMinutes(),
+  );
+  readonly durationOptions = signal<number[]>([15, 30, 45, 60]);
 
   // Date constraints
   readonly minDate = new Date(); // Today
@@ -284,6 +347,16 @@ export class Step3SlotsComponent implements OnInit {
     }
   }
 
+  onDurationChange(duration: number): void {
+    this.durationMinutes.set(duration);
+    this.appointmentsStore.setDurationMinutes(duration);
+    const selectedDate = this.selectedDate();
+    if (selectedDate) {
+      this.selectedSlot.set(null);
+      this.loadSlots(selectedDate);
+    }
+  }
+
   /**
    * Load slots for selected date
    */
@@ -297,20 +370,58 @@ export class Step3SlotsComponent implements OnInit {
 
     this.isLoadingSlots.set(true);
 
-    this.slotsService.getSlots(professionalId, dateStr).subscribe({
-      next: (response) => {
-        this.allSlots.set(response.slots);
-        this.isLoadingSlots.set(false);
+    this.slotsService
+      .getSlots(professionalId, dateStr, this.durationMinutes())
+      .subscribe({
+        next: (response) => {
+          const allowedDurations = this.buildDurationOptions(
+            response.slotMinutes,
+          );
+          this.durationOptions.set(allowedDurations);
 
-        if (response.slots.filter((s) => s.isAvailable).length === 0) {
-          this.toast.warning('No hay horarios disponibles para esta fecha');
-        }
-      },
-      error: (error: ApiError) => {
-        this.isLoadingSlots.set(false);
-        this.toast.error(getUserMessage(error));
-      },
-    });
+          if (!allowedDurations.includes(this.durationMinutes())) {
+            const nextDuration = allowedDurations[0] ?? response.slotMinutes;
+            const currentDuration = this.durationMinutes();
+            this.durationMinutes.set(nextDuration);
+            this.appointmentsStore.setDurationMinutes(nextDuration);
+
+            if (nextDuration !== currentDuration) {
+              this.loadSlots(date);
+              return;
+            }
+          }
+
+          this.allSlots.set(response.slots);
+          this.isLoadingSlots.set(false);
+
+          if (response.slots.filter((s) => s.isAvailable).length === 0) {
+            this.toast.warning('No hay horarios disponibles para esta fecha');
+          }
+        },
+        error: (error: ApiError) => {
+          this.isLoadingSlots.set(false);
+          this.toast.error(getUserMessage(error));
+        },
+      });
+  }
+
+  private buildDurationOptions(slotMinutes: number): number[] {
+    const options = new Set<number>();
+    const base = Math.max(15, slotMinutes || 30);
+
+    for (let factor = 1; factor <= 8; factor += 1) {
+      const value = base * factor;
+      if (value >= 15 && value <= 480) {
+        options.add(value);
+      }
+    }
+
+    const current = this.durationMinutes();
+    if (current >= 15 && current <= 480 && current % base === 0) {
+      options.add(current);
+    }
+
+    return Array.from(options).sort((a, b) => a - b);
   }
 
   /**

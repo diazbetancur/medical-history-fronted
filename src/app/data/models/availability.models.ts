@@ -8,21 +8,27 @@
  * Time Slot DTO - Slot de tiempo disponible
  */
 export interface TimeSlotDto {
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
+  startTime: string; // HH:mm (local)
+  endTime: string; // HH:mm (local)
+  startUtc: string; // ISO UTC
+  endUtc: string; // ISO UTC
   duration: number; // minutes
   isAvailable: boolean;
   professionalId: string;
   date: string; // ISO date (YYYY-MM-DD)
+  professionalLocationId: string | null;
+  professionalLocationName: string | null;
+  professionalLocationAddress: string | null;
 }
 
 /**
  * Availability Slots Response - Slots disponibles para una fecha
  */
 export interface AvailabilitySlotsResponse {
-  professionalId: string;
-  professionalName: string;
   date: string; // ISO date (YYYY-MM-DD)
+  timeZone: string;
+  slotMinutes: number;
+  totalSlots: number;
   slots: TimeSlotDto[];
 }
 

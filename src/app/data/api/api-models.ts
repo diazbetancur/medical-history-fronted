@@ -405,9 +405,9 @@ export interface ProfessionalProfile {
   businessName: string;
   slug: string;
   description?: string;
-  categoryId: string;
-  categoryName: string;
-  categorySlug: string;
+  categoryId?: string;
+  categoryName?: string;
+  categorySlug?: string;
   cityId: string;
   cityName: string;
   countryId: string;
@@ -453,6 +453,175 @@ export interface UpdateProfessionalProfilePayload {
   profileImageUrl?: string;
 }
 
+export interface ProfessionalProfilePhotoResponse {
+  profileImageUrl: string;
+}
+
+export interface ProfessionalSpecialty {
+  id: string;
+  name: string;
+}
+
+export interface AssignProfessionalSpecialtiesPayload {
+  specialtyIds: string[];
+}
+
+export type ProfessionalSpecialtyProposalStatus =
+  | 'Pending'
+  | 'Approved'
+  | 'Rejected';
+
+export interface ProfessionalSpecialtyProposal {
+  id: string;
+  name: string;
+  justification?: string;
+  status: ProfessionalSpecialtyProposalStatus;
+  dateCreated: string;
+}
+
+export interface ProposeProfessionalSpecialtyPayload {
+  name: string;
+  justification?: string;
+}
+
+export type ProfessionalEducationType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export interface ProfessionalEducationSummary {
+  id: string;
+  institution: string;
+  degree: string;
+  educationType: ProfessionalEducationType;
+  educationTypeName: string;
+  startYear: number | null;
+  endYear: number | null;
+  country: string | null;
+  hasDiploma: boolean;
+  dateCreated: string;
+}
+
+export interface ProfessionalEducationDetail extends ProfessionalEducationSummary {
+  diplomaUrl: string | null;
+}
+
+export interface CreateProfessionalEducationPayload {
+  institution: string;
+  degree: string;
+  educationType: ProfessionalEducationType;
+  startYear?: number;
+  endYear?: number;
+  country?: string;
+}
+
+export interface UpdateProfessionalEducationPayload {
+  institution?: string;
+  degree?: string;
+  educationType?: ProfessionalEducationType;
+  startYear?: number;
+  endYear?: number;
+  country?: string;
+}
+
+export interface ProfessionalLocation {
+  id: string;
+  name: string;
+  address: string | null;
+  cityId: string;
+  cityName: string;
+  countryId: string;
+  countryName: string;
+  phone: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  dateCreated: string;
+}
+
+export interface CreateProfessionalLocationPayload {
+  name: string;
+  address?: string;
+  cityId: string;
+  countryId: string;
+  phone?: string;
+}
+
+export interface UpdateProfessionalLocationPayload {
+  name?: string;
+  address?: string;
+  cityId?: string;
+  countryId?: string;
+  phone?: string;
+}
+
+export interface ProfessionalSetDefaultLocationResponse {
+  message: string;
+}
+
+export type ProfessionalAvailabilityDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface ProfessionalAvailabilityWindow {
+  id?: string;
+  dayOfWeek: ProfessionalAvailabilityDayOfWeek;
+  dayName?: string;
+  startTime: string;
+  endTime: string;
+  locationId: string;
+  locationName?: string;
+  slotDurationMinutes: number;
+  isActive?: boolean;
+}
+
+export interface ProfessionalAvailabilityTemplateResponse {
+  windows: ProfessionalAvailabilityWindow[];
+}
+
+export interface UpsertProfessionalAvailabilityTemplatePayload {
+  windows: Array<{
+    dayOfWeek: ProfessionalAvailabilityDayOfWeek;
+    startTime: string;
+    endTime: string;
+    locationId: string;
+    slotDurationMinutes: number;
+  }>;
+}
+
+export type ProfessionalAvailabilityExceptionType = 'Absent' | 'Override';
+
+export interface ProfessionalAvailabilityOverrideWindow {
+  startTime: string;
+  endTime: string;
+  locationId: string;
+  slotDurationMinutes: number;
+}
+
+export interface ProfessionalAvailabilityException {
+  id: string;
+  date: string;
+  type: ProfessionalAvailabilityExceptionType;
+  typeName: string;
+  reason: string | null;
+  overrideWindows: ProfessionalAvailabilityOverrideWindow[] | null;
+}
+
+export interface CreateProfessionalAvailabilityExceptionPayload {
+  date: string;
+  type: ProfessionalAvailabilityExceptionType;
+  reason?: string;
+  overrideWindows?: ProfessionalAvailabilityOverrideWindow[];
+}
+
+export interface ProfessionalAvailabilitySlot {
+  startTime: string;
+  endTime: string;
+  locationId: string;
+  locationName: string;
+  isAvailable: boolean;
+}
+
+export interface ProfessionalAvailabilitySlotsResponse {
+  date: string;
+  professionalId: string;
+  slots: ProfessionalAvailabilitySlot[];
+}
+
 // =============================================================================
 // Professional Services Models
 // =============================================================================
@@ -496,11 +665,13 @@ export interface UpdateServicePayload {
 
 export type RequestStatus =
   | 'Pending'
-  | 'Contacted'
-  | 'InProgress'
-  | 'Completed'
+  | 'Accepted'
   | 'Rejected'
-  | 'Cancelled';
+  | 'Completed'
+  | 0
+  | 1
+  | 2
+  | 3;
 
 export interface ServiceRequest {
   id: string;
@@ -527,7 +698,13 @@ export interface ProfessionalRequestsParams {
   to?: string;
 }
 
-export interface ProfessionalRequestsResponse extends PaginatedResponse<ServiceRequest> {}
+export interface ProfessionalRequestsResponse {
+  items: ServiceRequest[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
 
 // =============================================================================
 // Professional Dashboard
@@ -631,6 +808,24 @@ export interface ModerateProfileResponse {
   isActive: boolean;
   isVerified: boolean;
   isFeatured: boolean;
+  adminNotes?: string;
+  dateUpdated: string;
+}
+
+export interface ApproveProfessionalPayload {
+  adminNotes?: string;
+  isFeatured?: boolean;
+}
+
+export interface RejectProfessionalPayload {
+  reason?: string;
+}
+
+export interface ProfessionalActivationResponse {
+  id: string;
+  action: 'approved' | 'rejected';
+  isActive: boolean;
+  isVerified: boolean;
   adminNotes?: string;
   dateUpdated: string;
 }

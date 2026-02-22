@@ -82,6 +82,11 @@ export const ADMIN_PERMISSIONS = {
   ROLES_CREATE: 'Roles.Create',
   ROLES_EDIT: 'Roles.Edit',
 
+  // Profiles (Professionals)
+  PROFILES_VIEW: 'Profiles.View',
+  PROFILES_VERIFY: 'Profiles.Verify',
+  PROFILES_UPDATE: 'Profiles.Update',
+
   // Service Requests
   SERVICE_REQUESTS_VIEW_ALL: 'ServiceRequests.ViewAll',
   SERVICE_REQUESTS_MANAGE: 'ServiceRequests.Manage',
@@ -97,28 +102,34 @@ export const ADMIN_PERMISSIONS = {
  */
 export const PROFESSIONAL_PERMISSIONS = {
   // Appointments
+  APPOINTMENTS_VIEW_OWN: 'Appointments.ViewOwn',
   APPOINTMENTS_VIEW: 'Appointments.View',
   APPOINTMENTS_CREATE: 'Appointments.Create',
   APPOINTMENTS_EDIT: 'Appointments.Edit',
+  APPOINTMENTS_SLOTS_VIEW: 'Appointments.Slots.View',
   APPOINTMENTS_CANCEL: 'Appointments.Cancel',
+  APPOINTMENTS_CANCEL_OWN: 'Appointments.CancelOwn',
 
-  // Availability
-  AVAILABILITY_VIEW: 'Availability.View',
-  AVAILABILITY_MANAGE: 'Availability.Manage',
+  // Profile / Directory
+  PROFILES_VIEW: 'Profiles.View',
+  PROFILES_CREATE: 'Profiles.Create',
+  PROFILES_UPDATE: 'Profiles.Update',
+
+  // Service Requests (Leads)
+  SERVICE_REQUESTS_VIEW: 'ServiceRequests.View',
+  SERVICE_REQUESTS_UPDATE: 'ServiceRequests.Update',
 
   // Patients
-  PATIENTS_VIEW: 'Patients.View',
-  PATIENTS_EDIT: 'Patients.Edit',
+  PATIENTS_HISTORY_VIEW_OWN: 'Patients.History.ViewOwn',
+  PATIENTS_MEDICATIONS_VIEW_OWN: 'Patients.Medications.ViewOwn',
+  PATIENTS_ALLERGIES_VIEW_OWN: 'Patients.Allergies.ViewOwn',
+  PATIENTS_EXAMS_VIEW_OWN: 'Patients.Exams.ViewOwn',
 
-  // Notes
-  NOTES_VIEW: 'Notes.View',
-  NOTES_CREATE: 'Notes.Create',
-  NOTES_EDIT: 'Notes.Edit',
-
-  // Files
-  FILES_VIEW: 'Files.View',
-  FILES_UPLOAD: 'Files.Upload',
-  FILES_DELETE: 'Files.Delete',
+  // Manage own history modules
+  PATIENTS_BACKGROUND_MANAGE_OWN: 'Patients.Background.ManageOwn',
+  PATIENTS_MEDICATIONS_MANAGE_OWN: 'Patients.Medications.ManageOwn',
+  PATIENTS_ALLERGIES_MANAGE_OWN: 'Patients.Allergies.ManageOwn',
+  PATIENTS_EXAMS_MANAGE_OWN: 'Patients.Exams.ManageOwn',
 } as const;
 
 // =============================================================================
@@ -178,10 +189,14 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     label: 'Solicitudes',
-    icon: 'assignment',
-    route: '/admin/requests',
+    icon: 'pending_actions',
+    route: '/admin/solicitudes',
     context: 'ADMIN',
-    requiredPermissions: [ADMIN_PERMISSIONS.SERVICE_REQUESTS_VIEW_ALL],
+    requiredPermissions: [
+      ADMIN_PERMISSIONS.PROFILES_VIEW,
+      ADMIN_PERMISSIONS.PROFILES_VERIFY,
+      ADMIN_PERMISSIONS.PROFILES_UPDATE,
+    ],
   },
   {
     label: 'Reportes',
@@ -218,18 +233,35 @@ export const MENU_ITEMS: MenuItem[] = [
     exactMatch: true,
   },
   {
+    label: 'Mi Perfil Profesional',
+    icon: 'manage_accounts',
+    route: '/professional/profile',
+    context: 'PROFESSIONAL',
+    requiredPermissions: [
+      PROFESSIONAL_PERMISSIONS.PROFILES_VIEW,
+      PROFESSIONAL_PERMISSIONS.PROFILES_CREATE,
+      PROFESSIONAL_PERMISSIONS.PROFILES_UPDATE,
+    ],
+  },
+  {
     label: 'Agenda',
     icon: 'event',
-    route: '/professional/agenda',
+    route: '/professional/appointments',
     context: 'PROFESSIONAL',
-    requiredPermissions: [PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW],
+    requiredPermissions: [
+      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW_OWN,
+      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_CREATE,
+    ],
   },
   {
     label: 'Mis Citas',
     icon: 'assignment',
     route: '/professional/appointments',
     context: 'PROFESSIONAL',
-    requiredPermissions: [PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW],
+    requiredPermissions: [
+      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW,
+      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW_OWN,
+    ],
   },
   {
     label: 'Disponibilidad',
@@ -237,8 +269,19 @@ export const MENU_ITEMS: MenuItem[] = [
     route: '/professional/availability',
     context: 'PROFESSIONAL',
     requiredPermissions: [
-      PROFESSIONAL_PERMISSIONS.AVAILABILITY_MANAGE,
-      PROFESSIONAL_PERMISSIONS.AVAILABILITY_VIEW,
+      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_SLOTS_VIEW,
+      PROFESSIONAL_PERMISSIONS.PROFILES_UPDATE,
+      PROFESSIONAL_PERMISSIONS.PROFILES_VIEW,
+    ],
+  },
+  {
+    label: 'Solicitudes',
+    icon: 'mail',
+    route: '/professional/requests',
+    context: 'PROFESSIONAL',
+    requiredPermissions: [
+      PROFESSIONAL_PERMISSIONS.SERVICE_REQUESTS_VIEW,
+      PROFESSIONAL_PERMISSIONS.SERVICE_REQUESTS_UPDATE,
     ],
   },
   {
@@ -246,7 +289,12 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: 'people',
     route: '/professional/patients',
     context: 'PROFESSIONAL',
-    requiredPermissions: [PROFESSIONAL_PERMISSIONS.PATIENTS_VIEW],
+    requiredPermissions: [
+      PROFESSIONAL_PERMISSIONS.PATIENTS_HISTORY_VIEW_OWN,
+      PROFESSIONAL_PERMISSIONS.PATIENTS_MEDICATIONS_VIEW_OWN,
+      PROFESSIONAL_PERMISSIONS.PATIENTS_ALLERGIES_VIEW_OWN,
+      PROFESSIONAL_PERMISSIONS.PATIENTS_EXAMS_VIEW_OWN,
+    ],
   },
 
   // ==========================================================================
@@ -260,30 +308,55 @@ export const MENU_ITEMS: MenuItem[] = [
     exactMatch: true,
   },
   {
-    label: 'Buscar Profesionales',
-    icon: 'search',
-    route: '/patient/professionals',
+    label: 'Agendar Cita',
+    icon: 'event_available',
+    route: '/patient/wizard',
     context: 'PATIENT',
-    // No requiere permisos - siempre visible
-  },
-  {
-    label: 'Mis Citas',
-    icon: 'event',
-    route: '/patient/appointments',
-    context: 'PATIENT',
-    // No requiere permisos - siempre visible
+    requiredPermissions: ['Appointments.Create', 'Appointments.Slots.View'],
   },
   {
     label: 'Mi Historial',
     icon: 'history',
-    route: '/patient/history',
+    route: '/patient/profile',
     context: 'PATIENT',
+    requiredPermissions: ['Patients.History.ViewOwn'],
   },
   {
-    label: 'Mis Documentos',
-    icon: 'folder',
-    route: '/patient/documents',
+    label: 'Alergias',
+    icon: 'warning',
+    route: '/patient/allergies',
     context: 'PATIENT',
+    requiredPermissions: [
+      'Patients.Allergies.ViewOwn',
+      'Patients.Allergies.ManageOwn',
+    ],
+  },
+  {
+    label: 'Antecedentes',
+    icon: 'medical_information',
+    route: '/patient/background',
+    context: 'PATIENT',
+    requiredPermissions: [
+      'Patients.Background.ViewOwn',
+      'Patients.Background.ManageOwn',
+    ],
+  },
+  {
+    label: 'Medicamentos',
+    icon: 'medication',
+    route: '/patient/medications',
+    context: 'PATIENT',
+    requiredPermissions: [
+      'Patients.Medications.ViewOwn',
+      'Patients.Medications.ManageOwn',
+    ],
+  },
+  {
+    label: 'Exámenes',
+    icon: 'biotech',
+    route: '/patient/exams',
+    context: 'PATIENT',
+    requiredPermissions: ['Patients.Exams.ViewOwn', 'Patients.Exams.ManageOwn'],
   },
   {
     isDivider: true,
@@ -305,9 +378,9 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PATIENT',
   },
   {
-    label: 'Configuración',
-    icon: 'settings',
-    route: '/patient/settings',
+    label: 'Buscar Profesionales',
+    icon: 'search',
+    route: '/search',
     context: 'PATIENT',
   },
 ];

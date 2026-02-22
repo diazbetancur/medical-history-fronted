@@ -24,6 +24,8 @@ import {
 } from './admin-users.types';
 import { ApiClient } from './api-client';
 
+export type AdminUsersSegment = 'others' | 'professionals' | 'patients';
+
 /**
  * Admin Users API Service
  *
@@ -65,6 +67,34 @@ export class AdminUsersApi {
         | PaginatedResponseFormatA<AdminUserListDto>
         | PaginatedResponseFormatB<AdminUserListDto>
       >(this.basePath, { params: queryParams })
+      .pipe(
+        map((response) =>
+          this.normalizePaginatedResponse<AdminUserListDto>(response, params),
+        ),
+        catchError((error) => this.handleError(error)),
+      );
+  }
+
+  /**
+   * GET /api/admin/rbac/users/{segment}
+   *
+   * List users by segment:
+   * - others: administrative/non-patient/non-professional users
+   * - professionals: professional users
+   * - patients: patient users
+   */
+  listUsersBySegment(
+    segment: AdminUsersSegment,
+    params: AdminUsersQueryParams = {},
+  ): Observable<PaginatedResponse<AdminUserListDto>> {
+    const queryParams = this.buildQueryParams(params);
+    const endpoint = `${this.basePath}/${segment}`;
+
+    return this.api
+      .get<
+        | PaginatedResponseFormatA<AdminUserListDto>
+        | PaginatedResponseFormatB<AdminUserListDto>
+      >(endpoint, { params: queryParams })
       .pipe(
         map((response) =>
           this.normalizePaginatedResponse<AdminUserListDto>(response, params),

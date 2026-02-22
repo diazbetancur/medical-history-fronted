@@ -24,8 +24,10 @@ import {
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AuthService } from '@core/auth';
+import { AuthStore } from '@core/auth';
+import type { AdminUsersSegment } from '@data/api/admin-users.api';
 import type { AdminUserListDto } from '@data/api/admin-users.types';
 import { AdminUsersStore } from '@data/stores/admin-users.store';
 import { ToastService } from '@shared/services';
@@ -48,13 +50,14 @@ import { PERMISSIONS } from '../../admin-menu.config';
     MatProgressSpinnerModule,
     MatSidenavModule,
     MatTableModule,
+    MatTabsModule,
     MatTooltipModule,
   ],
   templateUrl: './users.page.html',
   styleUrl: './users.page.scss',
 })
 export class UsersPageComponent implements OnInit {
-  private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
   private readonly store = inject(AdminUsersStore);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
@@ -67,6 +70,12 @@ export class UsersPageComponent implements OnInit {
 
   readonly searchValue = signal('');
   readonly drawerOpen = signal(false);
+
+  readonly userTabs: { label: string; segment: AdminUsersSegment }[] = [
+    { label: 'Administrativos', segment: 'others' },
+    { label: 'Profesionales', segment: 'professionals' },
+    { label: 'Pacientes', segment: 'patients' },
+  ];
 
   // ==========================================================================
   // Store State (read-only signals)
@@ -83,6 +92,7 @@ export class UsersPageComponent implements OnInit {
   readonly totalUsers = this.store.totalUsers;
   readonly page = this.store.page;
   readonly pageSize = this.store.pageSize;
+  readonly segment = this.store.segment;
 
   // ==========================================================================
   // Table Configuration
@@ -104,23 +114,23 @@ export class UsersPageComponent implements OnInit {
   // ==========================================================================
 
   readonly canCreate = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.USERS_CREATE),
+    this.authStore.userPermissions().includes(PERMISSIONS.USERS_CREATE),
   );
 
   readonly canUpdate = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.USERS_UPDATE),
+    this.authStore.userPermissions().includes(PERMISSIONS.USERS_UPDATE),
   );
 
   readonly canDelete = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.USERS_DELETE),
+    this.authStore.userPermissions().includes(PERMISSIONS.USERS_DELETE),
   );
 
   readonly canAssignRoles = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.USERS_ASSIGN_ROLES),
+    this.authStore.userPermissions().includes(PERMISSIONS.USERS_ASSIGN_ROLES),
   );
 
   readonly canView = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.USERS_VIEW),
+    this.authStore.userPermissions().includes(PERMISSIONS.USERS_VIEW),
   );
 
   // ==========================================================================
@@ -135,9 +145,11 @@ export class UsersPageComponent implements OnInit {
     () => !this.loading() && this.users().length > 0,
   );
 
-  readonly activeUsersCount = computed(
-    () => this.users().filter((u) => !u.isLockedOut).length,
-  );
+  readonly currentTabIndex = computed(() => {
+    const current = this.segment();
+    const index = this.userTabs.findIndex((tab) => tab.segment === current);
+    return index >= 0 ? index : 0;
+  });
 
   // ==========================================================================
   // Lifecycle
@@ -185,6 +197,15 @@ export class UsersPageComponent implements OnInit {
     } else if (event.pageIndex + 1 !== this.page()) {
       this.store.setPage(event.pageIndex + 1);
     }
+  }
+
+  onTabChange(index: number): void {
+    const tab = this.userTabs[index];
+    if (!tab) return;
+
+    this.searchValue.set('');
+    this.store.setQuery('');
+    this.store.setSegment(tab.segment);
   }
 
   // ==========================================================================

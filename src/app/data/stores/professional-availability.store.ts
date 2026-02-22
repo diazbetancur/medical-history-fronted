@@ -7,6 +7,7 @@ import type {
   AbsenceFilters,
   CreateAbsenceDto,
 } from '@data/models/professional-absence.models';
+import type { ProfessionalLocationDto } from '@data/models/professional-location.models';
 import type {
   DaySchedule,
   WeeklyScheduleDto,
@@ -35,6 +36,10 @@ export class ProfessionalAvailabilityStore {
   private readonly _absences = signal<AbsenceDto[]>([]);
   private readonly _isLoadingAbsences = signal<boolean>(false);
 
+  // State signals - Locations
+  private readonly _locations = signal<ProfessionalLocationDto[]>([]);
+  private readonly _isLoadingLocations = signal<boolean>(false);
+
   // State signals - Common
   private readonly _lastError = signal<ProblemDetails | null>(null);
   private readonly _isSaving = signal<boolean>(false);
@@ -46,6 +51,10 @@ export class ProfessionalAvailabilityStore {
   // Public readonly signals - Absences
   readonly absences = this._absences.asReadonly();
   readonly isLoadingAbsences = this._isLoadingAbsences.asReadonly();
+
+  // Public readonly signals - Locations
+  readonly locations = this._locations.asReadonly();
+  readonly isLoadingLocations = this._isLoadingLocations.asReadonly();
 
   // Public readonly signals - Common
   readonly lastError = this._lastError.asReadonly();
@@ -62,11 +71,16 @@ export class ProfessionalAvailabilityStore {
 
   readonly futureAbsences = computed(() => {
     const today = new Date().toISOString().split('T')[0];
-    return this._absences().filter((absence) => absence.endDate >= today);
+    return this._absences().filter(
+      (absence) => absence.endDateTime.slice(0, 10) >= today,
+    );
   });
 
   readonly isLoading = computed(
-    () => this._isLoadingSchedule() || this._isLoadingAbsences(),
+    () =>
+      this._isLoadingSchedule() ||
+      this._isLoadingAbsences() ||
+      this._isLoadingLocations(),
   );
 
   // ============================================================================
@@ -77,14 +91,38 @@ export class ProfessionalAvailabilityStore {
    * Inicializar store (cargar horario y ausencias futuras)
    */
   initialize(): void {
-    const professionalId = this.authStore.user()?.professionalProfileId;
+    const professionalId = this.getProfessionalIdOrNotify();
     if (!professionalId) {
-      this.toastService.error('No se encontró perfil profesional');
       return;
     }
 
-    this.loadWeeklySchedule();
-    this.loadFutureAbsences();
+    this.loadWeeklySchedule(professionalId);
+    this.loadFutureAbsences(professionalId);
+    this.loadLocations();
+  }
+
+  loadLocations(includeInactive = false): void {
+    this._isLoadingLocations.set(true);
+    this._lastError.set(null);
+
+    this.availabilityApi
+      .getProfessionalLocations(includeInactive)
+      .pipe(
+        tap((locations) => {
+          this._locations.set(locations ?? []);
+        }),
+        catchError((error) => {
+          const problemDetails = error.error as ProblemDetails;
+          this._lastError.set(problemDetails);
+          this._locations.set([]);
+          this.toastService.error(
+            problemDetails.title || 'Error al cargar sedes',
+          );
+          return of(null);
+        }),
+        finalize(() => this._isLoadingLocations.set(false)),
+      )
+      .subscribe();
   }
 
   // ============================================================================
@@ -94,12 +132,17 @@ export class ProfessionalAvailabilityStore {
   /**
    * Cargar horario semanal
    */
-  loadWeeklySchedule(): void {
+  loadWeeklySchedule(professionalId?: string): void {
+    const profileId = professionalId ?? this.getProfessionalIdOrNotify();
+    if (!profileId) {
+      return;
+    }
+
     this._isLoadingSchedule.set(true);
     this._lastError.set(null);
 
     this.availabilityApi
-      .getWeeklySchedule()
+      .getWeeklySchedule(profileId)
       .pipe(
         tap((schedule) => {
           this._weeklySchedule.set(schedule);
@@ -132,16 +175,23 @@ export class ProfessionalAvailabilityStore {
   updateWeeklySchedule(
     days: DaySchedule[],
     slotDuration?: number,
-    bufferTime?: number,
+    timeZone?: string,
+    isActive?: boolean,
   ): void {
+    const professionalId = this.getProfessionalIdOrNotify();
+    if (!professionalId) {
+      return;
+    }
+
     this._isSaving.set(true);
     this._lastError.set(null);
 
     this.availabilityApi
-      .updateWeeklySchedule({
+      .updateWeeklySchedule(professionalId, {
         days,
         defaultSlotDuration: slotDuration,
-        bufferTime,
+        timeZone,
+        isActive,
       })
       .pipe(
         tap((schedule) => {
@@ -168,20 +218,25 @@ export class ProfessionalAvailabilityStore {
   /**
    * Cargar ausencias futuras (desde hoy)
    */
-  loadFutureAbsences(): void {
-    const today = new Date().toISOString().split('T')[0];
-    this.loadAbsences({ startDate: today });
+  loadFutureAbsences(professionalId?: string): void {
+    const today = new Date().toISOString().split('T')[0] + 'T00:00:00Z';
+    this.loadAbsences({ startDateTime: today }, professionalId);
   }
 
   /**
    * Cargar ausencias con filtros
    */
-  loadAbsences(filters?: AbsenceFilters): void {
+  loadAbsences(filters?: AbsenceFilters, professionalId?: string): void {
+    const profileId = professionalId ?? this.getProfessionalIdOrNotify();
+    if (!profileId) {
+      return;
+    }
+
     this._isLoadingAbsences.set(true);
     this._lastError.set(null);
 
     this.availabilityApi
-      .getAbsences(filters)
+      .getAbsences(profileId, filters)
       .pipe(
         tap((response) => {
           this._absences.set(response.items);
@@ -204,11 +259,16 @@ export class ProfessionalAvailabilityStore {
    * Crear ausencia
    */
   createAbsence(dto: CreateAbsenceDto): void {
+    const professionalId = this.getProfessionalIdOrNotify();
+    if (!professionalId) {
+      return;
+    }
+
     this._isSaving.set(true);
     this._lastError.set(null);
 
     this.availabilityApi
-      .createAbsence(dto)
+      .createAbsence(professionalId, dto)
       .pipe(
         tap((absence) => {
           this._absences.update((absences) => [...absences, absence]);
@@ -231,10 +291,15 @@ export class ProfessionalAvailabilityStore {
    * Eliminar ausencia
    */
   deleteAbsence(absenceId: string): void {
+    const professionalId = this.getProfessionalIdOrNotify();
+    if (!professionalId) {
+      return;
+    }
+
     this._isSaving.set(true);
 
     this.availabilityApi
-      .deleteAbsence(absenceId)
+      .deleteAbsence(professionalId, absenceId)
       .pipe(
         tap(() => {
           this._absences.update((absences) =>
@@ -259,5 +324,15 @@ export class ProfessionalAvailabilityStore {
    */
   clearError(): void {
     this._lastError.set(null);
+  }
+
+  private getProfessionalIdOrNotify(): string | null {
+    const professionalId = this.authStore.user()?.professionalProfileId ?? null;
+    if (!professionalId) {
+      this.toastService.error('No se encontró perfil profesional');
+      return null;
+    }
+
+    return professionalId;
   }
 }

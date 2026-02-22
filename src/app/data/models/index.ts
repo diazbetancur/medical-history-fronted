@@ -13,6 +13,7 @@ export * from './medication.models';
 export * from './models';
 export * from './patient-profile.models';
 export * from './professional-absence.models';
+export * from './professional-location.models';
 export * from './professional-schedule.models';
 export * from './public-page.models';
 export * from './specialty.models';

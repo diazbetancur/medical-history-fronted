@@ -9,11 +9,14 @@ import {
   AdminProfessionalsResponse,
   AdminRequestsParams,
   AdminRequestsResponse,
+  ApproveProfessionalPayload,
   ModerateProfilePayload,
   ModerateProfileResponse,
   ModerateRequestPayload,
   ModerateRequestResponse,
   ModerateServicePayload,
+  ProfessionalActivationResponse,
+  RejectProfessionalPayload,
   Service,
 } from './api-models';
 
@@ -63,6 +66,34 @@ export class AdminApi {
   ): Observable<ModerateProfileResponse> {
     return this.api.patch<ModerateProfileResponse>(
       `/admin/professionals/${id}`,
+      payload,
+    );
+  }
+
+  /**
+   * POST /api/admin/professionals/{id}/approve
+   * Approve a professional activation request.
+   */
+  approveProfessional(
+    id: string,
+    payload: ApproveProfessionalPayload = {},
+  ): Observable<ProfessionalActivationResponse> {
+    return this.api.post<ProfessionalActivationResponse>(
+      `/admin/professionals/${id}/approve`,
+      payload,
+    );
+  }
+
+  /**
+   * POST /api/admin/professionals/{id}/reject
+   * Reject a professional activation request.
+   */
+  rejectProfessional(
+    id: string,
+    payload: RejectProfessionalPayload = {},
+  ): Observable<ProfessionalActivationResponse> {
+    return this.api.post<ProfessionalActivationResponse>(
+      `/admin/professionals/${id}/reject`,
       payload,
     );
   }
@@ -146,8 +177,12 @@ export class AdminApi {
   ): URLSearchParams {
     const searchParams = new URLSearchParams();
 
-    if (params.status && params.status !== 'all') {
-      searchParams.set('status', params.status);
+    if (
+      params.status !== undefined &&
+      params.status !== null &&
+      params.status !== 'all'
+    ) {
+      searchParams.set('status', String(params.status));
     }
     if (params.countryId) {
       searchParams.set('countryId', params.countryId);
@@ -183,8 +218,8 @@ export class AdminApi {
     if (params.pageSize && params.pageSize !== 20) {
       searchParams.set('pageSize', String(params.pageSize));
     }
-    if (params.status) {
-      searchParams.set('status', params.status);
+    if (params.status !== undefined && params.status !== null) {
+      searchParams.set('status', String(params.status));
     }
     if (params.from) {
       searchParams.set('from', params.from);

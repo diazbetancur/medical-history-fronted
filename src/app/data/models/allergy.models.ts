@@ -8,7 +8,11 @@
 // Enums
 // =============================================================================
 
-export type AllergySeverity = 'Mild' | 'Moderate' | 'Severe';
+export type AllergySeverity =
+  | 'Mild'
+  | 'Moderate'
+  | 'Severe'
+  | 'LifeThreatening';
 export type AllergyStatus = 'Active' | 'Resolved';
 
 // =============================================================================

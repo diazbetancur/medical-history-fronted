@@ -5,6 +5,7 @@ import { AppointmentsApi } from '@data/api/appointments.api';
 import type { CreateAppointmentRequest } from '@data/api/appointments.types';
 import { ProfessionalsPublicApi } from '@data/api/professionals-public.api';
 import type { TimeSlotDto } from '@data/models/availability.models';
+import { SlotPreferencesService } from '@patient/services/slot-preferences.service';
 import { ToastService } from '@shared/services';
 import { catchError, finalize, of, tap } from 'rxjs';
 
@@ -19,6 +20,7 @@ import { catchError, finalize, of, tap } from 'rxjs';
 export class PatientAppointmentsStore {
   private readonly appointmentsApi = inject(AppointmentsApi);
   private readonly professionalsApi = inject(ProfessionalsPublicApi);
+  private readonly slotPreferences = inject(SlotPreferencesService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
@@ -28,6 +30,9 @@ export class PatientAppointmentsStore {
   private readonly _selectedSlot = signal<TimeSlotDto | null>(null);
   private readonly _professionalId = signal<string>('');
   private readonly _professionalName = signal<string>('');
+  private readonly _durationMinutes = signal<number>(
+    this.slotPreferences.getDurationMinutes(30),
+  );
   private readonly _isLoading = signal<boolean>(false);
   private readonly _isCreating = signal<boolean>(false);
   private readonly _lastError = signal<ProblemDetails | null>(null);
@@ -38,6 +43,7 @@ export class PatientAppointmentsStore {
   readonly selectedSlot = this._selectedSlot.asReadonly();
   readonly professionalId = this._professionalId.asReadonly();
   readonly professionalName = this._professionalName.asReadonly();
+  readonly durationMinutes = this._durationMinutes.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly isCreating = this._isCreating.asReadonly();
   readonly lastError = this._lastError.asReadonly();
@@ -62,9 +68,13 @@ export class PatientAppointmentsStore {
   initializeAppointmentFlow(
     professionalId: string,
     professionalName: string,
+    durationMinutes?: number,
   ): void {
     this._professionalId.set(professionalId);
     this._professionalName.set(professionalName);
+    this._durationMinutes.set(
+      durationMinutes ?? this.slotPreferences.getDurationMinutes(30),
+    );
     this._selectedDate.set('');
     this._selectedSlot.set(null);
     this._availableSlots.set([]);
@@ -86,7 +96,11 @@ export class PatientAppointmentsStore {
     this._selectedSlot.set(null);
 
     this.professionalsApi
-      .getAvailabilitySlots(this._professionalId(), date)
+      .getAvailabilitySlots(
+        this._professionalId(),
+        date,
+        this._durationMinutes(),
+      )
       .pipe(
         tap((response) => {
           this._availableSlots.set(response.slots);
@@ -111,6 +125,11 @@ export class PatientAppointmentsStore {
         finalize(() => this._isLoading.set(false)),
       )
       .subscribe();
+  }
+
+  setDurationMinutes(durationMinutes: number): void {
+    this._durationMinutes.set(durationMinutes);
+    this.slotPreferences.setDurationMinutes(durationMinutes);
   }
 
   /**
@@ -141,11 +160,9 @@ export class PatientAppointmentsStore {
     this._lastError.set(null);
 
     // Combine date and time into UTC ISO string
-    const startTimeUTC = `${date}T${slot.startTime}:00Z`;
-
     const request: CreateAppointmentRequest = {
       professionalId,
-      startTime: startTimeUTC,
+      startTime: slot.startUtc,
       notes,
     };
 
@@ -194,6 +211,7 @@ export class PatientAppointmentsStore {
     this._selectedSlot.set(null);
     this._professionalId.set('');
     this._professionalName.set('');
+    this._durationMinutes.set(this.slotPreferences.getDurationMinutes(30));
     this._lastError.set(null);
   }
 

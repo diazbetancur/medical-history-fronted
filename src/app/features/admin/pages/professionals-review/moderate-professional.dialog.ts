@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -35,6 +36,7 @@ export interface ModerateProfessionalDialogResult {
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
+    MatCheckboxModule,
     MatInputModule,
     MatProgressSpinnerModule,
   ],
@@ -79,6 +81,12 @@ export interface ModerateProfessionalDialogResult {
           usuario.</mat-hint
         >
       </mat-form-field>
+
+      @if (isVerify) {
+        <mat-checkbox [(ngModel)]="isFeatured" [disabled]="store.saving()">
+          Marcar como profesional destacado
+        </mat-checkbox>
+      }
 
       @if (error()) {
         <p class="dialog-error">
@@ -183,6 +191,7 @@ export class ModerateProfessionalDialogComponent {
 
   readonly isVerify = this.data.action === 'verify';
   adminNotes = '';
+  isFeatured = false;
   readonly error = signal<string | null>(null);
 
   confirm(): void {
@@ -191,7 +200,7 @@ export class ModerateProfessionalDialogComponent {
     const id = this.data.professional.id;
 
     const action$ = this.isVerify
-      ? this.store.verifyProfessional(id, notes)
+      ? this.store.verifyProfessional(id, notes, this.isFeatured)
       : this.store.disableProfessional(id, notes);
 
     action$.subscribe({

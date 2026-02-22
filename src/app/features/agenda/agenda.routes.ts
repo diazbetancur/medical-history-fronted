@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '@core/auth';
+import { authStoreGuard } from '@core/auth';
 
 /**
  * Agenda/Appointments Routes
@@ -16,7 +16,7 @@ import { authGuard } from '@core/auth';
 export const agendaRoutes: Routes = [
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authStoreGuard],
     children: [
       {
         path: '',

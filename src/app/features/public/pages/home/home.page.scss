@@ -107,14 +107,14 @@
 
 .hero {
   position: relative;
-  padding: 120px 24px 200px;
+  padding: 116px 24px 72px;
   background: var(--gradient-primary);
 
   text-align: center;
   overflow: hidden;
 
   @media (max-width: 768px) {
-    padding: 80px 16px 160px;
+    padding: 76px 16px 48px;
   }
 
   &::before {
@@ -195,16 +195,14 @@
   }
 
   .stats-overlay {
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    transform: translate(-50%, 50%);
-    width: calc(100% - 48px);
+    position: relative;
+    margin: 32px auto 0;
+    width: 100%;
     max-width: 1200px;
-    z-index: 2;
+    z-index: 1;
 
     @media (max-width: 768px) {
-      width: calc(100% - 32px);
+      margin-top: 24px;
     }
   }
 
@@ -251,10 +249,10 @@
 }
 
 .features {
-  padding: 120px 0 80px;
+  padding: 72px 0 80px;
 
   @media (max-width: 768px) {
-    padding: 100px 0 60px;
+    padding: 56px 0 56px;
   }
 
   .features-grid {

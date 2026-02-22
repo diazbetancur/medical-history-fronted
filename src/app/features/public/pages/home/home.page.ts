@@ -6,7 +6,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthStore } from '@core/auth';
 import { SeoService } from '@shared/services';
 import {
@@ -19,6 +19,7 @@ import {
   AuthModalData,
 } from '../../components/auth-modal/auth-modal.component';
 import { ProfessionalCardComponent } from '../../components/professional-card.component';
+import { PublicFooterComponent } from '../../components/public-footer.component';
 import { PublicHeaderComponent } from '../../components/public-header.component';
 import { AuthIntentService } from '../../services/auth-intent.service';
 
@@ -27,13 +28,13 @@ import { AuthIntentService } from '../../services/auth-intent.service';
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     MatButtonModule,
     MatIconModule,
     MatCardModule,
     MatChipsModule,
     MatProgressSpinnerModule,
     PublicHeaderComponent,
+    PublicFooterComponent,
     ProfessionalCardComponent,
   ],
   templateUrl: './home.page.html',

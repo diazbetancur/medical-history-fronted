@@ -69,12 +69,23 @@
     @for (exam of sortedExams(); track exam.id) {
     <mat-card class="exam-card">
       <mat-card-header>
+        @if (showImageThumb(exam)) {
+        <div mat-card-avatar class="thumb-avatar" (click)="viewExam(exam)">
+          <img
+            [src]="exam.downloadUrl!"
+            [alt]="'Miniatura de ' + exam.title"
+            title="Miniatura de examen"
+            class="thumb-image"
+          />
+        </div>
+        } @else {
         <mat-icon
           mat-card-avatar
           [class]="'file-icon ' + exam.fileType.toLowerCase()"
         >
           {{ getFileTypeIcon(exam) }}
         </mat-icon>
+        }
         <mat-card-title>{{ exam.title }}</mat-card-title>
         <mat-card-subtitle>
           <div class="exam-meta">

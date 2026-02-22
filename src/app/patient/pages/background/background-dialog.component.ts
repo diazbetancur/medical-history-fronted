@@ -56,11 +56,13 @@ export class BackgroundDialogComponent implements OnInit {
   isSubmitting = signal(false);
 
   readonly typeOptions = [
-    { value: 'Surgery' as BackgroundType, label: 'Cirugía' },
-    { value: 'ChronicDisease' as BackgroundType, label: 'Enfermedad Crónica' },
-    { value: 'Trauma' as BackgroundType, label: 'Trauma' },
-    { value: 'FamilyHistory' as BackgroundType, label: 'Antecedente Familiar' },
-    { value: 'Hospitalization' as BackgroundType, label: 'Hospitalización' },
+    { value: 'Chronic' as BackgroundType, label: 'Crónico' },
+    { value: 'Surgical' as BackgroundType, label: 'Quirúrgico' },
+    { value: 'Traumatic' as BackgroundType, label: 'Traumático' },
+    { value: 'Allergic' as BackgroundType, label: 'Alérgico' },
+    { value: 'Hereditary' as BackgroundType, label: 'Hereditario' },
+    { value: 'Perinatal' as BackgroundType, label: 'Perinatal' },
+    { value: 'Pharmacological' as BackgroundType, label: 'Farmacológico' },
     { value: 'Other' as BackgroundType, label: 'Otro' },
   ];
 

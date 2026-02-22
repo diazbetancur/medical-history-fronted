@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { shareReplay, tap } from 'rxjs/operators';
+import { map, shareReplay, tap } from 'rxjs/operators';
 
 import {
   CreateExamDto,
@@ -45,13 +45,32 @@ export class PatientExamsMvpService {
     }
 
     const request$ = this.http
-      .get<PatientExamsResponseDto>(this.baseUrl, {
+      .get<any>(this.baseUrl, {
         params: {
           page: page.toString(),
           pageSize: pageSize.toString(),
         },
       })
       .pipe(
+        map(
+          (response) =>
+            ({
+              items: (response?.items ?? []).map((item: any) =>
+                this.mapExam(item),
+              ),
+              totalCount: response?.total ?? response?.totalCount ?? 0,
+              page: response?.page ?? page,
+              pageSize: response?.pageSize ?? pageSize,
+              totalPages:
+                response?.totalPages ??
+                Math.max(
+                  1,
+                  Math.ceil(
+                    (response?.total ?? 0) / (response?.pageSize ?? pageSize),
+                  ),
+                ),
+            }) as PatientExamsResponseDto,
+        ),
         shareReplay(1),
         tap(() => {
           // Auto-invalidate cache after duration
@@ -63,6 +82,17 @@ export class PatientExamsMvpService {
 
     this.examsCache.set(cacheKey, request$);
     return request$;
+  }
+
+  /**
+   * Get exam detail by id
+   *
+   * GET /api/patients/me/exams/{id}
+   */
+  getById(id: string): Observable<ExamDto> {
+    return this.http
+      .get<any>(`${this.baseUrl}/${id}`)
+      .pipe(map((response) => this.mapExam(response)));
   }
 
   /**
@@ -79,7 +109,9 @@ export class PatientExamsMvpService {
     }
     formData.append('file', file, file.name);
 
-    return this.http.post<ExamDto>(this.baseUrl, formData);
+    return this.http
+      .post<any>(this.baseUrl, formData)
+      .pipe(map((response) => this.mapExam(response)));
   }
 
   /**
@@ -88,7 +120,9 @@ export class PatientExamsMvpService {
    * PUT /api/patients/me/exams/{id}
    */
   update(id: string, dto: UpdateExamDto): Observable<ExamDto> {
-    return this.http.put<ExamDto>(`${this.baseUrl}/${id}`, dto);
+    return this.http
+      .put<any>(`${this.baseUrl}/${id}`, dto)
+      .pipe(map((response) => this.mapExam(response)));
   }
 
   /**
@@ -106,9 +140,35 @@ export class PatientExamsMvpService {
    * GET /api/patients/me/exams/{id}/download-url
    */
   getDownloadUrl(id: string): Observable<ExamDownloadUrlDto> {
-    return this.http.get<ExamDownloadUrlDto>(
-      `${this.baseUrl}/${id}/download-url`,
+    return this.http.get<any>(`${this.baseUrl}/${id}/download-url`).pipe(
+      map(
+        (response) =>
+          ({
+            downloadUrl: response?.downloadUrl ?? response?.url,
+            expiresAtUtc: response?.expiresAtUtc,
+          }) as ExamDownloadUrlDto,
+      ),
     );
+  }
+
+  private mapExam(item: any): ExamDto {
+    const contentType = item?.fileContentType ?? null;
+    return {
+      id: item.id,
+      patientProfileId: item.patientProfileId ?? '',
+      title: item.title,
+      examDate: item.examDate,
+      notes: item.notes ?? undefined,
+      fileName: item.fileName ?? item.title,
+      fileType: contentType === 'application/pdf' ? 'PDF' : 'IMAGE',
+      fileSizeBytes: item.fileSizeBytes ?? 0,
+      uploadedAtUtc: item.dateCreated ?? item.uploadedAtUtc,
+      updatedAtUtc: item.dateUpdated ?? item.updatedAtUtc ?? item.dateCreated,
+      isActive: item.isActive ?? true,
+      downloadUrl: item.fileUrl ?? item.downloadUrl ?? undefined,
+      downloadUrlExpiresAtUtc:
+        item.fileUrlExpiresAtUtc ?? item.downloadUrlExpiresAtUtc ?? undefined,
+    } as ExamDto;
   }
 
   /**

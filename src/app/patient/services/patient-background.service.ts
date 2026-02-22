@@ -14,7 +14,7 @@ import {
   UpdateBackgroundDto,
 } from '@data/models';
 import { environment } from '@env';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -33,7 +33,35 @@ export class PatientBackgroundService {
    */
   getMine(): Observable<PatientBackgroundResponseDto> {
     return this.http
-      .get<PatientBackgroundResponseDto>(this.baseUrl)
+      .get<any>(this.baseUrl, {
+        params: {
+          page: '1',
+          pageSize: '50',
+          activeOnly: 'true',
+        },
+      })
+      .pipe(
+        map(
+          (response) =>
+            ({
+              items: (response?.items ?? []).map((item: any) => ({
+                id: item.id,
+                patientProfileId: '',
+                type: item.type,
+                title: item.typeName ?? item.type,
+                description: item.description,
+                eventDate: item.diagnosedYear
+                  ? `${item.diagnosedYear}-01-01`
+                  : null,
+                isChronic: item.type === 'Chronic',
+                isActive: item.isActive,
+                createdAt: item.dateCreated,
+                updatedAt: item.dateCreated,
+              })),
+              totalCount: response?.total ?? response?.totalCount ?? 0,
+            }) as PatientBackgroundResponseDto,
+        ),
+      )
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -49,7 +77,33 @@ export class PatientBackgroundService {
    */
   create(dto: CreateBackgroundDto): Observable<BackgroundDto> {
     return this.http
-      .post<BackgroundDto>(this.baseUrl, dto)
+      .post<any>(this.baseUrl, {
+        type: dto.type,
+        description: dto.description || dto.title,
+        diagnosedYear: dto.eventDate
+          ? Number(dto.eventDate.slice(0, 4))
+          : undefined,
+        notes: dto.isChronic ? 'Crónico' : undefined,
+      })
+      .pipe(
+        map(
+          (item) =>
+            ({
+              id: item.id,
+              patientProfileId: '',
+              type: item.type,
+              title: item.typeName ?? item.type,
+              description: item.description,
+              eventDate: item.diagnosedYear
+                ? `${item.diagnosedYear}-01-01`
+                : null,
+              isChronic: item.type === 'Chronic',
+              isActive: item.isActive,
+              createdAt: item.dateCreated,
+              updatedAt: item.dateCreated,
+            }) as BackgroundDto,
+        ),
+      )
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -64,9 +118,35 @@ export class PatientBackgroundService {
    * @param id Background ID
    * @param dto Update data
    */
-  update(id: number, dto: UpdateBackgroundDto): Observable<BackgroundDto> {
+  update(id: string, dto: UpdateBackgroundDto): Observable<BackgroundDto> {
     return this.http
-      .put<BackgroundDto>(`${this.baseUrl}/${id}`, dto)
+      .put<any>(`${this.baseUrl}/${id}`, {
+        type: dto.type,
+        description: dto.description || dto.title,
+        diagnosedYear: dto.eventDate
+          ? Number(dto.eventDate.slice(0, 4))
+          : undefined,
+        notes: dto.isChronic ? 'Crónico' : undefined,
+      })
+      .pipe(
+        map(
+          (item) =>
+            ({
+              id: item.id,
+              patientProfileId: '',
+              type: item.type,
+              title: item.typeName ?? item.type,
+              description: item.description,
+              eventDate: item.diagnosedYear
+                ? `${item.diagnosedYear}-01-01`
+                : null,
+              isChronic: item.type === 'Chronic',
+              isActive: item.isActive,
+              createdAt: item.dateCreated,
+              updatedAt: item.dateCreated,
+            }) as BackgroundDto,
+        ),
+      )
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -80,7 +160,7 @@ export class PatientBackgroundService {
    *
    * @param id Background ID
    */
-  delete(id: number): Observable<void> {
+  delete(id: string): Observable<void> {
     return this.http
       .delete<void>(`${this.baseUrl}/${id}`)
       .pipe(catchError((error) => this.handleError(error)));

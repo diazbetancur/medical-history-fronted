@@ -1,5 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   getErrorMessage,
   PaginationMeta,
@@ -8,6 +7,7 @@ import {
   RequestStatus,
   ServiceRequest,
 } from '@data/api';
+import { Observable, of } from 'rxjs';
 
 export interface ProfessionalRequestsState {
   requests: ServiceRequest[];
@@ -50,31 +50,23 @@ export class ProfessionalRequestsStore {
 
   // Filtered computed signals
   readonly pendingRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Pending')
+    this._state().requests.filter((r) => r.status === 'Pending'),
   );
-  readonly contactedRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Contacted')
-  );
-  readonly inProgressRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'InProgress')
+  readonly acceptedRequests = computed(() =>
+    this._state().requests.filter((r) => r.status === 'Accepted'),
   );
   readonly completedRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Completed')
+    this._state().requests.filter((r) => r.status === 'Completed'),
   );
-  readonly closedRequests = computed(() =>
-    this._state().requests.filter(
-      (r) =>
-        r.status === 'Completed' ||
-        r.status === 'Rejected' ||
-        r.status === 'Cancelled'
-    )
+  readonly rejectedRequests = computed(() =>
+    this._state().requests.filter((r) => r.status === 'Rejected'),
   );
 
   // Counts
   readonly pendingCount = computed(() => this.pendingRequests().length);
-  readonly contactedCount = computed(() => this.contactedRequests().length);
-  readonly inProgressCount = computed(() => this.inProgressRequests().length);
-  readonly closedCount = computed(() => this.closedRequests().length);
+  readonly acceptedCount = computed(() => this.acceptedRequests().length);
+  readonly completedCount = computed(() => this.completedRequests().length);
+  readonly rejectedCount = computed(() => this.rejectedRequests().length);
   readonly totalCount = computed(() => this._state().requests.length);
 
   /**
@@ -91,7 +83,7 @@ export class ProfessionalRequestsStore {
    */
   load(
     params: ProfessionalRequestsParams = {},
-    forceRefresh = false
+    forceRefresh = false,
   ): Observable<ServiceRequest[]> {
     // Return cached if valid and params match
     if (!forceRefresh && this.isCacheValid()) {
@@ -113,15 +105,28 @@ export class ProfessionalRequestsStore {
     return new Observable((subscriber) => {
       this.professionalApi.getRequests(params).subscribe({
         next: (response) => {
+          const currentPage = response.page ?? params.page ?? 1;
+          const currentPageSize = response.pageSize ?? params.pageSize ?? 20;
+          const totalItems = response.totalCount ?? response.items.length;
+          const totalPages =
+            response.totalPages ?? Math.ceil(totalItems / currentPageSize);
+
           this._state.set({
-            requests: response.data,
-            pagination: response.pagination,
+            requests: response.items,
+            pagination: {
+              currentPage,
+              pageSize: currentPageSize,
+              totalItems,
+              totalPages,
+              hasPrevious: currentPage > 1,
+              hasNext: currentPage < totalPages,
+            },
             loading: false,
             error: null,
             lastFetch: Date.now(),
             currentParams: params,
           });
-          subscriber.next(response.data);
+          subscriber.next(response.items);
           subscriber.complete();
         },
         error: (err) => {
@@ -142,18 +147,15 @@ export class ProfessionalRequestsStore {
    */
   updateStatus(
     requestId: string,
-    status: Extract<
-      RequestStatus,
-      'Contacted' | 'InProgress' | 'Completed' | 'Rejected' | 'Cancelled'
-    >,
-    professionalNotes?: string
+    status: Extract<RequestStatus, 'Accepted' | 'Completed' | 'Rejected'>,
+    professionalNotes?: string,
   ): Observable<ServiceRequest> {
     // Optimistic update
     const previousRequests = this._state().requests;
     this._state.update((s) => ({
       ...s,
       requests: s.requests.map((r) =>
-        r.id === requestId ? { ...r, status, professionalNotes } : r
+        r.id === requestId ? { ...r, status, professionalNotes } : r,
       ),
     }));
 
@@ -173,13 +175,13 @@ export class ProfessionalRequestsStore {
                       professionalNotes: response.professionalNotes,
                       dateUpdated: response.dateUpdated,
                     }
-                  : r
+                  : r,
               ),
             }));
 
             // Return the full updated request
             const updated = this._state().requests.find(
-              (r) => r.id === requestId
+              (r) => r.id === requestId,
             );
             if (updated) {
               subscriber.next(updated);
@@ -213,7 +215,7 @@ export class ProfessionalRequestsStore {
         ...currentParams,
         page: pagination.currentPage + 1,
       },
-      true
+      true,
     );
   }
 

@@ -157,7 +157,7 @@ export class RolePermissionsPageComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.toast.success(
-            `Permisos actualizados: ${response.addedCount} agregados, ${response.removedCount} removidos`,
+            response.message || 'Permisos actualizados correctamente',
           );
           this.hasChanges.set(false);
 

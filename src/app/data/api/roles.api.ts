@@ -30,19 +30,20 @@ export interface UpdateRolePayload {
 
 export interface CreateRoleResponse {
   success: boolean;
-  role: Role;
-  message?: string;
+  message: string;
+  data: unknown | null;
 }
 
 export interface UpdateRoleResponse {
   success: boolean;
-  role: Role;
-  message?: string;
+  message: string;
+  data: unknown | null;
 }
 
 export interface DeleteRoleResponse {
   success: boolean;
-  message?: string;
+  message: string;
+  data: unknown | null;
 }
 
 /**
@@ -80,9 +81,8 @@ export interface UpdateRolePermissionsPayload {
 
 export interface UpdateRolePermissionsResponse {
   success: boolean;
-  message?: string;
-  addedCount: number;
-  removedCount: number;
+  message: string;
+  data: unknown | null;
 }
 
 /**

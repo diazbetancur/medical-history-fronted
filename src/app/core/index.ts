@@ -15,4 +15,3 @@ export * from './config';
 export * from './http';
 export * from './platform';
 export * from './pwa';
-export { MenuBuilderService } from './services/menu-builder.service';

@@ -14,8 +14,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '@core/auth';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthStore } from '@core/auth';
 import type { AdminProfessionalListItem } from '@data/api/api-models';
 import type { ProfessionalStatusFilter } from '@data/stores/admin-professionals.store';
 import { AdminProfessionalsStore } from '@data/stores/admin-professionals.store';
@@ -46,10 +46,11 @@ import { PERMISSIONS } from '../../admin-menu.config';
   styleUrl: './professionals-review.page.scss',
 })
 export class ProfessionalsReviewPageComponent implements OnInit {
-  private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
   readonly store = inject(AdminProfessionalsStore);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
 
   // ── UI state ──────────────────────────────────────────────────────────────
   readonly searchValue = signal('');
@@ -76,17 +77,33 @@ export class ProfessionalsReviewPageComponent implements OnInit {
 
   // ── Permission checks ─────────────────────────────────────────────────────
   readonly canVerify = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.PROFILES_VERIFY),
+    this.authStore.userPermissions().includes(PERMISSIONS.PROFILES_VERIFY),
   );
   readonly canUpdate = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.PROFILES_UPDATE),
+    this.authStore.userPermissions().includes(PERMISSIONS.PROFILES_UPDATE),
   );
   readonly canFeature = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.PROFILES_FEATURE),
+    this.authStore.userPermissions().includes(PERMISSIONS.PROFILES_FEATURE),
   );
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
+    // If route data specifies a defaultFilter (e.g. from /admin/solicitudes),
+    // force the store to that filter so the correct tab is pre-selected.
+    const defaultFilter = this.route.snapshot.data['defaultFilter'] as
+      | ProfessionalStatusFilter
+      | undefined;
+
+    if (defaultFilter) {
+      const tabIndex = this.statusTabs.findIndex(
+        (t) => t.filter === defaultFilter,
+      );
+      if (tabIndex !== -1) {
+        this.activeTabIndex.set(tabIndex);
+        this.store.setStatusFilter(defaultFilter);
+      }
+    }
+
     this.store.load();
   }
 
