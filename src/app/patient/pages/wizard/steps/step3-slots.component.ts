@@ -282,7 +282,7 @@ export class Step3SlotsComponent implements OnInit {
   readonly selectedSlot = signal<SlotDto | null>(null);
 
   // Date constraints
-  readonly minDate = new Date(); // Today
+  readonly minDate = this.getTodayDate(); // Today
 
   // Computed
   readonly professionalName = computed(
@@ -331,6 +331,12 @@ export class Step3SlotsComponent implements OnInit {
       this.selectedSlot.set(null); // Reset slot selection
       this.loadSlots(date);
     }
+  }
+
+  private getTodayDate(): Date {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
   }
 
   /**

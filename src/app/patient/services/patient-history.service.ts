@@ -44,15 +44,32 @@ export class PatientHistoryService {
         map(
           (response) =>
             ({
-              items: (response?.items ?? []).map((item: any) => ({
-                id: item.id,
-                encounterDateUtc: item.visitDate ?? item.encounterDateUtc,
-                status: 'Closed',
-                professionalName: item.professionalName,
-                summary: item.diagnosis ?? item.notes,
-                notesCount: 0,
-              })),
-              totalCount: response?.total ?? response?.totalCount ?? 0,
+              items: (response?.items ?? []).map((item: any) => {
+                const notes = this.extractNotes(item);
+
+                return {
+                  id: item.id,
+                  encounterDateUtc: item.encounterDateUtc ?? item.visitDate,
+                  status: item.status ?? 'Closed',
+                  professionalName:
+                    item.professionalName ??
+                    item.createdByProfessionalName ??
+                    'Profesional',
+                  summary:
+                    item.summary ??
+                    item.diagnosis ??
+                    (typeof item.notes === 'string' ? item.notes : undefined),
+                  notesCount:
+                    item.notesCount ??
+                    (Array.isArray(notes) ? notes.length : 0),
+                };
+              }),
+              totalCount:
+                response?.total ??
+                response?.totalCount ??
+                response?.count ??
+                response?.items?.length ??
+                0,
               page: response?.page ?? page,
               pageSize: response?.pageSize ?? pageSize,
               totalPages:
@@ -79,33 +96,63 @@ export class PatientHistoryService {
     return this.http
       .get<any>(`${this.baseUrl}/history/${encounterId}`)
       .pipe(
-        map(
-          (item) =>
-            ({
-              id: item.id,
-              patientProfileId: '',
-              professionalProfileId: item.professionalProfileId,
-              professionalName: item.professionalName,
-              encounterDateUtc: item.visitDate ?? item.encounterDateUtc,
-              summary: item.diagnosis ?? item.notes,
-              status: 'Closed',
-              notes: item.notes
-                ? [
-                    {
-                      id: `${item.id}-note`,
-                      type: 'Note',
-                      text: item.notes,
-                      createdAtUtc: item.dateCreated ?? item.visitDate,
-                      createdByProfessionalProfileId:
-                        item.professionalProfileId ?? '',
-                      createdByProfessionalName: item.professionalName ?? '',
-                    },
-                  ]
-                : [],
-            }) as MedicalEncounterDto,
-        ),
+        map((response) => {
+          const item = response?.data ?? response;
+
+          return {
+            id: item.id,
+            patientProfileId: item.patientProfileId ?? '',
+            professionalProfileId: item.professionalProfileId ?? '',
+            professionalName:
+              item.professionalName ?? item.createdByProfessionalName ?? '',
+            appointmentId: item.appointmentId,
+            encounterDateUtc: item.encounterDateUtc ?? item.visitDate,
+            summary:
+              item.summary ??
+              item.diagnosis ??
+              (typeof item.notes === 'string' ? item.notes : undefined),
+            status: item.status ?? 'Closed',
+            closedAtUtc: item.closedAtUtc,
+            notes: this.extractNotes(item),
+          } as MedicalEncounterDto;
+        }),
       )
       .pipe(catchError((error) => this.handleError(error)));
+  }
+
+  private extractNotes(item: any): MedicalEncounterDto['notes'] {
+    if (Array.isArray(item?.notes)) {
+      return item.notes.map((note: any, index: number) => ({
+        id: note.id ?? `${item.id}-note-${index}`,
+        type: note.type === 'Addendum' ? 'Addendum' : 'Note',
+        text: note.text ?? '',
+        title: note.title,
+        createdAtUtc:
+          note.createdAtUtc ?? item.encounterDateUtc ?? item.visitDate ?? '',
+        createdByProfessionalProfileId:
+          note.createdByProfessionalProfileId ??
+          item.professionalProfileId ??
+          '',
+        createdByProfessionalName:
+          note.createdByProfessionalName ?? item.professionalName ?? '',
+      }));
+    }
+
+    if (typeof item?.notes === 'string' && item.notes.trim()) {
+      return [
+        {
+          id: `${item.id}-note`,
+          type: 'Note',
+          text: item.notes,
+          createdAtUtc:
+            item.dateCreated ?? item.encounterDateUtc ?? item.visitDate ?? '',
+          createdByProfessionalProfileId: item.professionalProfileId ?? '',
+          createdByProfessionalName: item.professionalName ?? '',
+        },
+      ];
+    }
+
+    return [];
   }
 
   /**

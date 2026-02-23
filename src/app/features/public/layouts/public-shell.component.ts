@@ -32,19 +32,8 @@ import { PublicLayoutComponent } from './public-layout/public-layout.component';
   selector: 'app-public-shell',
   standalone: true,
   imports: [PublicLayoutComponent],
-  template: `
-    <!-- Always render public layout (no profile check needed) -->
-    <app-public-layout />
-  `,
-  styles: [
-    `
-      :host {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
-    `,
-  ],
+  templateUrl: './public-shell.component.html',
+  styleUrl: './public-shell.component.scss',
 })
 export class PublicShellComponent {
   readonly uiProfile = inject(UiProfileService);

@@ -84,7 +84,11 @@ export class BookAppointmentPageComponent {
   readonly selectedSlot = computed(() => this.slotForm.value.slot);
 
   // Min date (today)
-  readonly minDate = new Date();
+  readonly minDate = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  })();
 
   constructor() {
     // Initialize forms
@@ -124,15 +128,17 @@ export class BookAppointmentPageComponent {
 
     // Get professionals from public search
     // In production, you'd have a dedicated endpoint
-    this.professionalsApi.searchProfessionals({ page: 1, pageSize: 50 }).subscribe({
-      next: (response: PaginatedProfessionalsResponse) => {
-        this.professionals.set(response.items);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
-    });
+    this.professionalsApi
+      .searchProfessionals({ page: 1, pageSize: 50 })
+      .subscribe({
+        next: (response: PaginatedProfessionalsResponse) => {
+          this.professionals.set(response.items);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+        },
+      });
   }
 
   /**

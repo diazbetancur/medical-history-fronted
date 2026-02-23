@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
+import { Router } from '@angular/router';
 import { AuthStore } from '@core/auth/auth.store';
 import { ProfessionalAppointmentsApi } from '@data/api/professional-appointments.api';
 import type {
@@ -157,6 +158,17 @@ import { ToastService } from '@shared/services';
                           >
                             <mat-icon>event_busy</mat-icon>
                             <span>Paciente no asistió</span>
+                          </button>
+                        }
+                        @if (canCreateHistoryFromAppointment(appointment)) {
+                          <button
+                            mat-menu-item
+                            (click)="
+                              openClinicalHistoryFromAppointment(appointment)
+                            "
+                          >
+                            <mat-icon>description</mat-icon>
+                            <span>Adicionar historia clínica</span>
                           </button>
                         }
                         @if (
@@ -638,6 +650,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
   private readonly appointmentsApi = inject(ProfessionalAppointmentsApi);
   private readonly authStore = inject(AuthStore);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   protected readonly rangeFrom = signal(this.getDateInputValue(new Date()));
   protected readonly rangeTo = signal(
@@ -720,6 +733,32 @@ export class ProfessionalAppointmentsPage implements OnInit {
     this.store.markAsNoShow(appointmentId);
   }
 
+  protected canCreateHistoryFromAppointment(
+    appointment: AppointmentDto,
+  ): boolean {
+    return (
+      this.isToday(appointment.date) &&
+      appointment.status !== 'CANCELLED' &&
+      !!appointment.patientId
+    );
+  }
+
+  protected openClinicalHistoryFromAppointment(
+    appointment: AppointmentDto,
+  ): void {
+    if (!appointment.patientId) {
+      this.toast.warning('No encontramos el paciente de esta cita');
+      return;
+    }
+
+    this.router.navigate(['/professional/patients', appointment.patientId], {
+      queryParams: {
+        createEncounter: '1',
+        appointmentId: appointment.id,
+      },
+    });
+  }
+
   protected applyDateRangeFilter(): void {
     const from = this.rangeFrom();
     const to = this.rangeTo();
@@ -786,5 +825,9 @@ export class ProfessionalAppointmentsPage implements OnInit {
     const value = new Date(date);
     value.setDate(value.getDate() + days);
     return value;
+  }
+
+  private isToday(date: string): boolean {
+    return date === this.getDateInputValue(new Date());
   }
 }

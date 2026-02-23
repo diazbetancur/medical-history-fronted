@@ -1,0 +1,28 @@
+<div class="offline-container">
+  <div class="offline-content">
+    <mat-icon class="offline-icon">cloud_off</mat-icon>
+    <h1>Sin conexión</h1>
+    <p>
+      No tienes conexión a internet. Algunas funciones pueden no estar
+      disponibles.
+    </p>
+    <div class="offline-actions">
+      <button mat-raised-button color="primary" (click)="retry()">
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+      <a mat-button routerLink="/">
+        <mat-icon>home</mat-icon>
+        Ir al inicio
+      </a>
+    </div>
+    <div class="offline-tips">
+      <h3>Mientras tanto puedes:</h3>
+      <ul>
+        <li>Revisar páginas que hayas visitado antes (están en caché)</li>
+        <li>Verificar tu conexión WiFi o datos móviles</li>
+        <li>Intentar de nuevo en unos momentos</li>
+      </ul>
+    </div>
+  </div>
+</div>

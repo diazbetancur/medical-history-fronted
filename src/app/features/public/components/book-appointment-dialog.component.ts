@@ -369,7 +369,7 @@ export class BookAppointmentDialogComponent {
   readonly selectedDate = signal<Date | null>(null);
   readonly availableSlots = signal<SlotDto[]>([]);
 
-  readonly minDate = this.getTomorrowDate();
+  readonly minDate = this.getTodayDate();
 
   constructor() {
     if (!this.professionalId()) {
@@ -501,10 +501,9 @@ export class BookAppointmentDialogComponent {
     });
   }
 
-  private getTomorrowDate(): Date {
-    const tomorrow = new Date();
-    tomorrow.setHours(0, 0, 0, 0);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow;
+  private getTodayDate(): Date {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
   }
 }

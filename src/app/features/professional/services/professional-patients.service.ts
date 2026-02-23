@@ -13,6 +13,7 @@ import {
   MedicalEncounterDto,
   ProfessionalPatientHistoryResponseDto,
   ProfessionalPatientsListResponseDto,
+  ProfessionalPatientSummaryDto,
   UpdateEncounterDto,
 } from '@data/models';
 import { environment } from '@env';
@@ -130,9 +131,61 @@ export class ProfessionalPatientsService {
       );
   }
 
+  /**
+   * Get patient summary for professional detail view
+   * GET /api/professional/patients/{patientProfileId}
+   */
+  getPatientSummary(
+    patientProfileId: string,
+  ): Observable<ProfessionalPatientSummaryDto> {
+    const cacheKey = `patient_summary_${patientProfileId}`;
+    const cached = this.getFromCache<ProfessionalPatientSummaryDto>(cacheKey);
+
+    if (cached) {
+      return new Observable((observer) => {
+        observer.next(cached);
+        observer.complete();
+      });
+    }
+
+    return this.http
+      .get<ProfessionalPatientSummaryDto>(
+        `${this.baseUrl}/patients/${patientProfileId}`,
+      )
+      .pipe(
+        catchError((error) => this.handleError(error)),
+        tap((data) => this.setCache(cacheKey, data)),
+      );
+  }
+
   // ==========================================================================
   // Encounter Management
   // ==========================================================================
+
+  /**
+   * Get encounter detail by id
+   * GET /api/professional/encounters/{id}
+   *
+   * @param encounterId Encounter ID
+   */
+  getEncounterDetail(encounterId: string): Observable<MedicalEncounterDto> {
+    const cacheKey = `encounter_detail_${encounterId}`;
+    const cached = this.getFromCache<MedicalEncounterDto>(cacheKey);
+
+    if (cached) {
+      return new Observable((observer) => {
+        observer.next(cached);
+        observer.complete();
+      });
+    }
+
+    return this.http
+      .get<MedicalEncounterDto>(`${this.baseUrl}/encounters/${encounterId}`)
+      .pipe(
+        catchError((error) => this.handleError(error)),
+        tap((data) => this.setCache(cacheKey, data)),
+      );
+  }
 
   /**
    * Create new medical encounter (always starts as DRAFT)
