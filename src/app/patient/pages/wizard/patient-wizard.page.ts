@@ -20,17 +20,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { PublicApi } from '@data/api';
-import { City } from '@data/api/api-models';
+import { Category, City, SearchProfessional } from '@data/api/api-models';
 import { BookAppointmentDialogComponent } from '@features/public/components/book-appointment-dialog.component';
 import { ToastService } from '@shared/services/toast.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import {
   getInitials,
-  ProfessionalSearchFiltersDto,
   ProfessionalSearchResultDto,
 } from '../../../public/models/professional-search.dto';
-import { SpecialtyDto } from '../../../public/models/specialty.dto';
-import { PublicCatalogService } from '../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../public/services/public-professionals.service';
 import { PatientProfileDto } from '../../models/patient-profile.dto';
 import { SlotDto } from '../../models/slot.dto';
@@ -109,7 +106,6 @@ export class PatientWizardPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly professionalsService = inject(PublicProfessionalsService);
-  private readonly catalogService = inject(PublicCatalogService);
   private readonly publicApi = inject(PublicApi);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
@@ -122,7 +118,7 @@ export class PatientWizardPage implements OnInit {
   readonly loading = signal(false);
   readonly hasSearched = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly specialties = signal<SpecialtyDto[]>([]);
+  readonly specialties = signal<Category[]>([]);
   readonly cities = signal<City[]>([]);
   readonly professionals = signal<ProfessionalSearchResultDto[]>([]);
   readonly listTitle = signal('Médicos con los que has tenido relación');
@@ -137,22 +133,38 @@ export class PatientWizardPage implements OnInit {
   }
 
   searchProfessionals(): void {
-    const filters: ProfessionalSearchFiltersDto = {
-      q: this.searchControl.value?.trim() || undefined,
-      specialtyId: this.specialtyControl.value || undefined,
-      cityId: this.cityControl.value || undefined,
-      page: 1,
-      pageSize: 12,
-    };
+    const queryText = this.searchControl.value?.trim();
+    const selectedSpecialtyId = this.specialtyControl.value;
+    const selectedCityId = this.cityControl.value;
+
+    const categorySlug = this.specialties().find(
+      (item) => item.id === selectedSpecialtyId,
+    )?.slug;
+
+    const citySlug = this.cities().find(
+      (item) => item.id === selectedCityId,
+    )?.slug;
 
     this.loading.set(true);
     this.errorMessage.set(null);
     this.hasSearched.set(true);
     this.listTitle.set('Resultados de búsqueda');
 
-    this.professionalsService.search(filters).subscribe({
-      next: (response: { professionals: ProfessionalSearchResultDto[] }) => {
-        this.professionals.set(response.professionals ?? []);
+    this.publicApi
+      .getSearchPage({
+        q: queryText || undefined,
+        category: categorySlug,
+        city: citySlug,
+        page: 1,
+        pageSize: 10,
+      })
+      .subscribe({
+      next: (response) => {
+        this.professionals.set(
+          (response.professionals ?? []).map((item) =>
+            this.mapSearchProfessional(item),
+          ),
+        );
         this.loading.set(false);
       },
       error: (error: ApiError) => {
@@ -337,6 +349,24 @@ export class PatientWizardPage implements OnInit {
     };
   }
 
+  private mapSearchProfessional(item: SearchProfessional): ProfessionalSearchResultDto {
+    return {
+      professionalProfileId: item.id,
+      slug: item.slug,
+      userId: item.id,
+      fullName: item.businessName,
+      professionalTitle: undefined,
+      photoUrl: item.profileImageUrl ?? undefined,
+      specialties: item.categoryName
+        ? [{ id: item.categorySlug, name: item.categoryName }]
+        : [],
+      city: item.cityName ?? undefined,
+      country: undefined,
+      yearsOfExperience: undefined,
+      isAvailableForAppointments: true,
+    };
+  }
+
   private setupDebounce(): void {
     this.searchControl.valueChanges
       .pipe(
@@ -356,14 +386,15 @@ export class PatientWizardPage implements OnInit {
   }
 
   private loadCatalogs(): void {
-    this.catalogService.getSpecialties().subscribe({
-      next: (items: SpecialtyDto[]) => this.specialties.set(items),
-      error: () => this.specialties.set([]),
-    });
-
     this.publicApi.getMetadata().subscribe({
-      next: (metadata) => this.cities.set(metadata.cities ?? []),
-      error: () => this.cities.set([]),
+      next: (metadata) => {
+        this.specialties.set(metadata.categories ?? []);
+        this.cities.set(metadata.cities ?? []);
+      },
+      error: () => {
+        this.specialties.set([]);
+        this.cities.set([]);
+      },
     });
   }
 }
