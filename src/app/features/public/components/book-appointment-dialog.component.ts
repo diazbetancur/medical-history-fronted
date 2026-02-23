@@ -90,88 +90,88 @@ interface BookingConfirmation {
           </mat-card-content>
         </mat-card>
       } @else {
-      <mat-card class="pro-card">
-        <div class="pro-layout">
-          <div class="avatar">
-            @if (imageUrl()) {
-              <img [src]="imageUrl()!" [alt]="professionalName()" />
-            } @else {
-              <mat-icon>person</mat-icon>
-            }
+        <mat-card class="pro-card">
+          <div class="pro-layout">
+            <div class="avatar">
+              @if (imageUrl()) {
+                <img [src]="imageUrl()!" [alt]="professionalName()" />
+              } @else {
+                <mat-icon>person</mat-icon>
+              }
+            </div>
+
+            <div class="pro-info">
+              <h3>{{ professionalName() }}</h3>
+              @if (specialties().length > 0) {
+                <p>{{ specialties().join(' · ') }}</p>
+              }
+            </div>
           </div>
+        </mat-card>
 
-          <div class="pro-info">
-            <h3>{{ professionalName() }}</h3>
-            @if (specialties().length > 0) {
-              <p>{{ specialties().join(' · ') }}</p>
-            }
-          </div>
-        </div>
-      </mat-card>
-
-      @if (loadingProfile()) {
-        <div class="state-block">
-          <mat-spinner diameter="34"></mat-spinner>
-          <p>Cargando profesional...</p>
-        </div>
-      } @else if (profileError()) {
-        <div class="state-block error">{{ profileError() }}</div>
-      } @else {
-        <mat-form-field appearance="outline" class="date-input">
-          <mat-label>Selecciona una fecha</mat-label>
-          <input
-            matInput
-            [matDatepicker]="picker"
-            [min]="minDate"
-            [value]="selectedDate()"
-            (dateChange)="onDatepickerChange($event)"
-            placeholder="Selecciona una fecha"
-          />
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="picker"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-
-        @if (loadingSlots()) {
+        @if (loadingProfile()) {
           <div class="state-block">
-            <mat-spinner diameter="28"></mat-spinner>
-            <p>Cargando horarios disponibles...</p>
+            <mat-spinner diameter="34"></mat-spinner>
+            <p>Cargando profesional...</p>
           </div>
-        } @else if (slotsError()) {
-          <div class="state-block error">{{ slotsError() }}</div>
-        } @else if (selectedDate() && availableSlots().length === 0) {
-          <div class="state-block">
-            No hay horarios disponibles para esta fecha.
-          </div>
-        } @else if (availableSlots().length > 0) {
-          <div class="slots-list">
-            @for (slot of availableSlots(); track slot.id) {
-              <button
-                type="button"
-                class="slot-item"
-                (click)="bookSlot(slot)"
-                [disabled]="isBooking()"
-              >
-                <div class="slot-time">
-                  {{ slot.startTime }} - {{ slot.endTime }}
-                </div>
-                @if (slot.professionalLocationName) {
-                  <div class="slot-location">
-                    {{ slot.professionalLocationName }}
+        } @else if (profileError()) {
+          <div class="state-block error">{{ profileError() }}</div>
+        } @else {
+          <mat-form-field appearance="outline" class="date-input">
+            <mat-label>Selecciona una fecha</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              [min]="minDate"
+              [value]="selectedDate()"
+              (dateChange)="onDatepickerChange($event)"
+              placeholder="Selecciona una fecha"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          @if (loadingSlots()) {
+            <div class="state-block">
+              <mat-spinner diameter="28"></mat-spinner>
+              <p>Cargando horarios disponibles...</p>
+            </div>
+          } @else if (slotsError()) {
+            <div class="state-block error">{{ slotsError() }}</div>
+          } @else if (selectedDate() && availableSlots().length === 0) {
+            <div class="state-block">
+              No hay horarios disponibles para esta fecha.
+            </div>
+          } @else if (availableSlots().length > 0) {
+            <div class="slots-list">
+              @for (slot of availableSlots(); track slot.id) {
+                <button
+                  type="button"
+                  class="slot-item"
+                  (click)="bookSlot(slot)"
+                  [disabled]="isBooking()"
+                >
+                  <div class="slot-time">
+                    {{ slot.startTime }} - {{ slot.endTime }}
                   </div>
-                }
-                @if (slot.professionalLocationAddress) {
-                  <div class="slot-address">
-                    {{ slot.professionalLocationAddress }}
-                  </div>
-                }
-              </button>
-            }
-          </div>
+                  @if (slot.professionalLocationName) {
+                    <div class="slot-location">
+                      {{ slot.professionalLocationName }}
+                    </div>
+                  }
+                  @if (slot.professionalLocationAddress) {
+                    <div class="slot-address">
+                      {{ slot.professionalLocationAddress }}
+                    </div>
+                  }
+                </button>
+              }
+            </div>
+          }
         }
-      }
       }
 
       @if (isBooking()) {
@@ -392,7 +392,10 @@ export class BookAppointmentDialogComponent {
   }
 
   acceptConfirmation(): void {
-    this.dialogRef.close({ success: true, confirmation: this.bookingConfirmation() });
+    this.dialogRef.close({
+      success: true,
+      confirmation: this.bookingConfirmation(),
+    });
   }
 
   bookSlot(slot: SlotDto): void {
