@@ -43,15 +43,15 @@ export class ProfessionalAppointmentsApi {
     }
 
     const pendingParams: any = {
-      from: params.from,
-      to: params.to,
+      startDate: params.from,
+      endDate: params.to,
       // status: params.status,
       // page: params.page,
       pageSize: params.pageSize,
     };
 
     return this.apiClient
-      .get<any>(`/appointments/professional/${professionalId}/pending`, {
+      .get<any>(`/appointments?professionalProfileId=${professionalId}`, {
         params: pendingParams,
       })
       .pipe(
@@ -87,7 +87,7 @@ export class ProfessionalAppointmentsApi {
    */
   confirmAppointment(appointmentId: string): Observable<AppointmentDto> {
     return this.apiClient.post<AppointmentDto>(
-      `/professional/appointments/${appointmentId}/confirm`,
+      `/appointments/${appointmentId}/confirm`,
       {},
     );
   }
@@ -100,7 +100,7 @@ export class ProfessionalAppointmentsApi {
     reason?: string,
   ): Observable<AppointmentDto> {
     return this.apiClient.post<AppointmentDto>(
-      `/professional/appointments/${appointmentId}/cancel`,
+      `/appointments/${appointmentId}/cancel`,
       { reason },
     );
   }
@@ -163,7 +163,13 @@ export class ProfessionalAppointmentsApi {
     return {
       id: item?.id ?? '',
       patientId: item?.patientId ?? '',
-      patientName: item?.patientName ?? '',
+      patientName:
+        item?.patientName ??
+        item?.patient?.fullName ??
+        [item?.patient?.firstName, item?.patient?.lastName]
+          .filter((value: string | undefined) => !!value)
+          .join(' ') ??
+        '',
       professionalId: item?.professionalId ?? item?.professionalProfileId ?? '',
       professionalName: item?.professionalName ?? '',
       professionalSlug: item?.professionalSlug ?? '',

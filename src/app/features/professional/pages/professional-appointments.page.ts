@@ -1,15 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import type { AppointmentStatus } from '@data/models/appointment.models';
+import { AuthStore } from '@core/auth/auth.store';
+import { ProfessionalAppointmentsApi } from '@data/api/professional-appointments.api';
+import type {
+  AppointmentDto,
+  AppointmentStatus,
+} from '@data/models/appointment.models';
 import { ProfessionalAppointmentsStore } from '@data/stores/professional-appointments.store';
+import { ToastService } from '@shared/services';
 
 /**
  * Professional Appointments Page
@@ -21,6 +30,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -29,6 +39,8 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
     MatTabsModule,
     MatMenuModule,
     MatBadgeModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   template: `
     <div class="appointments-page">
@@ -51,14 +63,6 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
           <mat-spinner diameter="50"></mat-spinner>
           <p>Cargando citas...</p>
         </div>
-      } @else if (!store.hasAppointments()) {
-        <mat-card class="empty-state">
-          <mat-card-content>
-            <mat-icon class="empty-icon">event_available</mat-icon>
-            <h3>No tienes citas programadas</h3>
-            <p>Las citas de los próximos 7 días aparecerán aquí</p>
-          </mat-card-content>
-        </mat-card>
       } @else {
         <!-- Tabs: Hoy / Próximas -->
         <mat-tab-group>
@@ -90,7 +94,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
                         <mat-icon>person</mat-icon>
                       </div>
                       <mat-card-title>
-                        Paciente #{{ appointment.patientId.substring(0, 8) }}
+                        {{ getPatientDisplayName(appointment) }}
                       </mat-card-title>
                       <mat-card-subtitle>
                         <mat-icon>schedule</mat-icon>
@@ -217,9 +221,7 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
                             <mat-icon>person</mat-icon>
                           </div>
                           <mat-card-title>
-                            Paciente #{{
-                              appointment.patientId.substring(0, 8)
-                            }}
+                            {{ getPatientDisplayName(appointment) }}
                           </mat-card-title>
                           <mat-card-subtitle>
                             <mat-icon>schedule</mat-icon>
@@ -278,6 +280,119 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
                             }
                           </mat-menu>
                         </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>date_range</mat-icon>
+              <span>Por rango</span>
+              @if (rangeAppointments().length > 0) {
+                <span class="badge">{{ rangeAppointments().length }}</span>
+              }
+            </ng-template>
+
+            <div class="range-filter">
+              <mat-form-field appearance="outline">
+                <mat-label>Desde</mat-label>
+                <input
+                  matInput
+                  type="date"
+                  [ngModel]="rangeFrom()"
+                  (ngModelChange)="rangeFrom.set($event)"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Hasta</mat-label>
+                <input
+                  matInput
+                  type="date"
+                  [ngModel]="rangeTo()"
+                  (ngModelChange)="rangeTo.set($event)"
+                />
+              </mat-form-field>
+
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="applyDateRangeFilter()"
+                [disabled]="rangeLoading()"
+              >
+                <mat-icon>search</mat-icon>
+                Buscar
+              </button>
+            </div>
+
+            @if (rangeLoading()) {
+              <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando citas del rango...</p>
+              </div>
+            } @else if (hasRangeFilterResult() && rangeAppointments().length === 0) {
+              <div class="empty-tab">
+                <mat-icon>event_busy</mat-icon>
+                <p>No hay citas para ese rango de fechas</p>
+              </div>
+            } @else if (rangeAppointments().length > 0) {
+              @for (
+                dateGroup of groupedRangeEntries();
+                track dateGroup.date
+              ) {
+                <div class="date-group">
+                  <h3 class="date-header">
+                    <mat-icon>calendar_today</mat-icon>
+                    {{ formatDate(dateGroup.date) }}
+                    <span class="count"
+                      >({{ dateGroup.appointments.length }} citas)</span
+                    >
+                  </h3>
+
+                  <div class="appointments-list">
+                    @for (
+                      appointment of dateGroup.appointments;
+                      track appointment.id
+                    ) {
+                      <mat-card class="appointment-card">
+                        <mat-card-header>
+                          <div mat-card-avatar class="appointment-avatar">
+                            <mat-icon>person</mat-icon>
+                          </div>
+                          <mat-card-title>
+                            {{ getPatientDisplayName(appointment) }}
+                          </mat-card-title>
+                          <mat-card-subtitle>
+                            <mat-icon>schedule</mat-icon>
+                            {{ appointment.startTime }} -
+                            {{ appointment.endTime }}
+                          </mat-card-subtitle>
+                        </mat-card-header>
+
+                        <mat-card-content>
+                          <div class="appointment-info">
+                            @if (appointment.notes) {
+                              <div class="info-row notes">
+                                <mat-icon>note</mat-icon>
+                                <span>{{ appointment.notes }}</span>
+                              </div>
+                            }
+
+                            <div class="status-chip">
+                              <mat-chip
+                                [class]="
+                                  'status-' + appointment.status.toLowerCase()
+                                "
+                              >
+                                {{ getStatusLabel(appointment.status) }}
+                              </mat-chip>
+                            </div>
+                          </div>
+                        </mat-card-content>
                       </mat-card>
                     }
                   </div>
@@ -400,6 +515,18 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
         }
       }
 
+      .range-filter {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(180px, 240px)) auto;
+        gap: 12px;
+        align-items: center;
+        margin: 16px 0 20px;
+
+        button mat-icon {
+          margin-right: 6px;
+        }
+      }
+
       .appointments-list {
         display: grid;
         gap: 16px;
@@ -490,6 +617,10 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
           padding: 16px;
         }
 
+        .range-filter {
+          grid-template-columns: 1fr;
+        }
+
         .page-header .header-content {
           flex-direction: column;
           align-items: flex-start;
@@ -505,8 +636,44 @@ import { ProfessionalAppointmentsStore } from '@data/stores/professional-appoint
 })
 export class ProfessionalAppointmentsPage implements OnInit {
   protected readonly store = inject(ProfessionalAppointmentsStore);
+  private readonly appointmentsApi = inject(ProfessionalAppointmentsApi);
+  private readonly authStore = inject(AuthStore);
+  private readonly toast = inject(ToastService);
+
+  protected readonly rangeFrom = signal(this.getDateInputValue(new Date()));
+  protected readonly rangeTo = signal(
+    this.getDateInputValue(this.addDays(new Date(), 7)),
+  );
+  protected readonly rangeLoading = signal(false);
+  protected readonly hasRangeFilterResult = signal(false);
+  protected readonly rangeAppointments = signal<AppointmentDto[]>([]);
 
   protected readonly appointmentsByDate = () => this.store.appointmentsByDate();
+  protected readonly groupedRangeAppointments = computed(() => {
+    const grouped: Record<string, AppointmentDto[]> = {};
+
+    for (const appointment of this.rangeAppointments()) {
+      if (!grouped[appointment.date]) {
+        grouped[appointment.date] = [];
+      }
+
+      grouped[appointment.date].push(appointment);
+    }
+
+    return Object.keys(grouped)
+      .sort()
+      .reduce((acc, date) => {
+        acc[date] = grouped[date].sort((a, b) =>
+          a.startTime.localeCompare(b.startTime),
+        );
+        return acc;
+      }, {} as Record<string, AppointmentDto[]>);
+  });
+  protected readonly groupedRangeEntries = computed(() =>
+    Object.entries(this.groupedRangeAppointments()).map(
+      ([date, appointments]) => ({ date, appointments }),
+    ),
+  );
 
   ngOnInit(): void {
     this.store.loadUpcomingAppointments();
@@ -549,5 +716,73 @@ export class ProfessionalAppointmentsPage implements OnInit {
 
   protected markAsNoShow(appointmentId: string): void {
     this.store.markAsNoShow(appointmentId);
+  }
+
+  protected applyDateRangeFilter(): void {
+    const from = this.rangeFrom();
+    const to = this.rangeTo();
+
+    if (!from || !to) {
+      this.toast.warning('Debes seleccionar fecha inicial y final');
+      return;
+    }
+
+    if (from > to) {
+      this.toast.warning('La fecha inicial no puede ser mayor que la final');
+      return;
+    }
+
+    const professionalId = this.authStore.user()?.professionalProfileId;
+    if (!professionalId) {
+      this.toast.error('No se encontró perfil profesional');
+      return;
+    }
+
+    this.rangeLoading.set(true);
+    this.hasRangeFilterResult.set(true);
+    this.rangeAppointments.set([]);
+
+    this.appointmentsApi
+      .getAppointments({
+        professionalId,
+        from,
+        to,
+        page: 1,
+        pageSize: 100,
+      })
+      .subscribe({
+        next: (response) => {
+          this.rangeAppointments.set(response.items ?? []);
+          this.rangeLoading.set(false);
+        },
+        error: (error: { error?: { title?: string } }) => {
+          this.toast.error(
+            error?.error?.title || 'Error al cargar citas por rango',
+          );
+          this.rangeLoading.set(false);
+        },
+      });
+  }
+
+  protected getPatientDisplayName(appointment: AppointmentDto): string {
+    if (appointment.patientName?.trim()) {
+      return appointment.patientName;
+    }
+
+    if (appointment.patientId?.trim()) {
+      return `Paciente #${appointment.patientId.substring(0, 8)}`;
+    }
+
+    return 'Paciente';
+  }
+
+  private getDateInputValue(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  private addDays(date: Date, days: number): Date {
+    const value = new Date(date);
+    value.setDate(value.getDate() + days);
+    return value;
   }
 }
