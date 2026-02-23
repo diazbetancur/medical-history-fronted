@@ -244,16 +244,6 @@ export const MENU_ITEMS: MenuItem[] = [
     ],
   },
   {
-    label: 'Agenda',
-    icon: 'event',
-    route: '/professional/appointments',
-    context: 'PROFESSIONAL',
-    requiredPermissions: [
-      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW_OWN,
-      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_CREATE,
-    ],
-  },
-  {
     label: 'Mis Citas',
     icon: 'assignment',
     route: '/professional/appointments',

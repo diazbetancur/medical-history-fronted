@@ -6,9 +6,10 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@core/auth';
 import { SeoService } from '@shared/services';
+import { ToastService } from '@shared/services/toast.service';
 import {
   PublicHomeProfessionalCardDto,
   PublicHomeStatsDto,
@@ -44,7 +45,9 @@ export class HomePageComponent implements OnInit {
   private readonly homeService = inject(PublicHomeService);
   private readonly seoService = inject(SeoService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly authStore = inject(AuthStore);
+  private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
   private readonly authIntent = inject(AuthIntentService);
 
@@ -70,6 +73,8 @@ export class HomePageComponent implements OnInit {
   loadingSpecialties = signal(true);
 
   ngOnInit(): void {
+    this.showAuthRedirectMessageIfNeeded();
+
     this.seoService.setSeo({
       title: 'MediTigo - Tu Directorio Médico de Confianza',
       description:
@@ -77,6 +82,35 @@ export class HomePageComponent implements OnInit {
     });
 
     this.loadHomeData();
+  }
+
+  private showAuthRedirectMessageIfNeeded(): void {
+    const queryParams = this.route.snapshot.queryParamMap;
+    const authRequired = queryParams.get('authRequired');
+    const reason = queryParams.get('reason');
+
+    if (reason === 'session_expired') {
+      this.toast.info(
+        'Tu sesión expiró. Inicia sesión nuevamente desde el botón "Iniciar Sesión".',
+      );
+    } else if (authRequired === '1') {
+      this.toast.info(
+        'Debes iniciar sesión para continuar. Usa el botón "Iniciar Sesión".',
+      );
+    } else {
+      return;
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        authRequired: null,
+        reason: null,
+        returnUrl: null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   private loadHomeData(): void {

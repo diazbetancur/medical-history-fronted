@@ -3,20 +3,15 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
-import { BookAppointmentDialogComponent } from '@features/public/components/book-appointment-dialog.component';
 import { ToastService } from '@shared/services/toast.service';
 import { ConfirmDialogComponent } from '@shared/ui';
 import { AppointmentDto } from '../../models/appointment.dto';
 import { AppointmentsService } from '../../services/appointments.service';
-import {
-  RequestAppointmentDialogComponent,
-  SelectedProfessionalForBooking,
-} from './request-appointment-dialog.component';
 
 @Component({
   selector: 'app-patient-home',
@@ -25,7 +20,6 @@ import {
     CommonModule,
     MatButtonModule,
     MatCardModule,
-    MatDialogModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
@@ -39,15 +33,6 @@ import {
           <p class="subtitle">
             Gestiona tus citas médicas de manera fácil y rápida
           </p>
-          <button
-            mat-raised-button
-            color="primary"
-            class="cta-button"
-            (click)="openRequestAppointment()"
-          >
-            <mat-icon>add_circle_outline</mat-icon>
-            Agendar Nueva Cita
-          </button>
         </div>
       </section>
 
@@ -81,7 +66,7 @@ import {
               <button
                 mat-raised-button
                 color="primary"
-                (click)="openRequestAppointment()"
+                (click)="navigateToWizard()"
               >
                 <mat-icon>add</mat-icon>
                 Agendar Ahora
@@ -160,7 +145,7 @@ import {
       <section class="quick-actions">
         <h2>Acciones Rápidas</h2>
         <div class="actions-grid">
-          <mat-card class="action-card" (click)="openRequestAppointment()">
+          <mat-card class="action-card" (click)="navigateToWizard()">
             <mat-card-content>
               <mat-icon>add_circle</mat-icon>
               <h3>Agendar Cita</h3>
@@ -176,7 +161,7 @@ import {
             </mat-card-content>
           </mat-card>
 
-          <mat-card class="action-card" disabled>
+          <mat-card class="action-card" (click)="navigateToProfile()">
             <mat-card-content>
               <mat-icon>person</mat-icon>
               <h3>Mi Perfil</h3>
@@ -220,17 +205,6 @@ import {
             margin: 0 0 32px 0;
             font-size: 15px;
             color: var(--color-text-secondary);
-          }
-
-          .cta-button {
-            height: 48px;
-            padding: 0 24px;
-            font-size: 14px;
-            font-weight: 600;
-
-            mat-icon {
-              margin-right: 8px;
-            }
           }
         }
       }
@@ -557,43 +531,15 @@ export class PatientHomeComponent implements OnInit {
     this.router.navigate(['/patient/wizard']);
   }
 
-  openRequestAppointment(): void {
-    const selectorRef = this.dialog.open(RequestAppointmentDialogComponent, {
-      width: '980px',
-      maxWidth: '96vw',
-      data: {
-        pageSize: 12,
-      },
-    });
-
-    selectorRef
-      .afterClosed()
-      .subscribe((selected: SelectedProfessionalForBooking | null) => {
-        if (!selected) {
-          return;
-        }
-
-        this.dialog.open(BookAppointmentDialogComponent, {
-          width: '760px',
-          maxWidth: '96vw',
-          data: {
-            slug: selected.slug,
-            professionalId: selected.professionalProfileId,
-            name: selected.fullName,
-            imageUrl: selected.photoUrl,
-            specialties: selected.specialty ? [selected.specialty] : [],
-          },
-        });
-      });
+  navigateToProfile(): void {
+    this.router.navigate(['/patient/profile']);
   }
 
   /**
    * Navigate to all appointments view
    */
   viewAllAppointments(): void {
-    this.router.navigate(['/patient/wizard'], {
-      queryParams: { step: 5 },
-    });
+    this.router.navigate(['/patient/profile']);
   }
 
   /**

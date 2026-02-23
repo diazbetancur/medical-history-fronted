@@ -26,8 +26,6 @@ import {
 import { SpecialtyDto } from '../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../public/services/public-professionals.service';
-import { AppointmentDto } from '../../models/appointment.dto';
-import { AppointmentsService } from '../../services/appointments.service';
 
 export interface SelectedProfessionalForBooking {
   professionalProfileId: string;
@@ -60,33 +58,6 @@ export interface RequestAppointmentDialogData {
     <h2 mat-dialog-title>Solicitar cita</h2>
 
     <mat-dialog-content class="dialog-content">
-      @if (recentProfessionals().length > 0) {
-        <mat-card class="recent-card">
-          <mat-card-content>
-            <h3>Últimos médicos visitados</h3>
-            <div class="recent-list">
-              @for (
-                item of recentProfessionals();
-                track item.professionalProfileId
-              ) {
-                <button
-                  mat-stroked-button
-                  type="button"
-                  (click)="selectProfessional(item)"
-                >
-                  <span class="name">{{ item.fullName }}</span>
-                  @if (item.specialties.length > 0) {
-                    <span class="specialty">{{
-                      item.specialties[0].name
-                    }}</span>
-                  }
-                </button>
-              }
-            </div>
-          </mat-card-content>
-        </mat-card>
-      }
-
       <mat-card class="filters-card">
         <mat-card-content>
           <div class="filters-grid">
@@ -212,33 +183,6 @@ export interface RequestAppointmentDialogData {
         width: 100%;
       }
 
-      .recent-card h3 {
-        margin: 0 0 10px;
-        font-size: 15px;
-        font-weight: 600;
-      }
-
-      .recent-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .recent-list button {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .recent-list .name {
-        font-weight: 600;
-      }
-
-      .recent-list .specialty {
-        color: var(--color-text-secondary);
-        font-size: 12px;
-      }
-
       .state-block {
         display: flex;
         align-items: center;
@@ -323,7 +267,6 @@ export class RequestAppointmentDialogComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly professionalsService = inject(PublicProfessionalsService);
   private readonly catalogService = inject(PublicCatalogService);
-  private readonly appointmentsService = inject(AppointmentsService);
   private readonly publicApi = inject(PublicApi);
   private readonly dialogRef = inject(
     MatDialogRef<
@@ -344,14 +287,12 @@ export class RequestAppointmentDialogComponent {
   readonly errorMessage = signal<string | null>(null);
   readonly specialties = signal<SpecialtyDto[]>([]);
   readonly cities = signal<City[]>([]);
-  readonly recentProfessionals = signal<ProfessionalSearchResultDto[]>([]);
   readonly results = signal<ProfessionalSearchResultDto[]>([]);
 
   readonly getInitials = getInitials;
 
   constructor() {
     this.loadCatalogs();
-    this.loadRecentProfessionals();
     this.setupDebounce();
     this.loadDefaultResults();
   }
@@ -473,47 +414,5 @@ export class RequestAppointmentDialogComponent {
       next: (metadata) => this.cities.set(metadata.cities ?? []),
       error: () => this.cities.set([]),
     });
-  }
-
-  private loadRecentProfessionals(): void {
-    this.appointmentsService
-      .getMyAppointments({ page: 1, pageSize: 30 })
-      .subscribe({
-        next: (response) => {
-          const map = new Map<string, ProfessionalSearchResultDto>();
-
-          response.appointments.forEach((appointment) => {
-            const mapped = this.mapAppointmentToProfessional(appointment);
-            if (!map.has(mapped.professionalProfileId)) {
-              map.set(mapped.professionalProfileId, mapped);
-            }
-          });
-
-          this.recentProfessionals.set([...map.values()].slice(0, 8));
-        },
-        error: () => this.recentProfessionals.set([]),
-      });
-  }
-
-  private mapAppointmentToProfessional(
-    appointment: AppointmentDto,
-  ): ProfessionalSearchResultDto {
-    return {
-      professionalProfileId: appointment.professionalProfileId,
-      slug: '',
-      userId: appointment.professional.id,
-      fullName: appointment.professional.name,
-      professionalTitle: undefined,
-      photoUrl: appointment.professional.photoUrl,
-      specialties: [
-        {
-          id: appointment.professional.specialty || 'specialty',
-          name: appointment.professional.specialty || 'Especialidad',
-        },
-      ],
-      city: undefined,
-      country: undefined,
-      isAvailableForAppointments: true,
-    };
   }
 }

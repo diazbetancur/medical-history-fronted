@@ -1,5 +1,5 @@
 .wizard-container {
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -15,30 +15,27 @@ mat-card {
     }
   }
 
-  mat-card-content {
-    padding: 0;
-  }
-}
-
-mat-stepper {
-  .step-label {
+  .content {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 8px;
 
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+    p {
+      margin: 0;
+      color: var(--color-text-secondary);
+    }
+
+    button {
+      width: fit-content;
     }
   }
 }
 
-// Responsive: vertical stepper on mobile
 @media (max-width: 768px) {
-  mat-stepper {
-    ::ng-deep .mat-stepper-horizontal {
-      flex-direction: column !important;
+  mat-card {
+    .content button {
+      width: 100%;
     }
   }
 }

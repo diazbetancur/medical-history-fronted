@@ -22,6 +22,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
+import { PublicApi } from '@data/api';
 import { ToastService } from '@shared/services/toast.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import {
@@ -63,7 +64,7 @@ import { SelectedProfessional, WizardStore } from '../patient-wizard.page';
       @if (recentProfessionals().length > 0) {
         <mat-card class="recent-card">
           <mat-card-content>
-            <h3>Médicos con citas anteriores</h3>
+            <h3>{{ recentSectionTitle() }}</h3>
             <div class="recent-list">
               @for (
                 prof of recentProfessionals();
@@ -499,6 +500,7 @@ export class Step2SearchProfessionalComponent implements OnInit {
   private readonly catalogService = inject(PublicCatalogService);
   private readonly professionalsService = inject(PublicProfessionalsService);
   private readonly appointmentsService = inject(AppointmentsService);
+  private readonly publicApi = inject(PublicApi);
   private readonly toast = inject(ToastService);
 
   readonly wizardStore = input.required<WizardStore>();
@@ -523,6 +525,7 @@ export class Step2SearchProfessionalComponent implements OnInit {
   readonly pageSize = signal(10);
   readonly preselectedSlug = signal<string | null>(null);
   readonly autoSelectedBySlug = signal(false);
+  readonly recentSectionTitle = signal('Médicos con citas anteriores');
 
   readonly getInitials = getInitials;
 
@@ -562,14 +565,48 @@ export class Step2SearchProfessionalComponent implements OnInit {
             }
           });
 
-          this.recentProfessionals.set(
-            [...uniqueByProfessional.values()].slice(0, 8),
-          );
+          const recent = [...uniqueByProfessional.values()].slice(0, 8);
+
+          if (recent.length > 0) {
+            this.recentSectionTitle.set('Médicos con citas anteriores');
+            this.recentProfessionals.set(recent);
+            return;
+          }
+
+          this.loadRelevantProfessionals();
         },
         error: () => {
-          this.recentProfessionals.set([]);
+          this.loadRelevantProfessionals();
         },
       });
+  }
+
+  private loadRelevantProfessionals(): void {
+    this.publicApi.getHomePage(8, 6).subscribe({
+      next: (home) => {
+        const relevant = (home.featuredProfessionals ?? []).map((item) => ({
+          professionalProfileId: item.id,
+          slug: item.slug,
+          userId: item.id,
+          fullName: item.businessName,
+          professionalTitle: undefined,
+          photoUrl: item.profileImageUrl,
+          specialties: (item.specialties ?? []).map((specialty) => ({
+            id: specialty.id,
+            name: specialty.name,
+          })),
+          city: item.cityName,
+          country: undefined,
+          isAvailableForAppointments: true,
+        }));
+
+        this.recentSectionTitle.set('Médicos recomendados');
+        this.recentProfessionals.set(relevant);
+      },
+      error: () => {
+        this.recentProfessionals.set([]);
+      },
+    });
   }
 
   private setupRoutePrefill(): void {

@@ -43,11 +43,12 @@ export class SlotsService {
   getSlots(
     professionalProfileId: string,
     date: string,
-    durationMinutes = 30,
+    durationMinutes?: number,
   ): Observable<SlotsResponseDto> {
-    const params = new HttpParams()
-      .set('date', date)
-      .set('durationMinutes', String(durationMinutes));
+    let params = new HttpParams().set('date', date);
+    if (typeof durationMinutes === 'number') {
+      params = params.set('durationMinutes', String(durationMinutes));
+    }
 
     return this.http
       .get<SlotsResponseContract>(

@@ -19,28 +19,43 @@ import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 
 interface WeeklyWindowResponseDto {
-  id: string;
+  id?: string;
   dayOfWeek: number;
-  dayName: string;
+  dayName?: string;
   startTime: string;
   endTime: string;
-  locationId: string;
-  locationName: string;
-  slotDurationMinutes: number;
-  isActive: boolean;
+  professionalLocationId?: string | null;
+  professionalLocationName?: string | null;
+  professionalLocationAddress?: string | null;
+  institutionId?: string | null;
+  institutionName?: string | null;
+  locationId?: string | null;
+  locationName?: string | null;
+  slotDurationMinutes?: number;
+  isActive?: boolean;
 }
 
 interface AvailabilityTemplateDto {
-  windows: WeeklyWindowResponseDto[];
+  id?: string;
+  professionalProfileId?: string;
+  timeZone?: string;
+  slotMinutes?: number;
+  isActive?: boolean;
+  dateCreated?: string;
+  weeklyWindows?: WeeklyWindowResponseDto[];
+  windows?: WeeklyWindowResponseDto[];
 }
 
 interface UpsertAvailabilityTemplateDto {
-  windows: Array<{
+  timeZone: string;
+  slotMinutes: number;
+  isActive?: boolean;
+  weeklyWindows: Array<{
     dayOfWeek: number;
     startTime: string;
     endTime: string;
-    locationId: string;
-    slotDurationMinutes: number;
+    professionalLocationId?: string | null;
+    institutionId?: string | null;
   }>;
 }
 
@@ -64,14 +79,24 @@ interface SlotResponseDto {
 
 interface AvailabilityExceptionDto {
   id: string;
-  date: string;
+  professionalProfileId?: string;
   type: 'Absent' | 'Override';
-  typeName: string;
+  startDateTime?: string;
+  endDateTime?: string;
+  overrideStartTime?: string | null;
+  overrideEndTime?: string | null;
   reason: string | null;
-  overrideWindows: Array<{
+  institutionId?: string | null;
+  institutionName?: string | null;
+  professionalLocationId?: string | null;
+  professionalLocationName?: string | null;
+  dateCreated?: string;
+  date?: string;
+  typeName?: string;
+  overrideWindows?: Array<{
     startTime: string;
     endTime: string;
-    locationId: string;
+    locationId: string | null;
     slotDurationMinutes: number;
   }> | null;
 }
@@ -99,18 +124,20 @@ export class ProfessionalAvailabilityApi {
     dto: UpdateWeeklyScheduleDto,
   ): Observable<WeeklyScheduleDto> {
     const payload: UpsertAvailabilityTemplateDto = {
-      windows: dto.days
+      timeZone: dto.timeZone ?? 'America/Tegucigalpa',
+      slotMinutes: dto.defaultSlotDuration ?? 30,
+      isActive: dto.isActive ?? true,
+      weeklyWindows: dto.days
         .filter((day) => day.isWorkingDay)
         .flatMap((day) =>
           day.timeBlocks.map((block) => ({
             dayOfWeek: this.mapDayEnumToNumber(day.dayOfWeek),
             startTime: block.startTime,
             endTime: block.endTime,
-            locationId: block.professionalLocationId ?? '',
-            slotDurationMinutes: dto.defaultSlotDuration ?? 30,
+            professionalLocationId: block.professionalLocationId ?? null,
+            institutionId: null,
           })),
-        )
-        .filter((window) => !!window.locationId),
+        ),
     };
 
     return this.apiClient
@@ -171,9 +198,8 @@ export class ProfessionalAvailabilityApi {
     filters?: AbsenceFilters,
   ): Observable<PaginatedAbsencesResponse> {
     const params: Record<string, string> = {};
-    if (filters?.startDateTime)
-      params['from'] = filters.startDateTime.slice(0, 10);
-    if (filters?.endDateTime) params['to'] = filters.endDateTime.slice(0, 10);
+    if (filters?.startDateTime) params['from'] = filters.startDateTime;
+    if (filters?.endDateTime) params['to'] = filters.endDateTime;
     if (filters?.type) params['type'] = filters.type;
 
     return this.apiClient
@@ -196,22 +222,19 @@ export class ProfessionalAvailabilityApi {
       .post<AvailabilityExceptionDto>(
         `/professional/${professionalId}/availability/exceptions`,
         {
-          date: dto.startDateTime.slice(0, 10),
           type: dto.type,
+          startDateTime: dto.startDateTime,
+          endDateTime: dto.endDateTime,
+          overrideStartTime:
+            dto.type === 'Override' ? (dto.overrideStartTime ?? null) : null,
+          overrideEndTime:
+            dto.type === 'Override' ? (dto.overrideEndTime ?? null) : null,
           reason: dto.reason,
-          overrideWindows:
-            dto.type === 'Override' &&
-            dto.overrideStartTime &&
-            dto.overrideEndTime
-              ? [
-                  {
-                    startTime: dto.overrideStartTime,
-                    endTime: dto.overrideEndTime,
-                    locationId: dto.professionalLocationId ?? '',
-                    slotDurationMinutes: 30,
-                  },
-                ]
-              : undefined,
+          professionalLocationId:
+            dto.type === 'Override'
+              ? (dto.professionalLocationId ?? null)
+              : null,
+          institutionId: null,
         },
       )
       .pipe(map((item) => this.mapExceptionToAbsence(item)));
@@ -251,7 +274,7 @@ export class ProfessionalAvailabilityApi {
     professionalId: string,
     template: AvailabilityTemplateDto | null,
   ): WeeklyScheduleDto {
-    const windows = template?.windows ?? [];
+    const windows = template?.weeklyWindows ?? template?.windows ?? [];
     const daySchedules: DaySchedule[] = [1, 2, 3, 4, 5, 6, 0].map((day) => {
       const dayWindows = windows.filter((window) => window.dayOfWeek === day);
       return {
@@ -260,38 +283,51 @@ export class ProfessionalAvailabilityApi {
         timeBlocks: dayWindows.map((window) => ({
           startTime: window.startTime,
           endTime: window.endTime,
-          professionalLocationId: window.locationId,
-          professionalLocationName: window.locationName,
-          professionalLocationAddress: null,
+          professionalLocationId:
+            window.professionalLocationId ?? window.locationId ?? null,
+          professionalLocationName:
+            window.professionalLocationName ?? window.locationName ?? null,
+          professionalLocationAddress:
+            window.professionalLocationAddress ?? null,
         })),
       };
     });
 
     return {
-      id: undefined,
-      professionalProfileId: professionalId,
+      id: template?.id,
+      professionalProfileId: template?.professionalProfileId ?? professionalId,
       days: daySchedules,
-      defaultSlotDuration: windows[0]?.slotDurationMinutes ?? 30,
-      timeZone: 'America/Bogota',
-      isActive: true,
-      createdAt: undefined,
+      defaultSlotDuration:
+        template?.slotMinutes ?? windows[0]?.slotDurationMinutes ?? 30,
+      timeZone: template?.timeZone ?? 'America/Tegucigalpa',
+      isActive: template?.isActive ?? true,
+      createdAt: template?.dateCreated,
     };
   }
 
   private mapExceptionToAbsence(item: AvailabilityExceptionDto): AbsenceDto {
     const firstOverride = item.overrideWindows?.[0];
+    const startDateTime =
+      item.startDateTime ??
+      (item.date ? `${item.date}T00:00:00Z` : new Date().toISOString());
+    const endDateTime =
+      item.endDateTime ??
+      (item.date ? `${item.date}T23:59:59Z` : new Date().toISOString());
+
     return {
       id: item.id,
-      professionalProfileId: '',
+      professionalProfileId: item.professionalProfileId ?? '',
       type: item.type,
-      startDateTime: `${item.date}T00:00:00Z`,
-      endDateTime: `${item.date}T23:59:59Z`,
-      overrideStartTime: firstOverride?.startTime ?? null,
-      overrideEndTime: firstOverride?.endTime ?? null,
-      professionalLocationId: firstOverride?.locationId ?? null,
-      professionalLocationName: null,
+      startDateTime,
+      endDateTime,
+      overrideStartTime:
+        item.overrideStartTime ?? firstOverride?.startTime ?? null,
+      overrideEndTime: item.overrideEndTime ?? firstOverride?.endTime ?? null,
+      professionalLocationId:
+        item.professionalLocationId ?? firstOverride?.locationId ?? null,
+      professionalLocationName: item.professionalLocationName ?? null,
       reason: item.reason ?? undefined,
-      createdAt: undefined,
+      createdAt: item.dateCreated,
     };
   }
 

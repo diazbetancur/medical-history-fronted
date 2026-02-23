@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 
 /**
  * Guard that checks if user is authenticated.
- * Redirects to /login if not authenticated.
+ * Redirects to / (home) if not authenticated.
  */
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -14,9 +14,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // Store intended URL for redirect after login
-  const returnUrl = state.url;
-  return router.createUrlTree(['/login'], {
-    queryParams: { returnUrl },
+  return router.createUrlTree(['/'], {
+    queryParams: { returnUrl: state.url, authRequired: '1' },
   });
 };
