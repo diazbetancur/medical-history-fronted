@@ -74,12 +74,10 @@ export class AppointmentsApi {
   /**
    * Cancel an appointment
    */
-  cancelAppointment(
-    request: CancelAppointmentRequest,
-  ): Observable<Appointment> {
-    return this.api.post<Appointment>(
+  cancelAppointment(request: CancelAppointmentRequest): Observable<void> {
+    return this.api.post<void>(
       `/appointments/${request.appointmentId}/cancel`,
-      { reason: request.reason },
+      null,
     );
   }
 

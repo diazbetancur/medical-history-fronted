@@ -94,10 +94,54 @@ export function formatSlotTime(slot: SlotDto): string {
   return `${slot.startTime} - ${slot.endTime}`;
 }
 
+const HONDURAS_TIMEZONE = 'America/Tegucigalpa';
+
+function getHondurasNowParts(now = new Date()): {
+  date: string;
+  hour: number;
+  minute: number;
+} {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: HONDURAS_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(now);
+
+  const get = (type: string) =>
+    Number(parts.find((part) => part.type === type)?.value ?? '0');
+
+  const year = String(get('year')).padStart(4, '0');
+  const month = String(get('month')).padStart(2, '0');
+  const day = String(get('day')).padStart(2, '0');
+
+  return {
+    date: `${year}-${month}-${day}`,
+    hour: get('hour'),
+    minute: get('minute'),
+  };
+}
+
+function parseTimeToMinutes(time: string): number {
+  const [hourRaw, minuteRaw] = time.trim().split(':');
+  const hour = Number(hourRaw ?? '0');
+  const minute = Number(minuteRaw ?? '0');
+  return hour * 60 + minute;
+}
+
 /**
  * Check if slot is in the past (compared to current time)
  */
 export function isSlotInPast(date: string, startTime: string): boolean {
-  const slotDateTime = new Date(`${date}T${startTime}`);
-  return slotDateTime < new Date();
+  const nowHn = getHondurasNowParts();
+
+  if (date !== nowHn.date) return false;
+
+  const slotMinutes = parseTimeToMinutes(startTime);
+  const nowMinutes = nowHn.hour * 60 + nowHn.minute;
+
+  return slotMinutes <= nowMinutes;
 }

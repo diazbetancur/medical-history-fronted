@@ -22,7 +22,7 @@ import { ApiError, getUserMessage } from '@core/http/api-error';
 import { formatDateOnly } from '@core/http/http-utils';
 import { PublicApi } from '@data/api';
 import { CreateAppointmentDto } from '@patient/models/appointment.dto';
-import { SlotDto } from '@patient/models/slot.dto';
+import { isSlotInPast, SlotDto } from '@patient/models/slot.dto';
 import { AppointmentsService } from '@patient/services/appointments.service';
 import { SlotsService } from '@patient/services/slots.service';
 
@@ -416,6 +416,8 @@ export class BookAppointmentDialogComponent {
       professionalProfileId: professionalId,
       date: formatDateOnly(selectedDate),
       slotId: slot.id,
+      appointmentDate: formatDateOnly(selectedDate),
+      timeSlot: `${slot.startTime}`,
     };
 
     this.appointmentsService.createAppointment(dto).subscribe({
@@ -485,7 +487,10 @@ export class BookAppointmentDialogComponent {
     this.slotsService.getSlots(professionalId, dateValue).subscribe({
       next: (response) => {
         this.availableSlots.set(
-          (response.slots ?? []).filter((slot) => slot.isAvailable),
+          (response.slots ?? []).filter(
+            (slot) =>
+              slot.isAvailable && !isSlotInPast(dateValue, slot.startTime),
+          ),
         );
         this.loadingSlots.set(false);
       },

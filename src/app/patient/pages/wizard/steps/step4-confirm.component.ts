@@ -378,6 +378,8 @@ export class Step4ConfirmComponent implements OnInit {
       professionalProfileId: professional.professionalProfileId,
       date: date,
       slotId: slot.id,
+      appointmentDate: date,
+      timeSlot: `${slot.startTime} - ${slot.endTime}`,
       notes: undefined,
     };
 

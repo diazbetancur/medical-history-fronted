@@ -136,8 +136,8 @@ export class ProfessionalAppointmentsStore {
     nextWeek.setDate(nextWeek.getDate() + 7);
 
     this.loadAppointments({
-      dateFrom: today.toISOString().split('T')[0],
-      dateTo: nextWeek.toISOString().split('T')[0],
+      from: today.toISOString().split('T')[0],
+      to: nextWeek.toISOString().split('T')[0],
     });
   }
 

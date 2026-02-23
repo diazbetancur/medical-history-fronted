@@ -53,7 +53,7 @@ export class AppointmentDetailPageComponent implements OnInit {
     if (id) {
       this.loadAppointment(id);
     } else {
-      this.router.navigate(['/dashboard/agenda']);
+      this.router.navigate([this.getBackRoute()]);
     }
   }
 
@@ -110,7 +110,12 @@ export class AppointmentDetailPageComponent implements OnInit {
    * Back to list
    */
   goBack(): void {
-    this.router.navigate(['/dashboard/agenda']);
+    this.router.navigate([this.getBackRoute()]);
+  }
+
+  private getBackRoute(): string {
+    const currentUrl = this.router.url ?? '';
+    return currentUrl.startsWith('/patient/') ? '/patient' : '/dashboard/agenda';
   }
 
   /**
