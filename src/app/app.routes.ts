@@ -327,6 +327,18 @@ export const routes: Routes = [
           ),
         title: 'Agenda tu Cita - Directory Pro',
       },
+        {
+          path: 'appointments/:id',
+          canActivate: [permissionStoreGuard],
+          data: {
+            requiredPermissions: ['Appointments.ViewOwn'],
+          },
+          loadComponent: () =>
+            import('./features/agenda/pages/appointment-detail/appointment-detail.page').then(
+              (m) => m.AppointmentDetailPageComponent,
+            ),
+          title: 'Detalle de Cita - Directory Pro',
+        },
       {
         path: 'profile',
         canActivate: [permissionStoreGuard],

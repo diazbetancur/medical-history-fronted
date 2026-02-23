@@ -21,7 +21,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { formatDateOnly } from '@core/http/http-utils';
 import { ToastService } from '@core/ui/toast.service';
-import { formatSlotTime, SlotDto } from '../../../models/slot.dto';
+import {
+  formatSlotTime,
+  isSlotInPast,
+  SlotDto,
+} from '../../../models/slot.dto';
 import { SlotsService } from '../../../services/slots.service';
 import { WizardStore } from '../patient-wizard.page';
 
@@ -289,7 +293,14 @@ export class Step3SlotsComponent implements OnInit {
       this.wizardStore().selectedProfessional()?.professionalProfileId ?? '',
   );
   readonly availableSlots = computed(() =>
-    this.allSlots().filter((s) => s.isAvailable),
+    this.allSlots().filter((slot) => {
+      if (!slot.isAvailable) return false;
+
+      const selectedDate = this.selectedDate();
+      if (!selectedDate) return true;
+
+      return !isSlotInPast(formatDateOnly(selectedDate), slot.startTime);
+    }),
   );
 
   ngOnInit(): void {
@@ -340,7 +351,12 @@ export class Step3SlotsComponent implements OnInit {
         this.allSlots.set(response.slots);
         this.isLoadingSlots.set(false);
 
-        if (response.slots.filter((s) => s.isAvailable).length === 0) {
+        if (
+          response.slots.filter(
+            (slot) =>
+              slot.isAvailable && !isSlotInPast(dateStr, slot.startTime),
+          ).length === 0
+        ) {
           this.toast.warning('No hay horarios disponibles para esta fecha');
         }
       },

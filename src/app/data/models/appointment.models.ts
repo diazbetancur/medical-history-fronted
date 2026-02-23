@@ -63,8 +63,8 @@ export interface AppointmentFilters {
   patientId?: string;
   professionalId?: string;
   status?: AppointmentStatus;
-  dateFrom?: string; // ISO date
-  dateTo?: string; // ISO date
+  from?: string; // ISO date
+  to?: string; // ISO date
   page?: number;
   pageSize?: number;
 }

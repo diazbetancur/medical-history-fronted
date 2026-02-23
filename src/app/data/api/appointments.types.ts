@@ -122,9 +122,6 @@ export interface CreateAppointmentResponse {
  */
 export interface CancelAppointmentRequest {
   appointmentId: string;
-
-  /** Reason for cancellation */
-  reason?: string;
 }
 
 /**

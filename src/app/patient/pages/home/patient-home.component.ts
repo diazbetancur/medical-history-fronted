@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { ToastService } from '@shared/services/toast.service';
 import { ConfirmDialogComponent } from '@shared/ui';
+import { AppointmentDetailDialogComponent } from './appointment-detail-dialog.component';
 import { AppointmentDto } from '../../models/appointment.dto';
 import { AppointmentsService } from '../../services/appointments.service';
 
@@ -129,7 +130,11 @@ import { AppointmentsService } from '../../services/appointments.service';
                       <mat-icon>cancel</mat-icon>
                       Cancelar
                     </button>
-                    <button mat-button color="primary" disabled>
+                    <button
+                      mat-button
+                      color="primary"
+                      (click)="viewAppointmentDetail(apt.id)"
+                    >
                       <mat-icon>info</mat-icon>
                       Detalles
                     </button>
@@ -540,6 +545,14 @@ export class PatientHomeComponent implements OnInit {
    */
   viewAllAppointments(): void {
     this.router.navigate(['/patient/profile']);
+  }
+
+  viewAppointmentDetail(appointmentId: string): void {
+    this.dialog.open(AppointmentDetailDialogComponent, {
+      width: '640px',
+      maxWidth: '96vw',
+      data: { appointmentId },
+    });
   }
 
   /**
