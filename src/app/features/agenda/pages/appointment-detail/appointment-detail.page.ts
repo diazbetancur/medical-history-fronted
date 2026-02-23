@@ -115,7 +115,9 @@ export class AppointmentDetailPageComponent implements OnInit {
 
   private getBackRoute(): string {
     const currentUrl = this.router.url ?? '';
-    return currentUrl.startsWith('/patient/') ? '/patient' : '/dashboard/agenda';
+    return currentUrl.startsWith('/patient/')
+      ? '/patient'
+      : '/dashboard/agenda';
   }
 
   /**

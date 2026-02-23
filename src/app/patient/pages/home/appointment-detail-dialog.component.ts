@@ -10,7 +10,7 @@ import {
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AppointmentsApi, Appointment } from '@data/api';
+import { Appointment, AppointmentsApi } from '@data/api';
 
 @Component({
   selector: 'app-appointment-detail-dialog',
