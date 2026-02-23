@@ -20,7 +20,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { PublicApi } from '@data/api';
-import { Category, City, SearchProfessional } from '@data/api/api-models';
+import { City, SearchProfessional } from '@data/api/api-models';
 import { BookAppointmentDialogComponent } from '@features/public/components/book-appointment-dialog.component';
 import { ToastService } from '@shared/services/toast.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -28,6 +28,8 @@ import {
   getInitials,
   ProfessionalSearchResultDto,
 } from '../../../public/models/professional-search.dto';
+import { SpecialtyDto } from '../../../public/models/specialty.dto';
+import { PublicCatalogService } from '../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../public/services/public-professionals.service';
 import { PatientProfileDto } from '../../models/patient-profile.dto';
 import { SlotDto } from '../../models/slot.dto';
@@ -41,6 +43,12 @@ export interface SelectedProfessional {
   slug: string;
   name: string;
   specialty?: string;
+}
+
+interface SpecialtyOption {
+  id: string;
+  name: string;
+  slug?: string;
 }
 
 export class WizardStore {
@@ -106,6 +114,7 @@ export class PatientWizardPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly appointmentsService = inject(AppointmentsService);
   private readonly professionalsService = inject(PublicProfessionalsService);
+  private readonly catalogService = inject(PublicCatalogService);
   private readonly publicApi = inject(PublicApi);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
@@ -118,7 +127,7 @@ export class PatientWizardPage implements OnInit {
   readonly loading = signal(false);
   readonly hasSearched = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly specialties = signal<Category[]>([]);
+  readonly specialties = signal<SpecialtyOption[]>([]);
   readonly cities = signal<City[]>([]);
   readonly professionals = signal<ProfessionalSearchResultDto[]>([]);
   readonly listTitle = signal('Médicos con los que has tenido relación');
@@ -137,13 +146,20 @@ export class PatientWizardPage implements OnInit {
     const selectedSpecialtyId = this.specialtyControl.value;
     const selectedCityId = this.cityControl.value;
 
-    const categorySlug = this.specialties().find(
+    const selectedSpecialty = this.specialties().find(
       (item) => item.id === selectedSpecialtyId,
-    )?.slug;
+    );
+
+    const categorySlug = selectedSpecialty?.slug;
 
     const citySlug = this.cities().find(
       (item) => item.id === selectedCityId,
     )?.slug;
+
+    const effectiveQuery =
+      !categorySlug && selectedSpecialty?.name
+        ? [queryText, selectedSpecialty.name].filter(Boolean).join(' ')
+        : queryText;
 
     this.loading.set(true);
     this.errorMessage.set(null);
@@ -152,27 +168,27 @@ export class PatientWizardPage implements OnInit {
 
     this.publicApi
       .getSearchPage({
-        q: queryText || undefined,
+        q: effectiveQuery || undefined,
         category: categorySlug,
         city: citySlug,
         page: 1,
         pageSize: 10,
       })
       .subscribe({
-      next: (response) => {
-        this.professionals.set(
-          (response.professionals ?? []).map((item) =>
-            this.mapSearchProfessional(item),
-          ),
-        );
-        this.loading.set(false);
-      },
-      error: (error: ApiError) => {
-        this.errorMessage.set(getUserMessage(error));
-        this.professionals.set([]);
-        this.loading.set(false);
-      },
-    });
+        next: (response) => {
+          this.professionals.set(
+            (response.professionals ?? []).map((item) =>
+              this.mapSearchProfessional(item),
+            ),
+          );
+          this.loading.set(false);
+        },
+        error: (error: ApiError) => {
+          this.errorMessage.set(getUserMessage(error));
+          this.professionals.set([]);
+          this.loading.set(false);
+        },
+      });
   }
 
   clearSearch(): void {
@@ -349,7 +365,9 @@ export class PatientWizardPage implements OnInit {
     };
   }
 
-  private mapSearchProfessional(item: SearchProfessional): ProfessionalSearchResultDto {
+  private mapSearchProfessional(
+    item: SearchProfessional,
+  ): ProfessionalSearchResultDto {
     return {
       professionalProfileId: item.id,
       slug: item.slug,
@@ -386,13 +404,48 @@ export class PatientWizardPage implements OnInit {
   }
 
   private loadCatalogs(): void {
-    this.publicApi.getMetadata().subscribe({
-      next: (metadata) => {
-        this.specialties.set(metadata.categories ?? []);
-        this.cities.set(metadata.cities ?? []);
+    this.catalogService.getSpecialties().subscribe({
+      next: (items: SpecialtyDto[]) => {
+        this.specialties.set(
+          (items ?? []).map((item) => ({
+            id: item.id,
+            name: item.name,
+          })),
+        );
       },
       error: () => {
         this.specialties.set([]);
+      },
+    });
+
+    this.publicApi.getMetadata().subscribe({
+      next: (metadata) => {
+        this.cities.set(metadata.cities ?? []);
+
+        const categories = metadata.categories ?? [];
+        if (categories.length > 0) {
+          const specialtyMap = new Map(
+            this.specialties().map((item) => [
+              item.name.trim().toLowerCase(),
+              item,
+            ]),
+          );
+
+          for (const category of categories) {
+            const key = category.name.trim().toLowerCase();
+            const existing = specialtyMap.get(key);
+            if (existing) {
+              specialtyMap.set(key, {
+                ...existing,
+                slug: category.slug,
+              });
+            }
+          }
+
+          this.specialties.set(Array.from(specialtyMap.values()));
+        }
+      },
+      error: () => {
         this.cities.set([]);
       },
     });

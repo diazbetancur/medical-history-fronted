@@ -84,7 +84,11 @@ export class BookAppointmentPageComponent {
   readonly selectedSlot = computed(() => this.slotForm.value.slot);
 
   // Min date (today)
-  readonly minDate = new Date();
+  readonly minDate = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  })();
 
   constructor() {
     // Initialize forms

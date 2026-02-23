@@ -7,6 +7,12 @@
       cierres)
     </p>
 
+    @if (data.appointmentId) {
+      <p class="dialog-description">
+        Esta atención quedará asociada a la cita seleccionada.
+      </p>
+    }
+
     @if (error()) {
       <div class="error-message">
         {{ error() }}

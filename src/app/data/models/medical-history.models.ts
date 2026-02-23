@@ -97,9 +97,30 @@ export interface PatientListItemDto {
   fullName: string;
   email: string;
   phone?: string;
+  address?: string;
+  street?: string;
+  city?: string;
+  country?: string;
   shareFullHistoryFlag: boolean;
   lastAppointmentUtc?: string;
   nextAppointmentUtc?: string;
+}
+
+export interface ProfessionalPatientSummaryDto {
+  patientProfileId: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  documentType?: string;
+  documentNumber?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  bloodType?: string;
+  countryId?: string;
+  cityId?: string;
+  countryName?: string;
+  cityName?: string;
+  shareFullHistoryFlag: boolean;
 }
 
 // =============================================================================

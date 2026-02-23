@@ -40,20 +40,8 @@ import { UiProfileService } from '@core/auth';
   selector: 'app-root-layout',
   standalone: true,
   imports: [RouterOutlet],
-  template: `
-    <!-- Simple pass-through to router-outlet -->
-    <!-- The actual shells are rendered by their own routes -->
-    <router-outlet />
-  `,
-  styles: [
-    `
-      :host {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
-    `,
-  ],
+  templateUrl: './root-layout.component.html',
+  styleUrl: './root-layout.component.scss',
 })
 export class RootLayoutComponent {
   private readonly uiProfile = inject(UiProfileService);

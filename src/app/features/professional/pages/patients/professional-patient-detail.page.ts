@@ -25,7 +25,10 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@core/auth/auth.store';
-import { ProfessionalEncounterListItemDto } from '@data/models';
+import {
+  ProfessionalEncounterListItemDto,
+  ProfessionalPatientSummaryDto,
+} from '@data/models';
 import { ProfessionalPatientAllergiesTabComponent } from '@patient/pages/allergies/professional-patient-allergies-tab.component';
 import { ProfessionalPatientBackgroundTabComponent } from '@patient/pages/background/professional-patient-background-tab.component';
 import { ProfessionalPatientExamsTabComponent } from '@patient/pages/exams/professional-patient-exams-tab.component';
@@ -36,6 +39,7 @@ import { ProfessionalPatientsService } from '../../services/professional-patient
 import { AddAddendumDialogComponent } from './dialogs/add-addendum-dialog.component';
 import { CreateEncounterDialogComponent } from './dialogs/create-encounter-dialog.component';
 import { EditEncounterDialogComponent } from './dialogs/edit-encounter-dialog.component';
+import { ViewEncounterDialogComponent } from './dialogs/view-encounter-dialog.component';
 
 @Component({
   selector: 'app-professional-patient-detail',
@@ -72,7 +76,10 @@ export class ProfessionalPatientDetailPage implements OnInit {
 
   // State signals
   readonly isLoading = signal(true);
+  readonly isLoadingSummary = signal(false);
+  readonly summaryError = signal<string | null>(null);
   readonly encounters = signal<ProfessionalEncounterListItemDto[]>([]);
+  readonly patientSummary = signal<ProfessionalPatientSummaryDto | null>(null);
   readonly totalItems = signal(0);
   readonly currentPage = signal(0); // 0-based for MatPaginator
   readonly pageSize = signal(10);
@@ -83,6 +90,30 @@ export class ProfessionalPatientDetailPage implements OnInit {
     this.patientsService.isFilteredByPrivacy(),
   );
 
+  readonly patientAddress = computed(() => {
+    const summary = this.patientSummary();
+    if (!summary) return 'No disponible';
+
+    const parts = [summary.cityName, summary.countryName]
+      .filter((value): value is string => !!value?.trim())
+      .map((value) => value.trim());
+
+    return parts.length ? parts.join(', ') : 'No disponible';
+  });
+
+  readonly patientDocument = computed(() => {
+    const summary = this.patientSummary();
+    if (!summary?.documentType && !summary?.documentNumber) {
+      return 'No disponible';
+    }
+
+    if (summary.documentType && summary.documentNumber) {
+      return `${summary.documentType} ${summary.documentNumber}`;
+    }
+
+    return summary.documentType || summary.documentNumber || 'No disponible';
+  });
+
   constructor() {
     // Monitor route param changes
     effect(
@@ -91,6 +122,7 @@ export class ProfessionalPatientDetailPage implements OnInit {
         if (id) {
           this.patientProfileId.set(id);
           this.loadHistory();
+          this.loadPatientSummary();
         }
       },
       { allowSignalWrites: true },
@@ -101,8 +133,40 @@ export class ProfessionalPatientDetailPage implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.patientProfileId.set(id);
-      this.loadHistory();
+      this.handleAutoCreateFromQueryParams();
     }
+  }
+
+  private loadPatientSummary(): void {
+    const patientId = this.patientProfileId();
+    if (!patientId) return;
+
+    this.isLoadingSummary.set(true);
+    this.summaryError.set(null);
+
+    this.patientsService
+      .getPatientSummary(patientId)
+      .pipe(finalize(() => this.isLoadingSummary.set(false)))
+      .subscribe({
+        next: (summary) => this.patientSummary.set(summary),
+        error: (error) => {
+          this.patientSummary.set(null);
+
+          if (error?.status === 403) {
+            this.summaryError.set(
+              'No tienes relación clínica con este paciente para ver el resumen.',
+            );
+            return;
+          }
+
+          if (error?.status === 404) {
+            this.summaryError.set('Paciente no encontrado.');
+            return;
+          }
+
+          this.summaryError.set('Error al cargar el resumen del paciente.');
+        },
+      });
   }
 
   /**
@@ -144,13 +208,17 @@ export class ProfessionalPatientDetailPage implements OnInit {
    * Open create encounter dialog
    */
   createEncounter(): void {
+    this.openCreateEncounterDialog();
+  }
+
+  private openCreateEncounterDialog(appointmentId?: string): void {
     const patientId = this.patientProfileId();
     if (!patientId) return;
 
     const dialogRef = this.dialog.open(CreateEncounterDialogComponent, {
       width: '600px',
       maxWidth: '95vw',
-      data: { patientProfileId: patientId },
+      data: { patientProfileId: patientId, appointmentId },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -161,6 +229,40 @@ export class ProfessionalPatientDetailPage implements OnInit {
         this.patientsService.invalidateAllCaches();
         this.loadHistory();
       }
+    });
+  }
+
+  private handleAutoCreateFromQueryParams(): void {
+    const shouldCreate =
+      this.route.snapshot.queryParamMap.get('createEncounter') === '1';
+
+    if (!shouldCreate) return;
+
+    const appointmentId =
+      this.route.snapshot.queryParamMap.get('appointmentId') ?? undefined;
+
+    this.openCreateEncounterDialog(appointmentId);
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        createEncounter: null,
+        appointmentId: null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  /**
+   * Open view encounter detail dialog
+   */
+  viewEncounter(encounter: ProfessionalEncounterListItemDto): void {
+    this.dialog.open(ViewEncounterDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      data: { encounterId: encounter.id },
     });
   }
 

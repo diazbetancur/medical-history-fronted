@@ -1,0 +1,51 @@
+@if (pwaInstall.shouldShowInstallUI()) {
+  <div class="install-prompt" role="banner" aria-label="Instalar aplicación">
+    @if (pwaInstall.isIOS()) {
+      <!-- iOS Safari Guide -->
+      <div class="install-content">
+        <mat-icon class="install-icon">ios_share</mat-icon>
+        <div class="install-text">
+          <strong>Instalar ProDirectory</strong>
+          <span
+            >Toca
+            <mat-icon class="inline-icon">ios_share</mat-icon>
+            y luego "Agregar a inicio"</span
+          >
+        </div>
+        <button
+          mat-icon-button
+          (click)="dismiss()"
+          aria-label="Cerrar"
+          class="close-btn"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    } @else if (pwaInstall.canInstall()) {
+      <!-- Chrome/Android Install Button -->
+      <div class="install-content">
+        <mat-icon class="install-icon">download</mat-icon>
+        <div class="install-text">
+          <strong>Instalar ProDirectory</strong>
+          <span>Acceso rápido desde tu pantalla de inicio</span>
+        </div>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="install()"
+          class="install-btn"
+        >
+          Instalar
+        </button>
+        <button
+          mat-icon-button
+          (click)="dismiss()"
+          aria-label="Cerrar"
+          class="close-btn"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+}

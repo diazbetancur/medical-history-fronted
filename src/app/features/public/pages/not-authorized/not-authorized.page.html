@@ -1,0 +1,36 @@
+<div class="not-authorized-container">
+  <div class="not-authorized-content">
+    <!-- Icon -->
+    <mat-icon class="error-icon">block</mat-icon>
+
+    <!-- Error Code -->
+    <h1 class="error-code">403</h1>
+
+    <!-- Title -->
+    <h2 class="error-title">Acceso No Autorizado</h2>
+
+    <!-- Message -->
+    <p class="error-message">
+      No tienes los permisos necesarios para acceder a este recurso.
+    </p>
+
+    <!-- Hint -->
+    <p class="error-hint">
+      Si crees que deberías tener acceso, contacta al administrador del sistema
+      para solicitar los permisos correspondientes.
+    </p>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a mat-raised-button color="primary" routerLink="/dashboard">
+        <mat-icon>arrow_back</mat-icon>
+        Ir al Dashboard
+      </a>
+
+      <a mat-stroked-button routerLink="/">
+        <mat-icon>home</mat-icon>
+        Ir al Inicio
+      </a>
+    </div>
+  </div>
+</div>

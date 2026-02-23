@@ -20,6 +20,7 @@ import { ProfessionalPatientsService } from '../../../services/professional-pati
 
 export interface CreateEncounterDialogData {
   patientProfileId: string;
+  appointmentId?: string;
 }
 
 @Component({
@@ -40,7 +41,7 @@ export class CreateEncounterDialogComponent {
   private readonly dialogRef = inject(
     MatDialogRef<CreateEncounterDialogComponent>,
   );
-  private readonly data = inject<CreateEncounterDialogData>(MAT_DIALOG_DATA);
+  readonly data = inject<CreateEncounterDialogData>(MAT_DIALOG_DATA);
   private readonly patientsService = inject(ProfessionalPatientsService);
   private readonly fb = inject(FormBuilder);
 
@@ -74,6 +75,7 @@ export class CreateEncounterDialogComponent {
         summary: formValue.summary || undefined,
         initialNote: formValue.initialNote!,
         noteTitle: formValue.noteTitle || undefined,
+        appointmentId: this.data.appointmentId || undefined,
       })
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
