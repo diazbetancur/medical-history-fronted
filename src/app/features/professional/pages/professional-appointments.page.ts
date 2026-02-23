@@ -334,16 +334,15 @@ import { ToastService } from '@shared/services';
                 <mat-spinner diameter="40"></mat-spinner>
                 <p>Cargando citas del rango...</p>
               </div>
-            } @else if (hasRangeFilterResult() && rangeAppointments().length === 0) {
+            } @else if (
+              hasRangeFilterResult() && rangeAppointments().length === 0
+            ) {
               <div class="empty-tab">
                 <mat-icon>event_busy</mat-icon>
                 <p>No hay citas para ese rango de fechas</p>
               </div>
             } @else if (rangeAppointments().length > 0) {
-              @for (
-                dateGroup of groupedRangeEntries();
-                track dateGroup.date
-              ) {
+              @for (dateGroup of groupedRangeEntries(); track dateGroup.date) {
                 <div class="date-group">
                   <h3 class="date-header">
                     <mat-icon>calendar_today</mat-icon>
@@ -662,12 +661,15 @@ export class ProfessionalAppointmentsPage implements OnInit {
 
     return Object.keys(grouped)
       .sort()
-      .reduce((acc, date) => {
-        acc[date] = grouped[date].sort((a, b) =>
-          a.startTime.localeCompare(b.startTime),
-        );
-        return acc;
-      }, {} as Record<string, AppointmentDto[]>);
+      .reduce(
+        (acc, date) => {
+          acc[date] = grouped[date].sort((a, b) =>
+            a.startTime.localeCompare(b.startTime),
+          );
+          return acc;
+        },
+        {} as Record<string, AppointmentDto[]>,
+      );
   });
   protected readonly groupedRangeEntries = computed(() =>
     Object.entries(this.groupedRangeAppointments()).map(
