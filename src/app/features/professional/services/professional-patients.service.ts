@@ -11,9 +11,9 @@ import {
   AddAddendumDto,
   CreateEncounterDto,
   MedicalEncounterDto,
-  ProfessionalPatientSummaryDto,
   ProfessionalPatientHistoryResponseDto,
   ProfessionalPatientsListResponseDto,
+  ProfessionalPatientSummaryDto,
   UpdateEncounterDto,
 } from '@data/models';
 import { environment } from '@env';

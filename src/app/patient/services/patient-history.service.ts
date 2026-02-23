@@ -96,28 +96,26 @@ export class PatientHistoryService {
     return this.http
       .get<any>(`${this.baseUrl}/history/${encounterId}`)
       .pipe(
-        map(
-          (response) => {
-            const item = response?.data ?? response;
+        map((response) => {
+          const item = response?.data ?? response;
 
-            return {
-              id: item.id,
-              patientProfileId: item.patientProfileId ?? '',
-              professionalProfileId: item.professionalProfileId ?? '',
-              professionalName:
-                item.professionalName ?? item.createdByProfessionalName ?? '',
-              appointmentId: item.appointmentId,
-              encounterDateUtc: item.encounterDateUtc ?? item.visitDate,
-              summary:
-                item.summary ??
-                item.diagnosis ??
-                (typeof item.notes === 'string' ? item.notes : undefined),
-              status: item.status ?? 'Closed',
-              closedAtUtc: item.closedAtUtc,
-              notes: this.extractNotes(item),
-            } as MedicalEncounterDto;
-          },
-        ),
+          return {
+            id: item.id,
+            patientProfileId: item.patientProfileId ?? '',
+            professionalProfileId: item.professionalProfileId ?? '',
+            professionalName:
+              item.professionalName ?? item.createdByProfessionalName ?? '',
+            appointmentId: item.appointmentId,
+            encounterDateUtc: item.encounterDateUtc ?? item.visitDate,
+            summary:
+              item.summary ??
+              item.diagnosis ??
+              (typeof item.notes === 'string' ? item.notes : undefined),
+            status: item.status ?? 'Closed',
+            closedAtUtc: item.closedAtUtc,
+            notes: this.extractNotes(item),
+          } as MedicalEncounterDto;
+        }),
       )
       .pipe(catchError((error) => this.handleError(error)));
   }
@@ -132,7 +130,9 @@ export class PatientHistoryService {
         createdAtUtc:
           note.createdAtUtc ?? item.encounterDateUtc ?? item.visitDate ?? '',
         createdByProfessionalProfileId:
-          note.createdByProfessionalProfileId ?? item.professionalProfileId ?? '',
+          note.createdByProfessionalProfileId ??
+          item.professionalProfileId ??
+          '',
         createdByProfessionalName:
           note.createdByProfessionalName ?? item.professionalName ?? '',
       }));

@@ -96,11 +96,9 @@
             <div class="summary-content">
               <span class="summary-label">Fecha de nacimiento</span>
               <span class="summary-value">
-                {{
-                  patientSummary()?.dateOfBirth
-                    ? (patientSummary()!.dateOfBirth | date: 'dd/MM/yyyy')
-                    : 'No disponible'
-                }}
+                {{ patientSummary()?.dateOfBirth ?
+                (patientSummary()!.dateOfBirth | date: 'dd/MM/yyyy') : 'No
+                disponible' }}
               </span>
             </div>
           </div>
@@ -248,7 +246,11 @@
             </mat-card-content>
 
             <mat-card-actions>
-              <button mat-button color="primary" (click)="viewEncounter(encounter)">
+              <button
+                mat-button
+                color="primary"
+                (click)="viewEncounter(encounter)"
+              >
                 <mat-icon>visibility</mat-icon>
                 Ver Detalle
               </button>

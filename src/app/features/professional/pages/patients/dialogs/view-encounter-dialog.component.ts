@@ -34,7 +34,9 @@ export interface ViewEncounterDialogData {
   styleUrl: './view-encounter-dialog.component.scss',
 })
 export class ViewEncounterDialogComponent implements OnInit {
-  private readonly dialogRef = inject(MatDialogRef<ViewEncounterDialogComponent>);
+  private readonly dialogRef = inject(
+    MatDialogRef<ViewEncounterDialogComponent>,
+  );
   private readonly data = inject<ViewEncounterDialogData>(MAT_DIALOG_DATA);
   private readonly patientsService = inject(ProfessionalPatientsService);
 
@@ -56,7 +58,9 @@ export class ViewEncounterDialogComponent implements OnInit {
       .subscribe({
         next: (encounter) => this.encounter.set(encounter),
         error: (error) => {
-          this.error.set(error.message || 'Error al cargar el detalle de la atención');
+          this.error.set(
+            error.message || 'Error al cargar el detalle de la atención',
+          );
         },
       });
   }
