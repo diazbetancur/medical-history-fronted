@@ -19,6 +19,33 @@ import {
   normalizeAppointmentStatus,
 } from '../models/appointment.dto';
 
+export interface RelatedProfessionalSpecialtyDto {
+  id: string;
+  name: string;
+  isPrimary: boolean;
+}
+
+export interface RelatedProfessionalDto {
+  id: string;
+  displayName: string;
+  slug: string;
+  profileImageUrl: string | null;
+  cityName: string | null;
+  countryName: string | null;
+  specialties: RelatedProfessionalSpecialtyDto[];
+  yearsOfExperience: number | null;
+  institutionSummary: string | null;
+  hasAvailabilityToday: boolean | null;
+}
+
+export interface RelatedProfessionalsResponseDto {
+  items: RelatedProfessionalDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -84,6 +111,28 @@ export class AppointmentsService {
   cancelAppointment(appointmentId: string): Observable<void> {
     return this.http
       .post<void>(`${this.baseUrl}/${appointmentId}/cancel`, null)
+      .pipe(catchError((error) => this.handleError(error)));
+  }
+
+  /**
+   * Get professionals related to my past appointments
+   * GET /api/appointments/mine/professionals
+   */
+  getMyRelatedProfessionals(
+    page = 1,
+    pageSize = 10,
+  ): Observable<RelatedProfessionalsResponseDto> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
+
+    return this.http
+      .get<RelatedProfessionalsResponseDto>(
+        `${this.baseUrl}/mine/professionals`,
+        {
+          params,
+        },
+      )
       .pipe(catchError((error) => this.handleError(error)));
   }
 

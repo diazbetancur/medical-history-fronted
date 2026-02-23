@@ -1,21 +1,44 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
+import { ApiError, getUserMessage } from '@core/http/api-error';
+import { PublicApi } from '@data/api';
+import { City } from '@data/api/api-models';
 import { BookAppointmentDialogComponent } from '@features/public/components/book-appointment-dialog.component';
+import { ToastService } from '@shared/services/toast.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
+import {
+  getInitials,
+  ProfessionalSearchFiltersDto,
+  ProfessionalSearchResultDto,
+} from '../../../public/models/professional-search.dto';
+import { SpecialtyDto } from '../../../public/models/specialty.dto';
+import { PublicCatalogService } from '../../../public/services/public-catalog.service';
+import { PublicProfessionalsService } from '../../../public/services/public-professionals.service';
 import { PatientProfileDto } from '../../models/patient-profile.dto';
 import { SlotDto } from '../../models/slot.dto';
 import {
-  RequestAppointmentDialogComponent,
-  SelectedProfessionalForBooking,
-} from '../home/request-appointment-dialog.component';
+  AppointmentsService,
+  RelatedProfessionalDto,
+} from '../../services/appointments.service';
 
-/**
- * Selected professional for wizard
- */
 export interface SelectedProfessional {
   professionalProfileId: string;
   slug: string;
@@ -23,35 +46,26 @@ export interface SelectedProfessional {
   specialty?: string;
 }
 
-/**
- * Wizard Store (internal to wizard page)
- * Manages wizard state across steps using signals
- */
 export class WizardStore {
-  // Step 1: Profile
   private readonly _profile = signal<PatientProfileDto | null>(null);
   readonly profile = this._profile.asReadonly();
 
-  // Step 2: Professional
   private readonly _selectedProfessional = signal<SelectedProfessional | null>(
     null,
   );
   readonly selectedProfessional = this._selectedProfessional.asReadonly();
 
-  // Step 3: Date & Slot
   private readonly _selectedDate = signal<string | null>(null);
   private readonly _selectedSlot = signal<SlotDto | null>(null);
   readonly selectedDate = this._selectedDate.asReadonly();
   readonly selectedSlot = this._selectedSlot.asReadonly();
 
-  // Computed: Check if each step is complete
   readonly isStep1Complete = computed(() => !!this._profile());
   readonly isStep2Complete = computed(() => !!this._selectedProfessional());
   readonly isStep3Complete = computed(
     () => !!this._selectedDate() && !!this._selectedSlot(),
   );
 
-  // Actions
   setProfile(profile: PatientProfileDto): void {
     this._profile.set(profile);
   }
@@ -78,50 +92,278 @@ export class WizardStore {
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
     MatCardModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './patient-wizard.page.html',
   styleUrl: './patient-wizard.page.scss',
 })
 export class PatientWizardPage implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly appointmentsService = inject(AppointmentsService);
+  private readonly professionalsService = inject(PublicProfessionalsService);
+  private readonly catalogService = inject(PublicCatalogService);
+  private readonly publicApi = inject(PublicApi);
+  private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
+  readonly searchControl = new FormControl<string>('');
+  readonly specialtyControl = new FormControl<string | null>(null);
+  readonly cityControl = new FormControl<string | null>(null);
+
+  readonly loading = signal(false);
+  readonly hasSearched = signal(false);
+  readonly errorMessage = signal<string | null>(null);
+  readonly specialties = signal<SpecialtyDto[]>([]);
+  readonly cities = signal<City[]>([]);
+  readonly professionals = signal<ProfessionalSearchResultDto[]>([]);
+  readonly listTitle = signal('Médicos con los que has tenido relación');
+
+  readonly getInitials = getInitials;
+  readonly hasResults = computed(() => this.professionals().length > 0);
+
   ngOnInit(): void {
-    queueMicrotask(() => this.openRequestAppointment());
+    this.loadCatalogs();
+    this.setupDebounce();
+    this.loadInitialProfessionals();
   }
 
-  openRequestAppointment(): void {
-    const selectorRef = this.dialog.open(RequestAppointmentDialogComponent, {
-      width: '980px',
-      maxWidth: '96vw',
-      data: {
-        pageSize: 12,
+  searchProfessionals(): void {
+    const filters: ProfessionalSearchFiltersDto = {
+      q: this.searchControl.value?.trim() || undefined,
+      specialtyId: this.specialtyControl.value || undefined,
+      cityId: this.cityControl.value || undefined,
+      page: 1,
+      pageSize: 12,
+    };
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+    this.hasSearched.set(true);
+    this.listTitle.set('Resultados de búsqueda');
+
+    this.professionalsService.search(filters).subscribe({
+      next: (response: { professionals: ProfessionalSearchResultDto[] }) => {
+        this.professionals.set(response.professionals ?? []);
+        this.loading.set(false);
+      },
+      error: (error: ApiError) => {
+        this.errorMessage.set(getUserMessage(error));
+        this.professionals.set([]);
+        this.loading.set(false);
       },
     });
+  }
 
-    selectorRef
-      .afterClosed()
-      .subscribe((selected: SelectedProfessionalForBooking | null) => {
-        if (!selected) {
-          this.router.navigate(['/patient']);
+  clearSearch(): void {
+    this.searchControl.setValue('');
+    this.specialtyControl.setValue(null);
+    this.cityControl.setValue(null);
+    this.hasSearched.set(false);
+    this.loadInitialProfessionals();
+  }
+
+  viewProfile(item: ProfessionalSearchResultDto): void {
+    if (!item.slug) {
+      this.toast.warning('Este profesional no tiene perfil público disponible');
+      return;
+    }
+
+    this.router.navigate(['/pro', item.slug]);
+  }
+
+  bookAppointment(item: ProfessionalSearchResultDto): void {
+    if (!item.slug) {
+      this.toast.warning('No pudimos abrir el perfil para agendar la cita');
+      return;
+    }
+
+    this.dialog.open(BookAppointmentDialogComponent, {
+      width: '760px',
+      maxWidth: '96vw',
+      data: {
+        slug: item.slug,
+        professionalId: item.professionalProfileId,
+        name: item.fullName,
+        imageUrl: item.photoUrl,
+        specialties: item.specialties.map(
+          (specialty: { name: string }) => specialty.name,
+        ),
+      },
+    });
+  }
+
+  retryInitialLoad(): void {
+    this.hasSearched.set(false);
+    this.loadInitialProfessionals();
+  }
+
+  goBackHome(): void {
+    this.router.navigate(['/patient']);
+  }
+
+  onSearchClick(): void {
+    this.searchProfessionals();
+  }
+
+  hasSearchText(): boolean {
+    return !!this.searchControl.value?.trim();
+  }
+
+  searchPlaceholder(): string {
+    return 'Nombre o especialidad';
+  }
+
+  sectionSubtitle(): string {
+    if (this.listTitle() === 'Médicos con los que has tenido relación') {
+      return 'Basado en tus citas previas.';
+    }
+    if (this.listTitle() === 'Médicos recomendados') {
+      return 'Te mostramos opciones disponibles para comenzar.';
+    }
+    return 'Puedes ver perfil o agendar directamente.';
+  }
+
+  trackByProfessional(_: number, item: ProfessionalSearchResultDto): string {
+    return item.professionalProfileId;
+  }
+
+  primarySpecialty(item: ProfessionalSearchResultDto): string {
+    return item.specialties[0]?.name ?? 'Especialidad no disponible';
+  }
+
+  hasLocation(item: ProfessionalSearchResultDto): boolean {
+    return !!item.city || !!item.country;
+  }
+
+  locationText(item: ProfessionalSearchResultDto): string {
+    return [item.city, item.country].filter((value) => !!value).join(', ');
+  }
+
+  experienceText(item: ProfessionalSearchResultDto): string | null {
+    if (!item.yearsOfExperience || item.yearsOfExperience <= 0) return null;
+    return `${item.yearsOfExperience} años de experiencia`;
+  }
+
+  showEmptyState(): boolean {
+    return (
+      !this.loading() &&
+      !this.errorMessage() &&
+      this.hasSearched() &&
+      !this.hasResults()
+    );
+  }
+
+  showInitialEmptyState(): boolean {
+    return (
+      !this.loading() &&
+      !this.errorMessage() &&
+      !this.hasResults() &&
+      !this.hasSearched()
+    );
+  }
+
+  resetAndLoadDefault(): void {
+    this.searchControl.setValue('');
+    this.specialtyControl.setValue(null);
+    this.cityControl.setValue(null);
+    this.hasSearched.set(false);
+    this.loadInitialProfessionals();
+  }
+
+  private loadInitialProfessionals(): void {
+    this.loading.set(true);
+    this.errorMessage.set(null);
+    this.listTitle.set('Médicos con los que has tenido relación');
+
+    this.appointmentsService.getMyRelatedProfessionals(1, 10).subscribe({
+      next: (response) => {
+        const related = response.items ?? [];
+        if (related.length > 0) {
+          this.professionals.set(related.map((item) => this.mapRelated(item)));
+          this.loading.set(false);
           return;
         }
 
-        this.dialog.open(BookAppointmentDialogComponent, {
-          width: '760px',
-          maxWidth: '96vw',
-          data: {
-            slug: selected.slug,
-            professionalId: selected.professionalProfileId,
-            name: selected.fullName,
-            imageUrl: selected.photoUrl,
-            specialties: selected.specialty ? [selected.specialty] : [],
-          },
-        });
-      });
+        this.loadFallbackProfessionals();
+      },
+      error: () => {
+        this.loadFallbackProfessionals();
+      },
+    });
+  }
+
+  private loadFallbackProfessionals(): void {
+    this.listTitle.set('Médicos recomendados');
+    this.professionalsService.search({ page: 1, pageSize: 10 }).subscribe({
+      next: (response: { professionals: ProfessionalSearchResultDto[] }) => {
+        this.professionals.set(response.professionals ?? []);
+        this.loading.set(false);
+      },
+      error: (error: ApiError) => {
+        this.errorMessage.set(getUserMessage(error));
+        this.professionals.set([]);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private mapRelated(
+    item: RelatedProfessionalDto,
+  ): ProfessionalSearchResultDto {
+    return {
+      professionalProfileId: item.id,
+      slug: item.slug,
+      userId: item.id,
+      fullName: item.displayName,
+      professionalTitle: undefined,
+      photoUrl: item.profileImageUrl ?? undefined,
+      specialties: (item.specialties ?? []).map((specialty) => ({
+        id: specialty.id,
+        name: specialty.name,
+      })),
+      city: item.cityName ?? undefined,
+      country: item.countryName ?? undefined,
+      yearsOfExperience: item.yearsOfExperience ?? undefined,
+      isAvailableForAppointments: item.hasAvailabilityToday ?? true,
+    };
+  }
+
+  private setupDebounce(): void {
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(350),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.searchProfessionals());
+
+    this.specialtyControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.searchProfessionals());
+
+    this.cityControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.searchProfessionals());
+  }
+
+  private loadCatalogs(): void {
+    this.catalogService.getSpecialties().subscribe({
+      next: (items: SpecialtyDto[]) => this.specialties.set(items),
+      error: () => this.specialties.set([]),
+    });
+
+    this.publicApi.getMetadata().subscribe({
+      next: (metadata) => this.cities.set(metadata.cities ?? []),
+      error: () => this.cities.set([]),
+    });
   }
 }
