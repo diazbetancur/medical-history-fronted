@@ -9,6 +9,7 @@ import {
 import { Router } from '@angular/router';
 import { ContextDto, CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
+import { ToastService } from '@shared/services/toast.service';
 import { catchError, Observable, of, tap } from 'rxjs';
 import { TokenStorage } from './token-storage.service';
 
@@ -54,6 +55,7 @@ export class AuthStore {
   private readonly tokenStorage = inject(TokenStorage);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly toast = inject(ToastService);
 
   // Private writable signal
   private readonly _state = signal<AuthState>(INITIAL_STATE);
@@ -191,6 +193,9 @@ export class AuthStore {
    */
   logout(): void {
     this.clearAuth();
+    this.toast.info(
+      'Sesión cerrada. Para continuar, inicia sesión desde el botón "Iniciar Sesión" en el inicio.',
+    );
     this.router.navigate(['/']);
     // this.debugLog('[AuthStore] User logged out');
   }

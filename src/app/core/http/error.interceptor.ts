@@ -32,7 +32,7 @@ const ERROR_MESSAGES: Record<number, string> = {
 };
 
 /**
- * Routes that should redirect to login on 401
+ * Routes that should redirect to home on 401
  */
 const AUTH_ROUTES = ['/dashboard', '/admin', '/api/professional', '/api/admin'];
 
@@ -43,7 +43,7 @@ const AUTH_ROUTES = ['/dashboard', '/admin', '/api/professional', '/api/admin'];
 const SILENT_ERROR_URLS = ['/public/search/suggest'];
 
 /**
- * Check if error should trigger redirect to login
+ * Check if error should trigger redirect to home
  */
 function shouldRedirectToLogin(url: string): boolean {
   return AUTH_ROUTES.some((route) => url.includes(route));
@@ -68,7 +68,7 @@ function shouldSilenceError(url: string, status: number): boolean {
  *
  * Responsibilities:
  * - Normalize errors to ProblemDetails format
- * - Handle 401 with redirect to login
+ * - Handle 401 with redirect to home
  * - Handle 403 with redirect to forbidden page
  * - Show toast notifications for user feedback
  * - Log errors in development with correlation ID
@@ -99,12 +99,15 @@ export const errorInterceptor: HttpInterceptorFn = (
       // Handle 401 Unauthorized
       if (error.status === 401 && shouldRedirectToLogin(req.url)) {
         tokenStorage.clearToken();
-        toast.error(problemDetails.title);
 
-        // Only redirect if not already on login page
-        if (!router.url.startsWith('/login')) {
-          router.navigate(['/login'], {
-            queryParams: { returnUrl: router.url, reason: 'session_expired' },
+        // Only redirect if not already on home
+        if (router.url !== '/') {
+          router.navigate(['/'], {
+            queryParams: {
+              returnUrl: router.url,
+              reason: 'session_expired',
+              authRequired: '1',
+            },
           });
         }
       }

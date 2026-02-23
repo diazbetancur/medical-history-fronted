@@ -1,5 +1,10 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -8,7 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTabsModule } from '@angular/material/tabs';
 import { AuthStore } from '@core/auth';
@@ -82,6 +87,10 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly sectionsTab = signal(0);
   readonly selectedSpecialtyIds = signal<string[]>([]);
   readonly showSpecialtyProposal = signal(false);
+  readonly specialtySearchControl = new FormControl<string>('', {
+    nonNullable: true,
+  });
+  readonly specialtyToAddControl = new FormControl<string | null>(null);
   readonly specialtiesLoaded = signal(false);
   readonly specialtiesCatalogLoaded = signal(false);
   readonly proposalsLoaded = signal(false);
@@ -137,6 +146,43 @@ export class ProfessionalOnboardingPage implements OnInit {
     const countryId = this.locationForm.get('countryId')?.value;
     if (!countryId) return this.cities();
     return this.cities().filter((city) => city.countryId === countryId);
+  });
+
+  readonly selectedSpecialties = computed(() => {
+    const selectedIds = this.selectedSpecialtyIds();
+    const catalogById = new Map(
+      this.availableSpecialties().map((item) => [item.id, item]),
+    );
+    const assignedById = new Map(
+      this.specialties().map((item) => [item.id, item]),
+    );
+
+    return selectedIds
+      .map((id) => {
+        const fromCatalog = catalogById.get(id);
+        if (fromCatalog) {
+          return { id: fromCatalog.id, name: fromCatalog.name };
+        }
+
+        const fromAssigned = assignedById.get(id);
+        if (fromAssigned) {
+          return { id: fromAssigned.id, name: fromAssigned.name };
+        }
+
+        return null;
+      })
+      .filter((item): item is { id: string; name: string } => !!item);
+  });
+
+  readonly availableSpecialtiesForPicker = computed(() => {
+    const selected = new Set(this.selectedSpecialtyIds());
+    const search = this.specialtySearchControl.value.trim().toLowerCase();
+
+    return this.availableSpecialties().filter((item) => {
+      if (selected.has(item.id)) return false;
+      if (!search) return true;
+      return item.name.toLowerCase().includes(search);
+    });
   });
 
   // ─── User info ─────────────────────────────────────────────────────────────
@@ -259,12 +305,21 @@ export class ProfessionalOnboardingPage implements OnInit {
     });
   }
 
-  onSpecialtiesSelectionChange(event: MatSelectChange): void {
-    const selected = (event.value ?? []) as string[];
-    const hasOther = selected.includes('OTHER_OPTION');
-    this.showSpecialtyProposal.set(hasOther);
-    this.selectedSpecialtyIds.set(
-      selected.filter((id) => id !== 'OTHER_OPTION'),
+  addSpecialtyToSelection(): void {
+    const specialtyId = this.specialtyToAddControl.value;
+    if (!specialtyId) return;
+
+    this.selectedSpecialtyIds.update((current) => {
+      if (current.includes(specialtyId)) return current;
+      return [...current, specialtyId];
+    });
+
+    this.specialtyToAddControl.setValue(null);
+  }
+
+  removeSpecialtyFromSelection(specialtyId: string): void {
+    this.selectedSpecialtyIds.update((current) =>
+      current.filter((id) => id !== specialtyId),
     );
   }
 

@@ -54,6 +54,8 @@ export interface CreateAbsenceDto {
   institutionId?: string | null;
   /** Motivo/nota (opcional) */
   reason?: string;
+  /** Duración de slot para override */
+  slotDurationMinutes?: number;
 }
 
 /**

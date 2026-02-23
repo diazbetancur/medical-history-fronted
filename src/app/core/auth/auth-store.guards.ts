@@ -51,7 +51,7 @@ export interface PermissionRouteData {
  *
  * Características:
  * - Usa AuthStore.isAuthenticated() (signal)
- * - Redirige a /login si no autenticado
+ * - Redirige a / (home) si no autenticado
  * - Guarda returnUrl en query params
  * - SSR-safe
  *
@@ -75,9 +75,8 @@ export const authStoreGuard: CanActivateFn = (
     return true;
   }
 
-  // Store intended URL for redirect after login
-  return router.createUrlTree(['/login'], {
-    queryParams: { returnUrl: state.url },
+  return router.createUrlTree(['/'], {
+    queryParams: { returnUrl: state.url, authRequired: '1' },
   });
 };
 
@@ -129,8 +128,8 @@ export const contextGuard: CanActivateFn = (
 
   // Verificar autenticación primero
   if (!authStore.isAuthenticated()) {
-    return router.createUrlTree(['/login'], {
-      queryParams: { returnUrl: state.url },
+    return router.createUrlTree(['/'], {
+      queryParams: { returnUrl: state.url, authRequired: '1' },
     });
   }
 
@@ -201,8 +200,8 @@ export const permissionStoreGuard: CanActivateFn = (
 
   // Verificar autenticación primero
   if (!authStore.isAuthenticated()) {
-    return router.createUrlTree(['/login'], {
-      queryParams: { returnUrl: state.url },
+    return router.createUrlTree(['/'], {
+      queryParams: { returnUrl: state.url, authRequired: '1' },
     });
   }
 

@@ -1,15 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatStepperModule } from '@angular/material/stepper';
+import { Router } from '@angular/router';
+import { BookAppointmentDialogComponent } from '@features/public/components/book-appointment-dialog.component';
 import { PatientProfileDto } from '../../models/patient-profile.dto';
 import { SlotDto } from '../../models/slot.dto';
-import { Step2SearchProfessionalComponent } from './steps/step2-search-professional.component';
-import { Step3SlotsComponent } from './steps/step3-slots.component';
-import { Step4ConfirmComponent } from './steps/step4-confirm.component';
-import { Step5MyAppointmentsComponent } from './steps/step5-my-appointments.component';
+import {
+  RequestAppointmentDialogComponent,
+  SelectedProfessionalForBooking,
+} from '../home/request-appointment-dialog.component';
 
 /**
  * Selected professional for wizard
@@ -76,23 +78,50 @@ export class WizardStore {
   standalone: true,
   imports: [
     CommonModule,
-    MatStepperModule,
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    Step2SearchProfessionalComponent,
-    Step3SlotsComponent,
-    Step4ConfirmComponent,
-    Step5MyAppointmentsComponent,
+    MatDialogModule,
   ],
-  providers: [WizardStore],
   templateUrl: './patient-wizard.page.html',
   styleUrl: './patient-wizard.page.scss',
 })
-export class PatientWizardPage {
-  readonly wizardStore = inject(WizardStore);
+export class PatientWizardPage implements OnInit {
+  private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
 
-  // Expose wizard state for template
-  readonly isStep2Complete = this.wizardStore.isStep2Complete;
-  readonly isStep3Complete = this.wizardStore.isStep3Complete;
+  ngOnInit(): void {
+    queueMicrotask(() => this.openRequestAppointment());
+  }
+
+  openRequestAppointment(): void {
+    const selectorRef = this.dialog.open(RequestAppointmentDialogComponent, {
+      width: '980px',
+      maxWidth: '96vw',
+      data: {
+        pageSize: 12,
+      },
+    });
+
+    selectorRef
+      .afterClosed()
+      .subscribe((selected: SelectedProfessionalForBooking | null) => {
+        if (!selected) {
+          this.router.navigate(['/patient']);
+          return;
+        }
+
+        this.dialog.open(BookAppointmentDialogComponent, {
+          width: '760px',
+          maxWidth: '96vw',
+          data: {
+            slug: selected.slug,
+            professionalId: selected.professionalProfileId,
+            name: selected.fullName,
+            imageUrl: selected.photoUrl,
+            specialties: selected.specialty ? [selected.specialty] : [],
+          },
+        });
+      });
+  }
 }

@@ -35,6 +35,7 @@ import {
   type WeeklyScheduleDto,
 } from '@data/models/professional-schedule.models';
 import { ProfessionalAvailabilityStore } from '@data/stores/professional-availability.store';
+import { ToastService } from '@shared/services/toast.service';
 import { ConfirmDialogComponent } from '@shared/ui';
 
 @Component({
@@ -143,24 +144,26 @@ import { ConfirmDialogComponent } from '@shared/ui';
                                 />
                               </mat-form-field>
 
-                              <mat-form-field
-                                appearance="outline"
-                                class="location-field"
-                              >
-                                <mat-label>Sede</mat-label>
-                                <mat-select
-                                  formControlName="professionalLocationId"
+                              @if (store.locations().length > 0) {
+                                <mat-form-field
+                                  appearance="outline"
+                                  class="location-field"
                                 >
-                                  @for (
-                                    location of store.locations();
-                                    track location.id
-                                  ) {
-                                    <mat-option [value]="location.id">
-                                      {{ location.name }}
-                                    </mat-option>
-                                  }
-                                </mat-select>
-                              </mat-form-field>
+                                  <mat-label>Sede</mat-label>
+                                  <mat-select
+                                    formControlName="professionalLocationId"
+                                  >
+                                    @for (
+                                      location of store.locations();
+                                      track location.id
+                                    ) {
+                                      <mat-option [value]="location.id">
+                                        {{ location.name }}
+                                      </mat-option>
+                                    }
+                                  </mat-select>
+                                </mat-form-field>
+                              }
 
                               <button
                                 mat-icon-button
@@ -191,7 +194,7 @@ import { ConfirmDialogComponent } from '@shared/ui';
 
               <div class="slot-config">
                 <mat-form-field appearance="outline">
-                  <mat-label>Duración de slots (minutos)</mat-label>
+                  <mat-label>Duración de citas (minutos)</mat-label>
                   <input
                     matInput
                     type="number"
@@ -204,8 +207,13 @@ import { ConfirmDialogComponent } from '@shared/ui';
 
                 <mat-form-field appearance="outline">
                   <mat-label>Zona horaria</mat-label>
-                  <input matInput type="text" formControlName="timeZone" />
-                  <mat-hint>Ejemplo: America/Bogota</mat-hint>
+                  <input
+                    matInput
+                    type="text"
+                    [value]="'America/Tegucigalpa'"
+                    readonly
+                  />
+                  <mat-hint>Honduras (fijo)</mat-hint>
                 </mat-form-field>
 
                 <mat-slide-toggle formControlName="isActive"
@@ -318,19 +326,21 @@ import { ConfirmDialogComponent } from '@shared/ui';
                         />
                       </mat-form-field>
 
-                      <mat-form-field appearance="outline">
-                        <mat-label>Sede</mat-label>
-                        <mat-select formControlName="professionalLocationId">
-                          @for (
-                            location of store.locations();
-                            track location.id
-                          ) {
-                            <mat-option [value]="location.id">{{
-                              location.name
-                            }}</mat-option>
-                          }
-                        </mat-select>
-                      </mat-form-field>
+                      @if (store.locations().length > 0) {
+                        <mat-form-field appearance="outline">
+                          <mat-label>Sede</mat-label>
+                          <mat-select formControlName="professionalLocationId">
+                            @for (
+                              location of store.locations();
+                              track location.id
+                            ) {
+                              <mat-option [value]="location.id">{{
+                                location.name
+                              }}</mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                      }
                     </div>
                   }
 
@@ -379,7 +389,10 @@ import { ConfirmDialogComponent } from '@shared/ui';
                         <button
                           mat-icon-button
                           color="warn"
-                          (click)="deleteAbsence(absence.id)"
+                          [disabled]="!canDeleteAbsence(absence.startDateTime)"
+                          (click)="
+                            deleteAbsence(absence.id, absence.startDateTime)
+                          "
                         >
                           <mat-icon>delete</mat-icon>
                         </button>
@@ -618,8 +631,11 @@ import { ConfirmDialogComponent } from '@shared/ui';
   ],
 })
 export class ProfessionalAvailabilityPage implements OnInit {
+  private static readonly HONDURAS_TIMEZONE = 'America/Tegucigalpa';
+
   protected readonly store = inject(ProfessionalAvailabilityStore);
   protected readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
 
   protected readonly daysOfWeek = DAYS_OF_WEEK;
@@ -666,7 +682,10 @@ export class ProfessionalAvailabilityPage implements OnInit {
         30,
         [Validators.required, Validators.min(5), Validators.max(240)],
       ],
-      timeZone: ['America/Bogota', Validators.required],
+      timeZone: [
+        ProfessionalAvailabilityPage.HONDURAS_TIMEZONE,
+        Validators.required,
+      ],
       isActive: [true],
     });
   }
@@ -679,7 +698,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
 
     this.scheduleForm.patchValue({
       defaultSlotDuration: schedule.defaultSlotDuration,
-      timeZone: schedule.timeZone,
+      timeZone: ProfessionalAvailabilityPage.HONDURAS_TIMEZONE,
       isActive: schedule.isActive,
     });
   }
@@ -706,10 +725,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
     return this.fb.group({
       startTime: [block.startTime, Validators.required],
       endTime: [block.endTime, Validators.required],
-      professionalLocationId: [
-        block.professionalLocationId ?? null,
-        Validators.required,
-      ],
+      professionalLocationId: [block.professionalLocationId ?? null],
     });
   }
 
@@ -804,10 +820,11 @@ export class ProfessionalAvailabilityPage implements OnInit {
     if (this.scheduleForm.invalid) return;
 
     const value = this.scheduleForm.value;
+
     this.store.updateWeeklySchedule(
       value.days,
       value.defaultSlotDuration,
-      value.timeZone,
+      ProfessionalAvailabilityPage.HONDURAS_TIMEZONE,
       value.isActive,
     );
   }
@@ -823,6 +840,9 @@ export class ProfessionalAvailabilityPage implements OnInit {
       value.overrideEndTime &&
       value.overrideEndTime <= value.overrideStartTime
     ) {
+      this.toast.error(
+        'La hora fin del override debe ser mayor a la hora inicio.',
+      );
       return;
     }
 
@@ -838,6 +858,8 @@ export class ProfessionalAvailabilityPage implements OnInit {
           ? (value.professionalLocationId ?? null)
           : null,
       reason: value.reason || undefined,
+      slotDurationMinutes:
+        Number(this.scheduleForm.get('defaultSlotDuration')?.value) || 30,
       institutionId: null,
     };
 
@@ -845,7 +867,14 @@ export class ProfessionalAvailabilityPage implements OnInit {
     this.cancelAbsenceForm();
   }
 
-  protected deleteAbsence(absenceId: string): void {
+  protected deleteAbsence(absenceId: string, startDateTime: string): void {
+    if (!this.canDeleteAbsence(startDateTime)) {
+      this.toast.info(
+        'Solo puedes eliminar excepciones del día actual o futuras.',
+      );
+      return;
+    }
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -862,6 +891,16 @@ export class ProfessionalAvailabilityPage implements OnInit {
       if (!confirmed) return;
       this.store.deleteAbsence(absenceId);
     });
+  }
+
+  protected canDeleteAbsence(startDateTime: string): boolean {
+    const exceptionDate = new Date(startDateTime);
+    exceptionDate.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return exceptionDate >= today;
   }
 
   protected cancelAbsenceForm(): void {
