@@ -30,6 +30,7 @@ import {
   ProfessionalSpecialtyProposal,
   PublicSpecialtyCatalogItem,
   ReplaceProfessionalSpecialtiesPayload,
+  Service,
   UpdateProfessionalProfilePayload,
 } from '@data/api/api-models';
 import { ToastService } from '@shared/services';
@@ -82,9 +83,12 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly specialties = signal<ProfessionalSpecialty[]>([]);
   readonly availableSpecialties = signal<PublicSpecialtyCatalogItem[]>([]);
   readonly specialtyProposals = signal<ProfessionalSpecialtyProposal[]>([]);
+  readonly services = signal<Service[]>([]);
   readonly education = signal<ProfessionalEducationSummary[]>([]);
   readonly locations = signal<ProfessionalLocation[]>([]);
   readonly sectionBusy = signal(false);
+  readonly showServiceForm = signal(false);
+  readonly editingServiceId = signal<string | null>(null);
   readonly editingEducationId = signal<string | null>(null);
   readonly editingLocationId = signal<string | null>(null);
   readonly sectionsTab = signal(0);
@@ -100,6 +104,7 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly specialtiesLoaded = signal(false);
   readonly specialtiesCatalogLoaded = signal(false);
   readonly proposalsLoaded = signal(false);
+  readonly servicesLoaded = signal(false);
   readonly educationLoaded = signal(false);
   readonly locationsLoaded = signal(false);
 
@@ -129,6 +134,11 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly specialtyProposalForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(150)]],
     justification: ['', [Validators.maxLength(500)]],
+  });
+
+  readonly serviceForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.maxLength(200)]],
+    description: ['', [Validators.maxLength(1000)]],
   });
 
   readonly educationForm = this.fb.group({
@@ -383,6 +393,23 @@ export class ProfessionalOnboardingPage implements OnInit {
     });
   }
 
+  private loadServicesBlock(force = false): void {
+    if (this.servicesLoaded() && !force) return;
+
+    this.sectionBusy.set(true);
+    this.professionalApi.getServices().subscribe({
+      next: (items) => {
+        this.services.set(items ?? []);
+        this.servicesLoaded.set(true);
+        this.sectionBusy.set(false);
+      },
+      error: () => {
+        this.toast.error('No fue posible cargar los servicios');
+        this.sectionBusy.set(false);
+      },
+    });
+  }
+
   private loadLocationsBlock(force = false): void {
     if (this.locationsLoaded() && !force) return;
 
@@ -406,12 +433,124 @@ export class ProfessionalOnboardingPage implements OnInit {
       return;
     }
     if (index === 2) {
-      this.loadEducationBlock();
+      this.loadServicesBlock();
       return;
     }
     if (index === 3) {
+      this.loadEducationBlock();
+      return;
+    }
+    if (index === 4) {
       this.loadLocationsBlock();
     }
+  }
+
+  startCreateService(): void {
+    this.editingServiceId.set(null);
+    this.serviceForm.reset({
+      name: '',
+      description: '',
+    });
+    this.showServiceForm.set(true);
+  }
+
+  editService(service: Service): void {
+    this.editingServiceId.set(service.id);
+    this.serviceForm.patchValue({
+      name: service.name,
+      description: service.description ?? '',
+    });
+    this.showServiceForm.set(true);
+  }
+
+  cancelServiceEdit(): void {
+    this.editingServiceId.set(null);
+    this.serviceForm.reset({
+      name: '',
+      description: '',
+    });
+    this.showServiceForm.set(false);
+  }
+
+  saveService(): void {
+    if (this.serviceForm.invalid) {
+      this.serviceForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.serviceForm.getRawValue();
+    const payload = {
+      name: value.name,
+      description: value.description || undefined,
+      priceFrom: 0,
+      priceTo: 0,
+      duration: '0',
+      sortOrder: 1,
+    };
+
+    const editingId = this.editingServiceId();
+    this.sectionBusy.set(true);
+
+    const request$ = editingId
+      ? this.professionalApi.updateService(editingId, payload)
+      : this.professionalApi.createService(payload);
+
+    request$.subscribe({
+      next: (service) => {
+        if (editingId) {
+          this.services.update((current) =>
+            current.map((item) => (item.id === service.id ? service : item)),
+          );
+        } else {
+          this.services.update((current) => [service, ...current]);
+        }
+
+        this.servicesLoaded.set(true);
+        this.cancelServiceEdit();
+        this.toast.success(
+          editingId ? 'Servicio actualizado' : 'Servicio agregado',
+        );
+        this.sectionBusy.set(false);
+      },
+      error: () => {
+        this.toast.error('No fue posible guardar el servicio');
+        this.sectionBusy.set(false);
+      },
+    });
+  }
+
+  deleteService(serviceId: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar servicio',
+        message: '¿Estás seguro de eliminar este servicio?',
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.sectionBusy.set(true);
+      this.professionalApi.deleteService(serviceId).subscribe({
+        next: () => {
+          this.services.update((current) =>
+            current.filter((item) => item.id !== serviceId),
+          );
+          this.servicesLoaded.set(true);
+          this.toast.success('Servicio eliminado');
+          this.sectionBusy.set(false);
+        },
+        error: () => {
+          this.toast.error('No fue posible eliminar el servicio');
+          this.sectionBusy.set(false);
+        },
+      });
+    });
   }
 
   saveProfile(): void {

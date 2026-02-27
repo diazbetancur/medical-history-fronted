@@ -330,6 +330,117 @@
         </div>
       </mat-tab>
 
+      <mat-tab label="Servicios">
+        <div class="form-section nested-section">
+          <div class="section-header">
+            <mat-icon>medical_information</mat-icon>
+            <span>Servicios</span>
+          </div>
+
+          @if (sectionBusy() && !servicesLoaded()) {
+          <div class="loading-state inline-loading">
+            <mat-spinner diameter="24"></mat-spinner>
+            <span>Cargando servicios...</span>
+          </div>
+          } @else {
+          <div class="inline-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              [disabled]="sectionBusy()"
+              (click)="startCreateService()"
+            >
+              Adicionar servicio
+            </button>
+          </div>
+
+          @if (showServiceForm()) {
+          <form
+            class="inline-form"
+            [formGroup]="serviceForm"
+            (ngSubmit)="saveService()"
+          >
+            <div class="row-2">
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre *</mat-label>
+                <input
+                  matInput
+                  formControlName="name"
+                  placeholder="Ej. Consulta General"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Descripción</mat-label>
+                <input
+                  matInput
+                  formControlName="description"
+                  placeholder="Ej. Atención primaria"
+                />
+              </mat-form-field>
+            </div>
+
+            <div class="inline-actions">
+              <button mat-button type="button" (click)="cancelServiceEdit()">
+                Cancelar
+              </button>
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                [disabled]="sectionBusy()"
+              >
+                {{ editingServiceId() ? 'Actualizar servicio' : 'Guardar
+                servicio' }}
+              </button>
+            </div>
+          </form>
+          } @if (services().length > 0) {
+          <div class="services-table-wrap">
+            <table class="services-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Opciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (service of services(); track service.id) {
+                <tr>
+                  <td>{{ service.name }}</td>
+                  <td>{{ service.description ?? '—' }}</td>
+                  <td>
+                    <div class="inline-actions">
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="editService(service)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        mat-button
+                        color="warn"
+                        type="button"
+                        (click)="deleteService(service.id)"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          } @else {
+          <p class="empty-hint">Aún no has agregado servicios.</p>
+          } }
+        </div>
+      </mat-tab>
+
       <mat-tab label="Formación">
         <div class="form-section nested-section">
           <div class="section-header">
@@ -631,7 +742,7 @@
     @if (!hasExistingProfile()) {
     <p class="terms-note standalone-note">
       Primero crea tu perfil para habilitar las tabs de especialidades,
-      formación y sedes.
+      servicios, formación y sedes.
     </p>
     } }
   </mat-card>
