@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import {
   FormBuilder,
@@ -8,7 +9,12 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,6 +41,173 @@ import {
 } from '@data/api/api-models';
 import { ToastService } from '@shared/services';
 import { ConfirmDialogComponent } from '@shared/ui';
+
+interface ProfessionalEducationFormDialogData {
+  title: string;
+  submitLabel: string;
+  educationTypeOptions: Array<{ value: number; label: string }>;
+  initial?: {
+    type: number;
+    degreeTitle: string;
+    institutionName: string;
+    institutionCountry: string;
+    startYear: number | null;
+    graduationYear: number | null;
+    description: string;
+  };
+}
+
+interface ProfessionalEducationFormDialogResult {
+  type: number;
+  degreeTitle: string;
+  institutionName: string;
+  institutionCountry?: string;
+  startYear?: number;
+  graduationYear?: number;
+  description?: string;
+}
+
+@Component({
+  selector: 'app-professional-education-form-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+  ],
+  template: `
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+
+    <mat-dialog-content>
+      <form [formGroup]="form" class="dialog-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo *</mat-label>
+          <mat-select formControlName="type">
+            @for (type of data.educationTypeOptions; track type.value) {
+              <mat-option [value]="type.value">{{ type.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Título *</mat-label>
+          <input matInput formControlName="degreeTitle" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Institución *</mat-label>
+          <input matInput formControlName="institutionName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>País</mat-label>
+          <input matInput formControlName="institutionCountry" />
+        </mat-form-field>
+
+        <div class="row-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Año inicio</mat-label>
+            <input matInput type="number" formControlName="startYear" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Año graduación</mat-label>
+            <input matInput type="number" formControlName="graduationYear" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput rows="3" formControlName="description"></textarea>
+        </mat-form-field>
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="close()">Cancelar</button>
+      <button mat-flat-button color="primary" type="button" (click)="save()">
+        {{ data.submitLabel }}
+      </button>
+    </mat-dialog-actions>
+  `,
+  styles: [
+    `
+      .dialog-form {
+        display: grid;
+        gap: 12px;
+        min-width: min(92vw, 640px);
+        padding-top: 4px;
+      }
+
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      @media (max-width: 640px) {
+        .row-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    `,
+  ],
+})
+export class ProfessionalEducationFormDialogComponent {
+  readonly data = inject<ProfessionalEducationFormDialogData>(MAT_DIALOG_DATA);
+  private readonly dialogRef = inject(
+    MatDialogRef<ProfessionalEducationFormDialogComponent>,
+  );
+  private readonly fb = inject(FormBuilder);
+
+  readonly form = this.fb.group({
+    type: [this.data.initial?.type ?? 3, [Validators.required]],
+    degreeTitle: [
+      this.data.initial?.degreeTitle ?? '',
+      [Validators.required, Validators.maxLength(200)],
+    ],
+    institutionName: [
+      this.data.initial?.institutionName ?? '',
+      [Validators.required, Validators.maxLength(200)],
+    ],
+    institutionCountry: [
+      this.data.initial?.institutionCountry ?? '',
+      [Validators.maxLength(120)],
+    ],
+    startYear: [this.data.initial?.startYear ?? null],
+    graduationYear: [this.data.initial?.graduationYear ?? null],
+    description: [
+      this.data.initial?.description ?? '',
+      [Validators.maxLength(1000)],
+    ],
+  });
+
+  close(): void {
+    this.dialogRef.close();
+  }
+
+  save(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const value = this.form.getRawValue();
+    this.dialogRef.close({
+      type: Number(value.type),
+      degreeTitle: value.degreeTitle?.trim() ?? '',
+      institutionName: value.institutionName?.trim() ?? '',
+      institutionCountry: value.institutionCountry?.trim() || undefined,
+      startYear: value.startYear ?? undefined,
+      graduationYear: value.graduationYear ?? undefined,
+      description: value.description?.trim() || undefined,
+    } satisfies ProfessionalEducationFormDialogResult);
+  }
+}
 
 @Component({
   selector: 'app-professional-onboarding',
@@ -89,7 +262,6 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly sectionBusy = signal(false);
   readonly showServiceForm = signal(false);
   readonly editingServiceId = signal<string | null>(null);
-  readonly editingEducationId = signal<string | null>(null);
   readonly editingLocationId = signal<string | null>(null);
   readonly sectionsTab = signal(0);
   readonly selectedSpecialtyIds = signal<string[]>([]);
@@ -139,15 +311,6 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly serviceForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
     description: ['', [Validators.maxLength(1000)]],
-  });
-
-  readonly educationForm = this.fb.group({
-    institution: ['', [Validators.required, Validators.maxLength(200)]],
-    degree: ['', [Validators.required, Validators.maxLength(200)]],
-    educationType: [0, [Validators.required]],
-    startYear: [null as number | null],
-    endYear: [null as number | null],
-    country: ['', [Validators.maxLength(120)]],
   });
 
   readonly locationForm = this.fb.nonNullable.group({
@@ -676,33 +839,75 @@ export class ProfessionalOnboardingPage implements OnInit {
       });
   }
 
-  saveEducation(): void {
-    if (this.educationForm.invalid) {
-      this.educationForm.markAllAsTouched();
-      return;
-    }
+  openCreateEducationDialog(): void {
+    const dialogRef = this.dialog.open(
+      ProfessionalEducationFormDialogComponent,
+      {
+        width: '720px',
+        maxWidth: '96vw',
+        data: {
+          title: 'Crear formación',
+          submitLabel: 'Crear formación',
+          educationTypeOptions: this.educationTypeOptions,
+        } satisfies ProfessionalEducationFormDialogData,
+      },
+    );
 
-    const value = this.educationForm.getRawValue();
+    dialogRef
+      .afterClosed()
+      .subscribe((result?: ProfessionalEducationFormDialogResult) => {
+        if (!result) return;
+        this.saveEducationFromDialog(result);
+      });
+  }
+
+  openEditEducationDialog(item: ProfessionalEducationSummary): void {
+    const dialogRef = this.dialog.open(
+      ProfessionalEducationFormDialogComponent,
+      {
+        width: '720px',
+        maxWidth: '96vw',
+        data: {
+          title: 'Editar formación',
+          submitLabel: 'Guardar cambios',
+          educationTypeOptions: this.educationTypeOptions,
+          initial: {
+            type: item.type,
+            degreeTitle: item.degreeTitle,
+            institutionName: item.institutionName,
+            institutionCountry: item.institutionCountry ?? '',
+            startYear: item.startYear,
+            graduationYear: item.graduationYear,
+            description: item.description ?? '',
+          },
+        } satisfies ProfessionalEducationFormDialogData,
+      },
+    );
+
+    dialogRef
+      .afterClosed()
+      .subscribe((result?: ProfessionalEducationFormDialogResult) => {
+        if (!result) return;
+        this.saveEducationFromDialog(result, item.id);
+      });
+  }
+
+  private saveEducationFromDialog(
+    value: ProfessionalEducationFormDialogResult,
+    editingId?: string,
+  ): void {
     const payload = {
-      institution: value.institution ?? '',
-      degree: value.degree ?? '',
-      educationType: Number(value.educationType) as
-        | 0
-        | 1
-        | 2
-        | 3
-        | 4
-        | 5
-        | 6
-        | 7,
+      type: Number(value.type) as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7,
+      degreeTitle: value.degreeTitle,
+      institutionName: value.institutionName,
+      institutionCountry: value.institutionCountry || undefined,
       startYear: value.startYear ?? undefined,
-      endYear: value.endYear ?? undefined,
-      country: value.country || undefined,
+      graduationYear: value.graduationYear ?? undefined,
+      description: value.description || undefined,
+      sortOrder: 1,
     };
 
-    const editingId = this.editingEducationId();
     this.sectionBusy.set(true);
-
     const request$ = editingId
       ? this.professionalApi.updateEducation(editingId, payload)
       : this.professionalApi.createEducation(payload);
@@ -716,7 +921,7 @@ export class ProfessionalOnboardingPage implements OnInit {
         } else {
           this.education.update((current) => [item, ...current]);
         }
-        this.cancelEducationEdit();
+
         this.educationLoaded.set(true);
         this.toast.success(
           editingId ? 'Formación actualizada' : 'Formación agregada',
@@ -727,30 +932,6 @@ export class ProfessionalOnboardingPage implements OnInit {
         this.toast.error('No fue posible guardar la formación');
         this.sectionBusy.set(false);
       },
-    });
-  }
-
-  editEducation(item: ProfessionalEducationSummary): void {
-    this.editingEducationId.set(item.id);
-    this.educationForm.patchValue({
-      institution: item.institution,
-      degree: item.degree,
-      educationType: item.educationType,
-      startYear: item.startYear,
-      endYear: item.endYear,
-      country: item.country ?? '',
-    });
-  }
-
-  cancelEducationEdit(): void {
-    this.editingEducationId.set(null);
-    this.educationForm.reset({
-      institution: '',
-      degree: '',
-      educationType: 0,
-      startYear: null,
-      endYear: null,
-      country: '',
     });
   }
 
@@ -803,66 +984,36 @@ export class ProfessionalOnboardingPage implements OnInit {
   }
 
   deleteEducation(id: string): void {
-    this.sectionBusy.set(true);
-    this.professionalApi.deleteEducation(id).subscribe({
-      next: () => {
-        this.education.update((current) =>
-          current.filter((entry) => entry.id !== id),
-        );
-        this.educationLoaded.set(true);
-        this.toast.success('Formación eliminada');
-        this.sectionBusy.set(false);
-      },
-      error: () => {
-        this.toast.error('No fue posible eliminar la formación');
-        this.sectionBusy.set(false);
-      },
-    });
-  }
-
-  onDiplomaSelected(event: Event, educationId: string): void {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    this.sectionBusy.set(true);
-    this.professionalApi.uploadEducationDiploma(educationId, file).subscribe({
-      next: () => {
-        this.education.update((current) =>
-          current.map((entry) =>
-            entry.id === educationId ? { ...entry, hasDiploma: true } : entry,
-          ),
-        );
-        this.educationLoaded.set(true);
-        this.toast.success('Diploma cargado');
-        this.sectionBusy.set(false);
-      },
-      error: () => {
-        this.toast.error('No fue posible cargar el diploma');
-        this.sectionBusy.set(false);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar formación',
+        message: '¿Estás seguro de eliminar este registro de formación?',
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
       },
     });
 
-    target.value = '';
-  }
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
 
-  deleteDiploma(educationId: string): void {
-    this.sectionBusy.set(true);
-    this.professionalApi.deleteEducationDiploma(educationId).subscribe({
-      next: () => {
-        this.education.update((current) =>
-          current.map((entry) =>
-            entry.id === educationId ? { ...entry, hasDiploma: false } : entry,
-          ),
-        );
-        this.educationLoaded.set(true);
-        this.toast.success('Diploma eliminado');
-        this.sectionBusy.set(false);
-      },
-      error: () => {
-        this.toast.error('No fue posible eliminar el diploma');
-        this.sectionBusy.set(false);
-      },
+      this.sectionBusy.set(true);
+      this.professionalApi.deleteEducation(id).subscribe({
+        next: () => {
+          this.education.update((current) =>
+            current.filter((entry) => entry.id !== id),
+          );
+          this.educationLoaded.set(true);
+          this.toast.success('Formación eliminada');
+          this.sectionBusy.set(false);
+        },
+        error: () => {
+          this.toast.error('No fue posible eliminar la formación');
+          this.sectionBusy.set(false);
+        },
+      });
     });
   }
 

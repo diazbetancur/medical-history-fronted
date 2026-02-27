@@ -61,25 +61,29 @@ export class ProfilePageComponent implements OnInit {
   readonly profile = signal<PatientProfileDto | null>(null);
 
   readonly summaryForm = this.fb.nonNullable.group({
-    firstName: ['', [Validators.required]],
-    lastName: ['', [Validators.required]],
+    fullName: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
     phone: ['', [Validators.required]],
+    documentType: [''],
+    documentNumber: [''],
     dateOfBirth: ['', [Validators.required]],
-    street: ['', [Validators.required]],
-    city: ['', [Validators.required]],
-    country: ['', [Validators.required]],
+    gender: [''],
+    bloodType: [''],
+    countryName: [''],
+    cityName: [''],
+    addressLine1: [''],
   });
 
   readonly fullName = computed(() => {
     const profile = this.profile();
     if (!profile) return 'No disponible';
-    return `${profile.firstName} ${profile.lastName}`.trim();
+    return profile.fullName?.trim() || 'No disponible';
   });
 
   readonly completeAddress = computed(() => {
-    const address = this.profile()?.address;
-    if (!address) return 'No disponible';
-    const parts = [address.street, address.city, address.state, address.country]
+    const profile = this.profile();
+    if (!profile) return 'No disponible';
+    const parts = [profile.addressLine1, profile.cityName, profile.countryName]
       .filter(Boolean)
       .join(', ');
     return parts || 'No disponible';
@@ -145,32 +149,34 @@ export class ProfilePageComponent implements OnInit {
     const current = this.profile();
     const request$ = current
       ? this.patientService.updateProfile({
-          firstName: raw.firstName,
-          lastName: raw.lastName,
+          fullName: raw.fullName,
+          email: raw.email,
           phone: raw.phone,
+          documentType: raw.documentType || null,
+          documentNumber: raw.documentNumber || null,
           dateOfBirth: raw.dateOfBirth,
-          address: {
-            ...(current.address ?? {
-              street: '',
-              city: '',
-              country: '',
-            }),
-            street: raw.street,
-            city: raw.city,
-            country: raw.country,
-          },
+          gender: raw.gender || null,
+          bloodType: raw.bloodType || null,
+          countryId: current.countryId ?? null,
+          cityId: current.cityId ?? null,
+          countryName: raw.countryName || null,
+          cityName: raw.cityName || null,
+          addressLine1: raw.addressLine1 || null,
         })
       : this.patientService.createProfile({
-          firstName: raw.firstName,
-          lastName: raw.lastName,
+          fullName: raw.fullName,
+          email: raw.email,
           phone: raw.phone,
+          documentType: raw.documentType || null,
+          documentNumber: raw.documentNumber || null,
           dateOfBirth: raw.dateOfBirth,
-          hasInsurance: false,
-          address: {
-            street: raw.street,
-            city: raw.city,
-            country: raw.country,
-          },
+          gender: raw.gender || null,
+          bloodType: raw.bloodType || null,
+          countryId: null,
+          cityId: null,
+          countryName: raw.countryName || null,
+          cityName: raw.cityName || null,
+          addressLine1: raw.addressLine1 || null,
         });
 
     request$.subscribe({
@@ -196,13 +202,17 @@ export class ProfilePageComponent implements OnInit {
 
   private patchSummaryForm(profile: PatientProfileDto): void {
     this.summaryForm.patchValue({
-      firstName: profile.firstName || '',
-      lastName: profile.lastName || '',
+      fullName: profile.fullName || '',
+      email: profile.email || '',
       phone: profile.phone || '',
+      documentType: profile.documentType || '',
+      documentNumber: profile.documentNumber || '',
       dateOfBirth: this.normalizeDateOnly(profile.dateOfBirth) || '',
-      street: profile.address?.street || '',
-      city: profile.address?.city || '',
-      country: profile.address?.country || '',
+      gender: profile.gender || '',
+      bloodType: profile.bloodType || '',
+      countryName: profile.countryName || '',
+      cityName: profile.cityName || '',
+      addressLine1: profile.addressLine1 || '',
     });
   }
 

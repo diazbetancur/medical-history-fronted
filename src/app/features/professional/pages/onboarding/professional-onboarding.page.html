@@ -207,7 +207,7 @@
       @if (hasExistingProfile()) {
       <mat-tab label="Especialidades">
         <div class="form-section nested-section">
-          <div class="section-header">
+          <div class="section-header section-header-with-action">
             <mat-icon>workspace_premium</mat-icon>
             <span>Especialidades</span>
           </div>
@@ -446,6 +446,15 @@
           <div class="section-header">
             <mat-icon>school</mat-icon>
             <span>Formación</span>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="openCreateEducationDialog()"
+              [disabled]="sectionBusy()"
+            >
+              Adicionar
+            </button>
           </div>
 
           @if (sectionBusy() && !educationLoaded()) {
@@ -453,143 +462,46 @@
             <mat-spinner diameter="24"></mat-spinner>
             <span>Cargando formación...</span>
           </div>
-          } @else {
-          <form
-            class="inline-form"
-            [formGroup]="educationForm"
-            (ngSubmit)="saveEducation()"
-          >
-            <div class="row-2">
-              <mat-form-field appearance="outline">
-                <mat-label>Institución *</mat-label>
-                <input
-                  matInput
-                  formControlName="institution"
-                  placeholder="Ej. Universidad Nacional"
-                />
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Título *</mat-label>
-                <input
-                  matInput
-                  formControlName="degree"
-                  placeholder="Ej. Médico Cirujano"
-                />
-              </mat-form-field>
-            </div>
-
-            <div class="row-2">
-              <mat-form-field appearance="outline">
-                <mat-label>Tipo</mat-label>
-                <mat-select formControlName="educationType">
-                  @for (type of educationTypeOptions; track type.value) {
-                  <mat-option [value]="type.value">{{ type.label }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>País</mat-label>
-                <input
-                  matInput
-                  formControlName="country"
-                  placeholder="Ej. Colombia"
-                />
-              </mat-form-field>
-            </div>
-
-            <div class="row-2">
-              <mat-form-field appearance="outline">
-                <mat-label>Año inicio</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="startYear"
-                  placeholder="Ej. 2016"
-                />
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Año fin</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="endYear"
-                  placeholder="Ej. 2021"
-                />
-              </mat-form-field>
-            </div>
-
-            <div class="inline-actions">
-              @if (editingEducationId()) {
-              <button mat-button type="button" (click)="cancelEducationEdit()">
-                Cancelar
-              </button>
-              }
-            </div>
-
-            <div class="inline-actions tab-save-actions">
-              <button
-                mat-flat-button
-                color="primary"
-                type="submit"
-                [disabled]="sectionBusy()"
-              >
-                {{ editingEducationId() ? 'Actualizar formación' : 'Guardar
-                formación' }}
-              </button>
-            </div>
-          </form>
-
-          @if (education().length > 0) {
-          <div class="items-grid">
-            @for (item of education(); track item.id) {
-            <div class="item-card">
-              <div class="item-title-row">
-                <strong>{{ item.degree }}</strong>
-                <span>{{ item.educationTypeName }}</span>
-              </div>
-              <p>{{ item.institution }}</p>
-              <p class="muted">
-                {{ item.startYear ?? '—' }} - {{ item.endYear ?? 'Actual' }} @if
-                (item.country) { · {{ item.country }} }
-              </p>
-
-              <div class="inline-actions">
-                <button mat-button type="button" (click)="editEducation(item)">
-                  Editar
-                </button>
-                <button
-                  mat-button
-                  color="warn"
-                  type="button"
-                  (click)="deleteEducation(item.id)"
-                >
-                  Eliminar
-                </button>
-
-                <input
-                  #diplomaInput
-                  type="file"
-                  accept="application/pdf,image/jpeg,image/png"
-                  hidden
-                  (change)="onDiplomaSelected($event, item.id)"
-                />
-                <button mat-button type="button" (click)="diplomaInput.click()">
-                  Subir diploma
-                </button>
-
-                @if (item.hasDiploma) {
-                <button
-                  mat-button
-                  color="warn"
-                  type="button"
-                  (click)="deleteDiploma(item.id)"
-                >
-                  Quitar diploma
-                </button>
+          } @else { @if (education().length > 0) {
+          <div class="services-table-wrap">
+            <table class="services-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Título</th>
+                  <th>Institución</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of education(); track item.id) {
+                <tr>
+                  <td>{{ item.typeName }}</td>
+                  <td>{{ item.degreeTitle }}</td>
+                  <td>{{ item.institutionName }}</td>
+                  <td>
+                    <div class="inline-actions">
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="openEditEducationDialog(item)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        mat-button
+                        color="warn"
+                        type="button"
+                        (click)="deleteEducation(item.id)"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
                 }
-              </div>
-            </div>
-            }
+              </tbody>
+            </table>
           </div>
           } @else {
           <p class="empty-hint">Aún no has agregado formación.</p>

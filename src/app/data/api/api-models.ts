@@ -512,37 +512,47 @@ export type ProfessionalEducationType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export interface ProfessionalEducationSummary {
   id: string;
-  institution: string;
-  degree: string;
-  educationType: ProfessionalEducationType;
-  educationTypeName: string;
+  professionalProfileId: string;
+  type: ProfessionalEducationType;
+  typeName: string;
+  degreeTitle: string;
+  institutionName: string;
+  institutionCountry: string | null;
   startYear: number | null;
-  endYear: number | null;
-  country: string | null;
+  graduationYear: number | null;
+  description: string | null;
+  sortOrder: number;
   hasDiploma: boolean;
+  diplomaOriginalFileName: string | null;
+  diplomaUrl: string | null;
+  diplomaUrlExpiresAtUtc: string | null;
   dateCreated: string;
 }
 
 export interface ProfessionalEducationDetail extends ProfessionalEducationSummary {
-  diplomaUrl: string | null;
+  dateUpdated?: string;
 }
 
 export interface CreateProfessionalEducationPayload {
-  institution: string;
-  degree: string;
-  educationType: ProfessionalEducationType;
+  type: ProfessionalEducationType;
+  degreeTitle: string;
+  institutionName: string;
+  institutionCountry?: string;
   startYear?: number;
-  endYear?: number;
-  country?: string;
+  graduationYear?: number;
+  description?: string;
+  sortOrder: number;
 }
 
 export interface UpdateProfessionalEducationPayload {
-  institution?: string;
-  degree?: string;
-  educationType?: ProfessionalEducationType;
+  type?: ProfessionalEducationType;
+  degreeTitle?: string;
+  institutionName?: string;
+  institutionCountry?: string;
   startYear?: number;
-  endYear?: number;
-  country?: string;
+  graduationYear?: number;
+  description?: string;
+  sortOrder?: number;
 }
 
 export interface ProfessionalLocation {

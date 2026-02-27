@@ -11,24 +11,22 @@
 export interface PatientProfileDto {
   id: string;
   userId: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string; // YYYY-MM-DD
-  gender?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
-  phone: string;
+  fullName: string;
   email: string;
-  address?: AddressDto;
-  bloodType?: BloodType;
-  allergies?: string[];
-  chronicConditions?: string[];
-  currentMedications?: string[];
-  hasInsurance: boolean;
-  insuranceProvider?: string;
-  insurancePolicyNumber?: string;
-  emergencyContact?: EmergencyContactDto;
-  isProfileComplete: boolean;
-  createdAt: string;
-  updatedAt: string;
+  phone: string;
+  documentType: string | null;
+  documentNumber: string | null;
+  dateOfBirth: string; // YYYY-MM-DD
+  gender: string | null;
+  bloodType: BloodType | string | null;
+  countryId: string | null;
+  cityId: string | null;
+  countryName: string | null;
+  cityName: string | null;
+  addressLine1: string | null;
+  shareFullHistoryWithTreatingProfessionals: boolean;
+  isActive: boolean;
+  dateCreated: string;
 }
 
 /**
@@ -61,10 +59,21 @@ export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
  * Create Patient Profile Request
  * POST /api/patients/me body
  */
-export interface CreatePatientProfileDto extends Omit<
-  PatientProfileDto,
-  'id' | 'userId' | 'email' | 'isProfileComplete' | 'createdAt' | 'updatedAt'
-> {}
+export interface CreatePatientProfileDto {
+  fullName: string;
+  email: string;
+  phone: string;
+  documentType?: string | null;
+  documentNumber?: string | null;
+  dateOfBirth: string;
+  gender?: string | null;
+  bloodType?: BloodType | string | null;
+  countryId?: string | null;
+  cityId?: string | null;
+  countryName?: string | null;
+  cityName?: string | null;
+  addressLine1?: string | null;
+}
 
 /**
  * Update Patient Profile Request
@@ -79,13 +88,13 @@ export function isProfileComplete(profile: PatientProfileDto | null): boolean {
   if (!profile) return false;
 
   return !!(
-    profile.firstName &&
-    profile.lastName &&
+    profile.fullName &&
+    profile.email &&
     profile.dateOfBirth &&
     profile.phone &&
-    profile.address?.street &&
-    profile.address?.city &&
-    profile.address?.country
+    profile.addressLine1 &&
+    profile.cityName &&
+    profile.countryName
   );
 }
 
@@ -98,17 +107,16 @@ export function calculateCompletionPercentage(
   if (!profile) return 0;
 
   const fields = [
-    profile.firstName,
-    profile.lastName,
+    profile.fullName,
+    profile.email,
     profile.dateOfBirth,
     profile.phone,
-    profile.address?.street,
-    profile.address?.city,
-    profile.address?.country,
+    profile.addressLine1,
+    profile.cityName,
+    profile.countryName,
     profile.bloodType,
-    profile.allergies?.length,
-    profile.hasInsurance ? profile.insuranceProvider : 'not_required',
-    profile.emergencyContact?.name,
+    profile.gender,
+    profile.documentType,
   ];
 
   const filledFields = fields.filter((f) => !!f).length;
