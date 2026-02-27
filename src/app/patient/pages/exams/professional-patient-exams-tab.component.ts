@@ -119,29 +119,27 @@ export class ProfessionalPatientExamsTabComponent {
   }
 
   viewExam(exam: ExamDto): void {
-    this.examsService
-      .getViewUrl(this.patientProfileId(), exam.id)
-      .subscribe({
-        next: (response) => {
-          const url = response.url ?? response.downloadUrl;
-          if (!url) {
-            this.snackBar.open(
-              'No se pudo obtener el enlace para visualizar',
-              'Cerrar',
-              { duration: 5000 },
-            );
-            return;
-          }
-          window.open(url, '_blank', 'noopener,noreferrer');
-        },
-        error: (err: ApiError) => {
+    this.examsService.getViewUrl(this.patientProfileId(), exam.id).subscribe({
+      next: (response) => {
+        const url = response.url ?? response.downloadUrl;
+        if (!url) {
           this.snackBar.open(
-            err.message || 'Error al obtener el enlace de visualización',
+            'No se pudo obtener el enlace para visualizar',
             'Cerrar',
             { duration: 5000 },
           );
-        },
-      });
+          return;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
+      },
+      error: (err: ApiError) => {
+        this.snackBar.open(
+          err.message || 'Error al obtener el enlace de visualización',
+          'Cerrar',
+          { duration: 5000 },
+        );
+      },
+    });
   }
 
   downloadExam(exam: ExamDto): void {
@@ -151,9 +149,13 @@ export class ProfessionalPatientExamsTabComponent {
         next: (response) => {
           const url = response.downloadUrl ?? response.url;
           if (!url) {
-            this.snackBar.open('No se pudo obtener el enlace de descarga', 'Cerrar', {
-              duration: 5000,
-            });
+            this.snackBar.open(
+              'No se pudo obtener el enlace de descarga',
+              'Cerrar',
+              {
+                duration: 5000,
+              },
+            );
             return;
           }
           const link = document.createElement('a');

@@ -157,9 +157,13 @@ export class PatientExamsPage implements OnInit {
       next: (response) => {
         const url = response.downloadUrl ?? response.url;
         if (!url) {
-          this.snackBar.open('No se pudo obtener el enlace de descarga', 'Cerrar', {
-            duration: 5000,
-          });
+          this.snackBar.open(
+            'No se pudo obtener el enlace de descarga',
+            'Cerrar',
+            {
+              duration: 5000,
+            },
+          );
           return;
         }
         const link = document.createElement('a');

@@ -124,7 +124,9 @@ export class ExamDetailDrawerComponent implements OnInit {
     this.examsService.getViewUrl(this.data.examId).subscribe({
       next: (url) => {
         if (!url) {
-          this.toastService.error('No se pudo generar el enlace para visualizar');
+          this.toastService.error(
+            'No se pudo generar el enlace para visualizar',
+          );
           return;
         }
         window.open(url, '_blank', 'noopener');
