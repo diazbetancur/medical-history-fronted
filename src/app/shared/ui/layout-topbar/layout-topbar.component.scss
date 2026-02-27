@@ -10,6 +10,20 @@
   gap: 4px;
 }
 
+.topbar--patient {
+  background-color: var(--color-secondary-hover) !important;
+  color: var(--color-accent-contrast) !important;
+
+  .context-badge {
+    background: rgba(255 255 255 / 0.16);
+  }
+
+  .mat-icon,
+  button {
+    color: var(--color-accent-contrast);
+  }
+}
+
 .menu-toggle {
   margin-right: 4px;
 }
