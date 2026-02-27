@@ -9,13 +9,59 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ApiError, createApiError } from '@core/http/api-error';
 import { environment } from '@env';
-import { catchError, Observable, of, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import {
   buildSearchCacheKey,
   ProfessionalDetailDto,
   ProfessionalSearchFiltersDto,
   ProfessionalSearchResponseDto,
+  ProfessionalSearchResultDto,
 } from '../models/professional-search.dto';
+
+interface SearchApiSpecialtyItem {
+  id?: string;
+  name?: string;
+  specialtyId?: string;
+  specialtyName?: string;
+  isPrimary?: boolean;
+}
+
+interface SearchApiItem {
+  id: string;
+  displayName: string;
+  slug: string;
+  profileImageUrl?: string;
+  cityName?: string;
+  countryName?: string;
+  specialties?: SearchApiSpecialtyItem[];
+}
+
+interface SearchApiProfessionalItem {
+  professionalProfileId?: string;
+  id?: string;
+  slug?: string;
+  userId?: string;
+  fullName?: string;
+  displayName?: string;
+  photoUrl?: string;
+  profileImageUrl?: string;
+  specialties?: SearchApiSpecialtyItem[];
+  city?: string;
+  cityName?: string;
+  country?: string;
+  countryName?: string;
+  isAvailableForAppointments?: boolean;
+}
+
+interface SearchApiResponse {
+  items?: SearchApiItem[];
+  totalCount?: number;
+  page?: number;
+  pageSize?: number;
+  totalPages?: number;
+  professionals?: SearchApiProfessionalItem[];
+  total?: number;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -56,8 +102,9 @@ export class PublicProfessionalsService {
     params = params.set('pageSize', filters.pageSize?.toString() || '10');
 
     return this.http
-      .get<ProfessionalSearchResponseDto>(`${this.baseUrl}/search`, { params })
+      .get<SearchApiResponse>(`${this.baseUrl}/search`, { params })
       .pipe(
+        map((response) => this.normalizeSearchResponse(response)),
         tap((response) => {
           // Cache the result
           this.searchCache.set(cacheKey, response);
@@ -67,6 +114,63 @@ export class PublicProfessionalsService {
           return throwError(() => apiError);
         }),
       );
+  }
+
+  private normalizeSearchResponse(
+    response: SearchApiResponse,
+  ): ProfessionalSearchResponseDto {
+    if (Array.isArray(response.professionals)) {
+      return {
+        professionals: response.professionals.map((item) => ({
+          professionalProfileId: item.professionalProfileId ?? item.id ?? '',
+          slug: item.slug ?? '',
+          userId: item.userId ?? '',
+          fullName: item.fullName ?? item.displayName ?? '',
+          photoUrl: item.photoUrl ?? item.profileImageUrl,
+          specialties: this.normalizeSpecialties(item.specialties),
+          city: item.city ?? item.cityName,
+          country: item.country ?? item.countryName,
+          isAvailableForAppointments: item.isAvailableForAppointments ?? true,
+        })),
+        total: response.total ?? response.professionals.length,
+        page: response.page ?? 1,
+        pageSize: response.pageSize ?? 10,
+        totalPages: response.totalPages ?? 1,
+      };
+    }
+
+    const professionals: ProfessionalSearchResultDto[] = (
+      response.items ?? []
+    ).map((item) => ({
+      professionalProfileId: item.id,
+      slug: item.slug,
+      userId: '',
+      fullName: item.displayName,
+      photoUrl: item.profileImageUrl,
+      specialties: this.normalizeSpecialties(item.specialties),
+      city: item.cityName,
+      country: item.countryName,
+      isAvailableForAppointments: true,
+    }));
+
+    return {
+      professionals,
+      total: response.totalCount ?? professionals.length,
+      page: response.page ?? 1,
+      pageSize: response.pageSize ?? 10,
+      totalPages: response.totalPages ?? 1,
+    };
+  }
+
+  private normalizeSpecialties(
+    specialties: SearchApiSpecialtyItem[] | undefined,
+  ): ProfessionalSearchResultDto['specialties'] {
+    return (specialties ?? [])
+      .map((specialty) => ({
+        id: specialty.id ?? specialty.specialtyId ?? '',
+        name: specialty.name ?? specialty.specialtyName ?? '',
+      }))
+      .filter((specialty) => !!specialty.id && !!specialty.name);
   }
 
   /**

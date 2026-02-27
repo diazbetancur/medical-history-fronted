@@ -10,6 +10,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -21,8 +22,6 @@ import {
   AppliedFilters,
   MetadataResponse,
   PublicApi,
-  SearchPageResponse,
-  SearchParams,
   SearchProfessional,
 } from '@data/api';
 import { SeoService } from '@shared/services';
@@ -37,6 +36,10 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
+import { ProfessionalSearchResponseDto } from '../../../../public/models/professional-search.dto';
+import { SpecialtyDto } from '../../../../public/models/specialty.dto';
+import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
+import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
 import { PublicHeaderComponent } from '../../components/public-header.component';
 
 @Component({
@@ -51,6 +54,7 @@ import { PublicHeaderComponent } from '../../components/public-header.component'
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MatChipsModule,
     MatIconModule,
     MatCardModule,
     MatProgressSpinnerModule,
@@ -61,6 +65,8 @@ import { PublicHeaderComponent } from '../../components/public-header.component'
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
   private readonly publicApi = inject(PublicApi);
+  private readonly catalogService = inject(PublicCatalogService);
+  private readonly professionalsService = inject(PublicProfessionalsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly seoService = inject(SeoService);
@@ -73,19 +79,25 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   readonly cityControl = new FormControl<string | null>(null);
 
   readonly metadata = signal<MetadataResponse | null>(null);
+  readonly specialties = signal<SpecialtyDto[]>([]);
   readonly professionals = signal<SearchProfessional[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly pagination = signal<SearchPageResponse['pagination'] | null>(null);
+  readonly pagination = signal<{
+    currentPage: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  } | null>(null);
   readonly appliedFilters = signal<AppliedFilters | null>(null);
   readonly suggestions = signal<string[]>([]);
 
-  readonly specialties = computed(() => this.metadata()?.categories ?? []);
   readonly cities = computed(() => this.metadata()?.cities ?? []);
   readonly hasResults = computed(() => this.professionals().length > 0);
 
   ngOnInit(): void {
     this.loadMetadata();
+    this.loadSpecialties();
     this.setupSuggest();
     this.setupFilterListeners();
 
@@ -93,20 +105,22 @@ export class SearchPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((params) => {
         this.searchControl.setValue(params['q'] || '', { emitEvent: false });
-        this.specialtyControl.setValue(params['category'] || null, {
+        const specialtyId = this.normalizeGuid(params['specialtyId']);
+        const cityId = this.normalizeGuid(params['cityId']);
+
+        this.specialtyControl.setValue(specialtyId ?? null, {
           emitEvent: false,
         });
-        this.cityControl.setValue(params['city'] || null, {
+        this.cityControl.setValue(cityId ?? null, {
           emitEvent: false,
         });
 
-        this.search({
-          q: params['q'] || undefined,
-          category: params['category'] || undefined,
-          city: params['city'] || undefined,
-          page: params['page'] ? Number(params['page']) : 1,
-          pageSize: this.pageSize,
-        });
+        this.search(
+          params['q'] || undefined,
+          specialtyId,
+          cityId,
+          params['page'] ? Number(params['page']) : 1,
+        );
       });
   }
 
@@ -120,6 +134,14 @@ export class SearchPageComponent implements OnInit, OnDestroy {
       next: (metadata) => this.metadata.set(metadata),
       error: () =>
         this.metadata.set({ countries: [], cities: [], categories: [] }),
+    });
+  }
+
+  private loadSpecialties(): void {
+    this.catalogService.getSpecialties().subscribe({
+      next: (specialties: SpecialtyDto[]) =>
+        this.specialties.set(specialties ?? []),
+      error: () => this.specialties.set([]),
     });
   }
 
@@ -161,21 +183,56 @@ export class SearchPageComponent implements OnInit, OnDestroy {
       .subscribe(() => this.searchWithCurrentFilters(1));
   }
 
-  private search(params: SearchParams): void {
+  private search(
+    q?: string,
+    specialtyId?: string,
+    cityId?: string,
+    page = 1,
+  ): void {
     this.loading.set(true);
     this.error.set(null);
 
-    this.publicApi
-      .getSearchPage(params)
+    this.professionalsService
+      .search({
+        q,
+        specialtyId,
+        cityId,
+        page,
+        pageSize: this.pageSize,
+      })
       .pipe(
-        tap((response) => {
-          this.professionals.set(response.professionals ?? []);
-          this.pagination.set(response.pagination ?? null);
-          this.appliedFilters.set(response.appliedFilters ?? null);
-
-          if (response.seo) {
-            this.seoService.setSeo(response.seo);
-          }
+        tap((response: ProfessionalSearchResponseDto) => {
+          this.professionals.set(
+            (response.professionals ?? []).map((item) => ({
+              id: item.professionalProfileId,
+              slug: item.slug,
+              businessName: item.fullName,
+              profileImageUrl: item.photoUrl,
+              specialties: (item.specialties ?? []).map((specialty) => ({
+                id: specialty.id,
+                name: specialty.name,
+                isPrimary: false,
+              })),
+              categoryName: '',
+              categorySlug: '',
+              cityName: item.city ?? '',
+              citySlug: '',
+              isVerified: false,
+              isFeatured: false,
+            })),
+          );
+          this.pagination.set({
+            currentPage: response.page,
+            pageSize: response.pageSize,
+            totalItems: response.total,
+            totalPages: response.totalPages,
+          });
+          this.appliedFilters.set({
+            category: specialtyId ?? null,
+            city: cityId ?? null,
+            q: q ?? null,
+          });
+          this.seoService.setTitle('Buscar Médicos | MediTigo');
         }),
         catchError((error) => {
           this.error.set(
@@ -192,17 +249,24 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
   private searchWithCurrentFilters(page = 1): void {
     const q = this.searchControl.value.trim();
-    const category = this.specialtyControl.value;
-    const city = this.cityControl.value;
+    const specialtyId = this.normalizeGuid(this.specialtyControl.value);
+    const cityId = this.normalizeGuid(this.cityControl.value);
 
     this.router.navigate(['/search'], {
       queryParams: {
         q: q || null,
-        category: category || null,
-        city: city || null,
+        specialtyId: specialtyId || null,
+        cityId: cityId || null,
         page,
       },
     });
+  }
+
+  private normalizeGuid(value: string | null | undefined): string | undefined {
+    if (!value) return undefined;
+    const guidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return guidRegex.test(value) ? value : undefined;
   }
 
   onSearchClick(): void {
@@ -220,6 +284,19 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
   goToProfile(slug: string): void {
     this.router.navigate(['/pro', slug]);
+  }
+
+  getSpecialtyNames(doctor: SearchProfessional): string[] {
+    return (doctor.specialties ?? []).map((item) => item.name);
+  }
+
+  getVisibleSpecialtyNames(doctor: SearchProfessional): string[] {
+    return this.getSpecialtyNames(doctor).slice(0, 3);
+  }
+
+  getHiddenSpecialtiesCount(doctor: SearchProfessional): number {
+    const count = this.getSpecialtyNames(doctor).length - 3;
+    return count > 0 ? count : 0;
   }
 
   reload(): void {

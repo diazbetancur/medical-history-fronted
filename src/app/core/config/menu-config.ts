@@ -265,16 +265,6 @@ export const MENU_ITEMS: MenuItem[] = [
     ],
   },
   {
-    label: 'Solicitudes',
-    icon: 'mail',
-    route: '/professional/requests',
-    context: 'PROFESSIONAL',
-    requiredPermissions: [
-      PROFESSIONAL_PERMISSIONS.SERVICE_REQUESTS_VIEW,
-      PROFESSIONAL_PERMISSIONS.SERVICE_REQUESTS_UPDATE,
-    ],
-  },
-  {
     label: 'Pacientes',
     icon: 'people',
     route: '/professional/patients',

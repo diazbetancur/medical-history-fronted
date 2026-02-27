@@ -70,7 +70,6 @@ import { AppointmentDetailDialogComponent } from './appointment-detail-dialog.co
                 color="primary"
                 (click)="navigateToWizard()"
               >
-                <mat-icon>add</mat-icon>
                 Agendar Ahora
               </button>
             </mat-card-content>

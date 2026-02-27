@@ -125,8 +125,16 @@
 
             <div class="info">
               <h3>{{ item.fullName }}</h3>
-              <p class="specialty">{{ primarySpecialty(item) }}</p>
-              @if (hasLocation(item)) {
+              @if (visibleSpecialties(item).length > 0) {
+              <mat-chip-set class="specialties">
+                @for (specialty of visibleSpecialties(item); track specialty.id)
+                {
+                <mat-chip>{{ specialty.name }}</mat-chip>
+                } @if (remainingSpecialtiesCount(item) > 0) {
+                <mat-chip>+{{ remainingSpecialtiesCount(item) }}</mat-chip>
+                }
+              </mat-chip-set>
+              } @if (hasLocation(item)) {
               <p class="meta">{{ locationText(item) }}</p>
               } @if (experienceText(item); as years) {
               <p class="meta">{{ years }}</p>

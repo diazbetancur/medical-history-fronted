@@ -155,8 +155,19 @@ export class PatientExamsPage implements OnInit {
   downloadExam(exam: ExamDto): void {
     this.examsService.getDownloadUrl(exam.id).subscribe({
       next: (response) => {
+        const url = response.downloadUrl ?? response.url;
+        if (!url) {
+          this.snackBar.open(
+            'No se pudo obtener el enlace de descarga',
+            'Cerrar',
+            {
+              duration: 5000,
+            },
+          );
+          return;
+        }
         const link = document.createElement('a');
-        link.href = response.downloadUrl;
+        link.href = url;
         link.download = exam.fileName;
         link.click();
       },

@@ -187,6 +187,34 @@
   gap: 8px;
 }
 
+.services-table-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.services-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+  }
+
+  th {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 600;
+  }
+
+  td {
+    font-size: 0.9rem;
+  }
+}
+
 .status-chip {
   border: 1px solid #dbeafe;
   color: #1d4ed8;

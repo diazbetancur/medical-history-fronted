@@ -70,7 +70,8 @@ export interface ProfessionalPatientExamsResponseDto {
 // =============================================================================
 
 export interface ExamDownloadUrlDto {
-  downloadUrl: string;
+  downloadUrl?: string;
+  url?: string;
   expiresAtUtc: string;
 }
 

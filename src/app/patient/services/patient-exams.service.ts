@@ -141,7 +141,19 @@ export class PatientExamsService {
   getDownloadUrl(examId: string): Observable<string> {
     return this.api
       .get<ExamDownloadUrlDto>(`${this.basePath}/${examId}/download-url`)
-      .pipe(map((response) => response.downloadUrl));
+      .pipe(map((response) => response.downloadUrl ?? response.url ?? ''));
+  }
+
+  /**
+   * View attachment in browser
+   *
+   * GET /api/patients/me/exams/{id}/view-url
+   * Returns signed URL
+   */
+  getViewUrl(examId: string): Observable<string> {
+    return this.api
+      .get<ExamDownloadUrlDto>(`${this.basePath}/${examId}/view-url`)
+      .pipe(map((response) => response.url ?? response.downloadUrl ?? ''));
   }
 
   /**
