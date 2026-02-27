@@ -162,7 +162,7 @@ export class ExamPreviewDialogComponent {
           }
           return this.examsService
             .getDownloadUrl(this.data.exam.id)
-            .pipe(switchMap((signed) => of(signed.downloadUrl)));
+            .pipe(switchMap((signed) => of(signed.downloadUrl ?? signed.url ?? null)));
         }),
         catchError(() => {
           this.error.set('No se pudo obtener la vista previa del examen');

@@ -86,6 +86,13 @@
                   <div matListItemMeta class="attachment-actions">
                     <button
                       mat-icon-button
+                      (click)="viewAttachment()"
+                      matTooltip="Ver"
+                    >
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
                       (click)="downloadAttachment()"
                       matTooltip="Descargar"
                     >

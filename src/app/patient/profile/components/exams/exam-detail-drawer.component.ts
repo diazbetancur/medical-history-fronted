@@ -12,6 +12,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastService } from '@shared/services';
 import { firstValueFrom } from 'rxjs';
 import { EXAM_CATEGORY_LABELS } from '../../../models/patient-exam.dto';
@@ -67,6 +68,7 @@ export class ConfirmDeleteDialogComponent {
     MatIconModule,
     MatListModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './exam-detail-drawer.component.html',
   styleUrl: './exam-detail-drawer.component.scss',
@@ -98,9 +100,37 @@ export class ExamDetailDrawerComponent implements OnInit {
    */
   downloadAttachment(): void {
     this.examsService.getDownloadUrl(this.data.examId).subscribe({
-      next: (url) => window.open(url, '_blank'),
+      next: (url) => {
+        if (!url) {
+          this.toastService.error('No se pudo generar el enlace de descarga');
+          return;
+        }
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = '';
+        link.target = '_blank';
+        link.rel = 'noopener';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      },
       error: () =>
         this.toastService.error('No se pudo generar el enlace de descarga'),
+    });
+  }
+
+  viewAttachment(): void {
+    this.examsService.getViewUrl(this.data.examId).subscribe({
+      next: (url) => {
+        if (!url) {
+          this.toastService.error('No se pudo generar el enlace para visualizar');
+          return;
+        }
+        window.open(url, '_blank', 'noopener');
+      },
+      error: () =>
+        this.toastService.error('No se pudo generar el enlace para visualizar'),
     });
   }
 

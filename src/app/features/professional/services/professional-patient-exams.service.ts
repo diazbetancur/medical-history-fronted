@@ -12,7 +12,7 @@ import {
   ProfessionalPatientExamsResponseDto,
 } from '@data/models';
 import { environment } from '@env';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
 
 /**
  * Simple in-memory cache for patient exams
@@ -94,7 +94,36 @@ export class ProfessionalPatientExamsService {
       .get<ExamDownloadUrlDto>(
         `${this.baseUrl}/${patientProfileId}/exams/${examId}/download-url`,
       )
-      .pipe(catchError((error) => this.handleError(error)));
+      .pipe(
+        map((response) => ({
+          downloadUrl: response.downloadUrl ?? response.url,
+          url: response.url ?? response.downloadUrl,
+          expiresAtUtc: response.expiresAtUtc,
+        })),
+        catchError((error) => this.handleError(error)),
+      );
+  }
+
+  /**
+   * Get view URL for patient exam file
+   * GET /api/professional/patients/{patientProfileId}/exams/{examId}/view-url
+   */
+  getViewUrl(
+    patientProfileId: string,
+    examId: string,
+  ): Observable<ExamDownloadUrlDto> {
+    return this.http
+      .get<ExamDownloadUrlDto>(
+        `${this.baseUrl}/${patientProfileId}/exams/${examId}/view-url`,
+      )
+      .pipe(
+        map((response) => ({
+          downloadUrl: response.downloadUrl ?? response.url,
+          url: response.url ?? response.downloadUrl,
+          expiresAtUtc: response.expiresAtUtc,
+        })),
+        catchError((error) => this.handleError(error)),
+      );
   }
 
   // ==========================================================================
