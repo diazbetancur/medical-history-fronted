@@ -278,9 +278,7 @@
           </div>
           } @else {
           <p class="empty-hint">No tienes especialidades seleccionadas.</p>
-          }
-
-          @if (showSpecialtyProposal()) {
+          } @if (showSpecialtyProposal()) {
           <form
             class="inline-form"
             [formGroup]="specialtyProposalForm"
