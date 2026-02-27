@@ -109,6 +109,9 @@ export class AuthModalComponent implements OnInit {
       return;
     }
 
+    // Ensure a clean session before attempting a new login
+    this.authStore.resetForLogin();
+
     this.isLoginLoading.set(true);
     this.loginError.set(null);
 

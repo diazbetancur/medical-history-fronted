@@ -8,6 +8,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,7 +21,6 @@ import { AuthStore } from '@core/auth';
 import { ProblemDetails } from '@core/models';
 import { ProfessionalApi, PublicApi } from '@data/api';
 import {
-  AssignProfessionalSpecialtiesPayload,
   City,
   Country,
   CreateProfessionalProfilePayload,
@@ -29,9 +29,11 @@ import {
   ProfessionalSpecialty,
   ProfessionalSpecialtyProposal,
   PublicSpecialtyCatalogItem,
+  ReplaceProfessionalSpecialtiesPayload,
   UpdateProfessionalProfilePayload,
 } from '@data/api/api-models';
 import { ToastService } from '@shared/services';
+import { ConfirmDialogComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-professional-onboarding',
@@ -59,6 +61,7 @@ export class ProfessionalOnboardingPage implements OnInit {
   private readonly publicApi = inject(PublicApi);
   private readonly authStore = inject(AuthStore);
   private readonly toast = inject(ToastService);
+  private readonly dialog = inject(MatDialog);
 
   // ─── Catalog data ──────────────────────────────────────────────────────────
   readonly countries = signal<Country[]>([]);
@@ -90,7 +93,10 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly specialtySearchControl = new FormControl<string>('', {
     nonNullable: true,
   });
-  readonly specialtyToAddControl = new FormControl<string | null>(null);
+  readonly specialtyToAddControl = new FormControl<string[]>([], {
+    nonNullable: true,
+  });
+  readonly professionalProfileId = signal<string | null>(null);
   readonly specialtiesLoaded = signal(false);
   readonly specialtiesCatalogLoaded = signal(false);
   readonly proposalsLoaded = signal(false);
@@ -205,6 +211,7 @@ export class ProfessionalOnboardingPage implements OnInit {
     this.professionalApi.getProfile().subscribe({
       next: (profile) => {
         this.hasExistingProfile.set(true);
+        this.professionalProfileId.set(profile.id);
         this.countries.set([
           {
             id: profile.countryId,
@@ -238,9 +245,16 @@ export class ProfessionalOnboardingPage implements OnInit {
       },
       error: () => {
         this.hasExistingProfile.set(false);
+        this.professionalProfileId.set(null);
         this.loadCatalogs();
       },
     });
+  }
+
+  private getCurrentProfessionalProfileId(): string | null {
+    return (
+      this.currentUser()?.professionalProfileId ?? this.professionalProfileId()
+    );
   }
 
   private prefillEmailFromUser(): void {
@@ -283,7 +297,14 @@ export class ProfessionalOnboardingPage implements OnInit {
 
     this.loadSpecialtiesCatalog(force);
     this.sectionBusy.set(true);
-    this.professionalApi.getSpecialties().subscribe({
+    const professionalProfileId = this.getCurrentProfessionalProfileId();
+    const specialtiesRequest$ = professionalProfileId
+      ? this.professionalApi.getProfessionalSpecialtiesByProfile(
+          professionalProfileId,
+        )
+      : this.professionalApi.getSpecialties();
+
+    specialtiesRequest$.subscribe({
       next: (specialties) => {
         this.specialties.set(specialties);
         this.selectedSpecialtyIds.set(specialties.map((item) => item.id));
@@ -306,30 +327,32 @@ export class ProfessionalOnboardingPage implements OnInit {
   }
 
   addSpecialtyToSelection(): void {
-    const specialtyId = this.specialtyToAddControl.value;
-    if (!specialtyId) return;
+    const specialtyIds = this.specialtyToAddControl.value;
+    if (!specialtyIds.length) return;
 
-    this.selectedSpecialtyIds.update((current) => {
-      if (current.includes(specialtyId)) return current;
-      return [...current, specialtyId];
-    });
+    const current = this.selectedSpecialtyIds();
+    const idsToAdd = specialtyIds.filter((id) => !current.includes(id));
+    if (!idsToAdd.length) {
+      this.specialtyToAddControl.setValue([]);
+      return;
+    }
 
-    this.specialtyToAddControl.setValue(null);
+    const updatedSelection = [...current, ...idsToAdd];
+    this.saveSpecialties(updatedSelection);
+
+    this.specialtyToAddControl.setValue([]);
   }
 
-  removeSpecialtyFromSelection(specialtyId: string): void {
-    this.selectedSpecialtyIds.update((current) =>
-      current.filter((id) => id !== specialtyId),
-    );
-  }
-
-  saveSpecialties(): void {
-    const payload: AssignProfessionalSpecialtiesPayload = {
-      specialtyIds: this.selectedSpecialtyIds(),
+  saveSpecialties(specialtyIds = this.selectedSpecialtyIds()): void {
+    const payload: ReplaceProfessionalSpecialtiesPayload = {
+      specialties: specialtyIds.map((specialtyId) => ({
+        specialtyId,
+        isPrimary: false,
+      })),
     };
 
     this.sectionBusy.set(true);
-    this.professionalApi.assignSpecialties(payload).subscribe({
+    this.professionalApi.replaceSpecialties(payload).subscribe({
       next: (result) => {
         this.specialties.set(result);
         this.selectedSpecialtyIds.set(result.map((item) => item.id));
@@ -589,6 +612,54 @@ export class ProfessionalOnboardingPage implements OnInit {
       startYear: null,
       endYear: null,
       country: '',
+    });
+  }
+
+  removeSpecialtyFromSelection(specialtyId: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar especialidad',
+        message: '¿Estás seguro de eliminar esta especialidad?',
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      const isPersisted = this.specialties().some(
+        (item) => item.id === specialtyId,
+      );
+
+      if (!isPersisted) {
+        this.selectedSpecialtyIds.update((current) =>
+          current.filter((id) => id !== specialtyId),
+        );
+        return;
+      }
+
+      this.sectionBusy.set(true);
+      this.professionalApi.deleteSpecialty(specialtyId).subscribe({
+        next: () => {
+          this.specialties.update((current) =>
+            current.filter((item) => item.id !== specialtyId),
+          );
+          this.selectedSpecialtyIds.update((current) =>
+            current.filter((id) => id !== specialtyId),
+          );
+          this.specialtiesLoaded.set(true);
+          this.toast.success('Especialidad eliminada');
+          this.sectionBusy.set(false);
+        },
+        error: () => {
+          this.toast.error('No fue posible eliminar la especialidad');
+          this.sectionBusy.set(false);
+        },
+      });
     });
   }
 

@@ -2,17 +2,9 @@
   <!-- Header -->
   <div class="dashboard-header">
     <div class="header-title">
-      <h1>Dashboard</h1>
+      <h1>Bienvenido {{ userName() }}</h1>
       <p>Resumen de tu actividad</p>
     </div>
-    <button
-      mat-icon-button
-      matTooltip="Recargar"
-      (click)="reload()"
-      [disabled]="loading()"
-    >
-      <mat-icon>refresh</mat-icon>
-    </button>
   </div>
 
   <!-- Loading state -->
@@ -20,18 +12,6 @@
   <div class="loading-container">
     <mat-spinner diameter="50"></mat-spinner>
     <p>Cargando dashboard...</p>
-  </div>
-  }
-
-  <!-- Error state -->
-  @if (error() && !loading()) {
-  <div class="error-banner">
-    <mat-icon>error_outline</mat-icon>
-    <span>{{ error() }}</span>
-    <button mat-stroked-button (click)="reload()">
-      <mat-icon>refresh</mat-icon>
-      Reintentar
-    </button>
   </div>
   }
 
@@ -88,7 +68,7 @@
           <span class="metric-value"
             >{{ dashboard()?.pendingEncountersCount ?? '–' }}</span
           >
-          <span class="metric-label">Encuentros pendientes</span>
+          <span class="metric-label">Citas pendientes del Mees</span>
         </div>
       </mat-card-content>
       <mat-card-actions>
@@ -107,7 +87,7 @@
         <div class="metric-info">
           @if (dashboard(); as data) {
           <span class="metric-value"
-            >{{ data.monthlyRevenue | currency: 'COP' : 'symbol-narrow' :
+            >{{ data.monthlyRevenue | currency: 'HNL' : 'symbol-narrow' :
             '1.0-0' }}</span
           >
           <span class="metric-label">
@@ -133,7 +113,7 @@
 
   <!-- ── Appointments today ─────────────────────────────────────────────── -->
   @if (dashboard(); as data) {
-  <mat-card class="appointments-card">
+  <mat-card class="appointments-card" style="display: none">
     <mat-card-header>
       <mat-card-title>
         <mat-icon>today</mat-icon>

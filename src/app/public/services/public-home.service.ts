@@ -108,8 +108,8 @@ export class PublicHomeService {
       const [firstName = fullName, ...restNames] = fullName.split(' ');
       const primarySpecialty =
         professional.specialties.find((specialty) => specialty.isPrimary)
-          ?.name ??
-        professional.specialties[0]?.name ??
+          ?.specialtyName ??
+        professional.specialties[0]?.specialtyName ??
         'Especialista';
 
       return {

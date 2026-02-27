@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
+import { AuthStore } from '@core/auth';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { ToastService } from '@shared/services/toast.service';
 import { ConfirmDialogComponent } from '@shared/ui';
@@ -30,7 +31,7 @@ import { AppointmentDetailDialogComponent } from './appointment-detail-dialog.co
       <!-- Hero Section -->
       <section class="hero">
         <div class="hero-content">
-          <h1>Bienvenido a Directory Pro</h1>
+          <h1>Bienvenido {{ userName() }}</h1>
           <p class="subtitle">
             Gestiona tus citas médicas de manera fácil y rápida
           </p>
@@ -486,7 +487,9 @@ export class PatientHomeComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly authStore = inject(AuthStore);
 
+  readonly userName = computed(() => this.authStore.userName() || '');
   // State
   readonly isLoading = signal(false);
   readonly allAppointments = signal<AppointmentDto[]>([]);

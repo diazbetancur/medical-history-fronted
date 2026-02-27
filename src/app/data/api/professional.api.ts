@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
   AssignProfessionalSpecialtiesPayload,
@@ -7,11 +7,12 @@ import {
   CreateProfessionalEducationPayload,
   CreateProfessionalLocationPayload,
   CreateProfessionalProfilePayload,
+  CreateProfessionalSpecialtyPayload,
   CreateServicePayload,
   ProfessionalAvailabilityException,
   ProfessionalAvailabilitySlotsResponse,
   ProfessionalAvailabilityTemplateResponse,
-  ProfessionalDashboardResponse,
+  ProfessionalDashboardSummaryResponse,
   ProfessionalEducationDetail,
   ProfessionalEducationSummary,
   ProfessionalLocation,
@@ -23,6 +24,7 @@ import {
   ProfessionalSpecialty,
   ProfessionalSpecialtyProposal,
   ProposeProfessionalSpecialtyPayload,
+  ReplaceProfessionalSpecialtiesPayload,
   Service,
   UpdateProfessionalEducationPayload,
   UpdateProfessionalLocationPayload,
@@ -32,6 +34,13 @@ import {
   UpdateServicePayload,
   UpsertProfessionalAvailabilityTemplatePayload,
 } from './api-models';
+
+interface ProfessionalSpecialtyApiResponse {
+  specialtyId: string;
+  specialtyName: string;
+  isPrimary: boolean;
+  dateCreated: string;
+}
 
 /**
  * Professional API Client
@@ -94,16 +103,53 @@ export class ProfessionalApi {
   // ===========================================================================
 
   getSpecialties(): Observable<ProfessionalSpecialty[]> {
-    return this.api.get<ProfessionalSpecialty[]>('/professional/specialties');
+    return this.api
+      .get<ProfessionalSpecialtyApiResponse[]>('/professional/specialties')
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  getProfessionalSpecialtiesByProfile(
+    professionalProfileId: string,
+  ): Observable<ProfessionalSpecialty[]> {
+    return this.api
+      .get<
+        ProfessionalSpecialtyApiResponse[]
+      >(`/professional/specialties/professional/${professionalProfileId}`)
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  addSpecialty(
+    payload: CreateProfessionalSpecialtyPayload,
+  ): Observable<ProfessionalSpecialty[]> {
+    return this.api
+      .post<
+        ProfessionalSpecialtyApiResponse[]
+      >('/professional/specialties', payload)
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  replaceSpecialties(
+    payload: ReplaceProfessionalSpecialtiesPayload,
+  ): Observable<ProfessionalSpecialty[]> {
+    return this.api
+      .put<
+        ProfessionalSpecialtyApiResponse[]
+      >('/professional/specialties', payload)
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  deleteSpecialty(specialtyId: string): Observable<void> {
+    return this.api.delete<void>(`/professional/specialties/${specialtyId}`);
   }
 
   assignSpecialties(
     payload: AssignProfessionalSpecialtiesPayload,
   ): Observable<ProfessionalSpecialty[]> {
-    return this.api.put<ProfessionalSpecialty[]>(
-      '/professional/specialties',
-      payload,
-    );
+    return this.api
+      .put<
+        ProfessionalSpecialtyApiResponse[]
+      >('/professional/specialties', payload)
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
   }
 
   getSpecialtyProposals(): Observable<ProfessionalSpecialtyProposal[]> {
@@ -363,15 +409,12 @@ export class ProfessionalApi {
   // ===========================================================================
 
   /**
-   * GET /api/professional/dashboard/{professionalProfileId}
-   * Returns aggregated dashboard metrics for the professional.
-   * Policy: Profiles.View
+   * GET /api/professional/dashboard/summary
+   * Returns aggregated dashboard metrics for the authenticated professional.
    */
-  getDashboard(
-    professionalProfileId: string,
-  ): Observable<ProfessionalDashboardResponse> {
-    return this.api.get<ProfessionalDashboardResponse>(
-      `/professional/dashboard/${professionalProfileId}`,
+  getDashboardSummary(): Observable<ProfessionalDashboardSummaryResponse> {
+    return this.api.get<ProfessionalDashboardSummaryResponse>(
+      '/professional/dashboard/summary',
     );
   }
 
@@ -401,5 +444,14 @@ export class ProfessionalApi {
     }
 
     return searchParams;
+  }
+
+  private mapProfessionalSpecialties(
+    items: ProfessionalSpecialtyApiResponse[],
+  ): ProfessionalSpecialty[] {
+    return (items ?? []).map((item) => ({
+      id: item.specialtyId,
+      name: item.specialtyName,
+    }));
   }
 }

@@ -1,5 +1,5 @@
 ﻿import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -7,14 +7,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '@core/auth';
+import { AuthService, AuthStore } from '@core/auth';
 import { ProfessionalApi } from '@data/api';
 import type {
   ProfessionalDashboardAppointment,
   ProfessionalDashboardResponse,
+  ProfessionalDashboardSummaryResponse,
 } from '@data/api/api-models';
+import { ToastService } from '@shared/services/toast.service';
 import { filter, take } from 'rxjs';
 
 @Component({
@@ -30,7 +31,6 @@ import { filter, take } from 'rxjs';
     MatTableModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    MatTooltipModule,
   ],
   templateUrl: './professional-dashboard.page.html',
   styleUrl: './professional-dashboard.page.scss',
@@ -39,9 +39,11 @@ export class ProfessionalDashboardPage {
   private readonly professionalApi = inject(ProfessionalApi);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly authStore = inject(AuthStore);
+  private readonly toast = inject(ToastService);
 
+  readonly userName = computed(() => this.authStore.userName() || '');
   readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
   readonly dashboard = signal<ProfessionalDashboardResponse | null>(null);
 
   readonly appointmentColumns = [
@@ -61,39 +63,37 @@ export class ProfessionalDashboardPage {
         take(1),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => {
-        const profileId = this.authService.professionalProfileId();
-        if (!profileId) {
-          this.error.set(
-            'No se encontró un perfil profesional asociado a tu cuenta.',
-          );
-          this.loading.set(false);
-          return;
-        }
-        this.loadDashboard(profileId);
-      });
+      .subscribe(() => this.loadDashboard());
   }
 
-  reload(): void {
-    const profileId = this.authService.professionalProfileId();
-    if (!profileId) return;
-    this.error.set(null);
-    this.dashboard.set(null);
-    this.loadDashboard(profileId);
-  }
-
-  private loadDashboard(profileId: string): void {
+  private loadDashboard(): void {
     this.loading.set(true);
-    this.professionalApi.getDashboard(profileId).subscribe({
-      next: (data) => {
-        this.dashboard.set(data);
+    this.professionalApi.getDashboardSummary().subscribe({
+      next: (data: ProfessionalDashboardSummaryResponse) => {
+        this.dashboard.set(this.mapSummaryToDashboard(data));
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('No se pudieron cargar los datos del dashboard.');
+        this.toast.error(
+          'Se presentó una falla consultando datos del dashboard.',
+        );
         this.loading.set(false);
       },
     });
+  }
+
+  private mapSummaryToDashboard(
+    summary: ProfessionalDashboardSummaryResponse,
+  ): ProfessionalDashboardResponse {
+    return {
+      appointmentsTodayCount: summary.todayAppointments,
+      appointmentsToday: [],
+      activePatientsCount: summary.activePatientsLast6Months,
+      pendingEncountersCount: summary.pendingAppointmentsThisMonth,
+      monthlyRevenue: summary.approxMonthlyIncome,
+      completedAppointmentsThisMonth: 0,
+      revenueMonth: '',
+    };
   }
 
   getAppointmentStatusChip(status: string): {
