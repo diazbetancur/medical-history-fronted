@@ -143,6 +143,14 @@
   margin-top: 12px;
 }
 
+.section-header-with-action {
+  justify-content: space-between;
+
+  button {
+    margin-left: auto;
+  }
+}
+
 .inline-loading {
   padding: 16px 0;
 }
