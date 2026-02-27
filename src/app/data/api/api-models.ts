@@ -252,6 +252,11 @@ export interface SearchProfessional {
   slug: string;
   businessName: string;
   profileImageUrl?: string;
+  specialties?: Array<{
+    id: string;
+    name: string;
+    isPrimary: boolean;
+  }>;
   categoryName: string;
   categorySlug: string;
   cityName: string;

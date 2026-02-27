@@ -38,9 +38,7 @@
           <mat-select [formControl]="specialtyControl">
             <mat-option [value]="null">Todas</mat-option>
             @for (specialty of specialties(); track specialty.id) {
-            <mat-option [value]="specialty.slug"
-              >{{ specialty.name }}</mat-option
-            >
+            <mat-option [value]="specialty.id">{{ specialty.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -50,7 +48,7 @@
           <mat-select [formControl]="cityControl">
             <mat-option [value]="null">Todas</mat-option>
             @for (city of cities(); track city.id) {
-            <mat-option [value]="city.slug">{{ city.name }}</mat-option>
+            <mat-option [value]="city.id">{{ city.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -115,11 +113,21 @@
             <mat-icon>place</mat-icon>
             {{ doctor.cityName }}
           </p>
-          <p class="extra-line">
-            <!-- Experiencia pendiente de backend en SearchProfessional -->
-            @if (doctor.priceFrom) { Valor consulta aprox: ${{ doctor.priceFrom
-            }} } @else { Valor consulta aprox: por confirmar }
-          </p>
+          @if (getSpecialtyNames(doctor).length > 0) {
+          <div class="specialties-block">
+            <span class="specialties-label">Especialista en</span>
+            <mat-chip-set class="specialty-chips" aria-label="Especialidades">
+              @for (specialtyName of getVisibleSpecialtyNames(doctor); track
+              specialtyName) {
+              <mat-chip class="specialty-chip">{{ specialtyName }}</mat-chip>
+              } @if (getHiddenSpecialtiesCount(doctor) > 0) {
+              <mat-chip class="specialty-chip specialty-more"
+                >+{{ getHiddenSpecialtiesCount(doctor) }}</mat-chip
+              >
+              }
+            </mat-chip-set>
+          </div>
+          }
         </div>
 
         <div class="doctor-actions">

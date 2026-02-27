@@ -9,13 +9,40 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ApiError, createApiError } from '@core/http/api-error';
 import { environment } from '@env';
-import { catchError, Observable, of, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import {
   buildSearchCacheKey,
   ProfessionalDetailDto,
   ProfessionalSearchFiltersDto,
+  ProfessionalSearchResultDto,
   ProfessionalSearchResponseDto,
 } from '../models/professional-search.dto';
+
+interface SearchApiSpecialtyItem {
+  id: string;
+  name: string;
+  isPrimary?: boolean;
+}
+
+interface SearchApiItem {
+  id: string;
+  displayName: string;
+  slug: string;
+  profileImageUrl?: string;
+  cityName?: string;
+  countryName?: string;
+  specialties?: SearchApiSpecialtyItem[];
+}
+
+interface SearchApiResponse {
+  items?: SearchApiItem[];
+  totalCount?: number;
+  page?: number;
+  pageSize?: number;
+  totalPages?: number;
+  professionals?: ProfessionalSearchResultDto[];
+  total?: number;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -56,8 +83,9 @@ export class PublicProfessionalsService {
     params = params.set('pageSize', filters.pageSize?.toString() || '10');
 
     return this.http
-      .get<ProfessionalSearchResponseDto>(`${this.baseUrl}/search`, { params })
+      .get<SearchApiResponse>(`${this.baseUrl}/search`, { params })
       .pipe(
+        map((response) => this.normalizeSearchResponse(response)),
         tap((response) => {
           // Cache the result
           this.searchCache.set(cacheKey, response);
@@ -67,6 +95,45 @@ export class PublicProfessionalsService {
           return throwError(() => apiError);
         }),
       );
+  }
+
+  private normalizeSearchResponse(
+    response: SearchApiResponse,
+  ): ProfessionalSearchResponseDto {
+    if (Array.isArray(response.professionals)) {
+      return {
+        professionals: response.professionals,
+        total: response.total ?? response.professionals.length,
+        page: response.page ?? 1,
+        pageSize: response.pageSize ?? 10,
+        totalPages: response.totalPages ?? 1,
+      };
+    }
+
+    const professionals: ProfessionalSearchResultDto[] = (response.items ?? []).map(
+      (item) => ({
+        professionalProfileId: item.id,
+        slug: item.slug,
+        userId: '',
+        fullName: item.displayName,
+        photoUrl: item.profileImageUrl,
+        specialties: (item.specialties ?? []).map((specialty) => ({
+          id: specialty.id,
+          name: specialty.name,
+        })),
+        city: item.cityName,
+        country: item.countryName,
+        isAvailableForAppointments: true,
+      }),
+    );
+
+    return {
+      professionals,
+      total: response.totalCount ?? professionals.length,
+      page: response.page ?? 1,
+      pageSize: response.pageSize ?? 10,
+      totalPages: response.totalPages ?? 1,
+    };
   }
 
   /**
