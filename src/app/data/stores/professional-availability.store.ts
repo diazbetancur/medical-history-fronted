@@ -327,7 +327,18 @@ export class ProfessionalAvailabilityStore {
   }
 
   private getProfessionalIdOrNotify(): string | null {
-    const professionalId = this.authStore.user()?.professionalProfileId ?? null;
+    const fromUser = this.authStore.user()?.professionalProfileId ?? null;
+    const fromCurrentContext =
+      this.authStore.currentContext()?.type === 'PROFESSIONAL'
+        ? this.authStore.currentContext()?.id
+        : null;
+    const fromAvailableContexts = this.authStore
+      .availableContexts()
+      .find((ctx) => ctx.type === 'PROFESSIONAL')?.id;
+
+    const professionalId =
+      fromUser ?? fromCurrentContext ?? fromAvailableContexts ?? null;
+
     if (!professionalId) {
       this.toastService.error('No se encontró perfil profesional');
       return null;

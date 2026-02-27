@@ -1,4 +1,8 @@
-<mat-toolbar color="primary" class="topbar">
+<mat-toolbar
+  color="primary"
+  class="topbar"
+  [class.topbar--patient]="isPatientContext()"
+>
   <!-- Menu toggle (mobile) -->
   <button mat-icon-button class="menu-toggle" (click)="menuToggle.emit()">
     <mat-icon>menu</mat-icon>

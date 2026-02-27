@@ -21,6 +21,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { AuthStore } from '@core/auth';
 import {
   ABSENCE_TYPE_NAMES,
   type AbsenceType,
@@ -29,7 +30,7 @@ import {
 import {
   DAYS_OF_WEEK,
   DAY_NAMES,
-  DEFAULT_WEEKLY_SCHEDULE,
+  type DayOfWeek,
   type DaySchedule,
   type TimeBlock,
   type WeeklyScheduleDto,
@@ -81,11 +82,7 @@ import { ConfirmDialogComponent } from '@shared/ui';
             <form [formGroup]="scheduleForm">
               <mat-accordion>
                 @for (day of daysOfWeek; track day; let i = $index) {
-                  <mat-expansion-panel
-                    [expanded]="
-                      getDayScheduleFormGroup(i).get('isWorkingDay')?.value
-                    "
-                  >
+                  <mat-expansion-panel>
                     <mat-expansion-panel-header>
                       <mat-panel-title>
                         <mat-slide-toggle
@@ -634,6 +631,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
   private static readonly HONDURAS_TIMEZONE = 'America/Tegucigalpa';
 
   protected readonly store = inject(ProfessionalAvailabilityStore);
+  private readonly authStore = inject(AuthStore);
   protected readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
@@ -648,17 +646,46 @@ export class ProfessionalAvailabilityPage implements OnInit {
   protected scheduleForm!: FormGroup;
   protected absenceForm!: FormGroup;
 
+  private readonly loadScheduleEffect = effect(() => {
+    const user = this.authStore.user();
+    const currentContext = this.authStore.currentContext();
+    const professionalId =
+      user?.professionalProfileId ??
+      (currentContext?.type === 'PROFESSIONAL' ? currentContext.id : null);
+
+    if (!professionalId) {
+      return;
+    }
+
+    if (this.store.weeklySchedule() || this.store.isLoadingSchedule()) {
+      return;
+    }
+
+    this.store.loadWeeklySchedule(professionalId);
+    this.store.loadFutureAbsences(professionalId);
+    this.store.loadLocations();
+  });
+
+  private readonly patchScheduleEffect = effect(() => {
+    const schedule = this.store.weeklySchedule();
+
+    if (!schedule || !this.scheduleForm) {
+      return;
+    }
+
+    queueMicrotask(() => {
+      if (!this.scheduleForm) {
+        return;
+      }
+
+      this.patchScheduleForm(schedule);
+    });
+  });
+
   ngOnInit(): void {
     this.initScheduleForm();
     this.initAbsenceForm();
     this.store.initialize();
-
-    effect(() => {
-      const schedule = this.store.weeklySchedule();
-      if (schedule) {
-        this.patchScheduleForm(schedule);
-      }
-    });
   }
 
   protected isOverrideType(): boolean {
@@ -676,7 +703,9 @@ export class ProfessionalAvailabilityPage implements OnInit {
   private initScheduleForm(): void {
     this.scheduleForm = this.fb.group({
       days: this.fb.array(
-        DEFAULT_WEEKLY_SCHEDULE.map((day) => this.createDayFormGroup(day)),
+        this.daysOfWeek.map((day) =>
+          this.createDayFormGroup(this.createEmptyDaySchedule(day)),
+        ),
       ),
       defaultSlotDuration: [
         30,
@@ -688,6 +717,14 @@ export class ProfessionalAvailabilityPage implements OnInit {
       ],
       isActive: [true],
     });
+  }
+
+  private createEmptyDaySchedule(dayOfWeek: DayOfWeek): DaySchedule {
+    return {
+      dayOfWeek,
+      isWorkingDay: false,
+      timeBlocks: [],
+    };
   }
 
   private patchScheduleForm(schedule: WeeklyScheduleDto): void {
