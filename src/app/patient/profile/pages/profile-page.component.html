@@ -56,9 +56,33 @@
                     }}</span>
                   </div>
                   <div class="summary-item">
+                    <span class="label">Tipo de documento</span>
+                    <span class="value">{{
+                      profile()?.documentType || "No disponible"
+                    }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Número de documento</span>
+                    <span class="value">{{
+                      profile()?.documentNumber || "No disponible"
+                    }}</span>
+                  </div>
+                  <div class="summary-item">
                     <span class="label">Fecha de nacimiento</span>
                     <span class="value">{{
                       profile()?.dateOfBirth || "No disponible"
+                    }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Género</span>
+                    <span class="value">{{
+                      profile()?.gender || "No disponible"
+                    }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Tipo de sangre</span>
+                    <span class="value">{{
+                      profile()?.bloodType || "No disponible"
                     }}</span>
                   </div>
                   <div class="summary-item full">
@@ -80,22 +104,22 @@
                 <form class="summary-form" [formGroup]="summaryForm">
                   <div class="summary-grid form-grid">
                     <mat-form-field appearance="outline">
-                      <mat-label>Nombre</mat-label>
+                      <mat-label>Nombre completo</mat-label>
                       <input
                         matInput
-                        formControlName="firstName"
-                        placeholder="Nombre"
-                        title="Nombre"
+                        formControlName="fullName"
+                        placeholder="Nombre completo"
+                        title="Nombre completo"
                       />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Apellido</mat-label>
+                      <mat-label>Email</mat-label>
                       <input
                         matInput
-                        formControlName="lastName"
-                        placeholder="Apellido"
-                        title="Apellido"
+                        formControlName="email"
+                        placeholder="correo@dominio.com"
+                        title="Email"
                       />
                     </mat-form-field>
 
@@ -110,6 +134,26 @@
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
+                      <mat-label>Tipo de documento</mat-label>
+                      <input
+                        matInput
+                        formControlName="documentType"
+                        placeholder="CC"
+                        title="Tipo de documento"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Número de documento</mat-label>
+                      <input
+                        matInput
+                        formControlName="documentNumber"
+                        placeholder="1234567890"
+                        title="Número de documento"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
                       <mat-label>Fecha de nacimiento</mat-label>
                       <input
                         matInput
@@ -120,23 +164,23 @@
                       />
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="full-field">
-                      <mat-label>Calle</mat-label>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Género</mat-label>
                       <input
                         matInput
-                        formControlName="street"
-                        placeholder="Calle"
-                        title="Calle"
+                        formControlName="gender"
+                        placeholder="Masculino"
+                        title="Género"
                       />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Ciudad</mat-label>
+                      <mat-label>Tipo de sangre</mat-label>
                       <input
                         matInput
-                        formControlName="city"
-                        placeholder="Ciudad"
-                        title="Ciudad"
+                        formControlName="bloodType"
+                        placeholder="O+"
+                        title="Tipo de sangre"
                       />
                     </mat-form-field>
 
@@ -144,9 +188,29 @@
                       <mat-label>País</mat-label>
                       <input
                         matInput
-                        formControlName="country"
-                        placeholder="País"
+                        formControlName="countryName"
+                        placeholder="Colombia"
                         title="País"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Ciudad</mat-label>
+                      <input
+                        matInput
+                        formControlName="cityName"
+                        placeholder="Medellín"
+                        title="Ciudad"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-field">
+                      <mat-label>Dirección</mat-label>
+                      <input
+                        matInput
+                        formControlName="addressLine1"
+                        placeholder="Calle 10 # 20-30"
+                        title="Dirección"
                       />
                     </mat-form-field>
                   </div>
