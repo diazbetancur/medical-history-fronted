@@ -20,7 +20,7 @@ import { ApiClient } from './api-client';
 
 interface WeeklyWindowResponseDto {
   id?: string;
-  dayOfWeek: number;
+  dayOfWeek: number | string;
   dayName?: string;
   startTime: string;
   endTime: string;
@@ -45,6 +45,24 @@ interface AvailabilityTemplateDto {
   weeklyWindows?: WeeklyWindowResponseDto[];
   windows?: WeeklyWindowResponseDto[];
 }
+
+interface AvailabilityTemplateEnvelopeDto {
+  data?: AvailabilityTemplateDto | null;
+  result?: AvailabilityTemplateDto | null;
+  template?: AvailabilityTemplateDto | null;
+}
+
+interface NormalizedWeeklyWindow {
+  dayNumber: number;
+  startTime: string;
+  endTime: string;
+  professionalLocationId: string | null;
+  professionalLocationName: string | null;
+  professionalLocationAddress: string | null;
+  slotDurationMinutes?: number;
+}
+
+type LooseRecord = Record<string, unknown>;
 
 interface UpsertAvailabilityTemplateDto {
   timeZone: string;
@@ -109,12 +127,12 @@ export class ProfessionalAvailabilityApi {
 
   getWeeklySchedule(professionalId: string): Observable<WeeklyScheduleDto> {
     return this.apiClient
-      .get<AvailabilityTemplateDto | null>(
-        `/professional/${professionalId}/availability/template`,
-      )
+      .get<
+        AvailabilityTemplateDto | AvailabilityTemplateEnvelopeDto | null
+      >(`/professional/${professionalId}/availability/template`)
       .pipe(
-        map((template) =>
-          this.mapTemplateToWeeklySchedule(professionalId, template),
+        map((response) =>
+          this.mapTemplateToWeeklySchedule(professionalId, response),
         ),
       );
   }
@@ -141,13 +159,12 @@ export class ProfessionalAvailabilityApi {
     };
 
     return this.apiClient
-      .put<AvailabilityTemplateDto>(
-        `/professional/${professionalId}/availability/template`,
-        payload,
-      )
+      .put<
+        AvailabilityTemplateDto | AvailabilityTemplateEnvelopeDto
+      >(`/professional/${professionalId}/availability/template`, payload)
       .pipe(
-        map((template) =>
-          this.mapTemplateToWeeklySchedule(professionalId, template),
+        map((response) =>
+          this.mapTemplateToWeeklySchedule(professionalId, response),
         ),
       );
   }
@@ -272,23 +289,32 @@ export class ProfessionalAvailabilityApi {
 
   private mapTemplateToWeeklySchedule(
     professionalId: string,
-    template: AvailabilityTemplateDto | null,
+    response: AvailabilityTemplateDto | AvailabilityTemplateEnvelopeDto | null,
   ): WeeklyScheduleDto {
-    const windows = template?.weeklyWindows ?? template?.windows ?? [];
+    const template = this.extractTemplate(response);
+    const windows = this.normalizeWeeklyWindows(
+      template?.weeklyWindows ?? template?.windows ?? [],
+    );
+
+    const byDay = new Map<number, NormalizedWeeklyWindow[]>();
+    for (const window of windows) {
+      const current = byDay.get(window.dayNumber) ?? [];
+      current.push(window);
+      byDay.set(window.dayNumber, current);
+    }
+
     const daySchedules: DaySchedule[] = [1, 2, 3, 4, 5, 6, 0].map((day) => {
-      const dayWindows = windows.filter((window) => window.dayOfWeek === day);
+      const dayWindows = byDay.get(day) ?? [];
+
       return {
         dayOfWeek: this.mapDayNumberToEnum(day),
         isWorkingDay: dayWindows.length > 0,
         timeBlocks: dayWindows.map((window) => ({
           startTime: window.startTime,
           endTime: window.endTime,
-          professionalLocationId:
-            window.professionalLocationId ?? window.locationId ?? null,
-          professionalLocationName:
-            window.professionalLocationName ?? window.locationName ?? null,
-          professionalLocationAddress:
-            window.professionalLocationAddress ?? null,
+          professionalLocationId: window.professionalLocationId,
+          professionalLocationName: window.professionalLocationName,
+          professionalLocationAddress: window.professionalLocationAddress,
         })),
       };
     });
@@ -303,6 +329,239 @@ export class ProfessionalAvailabilityApi {
       isActive: template?.isActive ?? true,
       createdAt: template?.dateCreated,
     };
+  }
+
+  private extractTemplate(
+    response: AvailabilityTemplateDto | AvailabilityTemplateEnvelopeDto | null,
+  ): AvailabilityTemplateDto | null {
+    return this.findTemplateCandidate(response);
+  }
+
+  private findTemplateCandidate(
+    source: unknown,
+    depth = 0,
+  ): AvailabilityTemplateDto | null {
+    if (typeof source === 'string') {
+      const parsed = this.tryParseJson(source);
+      if (parsed) {
+        return this.findTemplateCandidate(parsed, depth + 1);
+      }
+    }
+
+    if (!source || typeof source !== 'object' || depth > 4) {
+      return null;
+    }
+
+    const raw = source as LooseRecord;
+    const weeklyWindows =
+      (raw['weeklyWindows'] as WeeklyWindowResponseDto[] | undefined) ??
+      (raw['WeeklyWindows'] as WeeklyWindowResponseDto[] | undefined);
+    const windows =
+      (raw['windows'] as WeeklyWindowResponseDto[] | undefined) ??
+      (raw['Windows'] as WeeklyWindowResponseDto[] | undefined);
+    const slotMinutes =
+      (raw['slotMinutes'] as number | undefined) ??
+      (raw['SlotMinutes'] as number | undefined);
+
+    if (
+      Array.isArray(weeklyWindows) ||
+      Array.isArray(windows) ||
+      typeof slotMinutes === 'number'
+    ) {
+      return {
+        id:
+          (raw['id'] as string | undefined) ??
+          (raw['Id'] as string | undefined),
+        professionalProfileId:
+          (raw['professionalProfileId'] as string | undefined) ??
+          (raw['ProfessionalProfileId'] as string | undefined),
+        timeZone:
+          (raw['timeZone'] as string | undefined) ??
+          (raw['TimeZone'] as string | undefined),
+        slotMinutes,
+        isActive:
+          (raw['isActive'] as boolean | undefined) ??
+          (raw['IsActive'] as boolean | undefined),
+        dateCreated:
+          (raw['dateCreated'] as string | undefined) ??
+          (raw['DateCreated'] as string | undefined),
+        weeklyWindows,
+        windows,
+      };
+    }
+
+    for (const value of Object.values(raw)) {
+      const found = this.findTemplateCandidate(value, depth + 1);
+      if (found) return found;
+    }
+
+    return null;
+  }
+
+  private normalizeWeeklyWindows(
+    windows: WeeklyWindowResponseDto[] | null | undefined,
+  ): NormalizedWeeklyWindow[] {
+    if (typeof windows === 'string') {
+      const parsed = this.tryParseJson(windows);
+      if (Array.isArray(parsed)) {
+        return this.normalizeWeeklyWindows(parsed as WeeklyWindowResponseDto[]);
+      }
+      return [];
+    }
+
+    if (!Array.isArray(windows)) {
+      return [];
+    }
+
+    return windows
+      .map((window) => {
+        const raw = window as WeeklyWindowResponseDto & LooseRecord;
+        const normalizedWindow: WeeklyWindowResponseDto = {
+          ...window,
+          dayOfWeek:
+            window.dayOfWeek ??
+            (raw['DayOfWeek'] as number | string | undefined) ??
+            (raw['day'] as number | string | undefined) ??
+            '',
+          dayName: window.dayName ?? (raw['DayName'] as string | undefined),
+          startTime:
+            window.startTime ?? (raw['StartTime'] as string | undefined) ?? '',
+          endTime:
+            window.endTime ?? (raw['EndTime'] as string | undefined) ?? '',
+          professionalLocationId:
+            window.professionalLocationId ??
+            (raw['ProfessionalLocationId'] as string | null | undefined) ??
+            (raw['LocationId'] as string | null | undefined),
+          professionalLocationName:
+            window.professionalLocationName ??
+            (raw['ProfessionalLocationName'] as string | null | undefined) ??
+            (raw['LocationName'] as string | null | undefined),
+          professionalLocationAddress:
+            window.professionalLocationAddress ??
+            (raw['ProfessionalLocationAddress'] as string | null | undefined),
+          locationId:
+            window.locationId ??
+            (raw['LocationId'] as string | null | undefined),
+          locationName:
+            window.locationName ??
+            (raw['LocationName'] as string | null | undefined),
+          slotDurationMinutes:
+            window.slotDurationMinutes ??
+            (raw['SlotDurationMinutes'] as number | undefined),
+        };
+
+        const dayNumber = this.resolveWindowDay(normalizedWindow);
+        const startTime = this.normalizeTime(normalizedWindow.startTime);
+        const endTime = this.normalizeTime(normalizedWindow.endTime);
+
+        if (!this.isValidDay(dayNumber) || !startTime || !endTime) {
+          return null;
+        }
+
+        return {
+          dayNumber,
+          startTime,
+          endTime,
+          professionalLocationId:
+            normalizedWindow.professionalLocationId ??
+            normalizedWindow.locationId ??
+            null,
+          professionalLocationName:
+            normalizedWindow.professionalLocationName ??
+            normalizedWindow.locationName ??
+            null,
+          professionalLocationAddress:
+            normalizedWindow.professionalLocationAddress ?? null,
+          slotDurationMinutes: normalizedWindow.slotDurationMinutes,
+        } as NormalizedWeeklyWindow;
+      })
+      .filter((window): window is NormalizedWeeklyWindow => !!window);
+  }
+
+  private tryParseJson(value: string): unknown | null {
+    const text = value.trim();
+    if (!text || (text[0] !== '{' && text[0] !== '[')) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  }
+
+  private isValidDay(day: number): boolean {
+    return Number.isInteger(day) && day >= 0 && day <= 6;
+  }
+
+  private resolveWindowDay(window: WeeklyWindowResponseDto): number {
+    const dayValue = window.dayOfWeek;
+
+    if (typeof dayValue === 'number' && Number.isFinite(dayValue)) {
+      return dayValue;
+    }
+
+    if (typeof dayValue === 'string') {
+      const numeric = Number(dayValue);
+      if (!Number.isNaN(numeric)) {
+        return numeric;
+      }
+
+      const byName = this.mapDayNameToNumber(dayValue);
+      if (byName !== null) {
+        return byName;
+      }
+    }
+
+    const fromDayName = this.mapDayNameToNumber(window.dayName);
+    return fromDayName ?? -1;
+  }
+
+  private mapDayNameToNumber(dayName?: string | null): number | null {
+    if (!dayName) return null;
+
+    switch (dayName.trim().toLowerCase()) {
+      case 'sunday':
+      case 'domingo':
+        return 0;
+      case 'monday':
+      case 'lunes':
+        return 1;
+      case 'tuesday':
+      case 'martes':
+        return 2;
+      case 'wednesday':
+      case 'miércoles':
+      case 'miercoles':
+        return 3;
+      case 'thursday':
+      case 'jueves':
+        return 4;
+      case 'friday':
+      case 'viernes':
+        return 5;
+      case 'saturday':
+      case 'sábado':
+      case 'sabado':
+        return 6;
+      default:
+        return null;
+    }
+  }
+
+  private normalizeTime(value: string): string {
+    if (!value) return value;
+
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+
+    const hhmmMatch = trimmed.match(/^(\d{2}:\d{2})/);
+    if (hhmmMatch) {
+      return hhmmMatch[1];
+    }
+
+    return trimmed.length >= 5 ? trimmed.slice(0, 5) : trimmed;
   }
 
   private mapExceptionToAbsence(item: AvailabilityExceptionDto): AbsenceDto {
