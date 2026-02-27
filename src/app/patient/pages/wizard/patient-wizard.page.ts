@@ -183,12 +183,12 @@ export class PatientWizardPage implements OnInit {
   }
 
   viewProfile(item: ProfessionalSearchResultDto): void {
-    if (!item.slug) {
+    if (!item.professionalProfileId) {
       this.toast.warning('Este profesional no tiene perfil público disponible');
       return;
     }
 
-    this.router.navigate(['/pro', item.slug]);
+    this.router.navigate(['/pro', item.professionalProfileId]);
   }
 
   bookAppointment(item: ProfessionalSearchResultDto): void {

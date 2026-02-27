@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Router } from '@angular/router';
 import { AuthService, AuthStore } from '@core/auth';
+import { PublicProfessionalDetailResponse } from '@data/api';
 import { ProfileStore } from '@data/stores';
 import { AnalyticsService, SeoService } from '@shared/services';
 import { isNotFoundError } from '@shared/utils';
@@ -42,31 +43,22 @@ export class ProfilePageComponent {
   private readonly router = inject(Router);
 
   readonly estimatedTariff = computed(() => {
-    const prices = this.store
-      .services()
-      .map((service) => service.priceFrom)
-      .filter((price): price is number => !!price);
-
-    if (prices.length === 0) {
-      return null;
-    }
-
-    return Math.min(...prices);
+    const value = this.store.profile()?.consultationValue;
+    return typeof value === 'number' && value > 0 ? value : null;
   });
 
   readonly profileSpecialties = computed(() => {
     const profile = this.store.profile();
-    const category = profile?.categoryName?.trim();
-    const serviceNames = this.store
-      .services()
-      .map((service) => service.name?.trim())
+    const specialtyNames = profile?.specialtyNames ?? [];
+    const specialties = (profile?.specialties ?? [])
+      .map((item) => item.name?.trim())
       .filter((name): name is string => !!name);
 
-    const unique = [
-      ...new Set([...(category ? [category] : []), ...serviceNames]),
-    ];
+    const unique = [...new Set([...specialtyNames, ...specialties])];
     return unique.slice(0, 6);
   });
+
+  readonly hasLocations = computed(() => this.store.locations().length > 0);
 
   // Route param via input binding
   slug = input.required<string>();
@@ -80,36 +72,14 @@ export class ProfilePageComponent {
 
   private loadProfile(slug: string): void {
     this.store.load(slug).subscribe({
-      next: (response) => {
-        if (response.seo) {
-          this.seoService.setSeo(response.seo);
-        }
-
-        // Track profile view (only when data is loaded)
-        if (response.profile) {
-          const pro = response.profile;
-
-          this.analytics.trackViewProfile({
-            professionalId: pro.id,
-            slug: pro.slug,
-            city: pro.cityName,
-            category: pro.categoryName,
-          });
-
-          // Set JSON-LD structured data for professionals
-          this.seoService.setJsonLd({
-            '@context': 'https://schema.org',
-            '@type': 'LocalBusiness',
-            name: pro.businessName,
-            description: pro.description,
-            image: pro.profileImageUrl,
-            address: {
-              '@type': 'PostalAddress',
-              addressLocality: pro.cityName,
-              addressCountry: pro.countryName,
-            },
-          });
-        }
+      next: (pro) => {
+        this.setProfileSeo(pro);
+        this.analytics.trackViewProfile({
+          professionalId: pro.id,
+          slug: pro.slug,
+          city: pro.cityName ?? '',
+          category: this.profileSpecialties()[0] ?? '',
+        });
       },
       error: (err) => {
         // Redirect to not-found on 404
@@ -125,11 +95,7 @@ export class ProfilePageComponent {
     const currentSlug = this.slug();
     if (currentSlug) {
       this.store.load(currentSlug, true).subscribe({
-        next: (response) => {
-          if (response.seo) {
-            this.seoService.setSeo(response.seo);
-          }
-        },
+        next: (pro) => this.setProfileSeo(pro),
       });
     }
   }
@@ -155,7 +121,7 @@ export class ProfilePageComponent {
         data: {
           slug: profile.slug,
           professionalId: profile.id,
-          name: profile.businessName,
+          name: profile.displayName,
           imageUrl: profile.profileImageUrl,
           specialties: this.profileSpecialties(),
         },
@@ -165,7 +131,24 @@ export class ProfilePageComponent {
 
     this.router.navigate(['/login'], {
       queryParams: {
-        returnUrl: `/pro/${profile.slug}`,
+        returnUrl: `/pro/${profile.id}`,
+      },
+    });
+  }
+
+  private setProfileSeo(profile: PublicProfessionalDetailResponse): void {
+    this.seoService.setTitle(`${profile.displayName} | MediTigo`);
+    this.seoService.setJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      name: profile.displayName,
+      description: profile.bio,
+      image: profile.profileImageUrl,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: profile.address,
+        addressLocality: profile.cityName,
+        addressCountry: profile.countryName,
       },
     });
   }

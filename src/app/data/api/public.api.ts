@@ -7,6 +7,7 @@ import {
   HomePageResponse,
   MetadataResponse,
   ProfilePageResponse,
+  PublicProfessionalDetailResponse,
   PublicSpecialtyCatalogItem,
   SearchPageResponse,
   SearchParams,
@@ -63,6 +64,18 @@ export class PublicApi {
   getProfilePage(slug: string): Observable<ProfilePageResponse> {
     return this.api.get<ProfilePageResponse>(
       `/public/pages/profile/${encodeURIComponent(slug)}`,
+    );
+  }
+
+  /**
+   * GET /api/public/professionals/{id}
+   * Get professional public detail by profile id
+   */
+  getProfessionalById(
+    id: string,
+  ): Observable<PublicProfessionalDetailResponse> {
+    return this.api.get<PublicProfessionalDetailResponse>(
+      `/public/professionals/${encodeURIComponent(id)}`,
     );
   }
 
