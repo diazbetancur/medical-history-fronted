@@ -120,9 +120,16 @@
           font-weight: 600;
         }
 
-        .specialty {
-          margin: 4px 0 2px;
-          font-size: 14px;
+        .specialties {
+          margin: 6px 0 4px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+
+          mat-chip {
+            min-height: 24px;
+            font-size: 12px;
+          }
         }
 
         .meta {

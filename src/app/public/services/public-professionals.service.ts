@@ -14,13 +14,15 @@ import {
   buildSearchCacheKey,
   ProfessionalDetailDto,
   ProfessionalSearchFiltersDto,
-  ProfessionalSearchResultDto,
   ProfessionalSearchResponseDto,
+  ProfessionalSearchResultDto,
 } from '../models/professional-search.dto';
 
 interface SearchApiSpecialtyItem {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
+  specialtyId?: string;
+  specialtyName?: string;
   isPrimary?: boolean;
 }
 
@@ -34,13 +36,30 @@ interface SearchApiItem {
   specialties?: SearchApiSpecialtyItem[];
 }
 
+interface SearchApiProfessionalItem {
+  professionalProfileId?: string;
+  id?: string;
+  slug?: string;
+  userId?: string;
+  fullName?: string;
+  displayName?: string;
+  photoUrl?: string;
+  profileImageUrl?: string;
+  specialties?: SearchApiSpecialtyItem[];
+  city?: string;
+  cityName?: string;
+  country?: string;
+  countryName?: string;
+  isAvailableForAppointments?: boolean;
+}
+
 interface SearchApiResponse {
   items?: SearchApiItem[];
   totalCount?: number;
   page?: number;
   pageSize?: number;
   totalPages?: number;
-  professionals?: ProfessionalSearchResultDto[];
+  professionals?: SearchApiProfessionalItem[];
   total?: number;
 }
 
@@ -102,7 +121,17 @@ export class PublicProfessionalsService {
   ): ProfessionalSearchResponseDto {
     if (Array.isArray(response.professionals)) {
       return {
-        professionals: response.professionals,
+        professionals: response.professionals.map((item) => ({
+          professionalProfileId: item.professionalProfileId ?? item.id ?? '',
+          slug: item.slug ?? '',
+          userId: item.userId ?? '',
+          fullName: item.fullName ?? item.displayName ?? '',
+          photoUrl: item.photoUrl ?? item.profileImageUrl,
+          specialties: this.normalizeSpecialties(item.specialties),
+          city: item.city ?? item.cityName,
+          country: item.country ?? item.countryName,
+          isAvailableForAppointments: item.isAvailableForAppointments ?? true,
+        })),
         total: response.total ?? response.professionals.length,
         page: response.page ?? 1,
         pageSize: response.pageSize ?? 10,
@@ -110,22 +139,19 @@ export class PublicProfessionalsService {
       };
     }
 
-    const professionals: ProfessionalSearchResultDto[] = (response.items ?? []).map(
-      (item) => ({
-        professionalProfileId: item.id,
-        slug: item.slug,
-        userId: '',
-        fullName: item.displayName,
-        photoUrl: item.profileImageUrl,
-        specialties: (item.specialties ?? []).map((specialty) => ({
-          id: specialty.id,
-          name: specialty.name,
-        })),
-        city: item.cityName,
-        country: item.countryName,
-        isAvailableForAppointments: true,
-      }),
-    );
+    const professionals: ProfessionalSearchResultDto[] = (
+      response.items ?? []
+    ).map((item) => ({
+      professionalProfileId: item.id,
+      slug: item.slug,
+      userId: '',
+      fullName: item.displayName,
+      photoUrl: item.profileImageUrl,
+      specialties: this.normalizeSpecialties(item.specialties),
+      city: item.cityName,
+      country: item.countryName,
+      isAvailableForAppointments: true,
+    }));
 
     return {
       professionals,
@@ -134,6 +160,17 @@ export class PublicProfessionalsService {
       pageSize: response.pageSize ?? 10,
       totalPages: response.totalPages ?? 1,
     };
+  }
+
+  private normalizeSpecialties(
+    specialties: SearchApiSpecialtyItem[] | undefined,
+  ): ProfessionalSearchResultDto['specialties'] {
+    return (specialties ?? [])
+      .map((specialty) => ({
+        id: specialty.id ?? specialty.specialtyId ?? '',
+        name: specialty.name ?? specialty.specialtyName ?? '',
+      }))
+      .filter((specialty) => !!specialty.id && !!specialty.name);
   }
 
   /**

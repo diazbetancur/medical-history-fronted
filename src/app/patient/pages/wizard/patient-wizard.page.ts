@@ -11,6 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,7 +21,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { PublicApi } from '@data/api';
-import { City, SearchProfessional } from '@data/api/api-models';
+import { City } from '@data/api/api-models';
 import { BookAppointmentDialogComponent } from '@features/public/components/book-appointment-dialog.component';
 import { ToastService } from '@shared/services/toast.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -101,6 +102,7 @@ export class WizardStore {
     MatButtonModule,
     MatIconModule,
     MatCardModule,
+    MatChipsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -143,44 +145,25 @@ export class PatientWizardPage implements OnInit {
 
   searchProfessionals(): void {
     const queryText = this.searchControl.value?.trim();
-    const selectedSpecialtyId = this.specialtyControl.value;
-    const selectedCityId = this.cityControl.value;
-
-    const selectedSpecialty = this.specialties().find(
-      (item) => item.id === selectedSpecialtyId,
-    );
-
-    const categorySlug = selectedSpecialty?.slug;
-
-    const citySlug = this.cities().find(
-      (item) => item.id === selectedCityId,
-    )?.slug;
-
-    const effectiveQuery =
-      !categorySlug && selectedSpecialty?.name
-        ? [queryText, selectedSpecialty.name].filter(Boolean).join(' ')
-        : queryText;
+    const selectedSpecialtyId = this.normalizeGuid(this.specialtyControl.value);
+    const selectedCityId = this.normalizeGuid(this.cityControl.value);
 
     this.loading.set(true);
     this.errorMessage.set(null);
     this.hasSearched.set(true);
     this.listTitle.set('Resultados de búsqueda');
 
-    this.publicApi
-      .getSearchPage({
-        q: effectiveQuery || undefined,
-        category: categorySlug,
-        city: citySlug,
+    this.professionalsService
+      .search({
+        q: queryText || undefined,
+        specialtyId: selectedSpecialtyId,
+        cityId: selectedCityId,
         page: 1,
         pageSize: 10,
       })
       .subscribe({
         next: (response) => {
-          this.professionals.set(
-            (response.professionals ?? []).map((item) =>
-              this.mapSearchProfessional(item),
-            ),
-          );
+          this.professionals.set(response.professionals ?? []);
           this.loading.set(false);
         },
         error: (error: ApiError) => {
@@ -266,6 +249,18 @@ export class PatientWizardPage implements OnInit {
 
   primarySpecialty(item: ProfessionalSearchResultDto): string {
     return item.specialties[0]?.name ?? 'Especialidad no disponible';
+  }
+
+  visibleSpecialties(item: ProfessionalSearchResultDto): Array<{
+    id: string;
+    name: string;
+  }> {
+    return (item.specialties ?? []).slice(0, 1);
+  }
+
+  remainingSpecialtiesCount(item: ProfessionalSearchResultDto): number {
+    const count = (item.specialties ?? []).length - 1;
+    return count > 0 ? count : 0;
   }
 
   hasLocation(item: ProfessionalSearchResultDto): boolean {
@@ -365,24 +360,11 @@ export class PatientWizardPage implements OnInit {
     };
   }
 
-  private mapSearchProfessional(
-    item: SearchProfessional,
-  ): ProfessionalSearchResultDto {
-    return {
-      professionalProfileId: item.id,
-      slug: item.slug,
-      userId: item.id,
-      fullName: item.businessName,
-      professionalTitle: undefined,
-      photoUrl: item.profileImageUrl ?? undefined,
-      specialties: item.categoryName
-        ? [{ id: item.categorySlug, name: item.categoryName }]
-        : [],
-      city: item.cityName ?? undefined,
-      country: undefined,
-      yearsOfExperience: undefined,
-      isAvailableForAppointments: true,
-    };
+  private normalizeGuid(value: string | null | undefined): string | undefined {
+    if (!value) return undefined;
+    const guidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return guidRegex.test(value) ? value : undefined;
   }
 
   private setupDebounce(): void {

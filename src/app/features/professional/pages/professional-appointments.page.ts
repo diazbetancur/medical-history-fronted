@@ -71,11 +71,6 @@ import { ToastService } from '@shared/services';
             <ng-template mat-tab-label>
               <mat-icon>today</mat-icon>
               <span>Hoy</span>
-              @if (store.todayAppointments().length > 0) {
-                <span class="badge">{{
-                  store.todayAppointments().length
-                }}</span>
-              }
             </ng-template>
 
             @if (store.todayAppointments().length === 0) {
@@ -195,11 +190,6 @@ import { ToastService } from '@shared/services';
             <ng-template mat-tab-label>
               <mat-icon>event</mat-icon>
               <span>Próximos 7 días</span>
-              @if (store.upcomingAppointments().length > 0) {
-                <span class="badge">{{
-                  store.upcomingAppointments().length
-                }}</span>
-              }
             </ng-template>
 
             @if (store.upcomingAppointments().length === 0) {
