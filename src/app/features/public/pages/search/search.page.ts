@@ -282,8 +282,8 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     this.searchWithCurrentFilters(1);
   }
 
-  goToProfile(slug: string): void {
-    this.router.navigate(['/pro', slug]);
+  goToProfile(professionalId: string): void {
+    this.router.navigate(['/pro', professionalId]);
   }
 
   getSpecialtyNames(doctor: SearchProfessional): string[] {

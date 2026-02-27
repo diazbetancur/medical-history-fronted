@@ -39,7 +39,7 @@
             @if (profile.profileImageUrl) {
             <img
               [src]="profile.profileImageUrl"
-              [alt]="profile.businessName"
+              [alt]="profile.displayName"
               title="Foto del profesional"
             />
             } @else {
@@ -47,14 +47,10 @@
             }
           </div>
           <div class="details">
-            <h1>{{ profile.businessName }}</h1>
-            <p class="specialty">{{ profile.categoryName }}</p>
-            <p class="location-line">{{ profile.cityName }}</p>
-            <div class="badges">
-              @for (specialty of profileSpecialties(); track specialty) {
-              <mat-chip> {{ specialty }} </mat-chip>
-              }
-            </div>
+            <h1>{{ profile.displayName }}</h1>
+            <p class="location-line">
+              {{ profile.cityName }}, {{ profile.countryName }}
+            </p>
           </div>
         </div>
       </mat-card>
@@ -62,10 +58,17 @@
       <mat-tab-group>
         <mat-tab label="Información">
           <div class="tab-content">
-            @if (profile.description) {
+            @if (profile.bio) {
             <h3>Acerca de</h3>
-            <p>{{ profile.description }}</p>
-            } @else {
+            <p>{{ profile.bio }}</p>
+
+            @if (profileSpecialties().length > 0) {
+            <div class="badges">
+              @for (specialty of profileSpecialties(); track specialty) {
+              <mat-chip>{{ specialty }}</mat-chip>
+              }
+            </div>
+            } } @else {
             <p>Este profesional aún no ha agregado una descripción pública.</p>
             }
           </div>
@@ -76,16 +79,10 @@
             @if (store.services().length > 0) {
             <h3>Servicios</h3>
             <div class="services-list">
-              @for (service of store.services(); track service.id) {
+              @for (service of store.services(); track service.title) {
               <mat-card class="service-card">
                 <mat-card-header>
-                  <mat-card-title>{{ service.name }}</mat-card-title>
-                  @if (service.priceFrom) {
-                  <mat-card-subtitle>
-                    Desde ${{ service.priceFrom }} @if (service.priceTo) { - ${{
-                    service.priceTo }} }
-                  </mat-card-subtitle>
-                  }
+                  <mat-card-title>{{ service.title }}</mat-card-title>
                 </mat-card-header>
                 @if (service.description) {
                 <mat-card-content>
@@ -101,19 +98,57 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Ubicación">
+        <mat-tab label="Estudios">
           <div class="tab-content">
-            <p class="location-text">
-              <mat-icon>location_on</mat-icon>
-              {{ profile.cityName }}, {{ profile.countryName }} @if
-              (profile.address) { - {{ profile.address }} }
-            </p>
-            <div class="map-placeholder">
-              <mat-icon>map</mat-icon>
-              <span>Mapa (próximamente)</span>
+            @if (store.studies().length > 0) {
+            <div class="services-list">
+              @for (study of store.studies(); track study.title + '-' +
+              study.university) {
+              <mat-card class="service-card">
+                <mat-card-header>
+                  <mat-card-title>{{ study.title }}</mat-card-title>
+                  <mat-card-subtitle>{{ study.university }}</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>
+                    @if (study.country) { {{ study.country }} } @if
+                    (study.graduationYear) { · {{ study.graduationYear }} }
+                  </p>
+                </mat-card-content>
+              </mat-card>
+              }
+            </div>
+            } @else {
+            <p>Este profesional aún no ha agregado estudios.</p>
+            }
+          </div>
+        </mat-tab>
+
+        @if (hasLocations()) {
+        <mat-tab label="Ubicaciones">
+          <div class="tab-content">
+            <div class="services-list">
+              @for (location of store.locations(); track location.name + '-' +
+              location.address) {
+              <mat-card class="service-card">
+                <mat-card-header>
+                  <mat-card-title>{{ location.name }}</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  @if (location.address) {
+                  <p>{{ location.address }}</p>
+                  }
+                  <p>
+                    {{ location.cityName }} @if (location.countryName) {, {{
+                    location.countryName }} }
+                  </p>
+                </mat-card-content>
+              </mat-card>
+              }
             </div>
           </div>
         </mat-tab>
+        }
       </mat-tab-group>
     </div>
 

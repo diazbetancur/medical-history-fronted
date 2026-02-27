@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { PublicApi, PublicProfessionalDetailResponse } from '@data/api';
 import { Observable, catchError, of, tap } from 'rxjs';
-import { ProfilePageResponse, PublicApi } from '@data/api';
 
 interface StoreState<T> {
   data: T | null;
@@ -18,14 +18,14 @@ function createInitialState<T>(): StoreState<T> {
   };
 }
 
-interface ProfileStoreState extends StoreState<ProfilePageResponse> {
+interface ProfileStoreState extends StoreState<PublicProfessionalDetailResponse> {
   currentSlug: string | null;
 }
 
 // In-memory cache for multiple profiles
 const profileCache = new Map<
   string,
-  { data: ProfilePageResponse; timestamp: number }
+  { data: PublicProfessionalDetailResponse; timestamp: number }
 >();
 
 /**
@@ -39,7 +39,7 @@ export class ProfileStore {
 
   // Private state signal
   private readonly _state = signal<ProfileStoreState>({
-    ...createInitialState<ProfilePageResponse>(),
+    ...createInitialState<PublicProfessionalDetailResponse>(),
     currentSlug: null,
   });
 
@@ -51,13 +51,35 @@ export class ProfileStore {
   readonly data = computed(() => this._state().data);
   readonly loading = computed(() => this._state().loading);
   readonly error = computed(() => this._state().error);
-  readonly profile = computed(() => this._state().data?.profile ?? null);
-  readonly seo = computed(() => this._state().data?.seo ?? null);
+  readonly profile = computed(() => this._state().data ?? null);
   readonly services = computed(() => this._state().data?.services ?? []);
-  readonly relatedProfessionals = computed(
-    () => this._state().data?.relatedProfessionals ?? []
-  );
+  readonly studies = computed(() => this._state().data?.studies ?? []);
+  readonly locations = computed(() => this._state().data?.locations ?? []);
   readonly currentSlug = computed(() => this._state().currentSlug);
+
+  private normalizeDetail(
+    response: PublicProfessionalDetailResponse,
+  ): PublicProfessionalDetailResponse {
+    const raw = response as PublicProfessionalDetailResponse & {
+      photoUrl?: string | null;
+      imageUrl?: string | null;
+    };
+
+    return {
+      ...response,
+      profileImageUrl:
+        response.profileImageUrl ?? raw.photoUrl ?? raw.imageUrl ?? null,
+      specialtyNames: Array.isArray(response.specialtyNames)
+        ? response.specialtyNames
+        : [],
+      specialties: Array.isArray(response.specialties)
+        ? response.specialties
+        : [],
+      services: Array.isArray(response.services) ? response.services : [],
+      studies: Array.isArray(response.studies) ? response.studies : [],
+      locations: Array.isArray(response.locations) ? response.locations : [],
+    };
+  }
 
   /**
    * Check if cache is valid for given slug
@@ -71,7 +93,7 @@ export class ProfileStore {
   /**
    * Get cached data for slug
    */
-  private getCached(slug: string): ProfilePageResponse | null {
+  private getCached(slug: string): PublicProfessionalDetailResponse | null {
     const cached = profileCache.get(slug);
     if (!cached || !this.isCacheValid(slug)) return null;
     return cached.data;
@@ -80,13 +102,13 @@ export class ProfileStore {
   /**
    * Set cache for slug
    */
-  private setCache(slug: string, data: ProfilePageResponse): void {
+  private setCache(slug: string, data: PublicProfessionalDetailResponse): void {
     profileCache.set(slug, { data, timestamp: Date.now() });
 
     // Limit cache size (keep last 20 profiles)
     if (profileCache.size > 20) {
       const oldest = [...profileCache.entries()].sort(
-        (a, b) => a[1].timestamp - b[1].timestamp
+        (a, b) => a[1].timestamp - b[1].timestamp,
       )[0];
       profileCache.delete(oldest[0]);
     }
@@ -96,7 +118,10 @@ export class ProfileStore {
    * Load profile data by slug.
    * Uses cache if available and valid.
    */
-  load(slug: string, forceRefresh = false): Observable<ProfilePageResponse> {
+  load(
+    slug: string,
+    forceRefresh = false,
+  ): Observable<PublicProfessionalDetailResponse> {
     // Return cached data if valid
     if (!forceRefresh) {
       const cached = this.getCached(slug);
@@ -120,11 +145,12 @@ export class ProfileStore {
       currentSlug: slug,
     }));
 
-    return this.publicApi.getProfilePage(slug).pipe(
+    return this.publicApi.getProfessionalById(slug).pipe(
       tap((response) => {
-        this.setCache(slug, response);
+        const normalized = this.normalizeDetail(response);
+        this.setCache(slug, normalized);
         this._state.set({
-          data: response,
+          data: normalized,
           loading: false,
           error: null,
           lastFetch: Date.now(),
@@ -143,7 +169,7 @@ export class ProfileStore {
           error: errorMessage,
         }));
         throw err;
-      })
+      }),
     );
   }
 
@@ -152,7 +178,7 @@ export class ProfileStore {
    */
   reset(): void {
     this._state.set({
-      ...createInitialState<ProfilePageResponse>(),
+      ...createInitialState<PublicProfessionalDetailResponse>(),
       currentSlug: null,
     });
   }

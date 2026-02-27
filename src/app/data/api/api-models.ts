@@ -354,6 +354,48 @@ export interface ProfilePageResponse {
   seo: SeoMeta;
 }
 
+export interface PublicProfessionalDetailSpecialty {
+  id: string;
+  name: string;
+  isPrimary: boolean;
+}
+
+export interface PublicProfessionalDetailService {
+  title: string;
+  description?: string | null;
+}
+
+export interface PublicProfessionalDetailStudy {
+  title: string;
+  university: string;
+  country?: string | null;
+  graduationYear?: number | null;
+}
+
+export interface PublicProfessionalDetailLocation {
+  name: string;
+  address?: string | null;
+  cityName?: string | null;
+  countryName?: string | null;
+}
+
+export interface PublicProfessionalDetailResponse {
+  id: string;
+  displayName: string;
+  slug: string;
+  bio?: string | null;
+  cityName?: string | null;
+  countryName?: string | null;
+  address?: string | null;
+  consultationValue?: number | null;
+  specialtyNames?: string[] | null;
+  specialties?: PublicProfessionalDetailSpecialty[] | null;
+  services?: PublicProfessionalDetailService[] | null;
+  studies?: PublicProfessionalDetailStudy[] | null;
+  locations?: PublicProfessionalDetailLocation[] | null;
+  profileImageUrl?: string | null;
+}
+
 // =============================================================================
 // Suggest (Typeahead) Models
 // =============================================================================

@@ -198,6 +198,22 @@
     color: var(--color-text-secondary);
     font-size: 0.85rem;
   }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .services-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .service-card {
+    margin: 0;
+  }
 }
 
 .location-text {
