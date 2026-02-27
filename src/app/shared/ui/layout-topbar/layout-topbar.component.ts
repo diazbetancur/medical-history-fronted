@@ -78,7 +78,7 @@ export class LayoutTopbarComponent {
       case 'ADMIN':
         return 'Administración';
       default:
-        return 'Área Personal';
+        return 'Área Paciente';
     }
   }
 

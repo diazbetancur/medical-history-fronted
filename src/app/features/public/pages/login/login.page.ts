@@ -64,6 +64,9 @@ export class LoginPageComponent {
       return;
     }
 
+    // Ensure a clean session before attempting a new login
+    this.authStore.resetForLogin();
+
     this.isLoading.set(true);
     this.errorMessage.set(null);
 

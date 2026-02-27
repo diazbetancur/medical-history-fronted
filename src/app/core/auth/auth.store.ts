@@ -201,6 +201,14 @@ export class AuthStore {
   }
 
   /**
+   * Clears any previous auth/session residue before starting a new login flow.
+   * Useful when switching users in the same browser session.
+   */
+  resetForLogin(): void {
+    this.clearAuth();
+  }
+
+  /**
    * Initialize auth on app load
    * Checks for valid token and loads user
    * Returns Observable<CurrentUserDto | null>

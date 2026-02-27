@@ -218,35 +218,33 @@
             <span>Cargando especialidades...</span>
           </div>
           } @else {
-          <div class="row-2">
-            <mat-form-field appearance="outline">
-              <mat-label>Buscar especialidad</mat-label>
-              <input
-                matInput
-                [formControl]="specialtySearchControl"
-                placeholder="Escribe para filtrar..."
-              />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Agregar especialidad</mat-label>
-              <mat-select [formControl]="specialtyToAddControl">
-                @for (item of availableSpecialtiesForPicker(); track item.id) {
-                <mat-option [value]="item.id">{{ item.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Agregar especialidades</mat-label>
+            <mat-select [formControl]="specialtyToAddControl" multiple>
+              <mat-option disabled class="specialty-search-option">
+                <input
+                  matInput
+                  [formControl]="specialtySearchControl"
+                  placeholder="Escribe para filtrar..."
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()"
+                />
+              </mat-option>
+              @for (item of availableSpecialtiesForPicker(); track item.id) {
+              <mat-option [value]="item.id">{{ item.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
           <div class="inline-actions">
             <button
               mat-stroked-button
               color="primary"
               type="button"
-              [disabled]="!specialtyToAddControl.value"
+              [disabled]="specialtyToAddControl.value.length === 0 || sectionBusy()"
               (click)="addSpecialtyToSelection()"
             >
-              Agregar a mi selección
+              Agregar y guardar selección
             </button>
 
             <button
@@ -266,12 +264,13 @@
               <div class="item-title-row">
                 <strong>{{ item.name }}</strong>
                 <button
-                  mat-button
+                  mat-icon-button
                   color="warn"
                   type="button"
                   (click)="removeSpecialtyFromSelection(item.id)"
+                  aria-label="Eliminar especialidad"
                 >
-                  Quitar
+                  <mat-icon>delete</mat-icon>
                 </button>
               </div>
             </div>
@@ -279,21 +278,7 @@
           </div>
           } @else {
           <p class="empty-hint">No tienes especialidades seleccionadas.</p>
-          }
-
-          <div class="inline-actions tab-save-actions">
-            <button
-              mat-flat-button
-              color="primary"
-              type="button"
-              [disabled]="sectionBusy()"
-              (click)="saveSpecialties()"
-            >
-              Guardar especialidades
-            </button>
-          </div>
-
-          @if (showSpecialtyProposal()) {
+          } @if (showSpecialtyProposal()) {
           <form
             class="inline-form"
             [formGroup]="specialtyProposalForm"

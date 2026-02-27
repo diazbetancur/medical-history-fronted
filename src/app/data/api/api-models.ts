@@ -186,10 +186,9 @@ export interface FeaturedSpecialty {
   professionalCount?: number;
 }
 
-export interface ProfessionalSpecialty {
-  id: string;
-  name: string;
-  slug: string;
+export interface FeaturedProfessionalSpecialty {
+  specialtyId: string;
+  specialtyName: string;
   isPrimary: boolean;
 }
 
@@ -198,7 +197,7 @@ export interface FeaturedProfessional {
   slug: string;
   businessName: string;
   profileImageUrl?: string;
-  specialties: ProfessionalSpecialty[];
+  specialties: FeaturedProfessionalSpecialty[];
   cityName: string;
   citySlug: string;
   isVerified: boolean;
@@ -472,6 +471,20 @@ export interface AssignProfessionalSpecialtiesPayload {
   specialtyIds: string[];
 }
 
+export interface ProfessionalSpecialtySelectionItem {
+  specialtyId: string;
+  isPrimary: boolean;
+}
+
+export interface CreateProfessionalSpecialtyPayload {
+  specialtyId: string;
+  isPrimary: boolean;
+}
+
+export interface ReplaceProfessionalSpecialtiesPayload {
+  specialties: ProfessionalSpecialtySelectionItem[];
+}
+
 export type ProfessionalSpecialtyProposalStatus =
   | 'Pending'
   | 'Approved'
@@ -739,6 +752,13 @@ export interface ProfessionalDashboardResponse {
   monthlyRevenue: number;
   completedAppointmentsThisMonth: number;
   revenueMonth: string;
+}
+
+export interface ProfessionalDashboardSummaryResponse {
+  todayAppointments: number;
+  activePatientsLast6Months: number;
+  pendingAppointmentsThisMonth: number;
+  approxMonthlyIncome: number;
 }
 
 export interface UpdateRequestStatusPayload {
