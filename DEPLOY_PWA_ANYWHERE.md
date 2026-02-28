@@ -9,9 +9,11 @@ npm run build:prod
 ```
 
 Salida principal:
+
 - `dist/pro-directory/browser`
 
 Archivos críticos que deben quedar públicos:
+
 - `index.html`
 - `manifest.webmanifest`
 - `ngsw-worker.js`
@@ -29,6 +31,7 @@ Archivos críticos que deben quedar públicos:
 ## 3) Vercel
 
 Ya configurado en [vercel.json](vercel.json):
+
 - `buildCommand`
 - `outputDirectory`
 - `rewrites` SPA
@@ -37,8 +40,9 @@ Ya configurado en [vercel.json](vercel.json):
 ## 4) Netlify
 
 Ya preparado con:
-- [public/_redirects](public/_redirects) (fallback SPA)
-- [public/_headers](public/_headers) (cache PWA)
+
+- [public/\_redirects](public/_redirects) (fallback SPA)
+- [public/\_headers](public/_headers) (cache PWA)
 
 Si usas Netlify, publica `dist/pro-directory/browser`.
 
@@ -73,6 +77,7 @@ Y headers equivalentes para `manifest.webmanifest`, `ngsw-worker.js`, `ngsw.json
 ## 7) Cloudflare Pages / S3+CloudFront
 
 Asegura:
+
 - Fallback de rutas a `index.html`.
 - Cache-control manual para:
   - `manifest.webmanifest`
