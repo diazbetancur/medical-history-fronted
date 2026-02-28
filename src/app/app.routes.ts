@@ -340,6 +340,18 @@ export const routes: Routes = [
         title: 'Detalle de Cita - Directory Pro',
       },
       {
+        path: 'appointments',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Appointments.ViewOwn'],
+        },
+        loadComponent: () =>
+          import('./patient/pages/appointments/patient-appointments.page').then(
+            (m) => m.PatientAppointmentsPageComponent,
+          ),
+        title: 'Mis Citas - Directory Pro',
+      },
+      {
         path: 'profile',
         canActivate: [permissionStoreGuard],
         data: {
@@ -418,11 +430,6 @@ export const routes: Routes = [
             (m) => m.PatientExamsPage,
           ),
         title: 'Mis Exámenes - Directory Pro',
-      },
-      {
-        path: 'appointments',
-        redirectTo: 'wizard',
-        pathMatch: 'full',
       },
       {
         path: 'history',

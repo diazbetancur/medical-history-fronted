@@ -1,5 +1,5 @@
 {
-  "name": "ProDirectory - Encuentra Profesionales",
+  "name": "ProDirectory",
   "short_name": "ProDirectory",
   "description": "Encuentra médicos, abogados, psicólogos y más profesionales verificados en tu ciudad. Solicita citas fácilmente.",
   "display": "standalone",
@@ -58,34 +58,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "icons/icon-maskable-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "icons/icon-maskable-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "icons/screenshot-narrow.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Pantalla principal de ProDirectory en móvil"
-    },
-    {
-      "src": "icons/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Pantalla principal de ProDirectory en escritorio"
     }
   ],
   "shortcuts": [

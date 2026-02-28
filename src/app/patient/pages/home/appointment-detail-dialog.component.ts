@@ -10,7 +10,11 @@ import {
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Appointment, AppointmentsApi } from '@data/api';
+import { ApiError, getUserMessage } from '@core/http/api-error';
+import {
+  AppointmentsService,
+  MyAppointmentDetailDto,
+} from '../../services/appointments.service';
 
 @Component({
   selector: 'app-appointment-detail-dialog',
@@ -42,61 +46,34 @@ import { Appointment, AppointmentsApi } from '@data/api';
         <mat-card>
           <mat-card-content>
             <div class="row">
-              <strong>Estado:</strong>
-              <span>{{ getStatusLabel(appointment()!.status) }}</span>
-            </div>
-
-            <div class="row">
               <strong>Profesional:</strong>
-              <span>
-                {{ appointment()!.professional.firstName }}
-                {{ appointment()!.professional.lastName }}
-              </span>
-            </div>
-
-            @if (appointment()!.professional.specialization) {
-              <div class="row">
-                <strong>Especialidad:</strong>
-                <span>{{ appointment()!.professional.specialization }}</span>
-              </div>
-            }
-
-            <div class="row">
-              <strong>Correo:</strong>
-              <span>{{ appointment()!.professional.email }}</span>
+              <span>{{ appointment()!.professionalName }}</span>
             </div>
 
             <mat-divider></mat-divider>
 
             <div class="row">
-              <strong>Inicio:</strong>
-              <span>{{ toLocalDateTime(appointment()!.startTime) }}</span>
+              <strong>Dirección:</strong>
+              <span>{{ appointment()!.address }}</span>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="row">
+              <strong>Fecha:</strong>
+              <span>{{ formatDate(appointment()!.appointmentDate) }}</span>
             </div>
             <div class="row">
-              <strong>Fin:</strong>
-              <span>{{ toLocalDateTime(appointment()!.endTime) }}</span>
+              <strong>Hora:</strong>
+              <span>{{ appointment()!.timeSlot || '-' }}</span>
             </div>
-
-            @if (appointment()!.notes) {
-              <div class="row">
-                <strong>Notas:</strong>
-                <span>{{ appointment()!.notes }}</span>
-              </div>
-            }
-
-            @if (appointment()!.cancellationReason) {
-              <div class="row">
-                <strong>Motivo cancelación:</strong>
-                <span>{{ appointment()!.cancellationReason }}</span>
-              </div>
-            }
           </mat-card-content>
         </mat-card>
       }
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button mat-button (click)="close()">Cerrar</button>
+      <button mat-stroked-button (click)="close()">Cerrar</button>
     </mat-dialog-actions>
   `,
   styles: [
@@ -122,7 +99,7 @@ import { Appointment, AppointmentsApi } from '@data/api';
 
       .row {
         display: grid;
-        grid-template-columns: 150px 1fr;
+        grid-template-columns: 110px 1fr;
         gap: 8px;
         font-size: 14px;
         margin-bottom: 10px;
@@ -147,7 +124,7 @@ import { Appointment, AppointmentsApi } from '@data/api';
   ],
 })
 export class AppointmentDetailDialogComponent implements OnInit {
-  private readonly appointmentsApi = inject(AppointmentsApi);
+  private readonly appointmentsService = inject(AppointmentsService);
   private readonly dialogRef = inject(
     MatDialogRef<AppointmentDetailDialogComponent>,
   );
@@ -155,42 +132,34 @@ export class AppointmentDetailDialogComponent implements OnInit {
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
-  readonly appointment = signal<Appointment | null>(null);
+  readonly appointment = signal<MyAppointmentDetailDto | null>(null);
 
   ngOnInit(): void {
-    this.appointmentsApi.getById(this.data.appointmentId).subscribe({
-      next: (detail) => {
-        this.appointment.set(detail);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('No pudimos cargar el detalle de la cita.');
-        this.loading.set(false);
-      },
-    });
+    this.appointmentsService
+      .getMyAppointmentById(this.data.appointmentId)
+      .subscribe({
+        next: (detail) => {
+          this.appointment.set(detail);
+          this.loading.set(false);
+        },
+        error: (error: ApiError) => {
+          this.error.set(getUserMessage(error));
+          this.loading.set(false);
+        },
+      });
   }
 
   close(): void {
     this.dialogRef.close();
   }
 
-  toLocalDateTime(value: string | undefined): string {
+  formatDate(value: string | undefined): string {
     if (!value) return '-';
-    return new Date(value).toLocaleString('es-HN', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
+    return new Date(value).toLocaleDateString('es-ES', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
-  }
-
-  getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      pending: 'Pendiente',
-      confirmed: 'Confirmada',
-      cancelled: 'Cancelada',
-      completed: 'Completada',
-      'no-show': 'No asistió',
-    };
-
-    return labels[status] || status;
   }
 }

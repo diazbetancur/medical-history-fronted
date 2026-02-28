@@ -46,6 +46,30 @@ export interface RelatedProfessionalsResponseDto {
   totalPages: number;
 }
 
+export interface MyAppointmentDetailRawDto {
+  id?: string;
+  professionalName?: string;
+  placeName?: string;
+  address?: string;
+  appointmentDate?: string;
+  timeSlot?: string;
+  startUtc?: string;
+  endUtc?: string;
+  status?: number | string;
+  statusDisplay?: string;
+  reason?: string;
+}
+
+export interface MyAppointmentDetailDto {
+  professionalName: string;
+  placeName: string;
+  address: string;
+  appointmentDate: string;
+  timeSlot: string;
+  startUtc: string;
+  endUtc: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -136,6 +160,19 @@ export class AppointmentsService {
       .pipe(catchError((error) => this.handleError(error)));
   }
 
+  /**
+   * Get my appointment detail by id
+   * GET /api/appointments/mine/{id}
+   */
+  getMyAppointmentById(
+    appointmentId: string,
+  ): Observable<MyAppointmentDetailDto> {
+    return this.http
+      .get<MyAppointmentDetailRawDto>(`${this.baseUrl}/mine/${appointmentId}`)
+      .pipe(map((response) => this.mapMyAppointmentDetail(response)))
+      .pipe(catchError((error) => this.handleError(error)));
+  }
+
   private mapAppointmentsList(
     response: AppointmentsListRawDto,
   ): AppointmentsListDto {
@@ -189,9 +226,26 @@ export class AppointmentsService {
     };
   }
 
+  private mapMyAppointmentDetail(
+    item: MyAppointmentDetailRawDto,
+  ): MyAppointmentDetailDto {
+    const appointmentDate = this.extractDate(item?.appointmentDate);
+    const fallbackTime = this.extractTime(item?.startUtc);
+
+    return {
+      professionalName: item?.professionalName ?? 'Profesional',
+      placeName: item?.placeName ?? 'Lugar por confirmar',
+      address: item?.address ?? 'Dirección por confirmar',
+      appointmentDate,
+      timeSlot: item?.timeSlot ?? fallbackTime,
+      startUtc: this.asText(item?.startUtc),
+      endUtc: this.asText(item?.endUtc),
+    };
+  }
+
   private extractDate(rawDate: unknown): string {
     if (!rawDate) return '';
-    const value = String(rawDate);
+    const value = this.asText(rawDate);
     return value.includes('T') ? value.split('T')[0] : value;
   }
 
@@ -200,9 +254,10 @@ export class AppointmentsService {
     startTime: unknown,
     endTime: unknown,
   ): { startTime: string; endTime: string } {
-    const slot = String(timeSlot ?? '').trim();
+    const slot = this.asText(timeSlot).trim();
     if (slot) {
-      const match = slot.match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/);
+      const slotRangeRegex = /(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/;
+      const match = slotRangeRegex.exec(slot);
       if (match) {
         return {
           startTime: match[1],
@@ -213,15 +268,38 @@ export class AppointmentsService {
       if (/^\d{1,2}:\d{2}$/.test(slot)) {
         return {
           startTime: slot,
-          endTime: String(endTime ?? slot),
+          endTime: this.asText(endTime) || slot,
         };
       }
     }
 
     return {
-      startTime: String(startTime ?? ''),
-      endTime: String(endTime ?? ''),
+      startTime: this.asText(startTime),
+      endTime: this.asText(endTime),
     };
+  }
+
+  private extractTime(rawDateTime: unknown): string {
+    if (!rawDateTime) return '';
+    const value = this.asText(rawDateTime);
+    if (!value) return '';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  }
+
+  private asText(value: unknown): string {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+    return '';
   }
 
   /**
