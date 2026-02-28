@@ -135,16 +135,18 @@ export class AppointmentDetailDialogComponent implements OnInit {
   readonly appointment = signal<MyAppointmentDetailDto | null>(null);
 
   ngOnInit(): void {
-    this.appointmentsService.getMyAppointmentById(this.data.appointmentId).subscribe({
-      next: (detail) => {
-        this.appointment.set(detail);
-        this.loading.set(false);
-      },
-      error: (error: ApiError) => {
-        this.error.set(getUserMessage(error));
-        this.loading.set(false);
-      },
-    });
+    this.appointmentsService
+      .getMyAppointmentById(this.data.appointmentId)
+      .subscribe({
+        next: (detail) => {
+          this.appointment.set(detail);
+          this.loading.set(false);
+        },
+        error: (error: ApiError) => {
+          this.error.set(getUserMessage(error));
+          this.loading.set(false);
+        },
+      });
   }
 
   close(): void {

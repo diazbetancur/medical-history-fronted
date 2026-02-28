@@ -164,7 +164,9 @@ export class AppointmentsService {
    * Get my appointment detail by id
    * GET /api/appointments/mine/{id}
    */
-  getMyAppointmentById(appointmentId: string): Observable<MyAppointmentDetailDto> {
+  getMyAppointmentById(
+    appointmentId: string,
+  ): Observable<MyAppointmentDetailDto> {
     return this.http
       .get<MyAppointmentDetailRawDto>(`${this.baseUrl}/mine/${appointmentId}`)
       .pipe(map((response) => this.mapMyAppointmentDetail(response)))

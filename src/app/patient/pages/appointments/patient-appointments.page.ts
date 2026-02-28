@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -48,7 +48,11 @@ import { AppointmentDetailDialogComponent } from '../home/appointment-detail-dia
             <mat-icon>event_available</mat-icon>
             <h3>No tienes citas próximas</h3>
             <p>Agenda una nueva cita para verla aquí.</p>
-            <button mat-raised-button color="primary" (click)="navigateToWizard()">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="navigateToWizard()"
+            >
               Agendar cita
             </button>
           </mat-card-content>
@@ -63,7 +67,10 @@ import { AppointmentDetailDialogComponent } from '../home/appointment-detail-dia
                 <div class="appointment-header">
                   <div class="professional-avatar">
                     @if (apt.professional.photoUrl) {
-                      <img [src]="apt.professional.photoUrl" [alt]="apt.professional.name" />
+                      <img
+                        [src]="apt.professional.photoUrl"
+                        [alt]="apt.professional.name"
+                      />
                     } @else {
                       <mat-icon>person</mat-icon>
                     }
@@ -93,11 +100,19 @@ import { AppointmentDetailDialogComponent } from '../home/appointment-detail-dia
                 </div>
 
                 <div class="appointment-actions">
-                  <button mat-button color="warn" (click)="cancelAppointment(apt.id)">
+                  <button
+                    mat-button
+                    color="warn"
+                    (click)="cancelAppointment(apt.id)"
+                  >
                     <mat-icon>cancel</mat-icon>
                     Cancelar
                   </button>
-                  <button mat-button color="primary" (click)="viewAppointmentDetail(apt.id)">
+                  <button
+                    mat-button
+                    color="primary"
+                    (click)="viewAppointmentDetail(apt.id)"
+                  >
                     <mat-icon>info</mat-icon>
                     Detalles
                   </button>
@@ -320,7 +335,10 @@ export class PatientAppointmentsPageComponent implements OnInit {
     this.loadAllUpcomingAppointments();
   }
 
-  private loadAllUpcomingAppointments(page = 1, collected: AppointmentDto[] = []): void {
+  private loadAllUpcomingAppointments(
+    page = 1,
+    collected: AppointmentDto[] = [],
+  ): void {
     if (page === 1) {
       this.isLoading.set(true);
     }
