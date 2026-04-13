@@ -1,7 +1,7 @@
 <div class="book-appointment-container">
   <header class="page-header">
     <h1>Agendar Cita</h1>
-    <button mat-icon-button (click)="cancel()">
+    <button type="button" mat-icon-button (click)="cancel()">
       <mat-icon>close</mat-icon>
     </button>
   </header>
@@ -38,7 +38,12 @@
             </mat-form-field>
 
             <div class="step-actions">
-              <button mat-raised-button color="primary" matStepperNext>
+              <button
+                type="button"
+                mat-raised-button
+                color="primary"
+                matStepperNext
+              >
                 Siguiente
               </button>
             </div>
@@ -58,6 +63,7 @@
                 [matDatepicker]="picker"
                 formControlName="date"
                 [min]="minDate"
+                placeholder="Selecciona una fecha"
                 required
               />
               <mat-datepicker-toggle
@@ -69,8 +75,9 @@
             </mat-form-field>
 
             <div class="step-actions">
-              <button mat-button matStepperPrevious>Atrás</button>
+              <button type="button" mat-button matStepperPrevious>Atrás</button>
               <button
+                type="button"
                 mat-raised-button
                 color="primary"
                 matStepperNext
@@ -82,7 +89,49 @@
           </form>
         </mat-step>
 
-        <!-- Step 3: Select Time Slot -->
+        <!-- Step 3: Consultation Reason -->
+        <mat-step [stepControl]="observationForm">
+          <form [formGroup]="observationForm">
+            <ng-template matStepLabel>Motivo de Consulta</ng-template>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Motivo de la consulta</mat-label>
+              <textarea
+                matInput
+                formControlName="observation"
+                rows="4"
+                placeholder="Describe el motivo de la consulta (mínimo 50 caracteres)"
+                maxlength="500"
+              ></textarea>
+              <mat-hint align="end"
+                >{{ observationForm.value.observation?.length || 0 }}/500</mat-hint
+              >
+              @if (observationForm.get('observation')?.hasError('required')) {
+              <mat-error>El motivo de la consulta es obligatorio</mat-error>
+              } @else if
+              (observationForm.get('observation')?.hasError('trimmedMinLength')) {
+              <mat-error>
+                El motivo de la consulta debe tener al menos 50 caracteres
+              </mat-error>
+              }
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button type="button" mat-button matStepperPrevious>Atrás</button>
+              <button
+                type="button"
+                mat-raised-button
+                color="primary"
+                matStepperNext
+                [disabled]="!observationForm.valid"
+              >
+                Siguiente
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 4: Select Time Slot -->
         <mat-step [stepControl]="slotForm">
           <form [formGroup]="slotForm">
             <ng-template matStepLabel>Seleccionar Horario</ng-template>
@@ -96,7 +145,9 @@
             <div class="empty-slots">
               <mat-icon>event_busy</mat-icon>
               <p>No hay horarios disponibles para esta fecha</p>
-              <button mat-button matStepperPrevious>Elegir otra fecha</button>
+              <button type="button" mat-button matStepperPrevious>
+                Elegir otra fecha
+              </button>
             </div>
             } @else {
             <div class="slots-grid">
@@ -119,8 +170,9 @@
             </mat-error>
 
             <div class="step-actions">
-              <button mat-button matStepperPrevious>Atrás</button>
+              <button type="button" mat-button matStepperPrevious>Atrás</button>
               <button
+                type="button"
                 mat-raised-button
                 color="primary"
                 matStepperNext
@@ -133,9 +185,9 @@
           </form>
         </mat-step>
 
-        <!-- Step 4: Add Notes & Confirm -->
-        <mat-step [stepControl]="notesForm">
-          <form [formGroup]="notesForm">
+        <!-- Step 5: Confirm -->
+        <mat-step [stepControl]="observationForm">
+          <form [formGroup]="observationForm">
             <ng-template matStepLabel>Confirmar</ng-template>
 
             <div class="confirmation-summary">
@@ -162,27 +214,27 @@
                   </p>
                 </div>
               </div>
+
+              <div class="summary-item">
+                <mat-icon>description</mat-icon>
+                <div>
+                  <strong>Motivo de la consulta</strong>
+                  <p>{{ observationForm.value.observation?.trim() }}</p>
+                </div>
+              </div>
             </div>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Notas (opcional)</mat-label>
-              <textarea
-                matInput
-                formControlName="notes"
-                rows="4"
-                placeholder="Agrega información adicional para el profesional..."
-                maxlength="500"
-              ></textarea>
-              <mat-hint align="end"
-                >{{ notesForm.value.notes?.length || 0 }}/500</mat-hint
-              >
-            </mat-form-field>
-
             <div class="step-actions">
-              <button mat-button matStepperPrevious [disabled]="creating()">
+              <button
+                type="button"
+                mat-button
+                matStepperPrevious
+                [disabled]="creating()"
+              >
                 Atrás
               </button>
               <button
+                type="button"
                 mat-raised-button
                 color="primary"
                 (click)="createAppointment()"

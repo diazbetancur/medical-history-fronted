@@ -97,6 +97,7 @@ export interface CreateAppointmentDto {
   slotId?: string; // legacy
   appointmentDate?: string; // YYYY-MM-DD (new)
   timeSlot?: string; // new
+  observation?: string;
   notes?: string;
 }
 

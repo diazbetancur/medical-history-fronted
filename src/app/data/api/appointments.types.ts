@@ -103,6 +103,9 @@ export interface CreateAppointmentRequest {
   /** Start time in UTC (ISO 8601) */
   startTime: string;
 
+  /** Consultation reason */
+  Observation?: string;
+
   /** Optional notes from client */
   notes?: string;
 }
