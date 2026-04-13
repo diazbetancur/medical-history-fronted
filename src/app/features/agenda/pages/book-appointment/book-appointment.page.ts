@@ -46,8 +46,7 @@ import { type PaginatedProfessionalsResponse } from '@data/models';
 
 function trimmedMinLength(minLength: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    const value =
-      typeof control.value === 'string' ? control.value.trim() : '';
+    const value = typeof control.value === 'string' ? control.value.trim() : '';
 
     if (!value) {
       return { required: true };
@@ -220,8 +219,8 @@ export class BookAppointmentPageComponent {
     const professionalId = this.professionalForm.value.professionalId;
     const slot = this.slotForm.value.slot as TimeSlot;
     const observation =
-      (this.observationForm.value.observation as string | undefined)
-        ?.trim() || undefined;
+      (this.observationForm.value.observation as string | undefined)?.trim() ||
+      undefined;
 
     this.appointmentsApi
       .createAppointment({

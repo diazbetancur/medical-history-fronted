@@ -104,12 +104,14 @@
                 maxlength="500"
               ></textarea>
               <mat-hint align="end"
-                >{{ observationForm.value.observation?.length || 0 }}/500</mat-hint
+                >{{ observationForm.value.observation?.length || 0
+                }}/500</mat-hint
               >
               @if (observationForm.get('observation')?.hasError('required')) {
               <mat-error>El motivo de la consulta es obligatorio</mat-error>
               } @else if
-              (observationForm.get('observation')?.hasError('trimmedMinLength')) {
+              (observationForm.get('observation')?.hasError('trimmedMinLength'))
+              {
               <mat-error>
                 El motivo de la consulta debe tener al menos 50 caracteres
               </mat-error>
