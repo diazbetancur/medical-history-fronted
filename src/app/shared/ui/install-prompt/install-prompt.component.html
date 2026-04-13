@@ -1,16 +1,16 @@
 @if (pwaInstall.shouldShowInstallUI()) {
-  <div class="install-prompt" role="banner" aria-label="Instalar aplicación">
+  <header class="install-prompt" aria-label="Instalar aplicación">
     @if (pwaInstall.isIOS()) {
       <!-- iOS Safari Guide -->
       <div class="install-content">
         <mat-icon class="install-icon">ios_share</mat-icon>
         <div class="install-text">
           <strong>Instalar ProDirectory</strong>
-          <span
-            >Toca
+          <span>
+            Compartir
             <mat-icon class="inline-icon">ios_share</mat-icon>
-            y luego "Agregar a inicio"</span
-          >
+            → Ver más → Agregar a pantalla de inicio
+          </span>
         </div>
         <button
           mat-icon-button
@@ -47,5 +47,5 @@
         </button>
       </div>
     }
-  </div>
+  </header>
 }

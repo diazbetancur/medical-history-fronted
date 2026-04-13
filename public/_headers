@@ -1,0 +1,22 @@
+# Generic PWA caching rules (works in Netlify and static hosts that support _headers)
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate
+
+/ngsw-worker.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/ngsw.json
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css
+  Cache-Control: public, max-age=31536000, immutable

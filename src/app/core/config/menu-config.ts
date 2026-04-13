@@ -295,6 +295,13 @@ export const MENU_ITEMS: MenuItem[] = [
     requiredPermissions: ['Appointments.Create', 'Appointments.Slots.View'],
   },
   {
+    label: 'Mis Citas',
+    icon: 'assignment',
+    route: '/patient/appointments',
+    context: 'PATIENT',
+    requiredPermissions: ['Appointments.ViewOwn'],
+  },
+  {
     label: 'Mi Perfil',
     icon: 'person',
     route: '/patient/profile',

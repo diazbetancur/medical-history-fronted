@@ -504,7 +504,12 @@ export class PatientHomeComponent implements OnInit {
           (apt.status === 'PENDING' || apt.status === 'CONFIRMED')
         );
       })
-      .slice(0, 6); // Show max 6 upcoming appointments
+      .sort(
+        (left, right) =>
+          new Date(`${left.date}T${left.startTime}`).getTime() -
+          new Date(`${right.date}T${right.startTime}`).getTime(),
+      )
+      .slice(0, 2);
   });
 
   ngOnInit(): void {
@@ -546,7 +551,7 @@ export class PatientHomeComponent implements OnInit {
    * Navigate to all appointments view
    */
   viewAllAppointments(): void {
-    this.router.navigate(['/patient/profile']);
+    this.router.navigate(['/patient/appointments']);
   }
 
   viewAppointmentDetail(appointmentId: string): void {
