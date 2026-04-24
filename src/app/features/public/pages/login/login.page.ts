@@ -12,7 +12,10 @@ import { AuthStore, PostLoginNavigationService } from '@core/auth';
 import { CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
-import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
+import {
+  FormControlErrorComponent,
+  FormLabelComponent,
+} from '@shared/ui/forms';
 import { LoginFormMessages } from '../auth-form-messages';
 
 /**
@@ -62,7 +65,7 @@ export class LoginPageComponent implements OnInit {
 
   readonly loginFormMessages = LoginFormMessages;
 
-  private formValidityTrigger = signal(0);
+  private readonly formValidityTrigger = signal(0);
 
   ngOnInit(): void {
     this.setupFormValidationTracking();
@@ -70,11 +73,11 @@ export class LoginPageComponent implements OnInit {
 
   private setupFormValidationTracking(): void {
     this.form.valueChanges.subscribe(() => {
-      this.formValidityTrigger.update(v => v + 1);
+      this.formValidityTrigger.update((v) => v + 1);
     });
 
     this.form.statusChanges.subscribe(() => {
-      this.formValidityTrigger.update(v => v + 1);
+      this.formValidityTrigger.update((v) => v + 1);
     });
   }
 
@@ -214,18 +217,14 @@ export class LoginPageComponent implements OnInit {
   }
 
   private switchAndNavigateProfessional(user: CurrentUserDto): void {
-    const professionalContext = user.contexts.find(
-      (ctx) => ctx.type === 'PROFESSIONAL',
-    );
-
-    if (professionalContext) {
-      this.authStore.switchContext(professionalContext);
-    }
-
     const displayName = user.name || user.email || 'usuario';
-    this.toast.success(`¡Bienvenido, ${displayName}!`);
     this.isLoading.set(false);
-    this.postLoginNavigation.navigateByContext();
+
+    this.postLoginNavigation.navigateByContext({
+      preferProfessional: true,
+    });
+
+    this.toast.success(`¡Bienvenido, ${displayName}!`);
   }
 
   /**

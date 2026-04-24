@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, AuthStore } from '@core/auth';
+import { AuthStore } from '@core/auth';
 import { AuthIntentService } from '../services/auth-intent.service';
 import {
   AuthModalComponent,
@@ -194,7 +194,6 @@ import {
 })
 export class PublicHeaderComponent {
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
   private readonly authStore = inject(AuthStore);
   private readonly dialog = inject(MatDialog);
   private readonly authIntent = inject(AuthIntentService);
@@ -222,7 +221,7 @@ export class PublicHeaderComponent {
   }
 
   navigateToProfessional(): void {
-    if (this.authService.isAuthenticated()) {
+    if (this.authStore.isAuthenticated()) {
       this.router.navigate(['/professional']);
     } else {
       this.openAuthModal(true);

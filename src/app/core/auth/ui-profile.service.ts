@@ -1,5 +1,5 @@
 import { computed, inject, Injectable } from '@angular/core';
-import { AuthService } from './auth.service';
+import { AuthStore } from './auth.store';
 
 /**
  * UI Profile Types
@@ -85,18 +85,18 @@ const PROFESSIONAL_PERMISSION_PREFIXES = [
  */
 @Injectable({ providedIn: 'root' })
 export class UiProfileService {
-  private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
 
   /**
    * Current user roles (reactive)
    */
-  private readonly userRoles = computed(() => this.authService.roles() ?? []);
+  private readonly userRoles = computed(() => this.authStore.userRoles() ?? []);
 
   /**
    * Current user permissions (reactive)
    */
   private readonly userPermissions = computed(
-    () => this.authService.permissions() ?? [],
+    () => this.authStore.userPermissions() ?? [],
   );
 
   /**
@@ -145,8 +145,7 @@ export class UiProfileService {
    * 3. CLIENTE - default fallback
    */
   readonly current = computed<UiProfile>(() => {
-    // Check authenticated
-    if (!this.authService.isAuthenticated()) {
+    if (!this.authStore.isAuthenticated()) {
       return 'CLIENTE';
     }
 
@@ -194,9 +193,9 @@ export class UiProfileService {
       case 'ADMIN':
         return '/admin';
       case 'PROFESIONAL':
-        return '/dashboard'; // Professional dashboard
+        return '/professional';
       case 'CLIENTE':
-        return '/'; // Public home
+        return '/patient';
     }
   });
 
@@ -205,7 +204,7 @@ export class UiProfileService {
    * Shows why a specific profile was selected
    */
   readonly debugInfo = computed(() => {
-    if (!this.authService.isAuthenticated()) {
+    if (!this.authStore.isAuthenticated()) {
       return { profile: 'CLIENTE', reason: 'Not authenticated' };
     }
 
