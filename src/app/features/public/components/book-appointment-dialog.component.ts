@@ -18,6 +18,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { formatDateOnly } from '@core/http/http-utils';
 import { PublicApi } from '@data/api';
@@ -204,8 +205,9 @@ interface BookingConfirmation {
         <button mat-flat-button color="primary" (click)="acceptConfirmation()">
           Aceptar
         </button>
+      } @else {
+        <button mat-button (click)="close()">Cerrar</button>
       }
-      <button mat-button (click)="close()">Cerrar</button>
     </mat-dialog-actions>
   `,
   styles: [
@@ -369,6 +371,7 @@ export class BookAppointmentDialogComponent {
   private readonly dialogRef = inject(
     MatDialogRef<BookAppointmentDialogComponent>,
   );
+  private readonly router = inject(Router);
   readonly data = inject<BookAppointmentDialogData>(MAT_DIALOG_DATA);
 
   readonly loadingProfile = signal(false);
@@ -419,6 +422,7 @@ export class BookAppointmentDialogComponent {
       success: true,
       confirmation: this.bookingConfirmation(),
     });
+    void this.router.navigate(['/patient/appointments']);
   }
 
   bookSlot(slot: SlotDto): void {
