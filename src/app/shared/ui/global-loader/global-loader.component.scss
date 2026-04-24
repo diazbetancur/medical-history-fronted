@@ -1,0 +1,140 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  display: block;
+  pointer-events: none;
+}
+
+.global-loader {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    visibility 180ms ease;
+}
+
+.global-loader.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.loader-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.88),
+      rgba(255, 255, 255, 0.72)
+    ),
+    rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+
+.loader-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  padding: 28px 32px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  transform: translateY(8px) scale(0.98);
+  transition: transform 180ms ease;
+}
+
+.global-loader.is-visible .loader-content {
+  transform: translateY(0) scale(1);
+}
+
+.logo-loader {
+  position: relative;
+  width: clamp(110px, 22vw, 180px);
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.logo-loader__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 22px rgba(15, 23, 42, 0.14));
+}
+
+.logo-loader__shine {
+  position: absolute;
+  inset: -20% auto -20% 0;
+  width: 42%;
+  transform: translateX(-140%) skewX(-18deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.18),
+    rgba(255, 255, 255, 0.88),
+    rgba(255, 255, 255, 0.18),
+    transparent
+  );
+  animation: logo-shine 1.35s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+
+.loader-text {
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(15, 23, 42, 0.68);
+}
+
+@keyframes logo-shine {
+  0% {
+    transform: translateX(-150%) skewX(-18deg);
+  }
+
+  52%,
+  100% {
+    transform: translateX(260%) skewX(-18deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-loader,
+  .loader-content,
+  .logo-loader__shine {
+    transition: none;
+    animation: none;
+  }
+
+  .logo-loader__shine {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .loader-content {
+    padding: 24px 26px;
+    border-radius: 24px;
+  }
+
+  .logo-loader {
+    width: clamp(104px, 38vw, 150px);
+  }
+
+  .loader-text {
+    font-size: 0.82rem;
+  }
+}

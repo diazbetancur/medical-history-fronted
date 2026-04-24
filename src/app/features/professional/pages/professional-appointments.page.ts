@@ -11,7 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@core/auth/auth.store';
 import { ProfessionalAppointmentsApi } from '@data/api/professional-appointments.api';
 import type {
@@ -66,7 +66,10 @@ import { ToastService } from '@shared/services';
         </div>
       } @else {
         <!-- Tabs: Hoy / Próximas -->
-        <mat-tab-group>
+        <mat-tab-group
+          [selectedIndex]="selectedTabIndex()"
+          (selectedTabChange)="onTabChange($event.index)"
+        >
           <mat-tab>
             <ng-template mat-tab-label>
               <mat-icon>today</mat-icon>
@@ -282,6 +285,84 @@ import { ToastService } from '@shared/services';
                             }
                           </mat-menu>
                         </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon>calendar_month</mat-icon>
+              <span>Este mes</span>
+              @if (monthAppointments().length > 0) {
+                <span class="badge">{{ monthAppointments().length }}</span>
+              }
+            </ng-template>
+
+            @if (monthLoading()) {
+              <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando citas del mes...</p>
+              </div>
+            } @else if (monthAppointments().length === 0) {
+              <div class="empty-tab">
+                <mat-icon>calendar_month</mat-icon>
+                <p>No tienes citas registradas para este mes</p>
+              </div>
+            } @else {
+              @for (dateGroup of groupedMonthEntries(); track dateGroup.date) {
+                <div class="date-group">
+                  <h3 class="date-header">
+                    <mat-icon>calendar_today</mat-icon>
+                    {{ formatDate(dateGroup.date) }}
+                    <span class="count"
+                      >({{ dateGroup.appointments.length }} citas)</span
+                    >
+                  </h3>
+
+                  <div class="appointments-list">
+                    @for (
+                      appointment of dateGroup.appointments;
+                      track appointment.id
+                    ) {
+                      <mat-card class="appointment-card">
+                        <mat-card-header>
+                          <div mat-card-avatar class="appointment-avatar">
+                            <mat-icon>person</mat-icon>
+                          </div>
+                          <mat-card-title>
+                            {{ getPatientDisplayName(appointment) }}
+                          </mat-card-title>
+                          <mat-card-subtitle>
+                            <mat-icon>schedule</mat-icon>
+                            {{ appointment.startTime }} -
+                            {{ appointment.endTime }}
+                          </mat-card-subtitle>
+                        </mat-card-header>
+
+                        <mat-card-content>
+                          <div class="appointment-info">
+                            @if (appointment.notes) {
+                              <div class="info-row notes">
+                                <mat-icon>note</mat-icon>
+                                <span>{{ appointment.notes }}</span>
+                              </div>
+                            }
+
+                            <div class="status-chip">
+                              <mat-chip
+                                [class]="
+                                  'status-' + appointment.status.toLowerCase()
+                                "
+                              >
+                                {{ getStatusLabel(appointment.status) }}
+                              </mat-chip>
+                            </div>
+                          </div>
+                        </mat-card-content>
                       </mat-card>
                     }
                   </div>
@@ -639,9 +720,11 @@ export class ProfessionalAppointmentsPage implements OnInit {
   protected readonly store = inject(ProfessionalAppointmentsStore);
   private readonly appointmentsApi = inject(ProfessionalAppointmentsApi);
   private readonly authStore = inject(AuthStore);
+  private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
 
+  protected readonly selectedTabIndex = signal(0);
   protected readonly rangeFrom = signal(this.getDateInputValue(new Date()));
   protected readonly rangeTo = signal(
     this.getDateInputValue(this.addDays(new Date(), 7)),
@@ -649,8 +732,38 @@ export class ProfessionalAppointmentsPage implements OnInit {
   protected readonly rangeLoading = signal(false);
   protected readonly hasRangeFilterResult = signal(false);
   protected readonly rangeAppointments = signal<AppointmentDto[]>([]);
+  protected readonly monthLoading = signal(false);
+  protected readonly monthAppointments = signal<AppointmentDto[]>([]);
 
   protected readonly appointmentsByDate = () => this.store.appointmentsByDate();
+  protected readonly groupedMonthAppointments = computed(() => {
+    const grouped: Record<string, AppointmentDto[]> = {};
+
+    for (const appointment of this.monthAppointments()) {
+      if (!grouped[appointment.date]) {
+        grouped[appointment.date] = [];
+      }
+
+      grouped[appointment.date].push(appointment);
+    }
+
+    return Object.keys(grouped)
+      .sort()
+      .reduce(
+        (acc, date) => {
+          acc[date] = grouped[date].sort((a, b) =>
+            a.startTime.localeCompare(b.startTime),
+          );
+          return acc;
+        },
+        {} as Record<string, AppointmentDto[]>,
+      );
+  });
+  protected readonly groupedMonthEntries = computed(() =>
+    Object.entries(this.groupedMonthAppointments()).map(
+      ([date, appointments]) => ({ date, appointments }),
+    ),
+  );
   protected readonly groupedRangeAppointments = computed(() => {
     const grouped: Record<string, AppointmentDto[]> = {};
 
@@ -682,6 +795,24 @@ export class ProfessionalAppointmentsPage implements OnInit {
 
   ngOnInit(): void {
     this.store.loadUpcomingAppointments();
+
+    const requestedTab = this.route.snapshot.queryParamMap.get('tab');
+    if (requestedTab === 'month') {
+      this.selectedTabIndex.set(2);
+      this.loadMonthAppointments();
+    }
+  }
+
+  protected onTabChange(index: number): void {
+    this.selectedTabIndex.set(index);
+
+    if (
+      index === 2 &&
+      this.monthAppointments().length === 0 &&
+      !this.monthLoading()
+    ) {
+      this.loadMonthAppointments();
+    }
   }
 
   protected formatDate(dateStr: string): string {
@@ -791,6 +922,41 @@ export class ProfessionalAppointmentsPage implements OnInit {
             error?.error?.title || 'Error al cargar citas por rango',
           );
           this.rangeLoading.set(false);
+        },
+      });
+  }
+
+  private loadMonthAppointments(): void {
+    const professionalId = this.authStore.user()?.professionalProfileId;
+    if (!professionalId) {
+      this.toast.error('No se encontró perfil profesional');
+      return;
+    }
+
+    const today = new Date();
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    this.monthLoading.set(true);
+
+    this.appointmentsApi
+      .getAppointments({
+        professionalId,
+        from: this.getDateInputValue(monthStart),
+        to: this.getDateInputValue(monthEnd),
+        page: 1,
+        pageSize: 200,
+      })
+      .subscribe({
+        next: (response) => {
+          this.monthAppointments.set(response.items ?? []);
+          this.monthLoading.set(false);
+        },
+        error: (error: { error?: { title?: string } }) => {
+          this.toast.error(
+            error?.error?.title || 'Error al cargar citas del mes',
+          );
+          this.monthLoading.set(false);
         },
       });
   }

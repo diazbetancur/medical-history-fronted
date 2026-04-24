@@ -31,7 +31,7 @@ import { AppointmentDetailDialogComponent } from '../home/appointment-detail-dia
         <h1>Todas mis citas próximas</h1>
         <button mat-button (click)="navigateToDashboard()">
           <mat-icon>arrow_back</mat-icon>
-          Volver al dashboard
+          Volver al Inicio
         </button>
       </header>
 
