@@ -1,8 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import {
   AbstractControl,
-  FormGroup,
   FormBuilder,
+  FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
   ValidatorFn,
@@ -25,13 +25,16 @@ import { AuthStore, PostLoginNavigationService } from '@core/auth';
 import { CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
-import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
-import { AuthIntentService } from '../../services/auth-intent.service';
+import {
+  FormControlErrorComponent,
+  FormLabelComponent,
+} from '@shared/ui/forms';
 import {
   LoginFormMessages,
   PasswordComplexityHelpText,
   RegisterFormMessages,
 } from '../../pages/auth-form-messages';
+import { AuthIntentService } from '../../services/auth-intent.service';
 
 export interface AuthModalData {
   /** true cuando se abrió desde "Soy Médico" */
@@ -86,13 +89,7 @@ export class AuthModalComponent implements OnInit {
         '',
         [Validators.required, Validators.email, Validators.maxLength(256)],
       ],
-      phoneNumber: [
-        '',
-        [
-          Validators.maxLength(20),
-          this.phoneValidator(),
-        ],
-      ],
+      phoneNumber: ['', [Validators.maxLength(20), this.phoneValidator()]],
       password: [
         '',
         [
@@ -150,7 +147,10 @@ export class AuthModalComponent implements OnInit {
     const credentials = this.loginForm.getRawValue();
 
     this.authApi
-      .login({ email: credentials.email.trim(), password: credentials.password })
+      .login({
+        email: credentials.email.trim(),
+        password: credentials.password,
+      })
       .subscribe({
         next: (response) => {
           this.authStore.setToken(response.token, response.expiresAt);
@@ -295,7 +295,10 @@ export class AuthModalComponent implements OnInit {
           // Re-login para obtener nuevo token con rol Professional
           const credentials = this.loginForm.getRawValue();
           this.authApi
-            .login({ email: credentials.email.trim(), password: credentials.password })
+            .login({
+              email: credentials.email.trim(),
+              password: credentials.password,
+            })
             .subscribe({
               next: (loginResponse) => {
                 this.authStore.setToken(
@@ -316,7 +319,9 @@ export class AuthModalComponent implements OnInit {
                   },
                   error: (err) => {
                     const problem = this.extractProblemDetails(err);
-                    this.loginError.set(problem.title || 'Error al cargar la sesión');
+                    this.loginError.set(
+                      problem.title || 'Error al cargar la sesión',
+                    );
                     this.isLoginLoading.set(false);
                   },
                 });

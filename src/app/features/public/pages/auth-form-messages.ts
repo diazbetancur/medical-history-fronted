@@ -15,14 +15,18 @@ export const RegisterFormMessages = {
     required: 'Ingresa tu nombre',
     maxlength: 'El nombre no puede exceder 100 caracteres',
     server: (errorValue) =>
-      typeof errorValue === 'string' ? errorValue : 'Revisa el nombre ingresado',
+      typeof errorValue === 'string'
+        ? errorValue
+        : 'Revisa el nombre ingresado',
   } as FormErrorMessageMap,
 
   lastName: {
     required: 'Ingresa tu apellido',
     maxlength: 'El apellido no puede exceder 100 caracteres',
     server: (errorValue) =>
-      typeof errorValue === 'string' ? errorValue : 'Revisa el apellido ingresado',
+      typeof errorValue === 'string'
+        ? errorValue
+        : 'Revisa el apellido ingresado',
   } as FormErrorMessageMap,
 
   email: {
@@ -30,7 +34,9 @@ export const RegisterFormMessages = {
     email: 'Ingresa un correo válido',
     maxlength: 'El correo no puede exceder 256 caracteres',
     server: (errorValue) =>
-      typeof errorValue === 'string' ? errorValue : 'Revisa el correo ingresado',
+      typeof errorValue === 'string'
+        ? errorValue
+        : 'Revisa el correo ingresado',
   } as FormErrorMessageMap,
 
   password: {
@@ -40,21 +46,27 @@ export const RegisterFormMessages = {
     pattern:
       'Usa al menos 8 caracteres con mayúscula, minúscula, número y símbolo',
     server: (errorValue) =>
-      typeof errorValue === 'string' ? errorValue : 'Revisa la contraseña ingresada',
+      typeof errorValue === 'string'
+        ? errorValue
+        : 'Revisa la contraseña ingresada',
   } as FormErrorMessageMap,
 
   confirmPassword: {
     required: 'Confirma tu contraseña',
     passwordMismatch: 'Las contraseñas deben coincidir',
     server: (errorValue) =>
-      typeof errorValue === 'string' ? errorValue : 'Las contraseñas deben coincidir',
+      typeof errorValue === 'string'
+        ? errorValue
+        : 'Las contraseñas deben coincidir',
   } as FormErrorMessageMap,
 
   phoneNumber: {
     maxlength: 'El teléfono no puede exceder 20 caracteres',
     invalidPhone: 'Ingresa un teléfono válido',
     server: (errorValue) =>
-      typeof errorValue === 'string' ? errorValue : 'Revisa el teléfono ingresado',
+      typeof errorValue === 'string'
+        ? errorValue
+        : 'Revisa el teléfono ingresado',
   } as FormErrorMessageMap,
 
   asProfessional: {} as FormErrorMessageMap,
@@ -69,13 +81,17 @@ export const LoginFormMessages = {
     required: 'Ingresa tu correo',
     email: 'Ingresa un correo válido',
     server: (errorValue) =>
-      typeof errorValue === 'string' ? errorValue : 'Revisa el correo ingresado',
+      typeof errorValue === 'string'
+        ? errorValue
+        : 'Revisa el correo ingresado',
   } as FormErrorMessageMap,
 
   password: {
     required: 'Ingresa tu contraseña',
     server: (errorValue) =>
-      typeof errorValue === 'string' ? errorValue : 'Revisa la contraseña ingresada',
+      typeof errorValue === 'string'
+        ? errorValue
+        : 'Revisa la contraseña ingresada',
   } as FormErrorMessageMap,
 
   asProfessional: {} as FormErrorMessageMap,

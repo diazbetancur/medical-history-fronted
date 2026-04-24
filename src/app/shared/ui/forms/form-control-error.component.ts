@@ -1,4 +1,4 @@
-import { Component, computed, input, effect, signal } from '@angular/core';
+import { Component, computed, effect, input, signal } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
@@ -43,7 +43,15 @@ export class FormControlErrorComponent {
       if (!ctrl) return;
 
       const eventStream =
-        'events' in ctrl ? (ctrl as AbstractControl & { events?: { subscribe: (cb: () => void) => { unsubscribe: () => void } } }).events : undefined;
+        'events' in ctrl
+          ? (
+              ctrl as AbstractControl & {
+                events?: {
+                  subscribe: (cb: () => void) => { unsubscribe: () => void };
+                };
+              }
+            ).events
+          : undefined;
 
       const statusSub = ctrl.statusChanges?.subscribe(() => {
         this.controlStateVersion.update((v) => v + 1);
