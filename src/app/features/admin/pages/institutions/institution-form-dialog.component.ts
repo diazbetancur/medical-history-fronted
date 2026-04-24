@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -21,17 +21,13 @@ import type {
   InstitutionDto,
   UpdateInstitutionDto,
 } from '@data/models/institution.models';
+import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
 
 export interface InstitutionFormDialogData {
   mode: 'create' | 'edit';
   institution?: InstitutionDto;
 }
 
-/**
- * Institution Form Dialog Component
- *
- * Modal para crear o editar una institución.
- */
 @Component({
   selector: 'app-institution-form-dialog',
   standalone: true,
@@ -44,108 +40,52 @@ export interface InstitutionFormDialogData {
     MatButtonModule,
     MatSlideToggleModule,
     MatIconModule,
+    FormLabelComponent,
+    FormControlErrorComponent,
   ],
   template: `
     <h2 mat-dialog-title>
-      <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
-      {{ isEditMode ? 'Editar' : 'Nueva' }} Institución
+      <mat-icon>{{ isEditMode ? 'edit' : 'add_business' }}</mat-icon>
+      {{ isEditMode ? 'Editar institucion' : 'Nueva institucion' }}
     </h2>
 
     <mat-dialog-content>
       <form [formGroup]="form" class="institution-form">
-        <!-- Name -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nombre *</mat-label>
+          <mat-label>
+            <app-form-label text="Nombre" [required]="true"></app-form-label>
+          </mat-label>
           <input
             matInput
             formControlName="name"
-            placeholder="Ej: Hospital General"
+            placeholder="Ingresa el nombre de la institucion"
           />
-          @if (
-            form.get('name')?.hasError('required') && form.get('name')?.touched
-          ) {
-            <mat-error>El nombre es requerido</mat-error>
-          }
+          <app-form-control-error
+            [control]="form.get('name')"
+            [submitted]="submitted()"
+          ></app-form-control-error>
         </mat-form-field>
 
-        <!-- Code -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Código *</mat-label>
-          <input matInput formControlName="code" placeholder="Ej: HG-001" />
-          <mat-hint>Código único de la institución</mat-hint>
-          @if (
-            form.get('code')?.hasError('required') && form.get('code')?.touched
-          ) {
-            <mat-error>El código es requerido</mat-error>
-          }
-        </mat-form-field>
-
-        <!-- Description -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Descripción</mat-label>
-          <textarea
-            matInput
-            formControlName="description"
-            rows="3"
-            placeholder="Descripción breve de la institución"
-          ></textarea>
-        </mat-form-field>
-
-        <div class="form-row">
-          <!-- Phone -->
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Teléfono</mat-label>
-            <input
-              matInput
-              formControlName="phone"
-              placeholder="Ej: +1234567890"
-            />
-          </mat-form-field>
-
-          <!-- Email -->
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Email</mat-label>
-            <input
-              matInput
-              type="email"
-              formControlName="email"
-              placeholder="Ej: contacto@hospital.com"
-            />
-            @if (
-              form.get('email')?.hasError('email') && form.get('email')?.touched
-            ) {
-              <mat-error>Email inválido</mat-error>
-            }
-          </mat-form-field>
-        </div>
-
-        <!-- Address -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Dirección</mat-label>
+          <mat-label>Codigo</mat-label>
           <input
             matInput
-            formControlName="address"
-            placeholder="Ej: Av. Principal 123, Ciudad"
+            formControlName="code"
+            placeholder="Ingresa un codigo unico si aplica"
           />
+          <mat-hint>Opcional</mat-hint>
+          <app-form-control-error
+            [control]="form.get('code')"
+            [submitted]="submitted()"
+          ></app-form-control-error>
         </mat-form-field>
 
-        <!-- Website -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Sitio Web</mat-label>
-          <input
-            matInput
-            formControlName="website"
-            placeholder="Ej: https://www.hospital.com"
-          />
-        </mat-form-field>
-
-        <!-- Is Active -->
         <div class="toggle-container">
           <mat-slide-toggle formControlName="isActive" color="primary">
-            Institución Activa
+            Mantener activa
           </mat-slide-toggle>
           <p class="toggle-hint">
-            Las instituciones inactivas no aparecerán en los listados públicos
+            Las instituciones inactivas dejan de mostrarse en el catalogo.
           </p>
         </div>
       </form>
@@ -153,12 +93,7 @@ export interface InstitutionFormDialogData {
 
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancelar</button>
-      <button
-        mat-raised-button
-        color="primary"
-        [disabled]="form.invalid"
-        (click)="onSubmit()"
-      >
+      <button mat-raised-button color="primary" (click)="onSubmit()">
         <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
         {{ isEditMode ? 'Guardar' : 'Crear' }}
       </button>
@@ -180,13 +115,13 @@ export interface InstitutionFormDialogData {
 
       mat-dialog-content {
         padding: 0 24px 24px;
-        min-height: 200px;
       }
 
       .institution-form {
         display: flex;
         flex-direction: column;
         gap: 16px;
+        min-width: 420px;
         padding-top: 8px;
       }
 
@@ -194,17 +129,8 @@ export interface InstitutionFormDialogData {
         width: 100%;
       }
 
-      .form-row {
-        display: flex;
-        gap: 16px;
-
-        .half-width {
-          flex: 1;
-        }
-      }
-
       .toggle-container {
-        padding: 16px 0 8px;
+        padding: 8px 0 0;
 
         mat-slide-toggle {
           display: block;
@@ -223,14 +149,16 @@ export interface InstitutionFormDialogData {
         padding: 16px 24px;
         gap: 8px;
 
-        button mat-icon {
-          margin-right: 8px;
+        button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
         }
       }
 
-      @media (max-width: 600px) {
-        .form-row {
-          flex-direction: column;
+      @media (max-width: 640px) {
+        .institution-form {
+          min-width: auto;
         }
       }
     `,
@@ -244,58 +172,36 @@ export class InstitutionFormDialogComponent implements OnInit {
   readonly data = inject<InstitutionFormDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
+  readonly submitted = signal(false);
 
   get isEditMode(): boolean {
     return this.data.mode === 'edit';
   }
 
   ngOnInit(): void {
-    this.initForm();
-  }
-
-  /**
-   * Initialize form with validators
-   */
-  private initForm(): void {
     this.form = this.fb.group({
       name: [
-        this.data.institution?.name || '',
-        [Validators.required, Validators.minLength(3)],
+        this.data.institution?.name ?? '',
+        [Validators.required, Validators.maxLength(150)],
       ],
-      code: [
-        this.data.institution?.code || '',
-        [Validators.required, Validators.minLength(2)],
-      ],
-      description: [this.data.institution?.description || ''],
-      address: [this.data.institution?.address || ''],
-      phone: [this.data.institution?.phone || ''],
-      email: [this.data.institution?.email || '', [Validators.email]],
-      website: [this.data.institution?.website || ''],
+      code: [this.data.institution?.code ?? '', [Validators.maxLength(30)]],
       isActive: [this.data.institution?.isActive ?? true],
     });
   }
 
-  /**
-   * Handle form submission
-   */
   onSubmit(): void {
+    this.submitted.set(true);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const formValue = this.form.value;
-
-    // Clean empty strings to undefined
+    const formValue = this.form.getRawValue();
     const dto: CreateInstitutionDto | UpdateInstitutionDto = {
-      name: formValue.name,
-      code: formValue.code,
-      description: formValue.description || undefined,
-      address: formValue.address || undefined,
-      phone: formValue.phone || undefined,
-      email: formValue.email || undefined,
-      website: formValue.website || undefined,
-      isActive: formValue.isActive,
+      name: formValue.name?.trim() || '',
+      code: formValue.code?.trim() || undefined,
+      isActive: !!formValue.isActive,
     };
 
     this.dialogRef.close(dto);

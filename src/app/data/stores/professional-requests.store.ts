@@ -52,8 +52,11 @@ export class ProfessionalRequestsStore {
   readonly pendingRequests = computed(() =>
     this._state().requests.filter((r) => r.status === 'Pending'),
   );
-  readonly acceptedRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Accepted'),
+  readonly contactedRequests = computed(() =>
+    this._state().requests.filter((r) => r.status === 'Contacted'),
+  );
+  readonly inProgressRequests = computed(() =>
+    this._state().requests.filter((r) => r.status === 'InProgress'),
   );
   readonly completedRequests = computed(() =>
     this._state().requests.filter((r) => r.status === 'Completed'),
@@ -61,12 +64,17 @@ export class ProfessionalRequestsStore {
   readonly rejectedRequests = computed(() =>
     this._state().requests.filter((r) => r.status === 'Rejected'),
   );
+  readonly cancelledRequests = computed(() =>
+    this._state().requests.filter((r) => r.status === 'Cancelled'),
+  );
 
   // Counts
   readonly pendingCount = computed(() => this.pendingRequests().length);
-  readonly acceptedCount = computed(() => this.acceptedRequests().length);
+  readonly contactedCount = computed(() => this.contactedRequests().length);
+  readonly inProgressCount = computed(() => this.inProgressRequests().length);
   readonly completedCount = computed(() => this.completedRequests().length);
   readonly rejectedCount = computed(() => this.rejectedRequests().length);
+  readonly cancelledCount = computed(() => this.cancelledRequests().length);
   readonly totalCount = computed(() => this._state().requests.length);
 
   /**
@@ -147,7 +155,10 @@ export class ProfessionalRequestsStore {
    */
   updateStatus(
     requestId: string,
-    status: Extract<RequestStatus, 'Accepted' | 'Completed' | 'Rejected'>,
+    status: Extract<
+      RequestStatus,
+      'Contacted' | 'InProgress' | 'Completed' | 'Rejected' | 'Cancelled'
+    >,
     professionalNotes?: string,
   ): Observable<ServiceRequest> {
     // Optimistic update

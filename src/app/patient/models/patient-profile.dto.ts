@@ -62,10 +62,10 @@ export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 export interface CreatePatientProfileDto {
   fullName: string;
   email: string;
-  phone: string;
+  phone?: string | null;
   documentType?: string | null;
   documentNumber?: string | null;
-  dateOfBirth: string;
+  dateOfBirth?: string | null;
   gender?: string | null;
   bloodType?: BloodType | string | null;
   countryId?: string | null;
@@ -90,8 +90,6 @@ export function isProfileComplete(profile: PatientProfileDto | null): boolean {
   return !!(
     profile.fullName &&
     profile.email &&
-    profile.dateOfBirth &&
-    profile.phone &&
     profile.addressLine1 &&
     profile.cityName &&
     profile.countryName

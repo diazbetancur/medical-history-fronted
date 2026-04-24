@@ -45,20 +45,15 @@ export class CreateEncounterDialogComponent {
   private readonly patientsService = inject(ProfessionalPatientsService);
   private readonly fb = inject(FormBuilder);
 
-  // State
   readonly isSaving = signal(false);
   readonly error = signal<string | null>(null);
 
-  // Form
   readonly form = this.fb.group({
-    summary: [''],
-    initialNote: ['', [Validators.required, Validators.minLength(10)]],
-    noteTitle: [''],
+    summary: ['', [Validators.maxLength(200)]],
+    initialNote: ['', [Validators.required, Validators.maxLength(20000)]],
+    noteTitle: ['', [Validators.maxLength(100)]],
   });
 
-  /**
-   * Submit form
-   */
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -72,9 +67,9 @@ export class CreateEncounterDialogComponent {
 
     this.patientsService
       .createEncounter(this.data.patientProfileId, {
-        summary: formValue.summary || undefined,
-        initialNote: formValue.initialNote!,
-        noteTitle: formValue.noteTitle || undefined,
+        summary: formValue.summary?.trim() || undefined,
+        initialNote: formValue.initialNote?.trim() || '',
+        noteTitle: formValue.noteTitle?.trim() || undefined,
         appointmentId: this.data.appointmentId || undefined,
       })
       .pipe(finalize(() => this.isSaving.set(false)))
@@ -83,14 +78,11 @@ export class CreateEncounterDialogComponent {
           this.dialogRef.close(encounter);
         },
         error: (error) => {
-          this.error.set(error.message || 'Error al crear atención');
+          this.error.set(error.message || 'Error al crear atencion');
         },
       });
   }
 
-  /**
-   * Cancel
-   */
   cancel(): void {
     this.dialogRef.close();
   }

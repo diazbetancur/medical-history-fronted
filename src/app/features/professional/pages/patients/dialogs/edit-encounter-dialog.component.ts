@@ -44,19 +44,14 @@ export class EditEncounterDialogComponent {
   private readonly patientsService = inject(ProfessionalPatientsService);
   private readonly fb = inject(FormBuilder);
 
-  // State
   readonly isSaving = signal(false);
   readonly error = signal<string | null>(null);
 
-  // Form
   readonly form = this.fb.group({
-    summary: [''],
-    initialNote: ['', [Validators.required, Validators.minLength(10)]],
+    summary: ['', [Validators.maxLength(200)]],
+    initialNote: ['', [Validators.maxLength(20000)]],
   });
 
-  /**
-   * Submit form
-   */
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -70,8 +65,8 @@ export class EditEncounterDialogComponent {
 
     this.patientsService
       .updateDraftEncounter(this.data.encounterId, {
-        summary: formValue.summary || undefined,
-        initialNote: formValue.initialNote!,
+        summary: formValue.summary?.trim() || undefined,
+        initialNote: formValue.initialNote?.trim() || undefined,
       })
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
@@ -79,14 +74,11 @@ export class EditEncounterDialogComponent {
           this.dialogRef.close(encounter);
         },
         error: (error) => {
-          this.error.set(error.message || 'Error al actualizar atención');
+          this.error.set(error.message || 'Error al actualizar atencion');
         },
       });
   }
 
-  /**
-   * Cancel
-   */
   cancel(): void {
     this.dialogRef.close();
   }

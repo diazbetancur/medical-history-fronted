@@ -1,9 +1,9 @@
-<h2 mat-dialog-title>Editar Atención Médica</h2>
+<h2 mat-dialog-title>Editar Atencion Medica</h2>
 
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <mat-dialog-content>
     <p class="dialog-description">
-      Edita la atención médica (solo disponible mientras esté en borrador)
+      Edita la atencion medica mientras siga en estado borrador.
     </p>
 
     @if (error()) {
@@ -13,35 +13,35 @@
     }
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Resumen (Opcional)</mat-label>
+      <mat-label>Resumen</mat-label>
       <input
         matInput
         formControlName="summary"
-        placeholder="Ej: Control de presión arterial"
+        maxlength="200"
+        placeholder="Ej: Control de presion arterial"
       />
-      <mat-hint>Una breve descripción de la atención</mat-hint>
+      <mat-hint align="end">
+        {{ form.get("summary")?.value?.length || 0 }}/200
+      </mat-hint>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nota Inicial *</mat-label>
+      <mat-label>Nota inicial</mat-label>
       <textarea
         matInput
         formControlName="initialNote"
         rows="8"
-        placeholder="Describe los hallazgos, diagnóstico y tratamiento..."
+        maxlength="20000"
+        placeholder="Actualiza la nota inicial"
       ></textarea>
-      <mat-hint>Mínimo 10 caracteres</mat-hint>
+      <mat-hint align="end">
+        {{ form.get("initialNote")?.value?.length || 0 }}/20000
+      </mat-hint>
       @if (
-        form.get("initialNote")?.hasError("required") &&
+        form.get("initialNote")?.hasError("maxlength") &&
         form.get("initialNote")?.touched
       ) {
-        <mat-error>La nota inicial es requerida</mat-error>
-      }
-      @if (
-        form.get("initialNote")?.hasError("minlength") &&
-        form.get("initialNote")?.touched
-      ) {
-        <mat-error>La nota debe tener al menos 10 caracteres</mat-error>
+        <mat-error>El maximo permitido es 20000 caracteres</mat-error>
       }
     </mat-form-field>
   </mat-dialog-content>
@@ -59,7 +59,7 @@
       @if (isSaving()) {
         <mat-spinner diameter="20"></mat-spinner>
       }
-      Guardar Cambios
+      Guardar cambios
     </button>
   </mat-dialog-actions>
 </form>

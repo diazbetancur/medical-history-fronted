@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   FormControl,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,6 +43,9 @@ import {
 } from '@data/api/api-models';
 import { ToastService } from '@shared/services';
 import { ConfirmDialogComponent } from '@shared/ui';
+
+const EDUCATION_YEAR_MIN = 1900;
+const EDUCATION_YEAR_MAX = 2100;
 
 interface ProfessionalEducationFormDialogData {
   title: string;
@@ -111,12 +116,32 @@ interface ProfessionalEducationFormDialogResult {
         <div class="row-2">
           <mat-form-field appearance="outline">
             <mat-label>Año inicio</mat-label>
-            <input matInput type="number" formControlName="startYear" />
+            <input
+              matInput
+              type="number"
+              formControlName="startYear"
+              min="1900"
+              max="2100"
+            />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Año graduación</mat-label>
-            <input matInput type="number" formControlName="graduationYear" />
+            <input
+              matInput
+              type="number"
+              formControlName="graduationYear"
+              min="1900"
+              max="2100"
+            />
+            @if (
+              form.hasError('graduationBeforeStart') &&
+              (form.get('graduationYear')?.touched || form.get('startYear')?.touched)
+            ) {
+              <mat-error>
+                El aÃ±o de graduaciÃ³n debe ser igual o posterior al de inicio
+              </mat-error>
+            }
           </mat-form-field>
         </div>
 
@@ -164,27 +189,38 @@ export class ProfessionalEducationFormDialogComponent {
   );
   private readonly fb = inject(FormBuilder);
 
-  readonly form = this.fb.group({
-    type: [this.data.initial?.type ?? 3, [Validators.required]],
-    degreeTitle: [
-      this.data.initial?.degreeTitle ?? '',
-      [Validators.required, Validators.maxLength(200)],
-    ],
-    institutionName: [
-      this.data.initial?.institutionName ?? '',
-      [Validators.required, Validators.maxLength(200)],
-    ],
-    institutionCountry: [
-      this.data.initial?.institutionCountry ?? '',
-      [Validators.maxLength(120)],
-    ],
-    startYear: [this.data.initial?.startYear ?? null],
-    graduationYear: [this.data.initial?.graduationYear ?? null],
-    description: [
-      this.data.initial?.description ?? '',
-      [Validators.maxLength(1000)],
-    ],
-  });
+  readonly form = this.fb.group(
+    {
+      type: [this.data.initial?.type ?? 3, [Validators.required]],
+      degreeTitle: [
+        this.data.initial?.degreeTitle ?? '',
+        [Validators.required, Validators.maxLength(200)],
+      ],
+      institutionName: [
+        this.data.initial?.institutionName ?? '',
+        [Validators.required, Validators.maxLength(200)],
+      ],
+      institutionCountry: [
+        this.data.initial?.institutionCountry ?? '',
+        [Validators.maxLength(100)],
+      ],
+      startYear: [
+        this.data.initial?.startYear ?? null,
+        [Validators.min(EDUCATION_YEAR_MIN), Validators.max(EDUCATION_YEAR_MAX)],
+      ],
+      graduationYear: [
+        this.data.initial?.graduationYear ?? null,
+        [Validators.min(EDUCATION_YEAR_MIN), Validators.max(EDUCATION_YEAR_MAX)],
+      ],
+      description: [
+        this.data.initial?.description ?? '',
+        [Validators.maxLength(1000)],
+      ],
+    },
+    {
+      validators: [this.educationYearOrderValidator()],
+    },
+  );
 
   close(): void {
     this.dialogRef.close();
@@ -206,6 +242,19 @@ export class ProfessionalEducationFormDialogComponent {
       graduationYear: value.graduationYear ?? undefined,
       description: value.description?.trim() || undefined,
     } satisfies ProfessionalEducationFormDialogResult);
+  }
+
+  private educationYearOrderValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const startYear = Number(control.get('startYear')?.value ?? 0);
+      const graduationYear = Number(control.get('graduationYear')?.value ?? 0);
+
+      if (!startYear || !graduationYear) {
+        return null;
+      }
+
+      return graduationYear >= startYear ? null : { graduationBeforeStart: true };
+    };
   }
 }
 
@@ -293,31 +342,34 @@ export class ProfessionalOnboardingPage implements OnInit {
 
   // ─── Form ──────────────────────────────────────────────────────────────────
   readonly profileForm = this.fb.nonNullable.group({
-    businessName: ['', [Validators.required, Validators.maxLength(200)]],
+    businessName: ['', [Validators.required, Validators.maxLength(150)]],
     description: ['', [Validators.maxLength(2000)]],
     countryId: ['', [Validators.required]],
     cityId: ['', [Validators.required]],
     phone: ['', [Validators.maxLength(20)]],
     whatsApp: ['', [Validators.maxLength(20)]],
     email: ['', [Validators.email, Validators.maxLength(100)]],
-    address: ['', [Validators.maxLength(500)]],
+    address: ['', [Validators.maxLength(300)]],
   });
 
   readonly specialtyProposalForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(150)]],
+    name: [
+      '',
+      [Validators.required, Validators.minLength(2), Validators.maxLength(100)],
+    ],
     justification: ['', [Validators.maxLength(500)]],
   });
 
   readonly serviceForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(200)]],
+    name: ['', [Validators.required, Validators.maxLength(150)]],
     description: ['', [Validators.maxLength(1000)]],
   });
 
   readonly locationForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(120)]],
+    name: ['', [Validators.required, Validators.maxLength(200)]],
     address: ['', [Validators.maxLength(300)]],
-    countryId: ['', [Validators.required]],
-    cityId: ['', [Validators.required]],
+    countryId: [''],
+    cityId: [''],
     phone: ['', [Validators.maxLength(30)]],
   });
 
@@ -643,8 +695,8 @@ export class ProfessionalOnboardingPage implements OnInit {
 
     const value = this.serviceForm.getRawValue();
     const payload = {
-      name: value.name,
-      description: value.description || undefined,
+      name: value.name.trim(),
+      description: value.description.trim() || undefined,
       priceFrom: 0,
       priceTo: 0,
       duration: '0',
@@ -727,14 +779,14 @@ export class ProfessionalOnboardingPage implements OnInit {
 
     const value = this.profileForm.getRawValue();
     const payload: CreateProfessionalProfilePayload = {
-      businessName: value.businessName,
-      description: value.description || undefined,
+      businessName: value.businessName.trim(),
+      description: value.description.trim() || undefined,
       countryId: value.countryId,
       cityId: value.cityId,
-      phone: value.phone || undefined,
-      whatsApp: value.whatsApp || undefined,
-      email: value.email || undefined,
-      address: value.address || undefined,
+      phone: value.phone.trim() || undefined,
+      whatsApp: value.whatsApp.trim() || undefined,
+      email: value.email.trim() || undefined,
+      address: value.address.trim() || undefined,
     };
 
     const request$ = this.hasExistingProfile()
@@ -821,8 +873,8 @@ export class ProfessionalOnboardingPage implements OnInit {
     this.sectionBusy.set(true);
     this.professionalApi
       .createSpecialtyProposal({
-        name: value.name,
-        justification: value.justification || undefined,
+        name: value.name.trim(),
+        justification: value.justification.trim() || undefined,
       })
       .subscribe({
         next: (created) => {
@@ -1025,11 +1077,11 @@ export class ProfessionalOnboardingPage implements OnInit {
 
     const value = this.locationForm.getRawValue();
     const payload = {
-      name: value.name,
-      address: value.address || undefined,
-      countryId: value.countryId,
-      cityId: value.cityId,
-      phone: value.phone || undefined,
+      name: value.name.trim(),
+      address: value.address.trim() || undefined,
+      countryId: value.countryId || undefined,
+      cityId: value.cityId || undefined,
+      phone: value.phone.trim() || undefined,
     };
 
     const editingId = this.editingLocationId();

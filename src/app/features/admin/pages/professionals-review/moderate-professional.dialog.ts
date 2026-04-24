@@ -14,8 +14,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import type { AdminProfessionalListItem } from '@data/api/api-models';
 import { AdminProfessionalsStore } from '@data/stores/admin-professionals.store';
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 export interface ModerateProfessionalDialogData {
   professional: AdminProfessionalListItem;
   action: 'verify' | 'disable';
@@ -24,8 +22,6 @@ export interface ModerateProfessionalDialogData {
 export interface ModerateProfessionalDialogResult {
   success: boolean;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Component({
   selector: 'app-moderate-professional-dialog',
@@ -43,43 +39,38 @@ export interface ModerateProfessionalDialogResult {
   template: `
     <h2 mat-dialog-title>
       <mat-icon>{{ isVerify ? 'verified' : 'block' }}</mat-icon>
-      {{ isVerify ? 'Verificar Profesional' : 'Desactivar Profesional' }}
+      {{ isVerify ? 'Verificar profesional' : 'Desactivar profesional' }}
     </h2>
 
     <mat-dialog-content>
       <p class="dialog-description">
         @if (isVerify) {
-          ¿Confirmas que deseas <strong>verificar</strong> el perfil de
-          <strong>{{ data.professional.businessName }}</strong
-          >? El profesional podrá ser encontrado por los pacientes en la
-          plataforma.
+          Confirmas que deseas <strong>verificar</strong> el perfil de
+          <strong>{{ data.professional.businessName }}</strong>? El profesional
+          podra ser encontrado por los pacientes en la plataforma.
         } @else {
-          ¿Confirmas que deseas <strong>desactivar</strong> el perfil de
-          <strong>{{ data.professional.businessName }}</strong
-          >? El perfil dejará de ser visible para los pacientes.
+          Confirmas que deseas <strong>desactivar</strong> el perfil de
+          <strong>{{ data.professional.businessName }}</strong>? El perfil dejara
+          de ser visible para los pacientes.
         }
       </p>
 
       <mat-form-field appearance="outline" class="notes-field">
         <mat-label>
-          {{
-            isVerify ? 'Notas (opcional)' : 'Motivo de desactivación (opcional)'
-          }}
+          {{ isVerify ? 'Nota interna' : 'Motivo de desactivacion' }}
         </mat-label>
         <textarea
           matInput
           [(ngModel)]="adminNotes"
           rows="3"
+          maxlength="500"
           [placeholder]="
             isVerify
-              ? 'Ej: Documentación verificada correctamente'
-              : 'Ej: Incumplimiento de términos de servicio'
+              ? 'Escribe una nota interna si la necesitas'
+              : 'Explica brevemente el motivo'
           "
         ></textarea>
-        <mat-hint
-          >Estas notas son internas y no serán visibles para el
-          usuario.</mat-hint
-        >
+        <mat-hint align="end">{{ adminNotes.length }}/500</mat-hint>
       </mat-form-field>
 
       @if (isVerify) {
@@ -125,6 +116,7 @@ export interface ModerateProfessionalDialogResult {
         display: flex;
         align-items: center;
         gap: 10px;
+
         mat-icon {
           font-size: 24px;
           width: 24px;
@@ -170,7 +162,7 @@ export interface ModerateProfessionalDialogResult {
         padding: 16px 24px;
 
         button {
-          display: flex;
+          display: inline-flex;
           align-items: center;
           gap: 8px;
         }

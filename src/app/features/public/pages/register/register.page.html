@@ -11,7 +11,9 @@
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="name-row">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Nombre</mat-label>
+            <mat-label>
+              <app-form-label text="Nombre" [required]="true"></app-form-label>
+            </mat-label>
             <input
               matInput
               type="text"
@@ -19,13 +21,20 @@
               autocomplete="given-name"
               placeholder="Tu nombre"
             />
-            @if (form.controls.firstName.hasError('required')) {
-            <mat-error>El nombre es requerido</mat-error>
-            }
+            <app-form-control-error
+              [control]="form.controls.firstName"
+              [submitted]="submitted()"
+              [messages]="registerFormMessages.firstName"
+            ></app-form-control-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Apellido</mat-label>
+            <mat-label>
+              <app-form-label
+                text="Apellido"
+                [required]="true"
+              ></app-form-label>
+            </mat-label>
             <input
               matInput
               type="text"
@@ -33,14 +42,18 @@
               autocomplete="family-name"
               placeholder="Tu apellido"
             />
-            @if (form.controls.lastName.hasError('required')) {
-            <mat-error>El apellido es requerido</mat-error>
-            }
+            <app-form-control-error
+              [control]="form.controls.lastName"
+              [submitted]="submitted()"
+              [messages]="registerFormMessages.lastName"
+            ></app-form-control-error>
           </mat-form-field>
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
+          <mat-label>
+            <app-form-label text="Email" [required]="true"></app-form-label>
+          </mat-label>
           <input
             matInput
             type="email"
@@ -48,11 +61,11 @@
             autocomplete="email"
             placeholder="ejemplo@correo.com"
           />
-          @if (form.controls.email.hasError('required')) {
-          <mat-error>El email es requerido</mat-error>
-          } @if (form.controls.email.hasError('email')) {
-          <mat-error>Email inválido</mat-error>
-          }
+          <app-form-control-error
+            [control]="form.controls.email"
+            [submitted]="submitted()"
+            [messages]="registerFormMessages.email"
+          ></app-form-control-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -64,39 +77,60 @@
             autocomplete="tel"
             placeholder="+57 3000000000"
           />
+          <app-form-control-error
+            [control]="form.controls.phoneNumber"
+            [submitted]="submitted()"
+            [messages]="registerFormMessages.phoneNumber"
+          ></app-form-control-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Contraseña</mat-label>
+          <mat-label>
+            <app-form-label
+              text="Contrasena"
+              [required]="true"
+            ></app-form-label>
+          </mat-label>
           <input
             matInput
             type="password"
             formControlName="password"
             autocomplete="new-password"
-            placeholder="********"
+            placeholder="Crea una contrasena segura"
           />
-          @if (form.controls.password.hasError('required')) {
-          <mat-error>La contraseña es requerida</mat-error>
-          } @if (form.controls.password.hasError('minlength') ||
-          form.controls.password.hasError('pattern')) {
-          <mat-error
-            >Mínimo 8, con mayúscula, minúscula, número y símbolo</mat-error
-          >
-          }
+          <mat-hint class="password-hint">{{ passwordComplexityHelpText }}</mat-hint>
+          <app-form-control-error
+            [control]="form.controls.password"
+            [submitted]="submitted()"
+            [messages]="registerFormMessages.password"
+          ></app-form-control-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Confirmar contraseña</mat-label>
+          <mat-label>
+            <app-form-label
+              text="Confirmar contrasena"
+              [required]="true"
+            ></app-form-label>
+          </mat-label>
           <input
             matInput
             type="password"
             formControlName="confirmPassword"
             autocomplete="new-password"
-            placeholder="********"
+            placeholder="Confirma tu contrasena"
           />
-          @if (form.controls.confirmPassword.hasError('required')) {
-          <mat-error>La confirmación es requerida</mat-error>
-          } @if (form.hasError('passwordMismatch')) {
+          <app-form-control-error
+            [control]="form.controls.confirmPassword"
+            [submitted]="submitted()"
+            [messages]="registerFormMessages.confirmPassword"
+          ></app-form-control-error>
+          @if (
+            form.hasError('passwordMismatch') &&
+            (submitted() ||
+              form.controls.confirmPassword.touched ||
+              form.controls.confirmPassword.dirty)
+          ) {
           <mat-error>Las contraseñas no coinciden</mat-error>
           }
         </mat-form-field>
@@ -116,7 +150,7 @@
           mat-raised-button
           color="primary"
           type="submit"
-          [disabled]="isLoading()"
+          [disabled]="isLoading() || isFormInvalid()"
           class="full-width"
         >
           @if (isLoading()) {

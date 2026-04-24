@@ -89,7 +89,7 @@ export class BackgroundDialogComponent implements OnInit {
       type: [background?.type || null, [Validators.required]],
       title: [
         background?.title || '',
-        [Validators.required, Validators.maxLength(200)],
+        [Validators.required, Validators.maxLength(120)],
       ],
       description: [
         background?.description || '',

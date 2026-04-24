@@ -1,12 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,7 +30,7 @@ import { type PaginatedProfessionalsResponse } from '@data/models';
  * Multi-step form for booking an appointment:
  * 1. Select professional
  * 2. Select date
- * 3. Add consultation reason
+ * 3. Add optional consultation notes
  * 4. Select time slot
  * 5. Confirm and create
  *
@@ -43,25 +40,6 @@ import { type PaginatedProfessionalsResponse } from '@data/models';
  * - Converts UTC slots to local time for display
  * - Creates appointment with UTC time
  */
-
-function trimmedMinLength(minLength: number): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = typeof control.value === 'string' ? control.value.trim() : '';
-
-    if (!value) {
-      return { required: true };
-    }
-
-    return value.length >= minLength
-      ? null
-      : {
-          trimmedMinLength: {
-            requiredLength: minLength,
-            actualLength: value.length,
-          },
-        };
-  };
-}
 
 @Component({
   selector: 'app-book-appointment-page',
@@ -128,10 +106,7 @@ export class BookAppointmentPageComponent {
     });
 
     this.observationForm = this.fb.group({
-      observation: [
-        '',
-        [Validators.required, trimmedMinLength(50), Validators.maxLength(500)],
-      ],
+      observation: ['', [Validators.maxLength(1000)]],
     });
 
     // Load professionals on init

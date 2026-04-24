@@ -85,7 +85,11 @@
                   placeholder="Ej. Dr. Juan Pérez - Medicina Interna"
                   autocomplete="organization"
                 />
-                @if (profileForm.controls.businessName.hasError('required')) {
+                @if (
+                  profileForm.controls.businessName.hasError('required') &&
+                  (profileForm.controls.businessName.touched ||
+                    profileForm.controls.businessName.dirty)
+                ) {
                 <mat-error>Este campo es requerido</mat-error>
                 }
               </mat-form-field>
@@ -99,7 +103,11 @@
                   placeholder="consultorio@ejemplo.com"
                   autocomplete="email"
                 />
-                @if (profileForm.controls.email.hasError('email')) {
+                @if (
+                  profileForm.controls.email.hasError('email') &&
+                  (profileForm.controls.email.touched ||
+                    profileForm.controls.email.dirty)
+                ) {
                 <mat-error>Email inválido</mat-error>
                 }
               </mat-form-field>
@@ -139,7 +147,11 @@
                   >
                   }
                 </mat-select>
-                @if (profileForm.controls.countryId.hasError('required')) {
+                @if (
+                  profileForm.controls.countryId.hasError('required') &&
+                  (profileForm.controls.countryId.touched ||
+                    profileForm.controls.countryId.dirty)
+                ) {
                 <mat-error>Selecciona un país</mat-error>
                 }
               </mat-form-field>
@@ -154,7 +166,11 @@
                   <mat-option [value]="city.id">{{ city.name }}</mat-option>
                   }
                 </mat-select>
-                @if (profileForm.controls.cityId.hasError('required')) {
+                @if (
+                  profileForm.controls.cityId.hasError('required') &&
+                  (profileForm.controls.cityId.touched ||
+                    profileForm.controls.cityId.dirty)
+                ) {
                 <mat-error>Selecciona una ciudad</mat-error>
                 }
               </mat-form-field>
@@ -285,7 +301,7 @@
             (ngSubmit)="submitSpecialtyProposal()"
           >
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Proponer nueva especialidad</mat-label>
+              <mat-label>Proponer nueva especialidad *</mat-label>
               <input
                 matInput
                 formControlName="name"
@@ -557,7 +573,7 @@
 
             <div class="row-2">
               <mat-form-field appearance="outline">
-                <mat-label>País *</mat-label>
+                <mat-label>País</mat-label>
                 <mat-select formControlName="countryId">
                   @for (country of countries(); track country.id) {
                   <mat-option [value]="country.id"
@@ -568,7 +584,7 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Ciudad *</mat-label>
+                <mat-label>Ciudad</mat-label>
                 <mat-select
                   formControlName="cityId"
                   [disabled]="!locationForm.controls.countryId.value"

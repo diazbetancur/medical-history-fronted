@@ -24,8 +24,8 @@ export interface ProfessionalLocationDto {
 
 export interface CreateProfessionalLocationDto {
   name: string;
-  cityId: string;
-  countryId: string;
+  cityId?: string;
+  countryId?: string;
   address?: string;
   phone?: string;
 

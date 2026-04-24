@@ -21,7 +21,7 @@
             </div>
             } @else {
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Profesional</mat-label>
+              <mat-label>Profesional *</mat-label>
               <mat-select formControlName="professionalId" required>
                 @for (prof of professionals(); track prof.id) {
                 <mat-option [value]="prof.id">
@@ -34,7 +34,12 @@
                 </mat-option>
                 }
               </mat-select>
-              <mat-error>Selecciona un profesional</mat-error>
+              @if (
+                professionalForm.controls.professionalId.touched ||
+                professionalForm.controls.professionalId.dirty
+              ) {
+                <mat-error>Selecciona un profesional</mat-error>
+              }
             </mat-form-field>
 
             <div class="step-actions">
@@ -57,7 +62,7 @@
             <ng-template matStepLabel>Seleccionar Fecha</ng-template>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Fecha</mat-label>
+              <mat-label>Fecha *</mat-label>
               <input
                 matInput
                 [matDatepicker]="picker"
@@ -71,7 +76,11 @@
                 [for]="picker"
               ></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
-              <mat-error>Selecciona una fecha</mat-error>
+              @if (
+                dateForm.controls.date.touched || dateForm.controls.date.dirty
+              ) {
+                <mat-error>Selecciona una fecha</mat-error>
+              }
             </mat-form-field>
 
             <div class="step-actions">
@@ -95,26 +104,20 @@
             <ng-template matStepLabel>Motivo de Consulta</ng-template>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Motivo de la consulta</mat-label>
+              <mat-label>Motivo de la consulta (opcional)</mat-label>
               <textarea
                 matInput
                 formControlName="observation"
                 rows="4"
-                placeholder="Describe el motivo de la consulta (mínimo 50 caracteres)"
-                maxlength="500"
+                placeholder="Agrega un comentario para el profesional si lo necesitas"
+                maxlength="1000"
               ></textarea>
               <mat-hint align="end"
                 >{{ observationForm.value.observation?.length || 0
-                }}/500</mat-hint
+                }}/1000</mat-hint
               >
-              @if (observationForm.get('observation')?.hasError('required')) {
-              <mat-error>El motivo de la consulta es obligatorio</mat-error>
-              } @else if
-              (observationForm.get('observation')?.hasError('trimmedMinLength'))
-              {
-              <mat-error>
-                El motivo de la consulta debe tener al menos 50 caracteres
-              </mat-error>
+              @if (observationForm.get('observation')?.hasError('maxlength')) {
+              <mat-error>Máximo 1000 caracteres</mat-error>
               }
             </mat-form-field>
 
@@ -152,6 +155,7 @@
               </button>
             </div>
             } @else {
+            <p class="slots-label">Horario *</p>
             <div class="slots-grid">
               @for (slot of availableSlots(); track slot.startTime) {
               <button
@@ -167,7 +171,7 @@
               }
             </div>
 
-            <mat-error *ngIf="slotForm.invalid && slotForm.touched">
+            <mat-error *ngIf="slotForm.invalid && (slotForm.touched || slotForm.dirty)">
               Selecciona un horario
             </mat-error>
 
@@ -221,7 +225,7 @@
                 <mat-icon>description</mat-icon>
                 <div>
                   <strong>Motivo de la consulta</strong>
-                  <p>{{ observationForm.value.observation?.trim() }}</p>
+                  <p>{{ observationForm.value.observation?.trim() || 'No informado' }}</p>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -18,6 +18,8 @@ import { Router, RouterLink } from '@angular/router';
 import { ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
+import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
+import { RegisterFormMessages, PasswordComplexityHelpText } from '../auth-form-messages';
 
 @Component({
   selector: 'app-register-page',
@@ -32,11 +34,13 @@ import { ToastService } from '@shared/services';
     MatInputModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    FormControlErrorComponent,
+    FormLabelComponent,
   ],
   templateUrl: './register.page.html',
   styleUrl: './register.page.scss',
 })
-export class RegisterPageComponent {
+export class RegisterPageComponent implements OnInit {
   private readonly authApi = inject(AuthApi);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
@@ -44,15 +48,19 @@ export class RegisterPageComponent {
 
   readonly form = this.fb.group(
     {
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      phoneNumber: [''],
+      firstName: ['', [Validators.required, Validators.maxLength(100)]],
+      lastName: ['', [Validators.required, Validators.maxLength(100)]],
+      email: [
+        '',
+        [Validators.required, Validators.email, Validators.maxLength(256)],
+      ],
+      phoneNumber: ['', [Validators.maxLength(20)]],
       password: [
         '',
         [
           Validators.required,
           Validators.minLength(8),
+          Validators.maxLength(100),
           Validators.pattern(
             /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/,
           ),
@@ -68,8 +76,37 @@ export class RegisterPageComponent {
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly submitted = signal(false);
+
+  readonly registerFormMessages = RegisterFormMessages;
+  readonly passwordComplexityHelpText = PasswordComplexityHelpText;
+
+  // Monitor form validity using a signal that updates on value changes
+  private formValidityTrigger = signal(0);
+  readonly isFormInvalid = computed(() => {
+    // Force update when form validity changes
+    this.formValidityTrigger();
+    return this.form.invalid;
+  });
+
+  ngOnInit(): void {
+    this.setupFormValidationTracking();
+  }
+
+  private setupFormValidationTracking(): void {
+    this.form.valueChanges.subscribe(() => {
+      this.formValidityTrigger.update(v => v + 1);
+    });
+    
+    // Also trigger on status changes (for validators)
+    this.form.statusChanges.subscribe(() => {
+      this.formValidityTrigger.update(v => v + 1);
+    });
+  }
 
   onSubmit(): void {
+    this.submitted.set(true);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -82,12 +119,12 @@ export class RegisterPageComponent {
 
     this.authApi
       .register({
-        email: value.email!,
+        email: value.email!.trim(),
         password: value.password!,
         confirmPassword: value.confirmPassword!,
-        firstName: value.firstName!,
-        lastName: value.lastName!,
-        phoneNumber: value.phoneNumber || undefined,
+        firstName: value.firstName!.trim(),
+        lastName: value.lastName!.trim(),
+        phoneNumber: value.phoneNumber?.trim() || undefined,
       })
       .subscribe({
         next: (response) => {

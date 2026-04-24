@@ -1,13 +1,11 @@
 <div class="privacy-settings">
-  <!-- Loading State -->
   @if (isLoading()) {
     <div class="loading-container">
       <mat-spinner diameter="40"></mat-spinner>
-      <p>Cargando configuración...</p>
+      <p>Cargando configuracion...</p>
     </div>
   }
 
-  <!-- Error State -->
   @else if (error()) {
     <mat-card class="error-card">
       <mat-card-content>
@@ -19,17 +17,16 @@
     </mat-card>
   }
 
-  <!-- Content -->
   @else {
     <mat-card class="settings-card">
       <mat-card-header>
-        <mat-card-title>Privacidad de Historia Clínica</mat-card-title>
+        <mat-card-title>Privacidad de Historia Clinica</mat-card-title>
       </mat-card-header>
 
       <mat-card-content>
         <div class="privacy-info">
           <p class="info-text">
-            Controla quién puede ver tu historia clínica completa.
+            Controla quien puede ver tu historia clinica completa.
           </p>
         </div>
 
@@ -41,7 +38,7 @@
             color="primary"
           >
             <span class="toggle-label">
-              Compartir historial completo con médicos tratantes
+              Compartir historial completo con medicos tratantes *
             </span>
           </mat-slide-toggle>
 
@@ -53,12 +50,12 @@
         <div class="privacy-explanation">
           @if (shareFullHistory()) {
             <p class="explanation-text enabled">
-              ✅ Tus médicos tratantes pueden ver tu historia clínica completa,
+              Tus medicos tratantes pueden ver tu historia clinica completa,
               incluyendo atenciones registradas por otros profesionales.
             </p>
           } @else {
             <p class="explanation-text disabled">
-              🔒 Tus médicos solo podrán ver las atenciones que ellos han
+              Tus medicos solo podran ver las atenciones que ellos han
               registrado contigo. Tu historial de otros profesionales permanece
               privado.
             </p>

@@ -79,6 +79,16 @@ button[type="submit"] {
     display: inline-block;
     margin-right: 0.5rem;
   }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.password-hint {
+  font-size: 0.75rem !important;
+  color: var(--color-text-secondary) !important;
 }
 
 mat-card-actions {

@@ -130,7 +130,7 @@ import { InstitutionFormDialogComponent } from './institution-form-dialog.compon
               <ng-container matColumnDef="code">
                 <th mat-header-cell *matHeaderCellDef>Código</th>
                 <td mat-cell *matCellDef="let institution">
-                  <code>{{ institution.code }}</code>
+                  <code>{{ institution.code || '-' }}</code>
                 </td>
               </ng-container>
 
@@ -389,7 +389,6 @@ export class InstitutionsListPage {
   displayedColumns: string[] = [
     'name',
     'code',
-    'address',
     'isActive',
     'actions',
   ];

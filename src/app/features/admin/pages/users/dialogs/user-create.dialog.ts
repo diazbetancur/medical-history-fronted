@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -15,6 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import type { CreateUserDto } from '@data/api/admin-users.types';
 import { AdminUsersStore } from '@data/stores/admin-users.store';
+import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
 
 @Component({
   selector: 'app-user-create-dialog',
@@ -29,58 +30,68 @@ import { AdminUsersStore } from '@data/stores/admin-users.store';
     MatSelectModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
+    FormLabelComponent,
+    FormControlErrorComponent,
   ],
   template: `
     <h2 mat-dialog-title>
       <mat-icon>person_add</mat-icon>
-      Crear Usuario
+      Crear usuario
     </h2>
 
     <mat-dialog-content>
       <form [formGroup]="form" class="user-form">
-        <!-- Account Section -->
         <div class="form-section">
           <h3>Cuenta</h3>
 
           <mat-form-field appearance="outline">
-            <mat-label>Nombre de usuario</mat-label>
+            <mat-label>
+              <app-form-label
+                text="Nombre de usuario"
+                [required]="true"
+              ></app-form-label>
+            </mat-label>
             <input
               matInput
               formControlName="userName"
-              placeholder="usuario123"
+              placeholder="Ingresa el nombre de usuario"
             />
             <mat-icon matPrefix>account_circle</mat-icon>
-            @if (form.get('userName')?.hasError('required')) {
-              <mat-error>El nombre de usuario es requerido</mat-error>
-            }
-            @if (form.get('userName')?.hasError('minlength')) {
-              <mat-error>Mínimo 3 caracteres</mat-error>
-            }
+            <app-form-control-error
+              [control]="form.controls['userName']"
+              [submitted]="submitted()"
+            ></app-form-control-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
+            <mat-label>
+              <app-form-label text="Email" [required]="true"></app-form-label>
+            </mat-label>
             <input
               matInput
               formControlName="email"
               type="email"
-              placeholder="usuario@ejemplo.com"
+              placeholder="Ingresa un correo valido"
             />
             <mat-icon matPrefix>email</mat-icon>
-            @if (form.get('email')?.hasError('required')) {
-              <mat-error>El email es requerido</mat-error>
-            }
-            @if (form.get('email')?.hasError('email')) {
-              <mat-error>Formato de email inválido</mat-error>
-            }
+            <app-form-control-error
+              [control]="form.controls['email']"
+              [submitted]="submitted()"
+            ></app-form-control-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Contraseña</mat-label>
+            <mat-label>
+              <app-form-label
+                text="Contrasena"
+                [required]="true"
+              ></app-form-label>
+            </mat-label>
             <input
               matInput
               formControlName="password"
               [type]="showPassword() ? 'text' : 'password'"
+              placeholder="Crea una contrasena segura"
             />
             <mat-icon matPrefix>lock</mat-icon>
             <button
@@ -88,65 +99,99 @@ import { AdminUsersStore } from '@data/stores/admin-users.store';
               matSuffix
               type="button"
               (click)="togglePassword()"
+              aria-label="Mostrar u ocultar contrasena"
             >
               <mat-icon>{{
                 showPassword() ? 'visibility_off' : 'visibility'
               }}</mat-icon>
             </button>
-            @if (form.get('password')?.hasError('required')) {
-              <mat-error>La contraseña es requerida</mat-error>
-            }
-            @if (form.get('password')?.hasError('minlength')) {
-              <mat-error>Mínimo 8 caracteres</mat-error>
-            }
+            <app-form-control-error
+              [control]="form.controls['password']"
+              [submitted]="submitted()"
+              [messages]="{
+                minlength: 'Debes ingresar al menos 8 caracteres',
+                pattern: 'La contrasena debe incluir mayuscula, minuscula, numero y simbolo'
+              }"
+            ></app-form-control-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Confirmar contraseña</mat-label>
+            <mat-label>Confirmar contrasena</mat-label>
             <input
               matInput
               formControlName="confirmPassword"
               [type]="showPassword() ? 'text' : 'password'"
+              placeholder="Confirma la contrasena"
             />
             <mat-icon matPrefix>lock_outline</mat-icon>
-            @if (form.get('confirmPassword')?.hasError('required')) {
-              <mat-error>Confirma la contraseña</mat-error>
-            }
-            @if (form.hasError('passwordMismatch')) {
-              <mat-error>Las contraseñas no coinciden</mat-error>
+            <app-form-control-error
+              [control]="form.controls['confirmPassword']"
+              [submitted]="submitted()"
+            ></app-form-control-error>
+            @if (
+              form.hasError('passwordMismatch') &&
+              (submitted() ||
+                form.controls['confirmPassword'].touched ||
+                form.controls['confirmPassword'].dirty)
+            ) {
+              <mat-error>Las contrasenas no coinciden</mat-error>
             }
           </mat-form-field>
         </div>
 
-        <!-- Profile Section -->
         <div class="form-section">
-          <h3>Perfil (opcional)</h3>
+          <h3>Perfil</h3>
 
           <div class="form-row">
             <mat-form-field appearance="outline">
-              <mat-label>Nombre</mat-label>
-              <input matInput formControlName="firstName" />
+              <mat-label>
+                <app-form-label
+                  text="Nombre"
+                  [required]="true"
+                ></app-form-label>
+              </mat-label>
+              <input
+                matInput
+                formControlName="firstName"
+                placeholder="Ingresa el nombre"
+              />
               <mat-icon matPrefix>badge</mat-icon>
+              <app-form-control-error
+                [control]="form.controls['firstName']"
+                [submitted]="submitted()"
+              ></app-form-control-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Apellido</mat-label>
-              <input matInput formControlName="lastName" />
+              <mat-label>
+                <app-form-label
+                  text="Apellido"
+                  [required]="true"
+                ></app-form-label>
+              </mat-label>
+              <input
+                matInput
+                formControlName="lastName"
+                placeholder="Ingresa el apellido"
+              />
+              <app-form-control-error
+                [control]="form.controls['lastName']"
+                [submitted]="submitted()"
+              ></app-form-control-error>
             </mat-form-field>
           </div>
 
           <mat-form-field appearance="outline">
-            <mat-label>Teléfono</mat-label>
+            <mat-label>Telefono</mat-label>
             <input
               matInput
               formControlName="phone"
-              placeholder="+1 234 567 8900"
+              placeholder="Ingresa el telefono si aplica"
             />
             <mat-icon matPrefix>phone</mat-icon>
           </mat-form-field>
         </div>
 
-        <!-- Roles Section -->
         <div class="form-section">
           <h3>Roles</h3>
 
@@ -157,19 +202,18 @@ import { AdminUsersStore } from '@data/stores/admin-users.store';
             </div>
           } @else {
             <mat-form-field appearance="outline">
-              <mat-label>Asignar roles</mat-label>
+              <mat-label>Roles iniciales</mat-label>
               <mat-select formControlName="roles" multiple>
                 @for (role of availableRoles(); track role) {
                   <mat-option [value]="role">{{ role }}</mat-option>
                 }
               </mat-select>
               <mat-icon matPrefix>shield</mat-icon>
-              <mat-hint>Selecciona uno o más roles</mat-hint>
+              <mat-hint>Opcional</mat-hint>
             </mat-form-field>
           }
         </div>
 
-        <!-- Options -->
         <div class="form-section options">
           <mat-checkbox formControlName="sendWelcomeEmail">
             Enviar email de bienvenida
@@ -177,7 +221,6 @@ import { AdminUsersStore } from '@data/stores/admin-users.store';
         </div>
       </form>
 
-      <!-- Error Message -->
       @if (errorMessage()) {
         <div class="error-banner">
           <mat-icon>error</mat-icon>
@@ -194,14 +237,14 @@ import { AdminUsersStore } from '@data/stores/admin-users.store';
         mat-raised-button
         color="primary"
         (click)="onSubmit()"
-        [disabled]="saving() || form.invalid"
+        [disabled]="saving()"
       >
         @if (saving()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
           <ng-container>
             <mat-icon>person_add</mat-icon>
-            Crear Usuario
+            Crear usuario
           </ng-container>
         }
       </button>
@@ -211,7 +254,7 @@ import { AdminUsersStore } from '@data/stores/admin-users.store';
     `
       mat-dialog-content {
         min-width: 400px;
-        max-width: 500px;
+        max-width: 520px;
       }
 
       h2[mat-dialog-title] {
@@ -290,9 +333,18 @@ import { AdminUsersStore } from '@data/stores/admin-users.store';
       }
 
       mat-dialog-actions button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
         mat-spinner {
           display: inline-block;
-          margin-right: 8px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .form-row {
+          grid-template-columns: 1fr;
         }
       }
     `,
@@ -303,38 +355,46 @@ export class UserCreateDialogComponent implements OnInit {
   private readonly store = inject(AdminUsersStore);
   private readonly fb = inject(FormBuilder);
 
-  // State
   readonly saving = this.store.saving;
   readonly availableRoles = this.store.roleNames;
   readonly loadingRoles = this.store.loadingRoles;
   readonly showPassword = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly submitted = signal(false);
 
-  // Form
   readonly form: FormGroup = this.fb.group(
     {
-      userName: ['', [Validators.required, Validators.minLength(3)]],
+      userName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(100),
+          Validators.pattern(
+            /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/,
+          ),
+        ],
+      ],
       confirmPassword: ['', [Validators.required]],
-      firstName: [''],
-      lastName: [''],
+      firstName: ['', [Validators.required, Validators.maxLength(100)]],
+      lastName: ['', [Validators.required, Validators.maxLength(100)]],
       phone: [''],
-      roles: [['User']],
+      roles: [[] as string[]],
       sendWelcomeEmail: [true],
     },
     { validators: this.passwordMatchValidator },
   );
 
   ngOnInit(): void {
-    // Ensure roles are loaded
     if (this.availableRoles().length === 0) {
       this.store.loadRolesCatalog();
     }
   }
 
   togglePassword(): void {
-    this.showPassword.update((v) => !v);
+    this.showPassword.update((value) => !value);
   }
 
   onCancel(): void {
@@ -342,6 +402,8 @@ export class UserCreateDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
+    this.submitted.set(true);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -349,46 +411,37 @@ export class UserCreateDialogComponent implements OnInit {
 
     this.errorMessage.set(null);
 
-    const formValue = this.form.value;
+    const formValue = this.form.getRawValue();
     const dto: CreateUserDto = {
-      userName: formValue.userName,
-      email: formValue.email,
+      userName: formValue.userName.trim(),
+      email: formValue.email.trim(),
       password: formValue.password,
       confirmPassword: formValue.confirmPassword,
       roles: formValue.roles || [],
       profile: {
-        firstName: formValue.firstName || undefined,
-        lastName: formValue.lastName || undefined,
-        phone: formValue.phone || undefined,
+        firstName: formValue.firstName.trim(),
+        lastName: formValue.lastName.trim(),
+        phone: formValue.phone?.trim() || undefined,
       },
       sendWelcomeEmail: formValue.sendWelcomeEmail,
     };
 
-    // Clean up empty profile
-    if (
-      !dto.profile?.firstName &&
-      !dto.profile?.lastName &&
-      !dto.profile?.phone
-    ) {
-      delete dto.profile;
-    }
-
     this.store.createUser(dto);
 
-    // Watch for completion
     const checkComplete = setInterval(() => {
-      if (!this.saving()) {
-        clearInterval(checkComplete);
-        const error = this.store.error();
-        if (error) {
-          this.errorMessage.set(error.message || 'Error al crear el usuario');
-        } else {
-          this.dialogRef.close({ success: true });
-        }
+      if (this.saving()) {
+        return;
+      }
+
+      clearInterval(checkComplete);
+      const error = this.store.error();
+      if (error) {
+        this.errorMessage.set(error.message || 'Error al crear el usuario');
+      } else {
+        this.dialogRef.close({ success: true });
       }
     }, 100);
 
-    // Timeout safety
     setTimeout(() => clearInterval(checkComplete), 30000);
   }
 

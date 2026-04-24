@@ -118,7 +118,7 @@ interface BookingConfirmation {
           <div class="state-block error">{{ profileError() }}</div>
         } @else {
           <mat-form-field appearance="outline" class="date-input">
-            <mat-label>Selecciona una fecha</mat-label>
+            <mat-label>Fecha *</mat-label>
             <input
               matInput
               [matDatepicker]="picker"
@@ -139,18 +139,12 @@ interface BookingConfirmation {
             <textarea
               matInput
               rows="4"
-              maxlength="500"
+              maxlength="1000"
               [value]="observation()"
               (input)="onObservationInput($any($event.target).value)"
-              (blur)="onObservationBlur()"
-              placeholder="Describe el motivo de la consulta (mínimo 50 caracteres)"
+              placeholder="Agrega un comentario para el profesional si lo necesitas"
             ></textarea>
-            <mat-hint align="end">{{ observation().length }}/500</mat-hint>
-            @if (observationTouched() && !canBook()) {
-              <mat-error>
-                El motivo de la consulta debe tener al menos 50 caracteres.
-              </mat-error>
-            }
+            <mat-hint align="end">{{ observation().length }}/1000</mat-hint>
           </mat-form-field>
 
           @if (loadingSlots()) {
@@ -171,7 +165,7 @@ interface BookingConfirmation {
                   type="button"
                   class="slot-item"
                   (click)="bookSlot(slot)"
-                  [disabled]="isBooking() || !canBook()"
+                  [disabled]="isBooking()"
                 >
                   <div class="slot-time">
                     {{ slot.startTime }} - {{ slot.endTime }}
@@ -393,7 +387,6 @@ export class BookAppointmentDialogComponent {
   readonly selectedDate = signal<Date | null>(null);
   readonly availableSlots = signal<SlotDto[]>([]);
   readonly observation = signal('');
-  readonly observationTouched = signal(false);
 
   readonly minDate = this.getTodayDate();
 
@@ -417,14 +410,6 @@ export class BookAppointmentDialogComponent {
     this.observation.set(value);
   }
 
-  onObservationBlur(): void {
-    this.observationTouched.set(true);
-  }
-
-  canBook(): boolean {
-    return this.getTrimmedObservation().length >= 50;
-  }
-
   close(): void {
     this.dialogRef.close();
   }
@@ -439,15 +424,7 @@ export class BookAppointmentDialogComponent {
   bookSlot(slot: SlotDto): void {
     if (this.isBooking()) return;
 
-    this.observationTouched.set(true);
     const observation = this.getTrimmedObservation();
-
-    if (observation.length < 50) {
-      this.bookingError.set(
-        'El motivo de la consulta debe tener al menos 50 caracteres.',
-      );
-      return;
-    }
 
     const professionalId = this.professionalId();
     const selectedDate = this.selectedDate();

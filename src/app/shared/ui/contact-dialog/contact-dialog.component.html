@@ -25,29 +25,44 @@
   <mat-dialog-content>
     <form [formGroup]="form" class="contact-form">
       <mat-form-field appearance="outline">
-        <mat-label>Nombre completo</mat-label>
-        <input matInput formControlName="name" placeholder="Tu nombre" />
-        @if (form.get('name')?.hasError('required') &&
-        form.get('name')?.touched) {
-        <mat-error>El nombre es requerido</mat-error>
-        }
+        <mat-label>
+          <app-form-label
+            text="Nombre completo"
+            [required]="true"
+          ></app-form-label>
+        </mat-label>
+        <input
+          matInput
+          formControlName="name"
+          placeholder="Tu nombre"
+          maxlength="100"
+        />
+        <mat-hint align="end">{{ form.get("name")?.value?.length || 0 }}/100</mat-hint>
+        <app-form-control-error
+          [control]="form.get('name')"
+          [submitted]="submitted()"
+        ></app-form-control-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Correo electrónico</mat-label>
+        <mat-label>
+          <app-form-label
+            text="Correo electronico"
+            [required]="true"
+          ></app-form-label>
+        </mat-label>
         <input
           matInput
           formControlName="email"
           type="email"
           placeholder="correo@ejemplo.com"
+          maxlength="100"
         />
-        @if (form.get('email')?.hasError('required') &&
-        form.get('email')?.touched) {
-        <mat-error>El correo es requerido</mat-error>
-        } @if (form.get('email')?.hasError('email') &&
-        form.get('email')?.touched) {
-        <mat-error>Ingresa un correo válido</mat-error>
-        }
+        <mat-hint align="end">{{ form.get("email")?.value?.length || 0 }}/100</mat-hint>
+        <app-form-control-error
+          [control]="form.get('email')"
+          [submitted]="submitted()"
+        ></app-form-control-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -57,7 +72,9 @@
           formControlName="phone"
           type="tel"
           placeholder="+52 55 1234 5678"
+          maxlength="20"
         />
+        <mat-hint align="end">{{ form.get("phone")?.value?.length || 0 }}/20</mat-hint>
       </mat-form-field>
 
       @if (data.services && data.services.length > 0) {
@@ -73,20 +90,21 @@
       }
 
       <mat-form-field appearance="outline">
-        <mat-label>Mensaje</mat-label>
+        <mat-label>
+          <app-form-label text="Mensaje" [required]="true"></app-form-label>
+        </mat-label>
         <textarea
           matInput
           formControlName="message"
           rows="4"
           placeholder="Describe brevemente lo que necesitas..."
+          maxlength="1000"
         ></textarea>
-        @if (form.get('message')?.hasError('required') &&
-        form.get('message')?.touched) {
-        <mat-error>El mensaje es requerido</mat-error>
-        } @if (form.get('message')?.hasError('minlength') &&
-        form.get('message')?.touched) {
-        <mat-error>El mensaje debe tener al menos 10 caracteres</mat-error>
-        }
+        <mat-hint align="end">{{ form.get("message")?.value?.length || 0 }}/1000</mat-hint>
+        <app-form-control-error
+          [control]="form.get('message')"
+          [submitted]="submitted()"
+        ></app-form-control-error>
       </mat-form-field>
 
       @if (error()) {

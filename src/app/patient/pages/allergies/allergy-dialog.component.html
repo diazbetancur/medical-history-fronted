@@ -25,10 +25,10 @@
         matInput
         formControlName="reaction"
         placeholder="Ej: Urticaria, Dificultad para respirar"
-        maxlength="500"
+        maxlength="300"
       />
       <mat-hint align="end"
-        >{{ form.get("reaction")?.value?.length || 0 }}/500</mat-hint
+        >{{ form.get("reaction")?.value?.length || 0 }}/300</mat-hint
       >
       <mat-error>{{ getErrorMessage("reaction") }}</mat-error>
     </mat-form-field>
@@ -70,10 +70,10 @@
         formControlName="notes"
         rows="3"
         placeholder="Observaciones, tratamiento recomendado, etc."
-        maxlength="1000"
+        maxlength="500"
       ></textarea>
       <mat-hint align="end"
-        >{{ form.get("notes")?.value?.length || 0 }}/1000</mat-hint
+        >{{ form.get("notes")?.value?.length || 0 }}/500</mat-hint
       >
       <mat-error>{{ getErrorMessage("notes") }}</mat-error>
     </mat-form-field>

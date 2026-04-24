@@ -61,17 +61,17 @@ export class ProfilePageComponent implements OnInit {
   readonly profile = signal<PatientProfileDto | null>(null);
 
   readonly summaryForm = this.fb.nonNullable.group({
-    fullName: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    phone: ['', [Validators.required]],
-    documentType: [''],
-    documentNumber: [''],
-    dateOfBirth: ['', [Validators.required]],
-    gender: [''],
-    bloodType: [''],
-    countryName: [''],
-    cityName: [''],
-    addressLine1: [''],
+    fullName: ['', [Validators.required, Validators.maxLength(200)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+    phone: ['', [Validators.maxLength(20)]],
+    documentType: ['', [Validators.maxLength(10)]],
+    documentNumber: ['', [Validators.maxLength(30)]],
+    dateOfBirth: [''],
+    gender: ['', [Validators.maxLength(20)]],
+    bloodType: ['', [Validators.maxLength(5)]],
+    countryName: ['', [Validators.maxLength(100)]],
+    cityName: ['', [Validators.maxLength(100)]],
+    addressLine1: ['', [Validators.maxLength(300)]],
   });
 
   readonly fullName = computed(() => {
@@ -143,40 +143,41 @@ export class ProfilePageComponent implements OnInit {
       return;
     }
 
+    const current = this.profile();
     const raw = this.summaryForm.getRawValue();
     this.isSavingSummary.set(true);
+    const locationFields = this.resolveLocationFields(current, raw);
 
-    const current = this.profile();
     const request$ = current
       ? this.patientService.updateProfile({
-          fullName: raw.fullName,
-          email: raw.email,
-          phone: raw.phone,
-          documentType: raw.documentType || null,
-          documentNumber: raw.documentNumber || null,
-          dateOfBirth: raw.dateOfBirth,
-          gender: raw.gender || null,
-          bloodType: raw.bloodType || null,
-          countryId: current.countryId ?? null,
-          cityId: current.cityId ?? null,
-          countryName: raw.countryName || null,
-          cityName: raw.cityName || null,
-          addressLine1: raw.addressLine1 || null,
+          fullName: raw.fullName.trim(),
+          email: raw.email.trim(),
+          phone: this.normalizeOptionalText(raw.phone),
+          documentType: this.normalizeOptionalText(raw.documentType),
+          documentNumber: this.normalizeOptionalText(raw.documentNumber),
+          dateOfBirth: this.normalizeDateOnly(raw.dateOfBirth),
+          gender: this.normalizeOptionalText(raw.gender),
+          bloodType: this.normalizeOptionalText(raw.bloodType),
+          countryId: locationFields.countryId,
+          cityId: locationFields.cityId,
+          countryName: locationFields.countryName,
+          cityName: locationFields.cityName,
+          addressLine1: this.normalizeOptionalText(raw.addressLine1),
         })
       : this.patientService.createProfile({
-          fullName: raw.fullName,
-          email: raw.email,
-          phone: raw.phone,
-          documentType: raw.documentType || null,
-          documentNumber: raw.documentNumber || null,
-          dateOfBirth: raw.dateOfBirth,
-          gender: raw.gender || null,
-          bloodType: raw.bloodType || null,
-          countryId: null,
-          cityId: null,
-          countryName: raw.countryName || null,
-          cityName: raw.cityName || null,
-          addressLine1: raw.addressLine1 || null,
+          fullName: raw.fullName.trim(),
+          email: raw.email.trim(),
+          phone: this.normalizeOptionalText(raw.phone),
+          documentType: this.normalizeOptionalText(raw.documentType),
+          documentNumber: this.normalizeOptionalText(raw.documentNumber),
+          dateOfBirth: this.normalizeDateOnly(raw.dateOfBirth),
+          gender: this.normalizeOptionalText(raw.gender),
+          bloodType: this.normalizeOptionalText(raw.bloodType),
+          countryId: locationFields.countryId,
+          cityId: locationFields.cityId,
+          countryName: locationFields.countryName,
+          cityName: locationFields.cityName,
+          addressLine1: this.normalizeOptionalText(raw.addressLine1),
         });
 
     request$.subscribe({
@@ -244,5 +245,38 @@ export class ProfilePageComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private normalizeOptionalText(value: string | null | undefined): string | null {
+    const normalized = value?.trim();
+    return normalized ? normalized : null;
+  }
+
+  private resolveLocationFields(
+    current: PatientProfileDto | null,
+    raw: {
+      countryName: string;
+      cityName: string;
+    },
+  ): {
+    countryId: string | null;
+    cityId: string | null;
+    countryName: string | null;
+    cityName: string | null;
+  } {
+    const countryName = this.normalizeOptionalText(raw.countryName);
+    const cityName = this.normalizeOptionalText(raw.cityName);
+    const currentCountryName = this.normalizeOptionalText(current?.countryName);
+    const currentCityName = this.normalizeOptionalText(current?.cityName);
+
+    const countryChanged = countryName !== currentCountryName;
+    const cityChanged = cityName !== currentCityName;
+
+    return {
+      countryId: countryChanged ? null : current?.countryId ?? null,
+      cityId: countryChanged || cityChanged ? null : current?.cityId ?? null,
+      countryName,
+      cityName,
+    };
   }
 }

@@ -104,23 +104,27 @@
                 <form class="summary-form" [formGroup]="summaryForm">
                   <div class="summary-grid form-grid">
                     <mat-form-field appearance="outline">
-                      <mat-label>Nombre completo</mat-label>
+                      <mat-label>Nombre completo *</mat-label>
                       <input
                         matInput
                         formControlName="fullName"
                         placeholder="Nombre completo"
                         title="Nombre completo"
+                        maxlength="200"
                       />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Email</mat-label>
+                      <mat-label>Email *</mat-label>
                       <input
                         matInput
                         formControlName="email"
                         placeholder="correo@dominio.com"
                         title="Email"
+                        maxlength="255"
+                        readonly
                       />
+                      <mat-hint>Se sincroniza desde tu cuenta</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -128,6 +132,7 @@
                       <input
                         matInput
                         formControlName="phone"
+                        maxlength="20"
                         placeholder="Teléfono"
                         title="Teléfono"
                       />
@@ -138,6 +143,7 @@
                       <input
                         matInput
                         formControlName="documentType"
+                        maxlength="10"
                         placeholder="CC"
                         title="Tipo de documento"
                       />
@@ -148,6 +154,7 @@
                       <input
                         matInput
                         formControlName="documentNumber"
+                        maxlength="30"
                         placeholder="1234567890"
                         title="Número de documento"
                       />
@@ -169,6 +176,7 @@
                       <input
                         matInput
                         formControlName="gender"
+                        maxlength="20"
                         placeholder="Masculino"
                         title="Género"
                       />
@@ -179,6 +187,7 @@
                       <input
                         matInput
                         formControlName="bloodType"
+                        maxlength="5"
                         placeholder="O+"
                         title="Tipo de sangre"
                       />
@@ -189,6 +198,7 @@
                       <input
                         matInput
                         formControlName="countryName"
+                        maxlength="100"
                         placeholder="Colombia"
                         title="País"
                       />
@@ -199,6 +209,7 @@
                       <input
                         matInput
                         formControlName="cityName"
+                        maxlength="100"
                         placeholder="Medellín"
                         title="Ciudad"
                       />
@@ -209,6 +220,7 @@
                       <input
                         matInput
                         formControlName="addressLine1"
+                        maxlength="300"
                         placeholder="Calle 10 # 20-30"
                         title="Dirección"
                       />

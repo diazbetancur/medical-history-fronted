@@ -83,11 +83,11 @@ export class AllergyDialogComponent implements OnInit {
         allergy?.allergen || '',
         [Validators.required, Validators.maxLength(200)],
       ],
-      reaction: [allergy?.reaction || '', [Validators.maxLength(500)]],
+      reaction: [allergy?.reaction || '', [Validators.maxLength(300)]],
       severity: [allergy?.severity || null, [Validators.required]],
       status: [allergy?.status || 'Active', [Validators.required]],
       onsetDate: [this.normalizeDateOnly(allergy?.onsetDate), []],
-      notes: [allergy?.notes || '', [Validators.maxLength(1000)]],
+      notes: [allergy?.notes || '', [Validators.maxLength(500)]],
     });
   }
 
@@ -104,12 +104,12 @@ export class AllergyDialogComponent implements OnInit {
     const formValue = this.form.value;
 
     const dto: CreateAllergyDto | UpdateAllergyDto = {
-      allergen: formValue.allergen,
-      reaction: formValue.reaction || undefined,
+      allergen: formValue.allergen?.trim(),
+      reaction: formValue.reaction?.trim() || undefined,
       severity: formValue.severity,
       status: formValue.status,
       onsetDate: this.normalizeDateOnly(formValue.onsetDate) || undefined,
-      notes: formValue.notes || undefined,
+      notes: formValue.notes?.trim() || undefined,
     };
 
     this.dialogRef.close(dto);

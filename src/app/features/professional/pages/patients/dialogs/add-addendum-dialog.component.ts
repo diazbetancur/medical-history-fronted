@@ -42,19 +42,14 @@ export class AddAddendumDialogComponent {
   private readonly patientsService = inject(ProfessionalPatientsService);
   private readonly fb = inject(FormBuilder);
 
-  // State
   readonly isSaving = signal(false);
   readonly error = signal<string | null>(null);
 
-  // Form
   readonly form = this.fb.group({
-    text: ['', [Validators.required, Validators.minLength(10)]],
-    title: [''],
+    text: ['', [Validators.required, Validators.maxLength(20000)]],
+    title: ['', [Validators.maxLength(100)]],
   });
 
-  /**
-   * Submit form
-   */
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -68,8 +63,8 @@ export class AddAddendumDialogComponent {
 
     this.patientsService
       .addAddendum(this.data.encounterId, {
-        text: formValue.text!,
-        title: formValue.title || undefined,
+        text: formValue.text?.trim() || '',
+        title: formValue.title?.trim() || undefined,
       })
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
@@ -82,9 +77,6 @@ export class AddAddendumDialogComponent {
       });
   }
 
-  /**
-   * Cancel
-   */
   cancel(): void {
     this.dialogRef.close();
   }

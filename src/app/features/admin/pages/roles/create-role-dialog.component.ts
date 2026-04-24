@@ -23,35 +23,37 @@ import { RolesStore } from '@data/stores/roles.store';
   template: `
     <h2 mat-dialog-title>
       <mat-icon>add_circle</mat-icon>
-      Crear Nuevo Rol
+      Crear rol
     </h2>
 
     <mat-dialog-content>
       <form #roleForm="ngForm">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nombre del Rol</mat-label>
+          <mat-label>Nombre del rol *</mat-label>
           <input
             matInput
             [(ngModel)]="roleName"
             name="roleName"
+            #roleNameModel="ngModel"
             required
-            placeholder="Ej: Editor de Contenido"
+            placeholder="Ingresa el nombre del rol"
             [disabled]="saving()"
           />
-          <mat-icon matPrefix>badge</mat-icon>
+          @if (roleNameModel.invalid && (roleForm.submitted || roleNameModel.touched)) {
+            <mat-error>Este campo es obligatorio</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Descripción</mat-label>
+          <mat-label>Descripcion</mat-label>
           <textarea
             matInput
             [(ngModel)]="roleDescription"
             name="roleDescription"
             rows="3"
-            placeholder="Describe las responsabilidades de este rol"
+            placeholder="Describe el objetivo del rol"
             [disabled]="saving()"
           ></textarea>
-          <mat-icon matPrefix>description</mat-icon>
         </mat-form-field>
       </form>
 
@@ -67,19 +69,13 @@ import { RolesStore } from '@data/stores/roles.store';
       <button mat-button (click)="onCancel()" [disabled]="saving()">
         Cancelar
       </button>
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="onCreate()"
-        [disabled]="!roleName.trim() || saving()"
-      >
+      <button mat-raised-button color="primary" (click)="onCreate()">
         @if (saving()) {
           <mat-spinner diameter="20"></mat-spinner>
-        }
-        @if (!saving()) {
+        } @else {
           <mat-icon>save</mat-icon>
         }
-        Crear Rol
+        Crear rol
       </button>
     </mat-dialog-actions>
   `,
@@ -134,7 +130,7 @@ import { RolesStore } from '@data/stores/roles.store';
       gap: 8px;
 
       button {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
 
@@ -155,8 +151,10 @@ export class CreateRoleDialogComponent {
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
 
-  onCreate() {
-    if (!this.roleName.trim()) return;
+  onCreate(): void {
+    if (!this.roleName.trim()) {
+      return;
+    }
 
     this.saving.set(true);
     this.error.set(null);
@@ -182,7 +180,7 @@ export class CreateRoleDialogComponent {
       });
   }
 
-  onCancel() {
+  onCancel(): void {
     this.dialogRef.close();
   }
 }

@@ -80,7 +80,7 @@ export interface CreateEncounterDto {
 
 export interface UpdateEncounterDto {
   summary?: string;
-  initialNote: string;
+  initialNote?: string;
 }
 
 export interface AddAddendumDto {

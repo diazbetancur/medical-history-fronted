@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthApi } from '@data/api';
+import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
 
 @Component({
   selector: 'app-reset-password-page',
@@ -21,6 +22,8 @@ import { AuthApi } from '@data/api';
     MatInputModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    FormControlErrorComponent,
+    FormLabelComponent,
   ],
   templateUrl: './reset-password.page.html',
   styleUrl: './reset-password.page.scss',
@@ -45,6 +48,7 @@ export class ResetPasswordPageComponent {
       [
         Validators.required,
         Validators.minLength(8),
+        Validators.maxLength(100),
         Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/),
       ],
     ],
@@ -53,8 +57,11 @@ export class ResetPasswordPageComponent {
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly submitted = signal(false);
 
   onSubmit(): void {
+    this.submitted.set(true);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -71,8 +78,8 @@ export class ResetPasswordPageComponent {
 
     this.authApi
       .resetPassword({
-        email: value.email,
-        token: value.token,
+        email: value.email.trim(),
+        token: value.token.trim(),
         newPassword: value.newPassword,
         confirmNewPassword: value.confirmNewPassword,
       })

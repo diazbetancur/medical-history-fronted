@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import {
   AbstractControl,
+  FormGroup,
   FormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
@@ -24,7 +25,13 @@ import { AuthStore, PostLoginNavigationService } from '@core/auth';
 import { CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
+import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
 import { AuthIntentService } from '../../services/auth-intent.service';
+import {
+  LoginFormMessages,
+  PasswordComplexityHelpText,
+  RegisterFormMessages,
+} from '../../pages/auth-form-messages';
 
 export interface AuthModalData {
   /** true cuando se abrió desde "Soy Médico" */
@@ -46,6 +53,8 @@ export interface AuthModalData {
     MatInputModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    FormControlErrorComponent,
+    FormLabelComponent,
   ],
   templateUrl: './auth-modal.component.html',
   styleUrls: ['./auth-modal.component.scss'],
@@ -65,21 +74,31 @@ export class AuthModalComponent implements OnInit {
   // ─── Login form ───────────────────────────────────────────────────────────
   readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required]],
   });
 
   // ─── Register form ────────────────────────────────────────────────────────
   readonly registerForm = this.fb.group(
     {
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      phoneNumber: [''],
+      firstName: ['', [Validators.required, Validators.maxLength(100)]],
+      lastName: ['', [Validators.required, Validators.maxLength(100)]],
+      email: [
+        '',
+        [Validators.required, Validators.email, Validators.maxLength(256)],
+      ],
+      phoneNumber: [
+        '',
+        [
+          Validators.maxLength(20),
+          this.phoneValidator(),
+        ],
+      ],
       password: [
         '',
         [
           Validators.required,
           Validators.minLength(8),
+          Validators.maxLength(100),
           Validators.pattern(
             /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/,
           ),
@@ -95,15 +114,28 @@ export class AuthModalComponent implements OnInit {
   readonly loginError = signal<string | null>(null);
   readonly registerError = signal<string | null>(null);
   readonly registerSuccess = signal(false);
+  readonly loginSubmitted = signal(false);
+  readonly registerSubmitted = signal(false);
+  readonly loginFormMessages = LoginFormMessages;
+  readonly registerFormMessages = RegisterFormMessages;
+  readonly passwordComplexityHelpText = PasswordComplexityHelpText;
+  readonly showLoginPassword = signal(false);
+  readonly showRegisterPassword = signal(false);
+  readonly showConfirmPassword = signal(false);
 
   selectedTabIndex = 0;
 
   ngOnInit(): void {
     this.selectedTabIndex = this.data.initialTab ?? 0;
+    this.setupServerErrorCleanup(this.loginForm);
+    this.setupServerErrorCleanup(this.registerForm);
   }
 
   // ─── Login ────────────────────────────────────────────────────────────────
   onLoginSubmit(): void {
+    this.loginSubmitted.set(true);
+    this.clearServerFieldErrors(this.loginForm);
+
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -118,7 +150,7 @@ export class AuthModalComponent implements OnInit {
     const credentials = this.loginForm.getRawValue();
 
     this.authApi
-      .login({ email: credentials.email, password: credentials.password })
+      .login({ email: credentials.email.trim(), password: credentials.password })
       .subscribe({
         next: (response) => {
           this.authStore.setToken(response.token, response.expiresAt);
@@ -132,14 +164,20 @@ export class AuthModalComponent implements OnInit {
               }
             },
             error: (err) => {
-              this.loginError.set(this.extractTitle(err));
+              const problem = this.extractProblemDetails(err);
+              this.loginError.set(problem.title || 'Error al cargar la sesión');
               this.isLoginLoading.set(false);
             },
           });
         },
         error: (err) => {
+          const problem = this.extractProblemDetails(err);
+          const hasFieldErrors = this.applyServiceFieldErrors(
+            this.loginForm,
+            problem.errors,
+          );
           this.loginError.set(
-            this.extractTitle(err) || 'Credenciales inválidas',
+            hasFieldErrors ? null : problem.title || 'Credenciales inválidas',
           );
           this.isLoginLoading.set(false);
         },
@@ -148,6 +186,9 @@ export class AuthModalComponent implements OnInit {
 
   // ─── Register ─────────────────────────────────────────────────────────────
   onRegisterSubmit(): void {
+    this.registerSubmitted.set(true);
+    this.clearServerFieldErrors(this.registerForm);
+
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
@@ -160,12 +201,12 @@ export class AuthModalComponent implements OnInit {
 
     this.authApi
       .register({
-        email: value.email!,
+        email: value.email!.trim(),
         password: value.password!,
         confirmPassword: value.confirmPassword!,
-        firstName: value.firstName!,
-        lastName: value.lastName!,
-        phoneNumber: value.phoneNumber || undefined,
+        firstName: value.firstName!.trim(),
+        lastName: value.lastName!.trim(),
+        phoneNumber: value.phoneNumber?.trim() || undefined,
       })
       .subscribe({
         next: (response) => {
@@ -178,12 +219,31 @@ export class AuthModalComponent implements OnInit {
           this.selectedTabIndex = 0;
         },
         error: (err) => {
+          const problem = this.extractProblemDetails(err);
+          const hasFieldErrors = this.applyServiceFieldErrors(
+            this.registerForm,
+            problem.errors,
+          );
           this.registerError.set(
-            this.extractTitle(err) || 'No fue posible registrar el usuario',
+            hasFieldErrors
+              ? null
+              : problem.title || 'No fue posible registrar el usuario',
           );
           this.isRegisterLoading.set(false);
         },
       });
+  }
+
+  toggleLoginPasswordVisibility(): void {
+    this.showLoginPassword.update((value) => !value);
+  }
+
+  toggleRegisterPasswordVisibility(): void {
+    this.showRegisterPassword.update((value) => !value);
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword.update((value) => !value);
   }
 
   // ─── Post-login ───────────────────────────────────────────────────────────
@@ -235,7 +295,7 @@ export class AuthModalComponent implements OnInit {
           // Re-login para obtener nuevo token con rol Professional
           const credentials = this.loginForm.getRawValue();
           this.authApi
-            .login({ email: credentials.email, password: credentials.password })
+            .login({ email: credentials.email.trim(), password: credentials.password })
             .subscribe({
               next: (loginResponse) => {
                 this.authStore.setToken(
@@ -255,9 +315,8 @@ export class AuthModalComponent implements OnInit {
                     this.navigateAsProfessional(updatedUser);
                   },
                   error: (err) => {
-                    this.loginError.set(
-                      this.extractTitle(err) || 'Error al cargar la sesión',
-                    );
+                    const problem = this.extractProblemDetails(err);
+                    this.loginError.set(problem.title || 'Error al cargar la sesión');
                     this.isLoginLoading.set(false);
                   },
                 });
@@ -273,8 +332,9 @@ export class AuthModalComponent implements OnInit {
             });
         },
         error: (err) => {
+          const problem = this.extractProblemDetails(err);
           this.loginError.set(
-            this.extractTitle(err) ||
+            problem.title ||
               'No fue posible activar tu perfil profesional en este momento',
           );
           this.isLoginLoading.set(false);
@@ -310,7 +370,7 @@ export class AuthModalComponent implements OnInit {
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
-  private extractTitle(error: unknown): string {
+  private extractProblemDetails(error: unknown): ProblemDetails {
     if (
       error &&
       typeof error === 'object' &&
@@ -319,9 +379,97 @@ export class AuthModalComponent implements OnInit {
       typeof error.error === 'object'
     ) {
       const err = error.error as Partial<ProblemDetails>;
-      if (err.title) return err.title;
+      if (err.type && err.title && err.status) {
+        return err as ProblemDetails;
+      }
     }
-    return '';
+
+    return {
+      type: 'about:blank',
+      title: 'Error en la solicitud',
+      status: 500,
+    };
+  }
+
+  private setupServerErrorCleanup(form: FormGroup): void {
+    Object.values(form.controls).forEach((control) => {
+      control.valueChanges.subscribe(() => {
+        this.clearServerError(control);
+      });
+    });
+  }
+
+  private clearServerFieldErrors(form: FormGroup): void {
+    Object.values(form.controls).forEach((control) => {
+      this.clearServerError(control);
+    });
+  }
+
+  private clearServerError(control: AbstractControl): void {
+    const current = control.errors;
+    if (!current || !('server' in current)) {
+      return;
+    }
+
+    const { server: _removedServerError, ...rest } = current;
+    control.setErrors(Object.keys(rest).length > 0 ? rest : null);
+  }
+
+  private applyServiceFieldErrors(
+    form: FormGroup,
+    errors?: Record<string, string[]>,
+  ): boolean {
+    if (!errors) {
+      return false;
+    }
+
+    let applied = false;
+
+    for (const [backendField, messages] of Object.entries(errors)) {
+      const controlName = this.mapServiceFieldToControlName(backendField);
+      if (!controlName) {
+        continue;
+      }
+
+      const control = form.get(controlName);
+      if (!control) {
+        continue;
+      }
+
+      const serverMessage = messages?.[0]?.trim();
+      if (!serverMessage) {
+        continue;
+      }
+
+      const existingErrors = control.errors;
+      control.setErrors(
+        existingErrors
+          ? { ...existingErrors, server: serverMessage }
+          : { server: serverMessage },
+      );
+      control.markAsTouched();
+      applied = true;
+    }
+
+    return applied;
+  }
+
+  private mapServiceFieldToControlName(field: string): string | null {
+    const normalized = field.replaceAll(/[^a-zA-Z]/g, '').toLowerCase();
+
+    const dictionary: Record<string, string> = {
+      email: 'email',
+      password: 'password',
+      firstname: 'firstName',
+      lastname: 'lastName',
+      phonenumber: 'phoneNumber',
+    };
+
+    if (normalized === 'confirm' + 'password') {
+      return 'confirmPassword';
+    }
+
+    return dictionary[normalized] ?? null;
   }
 
   private passwordMatchValidator(): ValidatorFn {
@@ -330,6 +478,23 @@ export class AuthModalComponent implements OnInit {
       const confirmPassword = control.get('confirmPassword')?.value;
       if (!password || !confirmPassword) return null;
       return password === confirmPassword ? null : { passwordMismatch: true };
+    };
+  }
+
+  private phoneValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return null; // Empty is valid (optional field)
+
+      // Allow: digits, +, -, (, ), space
+      // Must contain at least some digits
+      const hasDigits = /\d/.test(value);
+      const validChars = /^[0-9+\-() ]+$/.test(value);
+
+      if (!hasDigits || !validChars) {
+        return { invalidPhone: true };
+      }
+      return null;
     };
   }
 }
