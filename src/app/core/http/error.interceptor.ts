@@ -41,6 +41,17 @@ const AUTH_ROUTES = ['/dashboard', '/admin', '/api/professional', '/api/admin'];
  * These endpoints handle errors gracefully in the component/store level
  */
 const SILENT_ERROR_URLS = ['/public/search/suggest'];
+const GENERIC_API_FAILURE_MESSAGE =
+  'Estamos presentando fallas. Inténtalo nuevamente más tarde.';
+const GENERIC_API_FAILURE_STATUSES = new Set([0, 502, 503, 504]);
+const NETWORK_FAILURE_TOAST_WINDOW_MS = 4000;
+
+let lastNetworkFailureToastAt = 0;
+
+function isApiRequest(url: string): boolean {
+  const apiBase = environment.apiBaseUrl.replace(/\/+$/, '');
+  return url.startsWith(apiBase) || url.includes('/api/');
+}
 
 /**
  * Check if error should trigger redirect to home
@@ -63,6 +74,25 @@ function shouldSilenceError(url: string, status: number): boolean {
   return false;
 }
 
+function isNetworkOrUnavailableError(error: HttpErrorResponse): boolean {
+  if (GENERIC_API_FAILURE_STATUSES.has(error.status)) {
+    return true;
+  }
+
+  return error.status === 0 || error.error instanceof ProgressEvent;
+}
+
+function showGenericApiFailureToast(toast: ToastService): void {
+  const now = Date.now();
+
+  if (now - lastNetworkFailureToastAt < NETWORK_FAILURE_TOAST_WINDOW_MS) {
+    return;
+  }
+
+  lastNetworkFailureToastAt = now;
+  toast.error(GENERIC_API_FAILURE_MESSAGE);
+}
+
 /**
  * Global Error Interceptor
  *
@@ -70,8 +100,7 @@ function shouldSilenceError(url: string, status: number): boolean {
  * - Normalize errors to ProblemDetails format
  * - Handle 401 with redirect to home
  * - Handle 403 with redirect to forbidden page
- * - Show toast notifications for user feedback
- * - Log errors in development with correlation ID
+ * - Show only a generic toast for network/API-unavailable failures
  * - Never expose stack traces or technical errors to users
  */
 export const errorInterceptor: HttpInterceptorFn = (
@@ -116,16 +145,9 @@ export const errorInterceptor: HttpInterceptorFn = (
         toast.error(problemDetails.title);
         router.navigate(['/forbidden']);
       }
-      // Show toast for other errors (except 404 on specific routes)
-      else if (
-        !(error.status === 404 && req.url.includes('/public/pages/profile/'))
-      ) {
-        // Build toast message with traceId in dev mode
-        let toastMessage = problemDetails.title;
-        if (!environment.production && problemDetails.traceId) {
-          toastMessage += ` [ID: ${problemDetails.traceId.substring(0, 8)}...]`;
-        }
-        toast.error(toastMessage);
+      // Phase 1: only show a global fallback toast for network/API outages.
+      else if (isApiRequest(req.url) && isNetworkOrUnavailableError(error)) {
+        showGenericApiFailureToast(toast);
       }
 
       // Return error with ProblemDetails format

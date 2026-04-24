@@ -226,7 +226,7 @@ export const MENU_ITEMS: MenuItem[] = [
   // PROFESSIONAL MENU
   // ==========================================================================
   {
-    label: 'Dashboard',
+    label: 'Inicio',
     icon: 'dashboard',
     route: '/professional',
     context: 'PROFESSIONAL',

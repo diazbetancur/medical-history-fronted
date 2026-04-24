@@ -26,12 +26,11 @@ import { CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
 import {
-  FormControlErrorComponent,
-  FormLabelComponent,
-} from '@shared/ui/forms';
+  FormErrorMessage,
+  FormErrorMessageMap,
+} from '@shared/utils/form-validation';
 import {
   LoginFormMessages,
-  PasswordComplexityHelpText,
   RegisterFormMessages,
 } from '../../pages/auth-form-messages';
 import { AuthIntentService } from '../../services/auth-intent.service';
@@ -56,8 +55,6 @@ export interface AuthModalData {
     MatInputModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    FormControlErrorComponent,
-    FormLabelComponent,
   ],
   templateUrl: './auth-modal.component.html',
   styleUrls: ['./auth-modal.component.scss'],
@@ -115,10 +112,15 @@ export class AuthModalComponent implements OnInit {
   readonly registerSubmitted = signal(false);
   readonly loginFormMessages = LoginFormMessages;
   readonly registerFormMessages = RegisterFormMessages;
-  readonly passwordComplexityHelpText = PasswordComplexityHelpText;
   readonly showLoginPassword = signal(false);
   readonly showRegisterPassword = signal(false);
   readonly showConfirmPassword = signal(false);
+  readonly passwordChecklistItems = [
+    { key: 'length', label: '8+ caracteres' },
+    { key: 'mixedCase', label: 'Mayúscula y minúscula' },
+    { key: 'digit', label: 'Número' },
+    { key: 'symbol', label: 'Símbolo' },
+  ] as const;
 
   selectedTabIndex = 0;
 
@@ -244,6 +246,179 @@ export class AuthModalComponent implements OnInit {
 
   toggleConfirmPasswordVisibility(): void {
     this.showConfirmPassword.update((value) => !value);
+  }
+
+  shouldShowLoginError(controlName: string): boolean {
+    return this.shouldShowControlError(
+      this.loginForm.get(controlName),
+      this.loginSubmitted(),
+    );
+  }
+
+  shouldShowRegisterError(controlName: string): boolean {
+    return this.shouldShowControlError(
+      this.registerForm.get(controlName),
+      this.registerSubmitted(),
+    );
+  }
+
+  getLoginEmailError(): string | null {
+    if (!this.shouldShowLoginError('email')) {
+      return null;
+    }
+
+    return (
+      this.getMessageFromMap(
+        this.loginForm.controls.email,
+        this.loginFormMessages.email,
+        ['server', 'required', 'email'],
+      ) ?? 'Revisa el correo ingresado.'
+    );
+  }
+
+  getLoginPasswordError(): string | null {
+    if (!this.shouldShowLoginError('password')) {
+      return null;
+    }
+
+    return (
+      this.getMessageFromMap(
+        this.loginForm.controls.password,
+        this.loginFormMessages.password,
+        ['server', 'required'],
+      ) ?? 'Revisa la contraseña ingresada.'
+    );
+  }
+
+  getRegisterFirstNameError(): string | null {
+    if (!this.shouldShowRegisterError('firstName')) {
+      return null;
+    }
+
+    return (
+      this.getMessageFromMap(
+        this.registerForm.controls.firstName,
+        this.registerFormMessages.firstName,
+        ['server', 'required', 'maxlength'],
+      ) ?? 'Revisa el nombre ingresado.'
+    );
+  }
+
+  getRegisterLastNameError(): string | null {
+    if (!this.shouldShowRegisterError('lastName')) {
+      return null;
+    }
+
+    return (
+      this.getMessageFromMap(
+        this.registerForm.controls.lastName,
+        this.registerFormMessages.lastName,
+        ['server', 'required', 'maxlength'],
+      ) ?? 'Revisa el apellido ingresado.'
+    );
+  }
+
+  getRegisterEmailError(): string | null {
+    if (!this.shouldShowRegisterError('email')) {
+      return null;
+    }
+
+    return (
+      this.getMessageFromMap(
+        this.registerForm.controls.email,
+        this.registerFormMessages.email,
+        ['server', 'required', 'email', 'maxlength'],
+      ) ?? 'Revisa el correo ingresado.'
+    );
+  }
+
+  getRegisterPhoneError(): string | null {
+    if (!this.shouldShowRegisterError('phoneNumber')) {
+      return null;
+    }
+
+    return (
+      this.getMessageFromMap(
+        this.registerForm.controls.phoneNumber,
+        this.registerFormMessages.phoneNumber,
+        ['server', 'maxlength', 'invalidPhone'],
+      ) ?? 'Revisa el teléfono ingresado.'
+    );
+  }
+
+  getRegisterPasswordError(): string | null {
+    const control = this.registerForm.controls.password;
+
+    if (!this.shouldShowRegisterError('password')) {
+      return null;
+    }
+
+    if (control.hasError('server')) {
+      return this.getMessageFromMap(
+        control,
+        this.registerFormMessages.password,
+        ['server'],
+      );
+    }
+
+    if (control.hasError('required')) {
+      return 'La contraseña es obligatoria.';
+    }
+
+    if (
+      this.registerSubmitted() &&
+      (control.hasError('minlength') ||
+        control.hasError('maxlength') ||
+        control.hasError('pattern'))
+    ) {
+      return 'La contraseña no cumple los requisitos.';
+    }
+
+    return null;
+  }
+
+  getRegisterConfirmPasswordError(): string | null {
+    const control = this.registerForm.controls.confirmPassword;
+    const shouldShowError = this.registerSubmitted() || control.touched;
+
+    if (!shouldShowError) {
+      return null;
+    }
+
+    if (control.hasError('required')) {
+      return 'Confirma tu contraseña.';
+    }
+
+    if (this.shouldShowRegisterPasswordMismatch()) {
+      return 'Las contraseñas no coinciden.';
+    }
+
+    if (control.hasError('server')) {
+      return this.getMessageFromMap(
+        control,
+        this.registerFormMessages.confirmPassword,
+        ['server'],
+      );
+    }
+
+    return null;
+  }
+
+  isPasswordRequirementMet(
+    requirement: 'length' | 'mixedCase' | 'digit' | 'symbol',
+  ): boolean {
+    const value = this.registerForm.controls.password.value ?? '';
+
+    switch (requirement) {
+      case 'length':
+        return value.length >= 8;
+      case 'mixedCase':
+        return /[A-Z]/.test(value) && /[a-z]/.test(value);
+      case 'digit':
+        return /\d/.test(value);
+      case 'symbol':
+        return /[^A-Za-z0-9]/.test(value);
+    }
   }
 
   // ─── Post-login ───────────────────────────────────────────────────────────
@@ -394,6 +569,61 @@ export class AuthModalComponent implements OnInit {
       title: 'Error en la solicitud',
       status: 500,
     };
+  }
+
+  private shouldShowControlError(
+    control: AbstractControl | null,
+    submitted: boolean,
+  ): boolean {
+    return !!control && control.invalid && (control.touched || submitted);
+  }
+
+  private shouldShowRegisterPasswordMismatch(): boolean {
+    const passwordControl = this.registerForm.controls.password;
+    const confirmPasswordControl = this.registerForm.controls.confirmPassword;
+    const password = passwordControl.value ?? '';
+    const confirmPassword = confirmPasswordControl.value ?? '';
+
+    return (
+      !!confirmPassword &&
+      password !== confirmPassword &&
+      (this.registerSubmitted() || confirmPasswordControl.touched)
+    );
+  }
+
+  private getMessageFromMap(
+    control: AbstractControl | null,
+    messages: FormErrorMessageMap,
+    order: string[],
+  ): string | null {
+    if (!control?.errors) {
+      return null;
+    }
+
+    for (const errorKey of order) {
+      if (!control.hasError(errorKey)) {
+        continue;
+      }
+
+      const message = messages[errorKey];
+      if (!message) {
+        continue;
+      }
+
+      return this.resolveMessage(message, control.getError(errorKey));
+    }
+
+    return null;
+  }
+
+  private resolveMessage(
+    message: FormErrorMessage,
+    errorValue: unknown,
+    control: AbstractControl | null = null,
+  ): string {
+    return typeof message === 'function'
+      ? message(errorValue, control)
+      : message;
   }
 
   private setupServerErrorCleanup(form: FormGroup): void {

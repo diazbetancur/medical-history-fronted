@@ -3,7 +3,7 @@
   <div class="onboarding-header">
     <div class="brand">
       <mat-icon class="brand-icon">medical_services</mat-icon>
-      <span class="brand-text">MediTigo</span>
+      <span class="brand-text">Inicio</span>
     </div>
     <h1 class="onboarding-title">Configura tu perfil profesional</h1>
     <p class="onboarding-subtitle">
@@ -85,11 +85,9 @@
                   placeholder="Ej. Dr. Juan Pérez - Medicina Interna"
                   autocomplete="organization"
                 />
-                @if (
-                  profileForm.controls.businessName.hasError('required') &&
-                  (profileForm.controls.businessName.touched ||
-                    profileForm.controls.businessName.dirty)
-                ) {
+                @if ( profileForm.controls.businessName.hasError('required') &&
+                (profileForm.controls.businessName.touched ||
+                profileForm.controls.businessName.dirty) ) {
                 <mat-error>Este campo es requerido</mat-error>
                 }
               </mat-form-field>
@@ -103,11 +101,9 @@
                   placeholder="consultorio@ejemplo.com"
                   autocomplete="email"
                 />
-                @if (
-                  profileForm.controls.email.hasError('email') &&
-                  (profileForm.controls.email.touched ||
-                    profileForm.controls.email.dirty)
-                ) {
+                @if ( profileForm.controls.email.hasError('email') &&
+                (profileForm.controls.email.touched ||
+                profileForm.controls.email.dirty) ) {
                 <mat-error>Email inválido</mat-error>
                 }
               </mat-form-field>
@@ -147,11 +143,9 @@
                   >
                   }
                 </mat-select>
-                @if (
-                  profileForm.controls.countryId.hasError('required') &&
-                  (profileForm.controls.countryId.touched ||
-                    profileForm.controls.countryId.dirty)
-                ) {
+                @if ( profileForm.controls.countryId.hasError('required') &&
+                (profileForm.controls.countryId.touched ||
+                profileForm.controls.countryId.dirty) ) {
                 <mat-error>Selecciona un país</mat-error>
                 }
               </mat-form-field>
@@ -166,11 +160,9 @@
                   <mat-option [value]="city.id">{{ city.name }}</mat-option>
                   }
                 </mat-select>
-                @if (
-                  profileForm.controls.cityId.hasError('required') &&
-                  (profileForm.controls.cityId.touched ||
-                    profileForm.controls.cityId.dirty)
-                ) {
+                @if ( profileForm.controls.cityId.hasError('required') &&
+                (profileForm.controls.cityId.touched ||
+                profileForm.controls.cityId.dirty) ) {
                 <mat-error>Selecciona una ciudad</mat-error>
                 }
               </mat-form-field>
