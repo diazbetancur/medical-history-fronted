@@ -38,6 +38,7 @@ export class PatientChangePasswordPage {
       [
         Validators.required,
         Validators.minLength(8),
+        Validators.maxLength(100),
         Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/),
       ],
     ],

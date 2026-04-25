@@ -187,8 +187,8 @@ export class PatientHistoryService {
   ): Observable<PatientPrivacyDto> {
     return this.http
       .put<any>(`${this.baseUrl}/privacy`, {
-        allowHistorySharing: dto.shareFullHistoryWithTreatingProfessionals,
-        allowAnonymousResearch: false,
+        shareFullHistoryWithTreatingProfessionals:
+          dto.shareFullHistoryWithTreatingProfessionals,
       })
       .pipe(
         map(

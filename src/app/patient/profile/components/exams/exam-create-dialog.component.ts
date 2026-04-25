@@ -47,10 +47,10 @@ export class ExamCreateDialogComponent {
   selectedFile: File | null = null;
 
   readonly form = this.fb.group({
-    title: ['', [Validators.required, Validators.maxLength(200)]],
+    title: ['', [Validators.required, Validators.maxLength(150)]],
     category: [''],
-    examDate: [''],
-    notes: ['', [Validators.maxLength(1000)]],
+    examDate: ['', [Validators.required]],
+    notes: ['', [Validators.maxLength(1500)]],
   });
 
   /**
@@ -77,10 +77,10 @@ export class ExamCreateDialogComponent {
     const formValue = this.form.value;
 
     const request: CreateExamRequest = {
-      title: formValue.title!,
+      title: formValue.title!.trim(),
       category: (formValue.category || undefined) as ExamCategory | undefined,
       examDate: this.normalizeDateOnly(formValue.examDate) || undefined,
-      notes: formValue.notes || undefined,
+      notes: formValue.notes?.trim() || undefined,
     };
 
     const exam = await this.store.createExam(request, this.selectedFile);

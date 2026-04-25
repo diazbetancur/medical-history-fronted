@@ -46,7 +46,13 @@
             title="Buscar médico"
           />
           @if (hasSearchText()) {
-          <button matSuffix mat-icon-button (click)="clearSearch()">
+          <button
+            type="button"
+            matSuffix
+            mat-icon-button
+            aria-label="Limpiar busqueda"
+            (click)="clearSearch()"
+          >
             <mat-icon>close</mat-icon>
           </button>
           }

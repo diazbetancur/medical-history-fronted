@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +12,11 @@ import { AuthStore, PostLoginNavigationService } from '@core/auth';
 import { CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
+import {
+  FormControlErrorComponent,
+  FormLabelComponent,
+} from '@shared/ui/forms';
+import { LoginFormMessages } from '../auth-form-messages';
 
 /**
  * Login Page Component
@@ -30,11 +35,13 @@ import { ToastService } from '@shared/services';
     MatInputModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    FormControlErrorComponent,
+    FormLabelComponent,
   ],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit {
   private readonly authApi = inject(AuthApi);
   private readonly authStore = inject(AuthStore);
   private readonly postLoginNavigation = inject(PostLoginNavigationService);
@@ -44,12 +51,35 @@ export class LoginPageComponent {
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required]],
     asProfessional: [false],
   });
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly submitted = signal(false);
+  readonly isFormInvalid = computed(() => {
+    this.formValidityTrigger();
+    return this.form.invalid;
+  });
+
+  readonly loginFormMessages = LoginFormMessages;
+
+  private readonly formValidityTrigger = signal(0);
+
+  ngOnInit(): void {
+    this.setupFormValidationTracking();
+  }
+
+  private setupFormValidationTracking(): void {
+    this.form.valueChanges.subscribe(() => {
+      this.formValidityTrigger.update((v) => v + 1);
+    });
+
+    this.form.statusChanges.subscribe(() => {
+      this.formValidityTrigger.update((v) => v + 1);
+    });
+  }
 
   /**
    * Submit login form
@@ -59,6 +89,8 @@ export class LoginPageComponent {
    * 4. Redirect to dashboard on success
    */
   onSubmit(): void {
+    this.submitted.set(true);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -74,7 +106,7 @@ export class LoginPageComponent {
 
     this.authApi
       .login({
-        email: credentials.email,
+        email: credentials.email.trim(),
         password: credentials.password,
       })
       .subscribe({
@@ -185,18 +217,14 @@ export class LoginPageComponent {
   }
 
   private switchAndNavigateProfessional(user: CurrentUserDto): void {
-    const professionalContext = user.contexts.find(
-      (ctx) => ctx.type === 'PROFESSIONAL',
-    );
-
-    if (professionalContext) {
-      this.authStore.switchContext(professionalContext);
-    }
-
     const displayName = user.name || user.email || 'usuario';
-    this.toast.success(`¡Bienvenido, ${displayName}!`);
     this.isLoading.set(false);
-    this.postLoginNavigation.navigateByContext();
+
+    this.postLoginNavigation.navigateByContext({
+      preferProfessional: true,
+    });
+
+    this.toast.success(`¡Bienvenido, ${displayName}!`);
   }
 
   /**

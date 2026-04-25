@@ -1,11 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -32,40 +32,44 @@ interface DialogData {
   template: `
     <h2 mat-dialog-title>
       <mat-icon>edit</mat-icon>
-      Editar Rol
+      Editar rol
     </h2>
 
     <mat-dialog-content>
       <form #roleForm="ngForm">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nombre del Rol</mat-label>
+          <mat-label>Nombre del rol</mat-label>
           <input
             matInput
             [(ngModel)]="roleName"
             name="roleName"
-            required
-            placeholder="Ej: Editor de Contenido"
+            #roleNameModel="ngModel"
+            [required]="!isSystemRole"
+            placeholder="Ingresa el nombre del rol"
             [disabled]="saving() || isSystemRole"
           />
-          <mat-icon matPrefix>badge</mat-icon>
           @if (isSystemRole) {
-            <mat-hint>
-              Los roles del sistema no pueden cambiar su nombre
-            </mat-hint>
+            <mat-hint>Los roles del sistema no pueden cambiar su nombre.</mat-hint>
+          }
+          @if (
+            !isSystemRole &&
+            !roleName.trim() &&
+            (roleForm.submitted || roleNameModel.touched)
+          ) {
+            <mat-error>Este campo es obligatorio</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Descripción</mat-label>
+          <mat-label>Descripcion</mat-label>
           <textarea
             matInput
             [(ngModel)]="roleDescription"
             name="roleDescription"
             rows="3"
-            placeholder="Describe las responsabilidades de este rol"
+            placeholder="Describe el objetivo del rol"
             [disabled]="saving()"
           ></textarea>
-          <mat-icon matPrefix>description</mat-icon>
         </mat-form-field>
       </form>
 
@@ -85,15 +89,14 @@ interface DialogData {
         mat-raised-button
         color="primary"
         (click)="onUpdate()"
-        [disabled]="!hasChanges() || saving()"
+        [disabled]="saving()"
       >
         @if (saving()) {
           <mat-spinner diameter="20"></mat-spinner>
-        }
-        @if (!saving()) {
+        } @else {
           <mat-icon>save</mat-icon>
         }
-        Guardar Cambios
+        Guardar cambios
       </button>
     </mat-dialog-actions>
   `,
@@ -148,7 +151,7 @@ interface DialogData {
       gap: 8px;
 
       button {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
 
@@ -182,7 +185,7 @@ export class EditRoleDialogComponent {
     this.originalDescription = this.data.role.description || '';
   }
 
-  hasChanges(): boolean {
+  private hasChanges(): boolean {
     const nameChanged =
       !this.isSystemRole && this.roleName.trim() !== this.originalName;
 
@@ -191,8 +194,14 @@ export class EditRoleDialogComponent {
     );
   }
 
-  onUpdate() {
-    if (!this.hasChanges()) return;
+  onUpdate(): void {
+    if (!this.hasChanges()) {
+      return;
+    }
+
+    if (!this.isSystemRole && !this.roleName.trim()) {
+      return;
+    }
 
     this.saving.set(true);
     this.error.set(null);
@@ -223,7 +232,7 @@ export class EditRoleDialogComponent {
     });
   }
 
-  onCancel() {
+  onCancel(): void {
     this.dialogRef.close();
   }
 }

@@ -2,13 +2,23 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PwaInstallService, PwaUpdateService } from '@core/pwa';
 import { AnalyticsService } from '@shared/services';
-import { InstallPromptComponent, UpdateBannerComponent } from '@shared/ui';
+import {
+  GlobalLoaderComponent,
+  InstallPromptComponent,
+  UpdateBannerComponent,
+} from '@shared/ui';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, InstallPromptComponent, UpdateBannerComponent],
+  imports: [
+    RouterOutlet,
+    GlobalLoaderComponent,
+    InstallPromptComponent,
+    UpdateBannerComponent,
+  ],
   template: `
+    <app-global-loader />
     <app-update-banner />
     <router-outlet />
     <app-install-prompt />

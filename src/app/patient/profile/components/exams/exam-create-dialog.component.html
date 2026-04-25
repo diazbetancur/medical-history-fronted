@@ -2,24 +2,26 @@
 
 <mat-dialog-content>
   <form [formGroup]="form" class="exam-form">
-    <!-- Title -->
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Título del Examen *</mat-label>
+      <mat-label>Titulo del examen *</mat-label>
       <input
         matInput
         formControlName="title"
-        placeholder="Ej: Análisis de Sangre"
+        maxlength="150"
+        placeholder="Ej: Analisis de sangre"
       />
+      <mat-hint align="end">
+        {{ form.get("title")?.value?.length || 0 }}/150
+      </mat-hint>
       @if (form.get("title")?.invalid && form.get("title")?.touched) {
         <mat-error>{{ getErrorMessage("title") }}</mat-error>
       }
     </mat-form-field>
 
-    <!-- Category -->
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Categoría</mat-label>
+      <mat-label>Categoria</mat-label>
       <mat-select formControlName="category">
-        <mat-option [value]="''">Sin categoría</mat-option>
+        <mat-option [value]="''">Sin categoria</mat-option>
         @for (category of categories; track category) {
           <mat-option [value]="category">
             {{ categoryLabels[category] }}
@@ -28,26 +30,31 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- Exam Date -->
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Fecha del Examen</mat-label>
+      <mat-label>Fecha del examen *</mat-label>
       <input
         matInput
         type="date"
         formControlName="examDate"
         placeholder="Selecciona una fecha"
       />
+      @if (form.get("examDate")?.invalid && form.get("examDate")?.touched) {
+        <mat-error>{{ getErrorMessage("examDate") }}</mat-error>
+      }
     </mat-form-field>
 
-    <!-- Notes -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Notas</mat-label>
       <textarea
         matInput
         formControlName="notes"
         rows="4"
-        placeholder="Observaciones, instrucciones del médico, etc."
+        maxlength="1500"
+        placeholder="Observaciones, instrucciones del medico, etc."
       ></textarea>
+      <mat-hint align="end">
+        {{ form.get("notes")?.value?.length || 0 }}/1500
+      </mat-hint>
       @if (form.get("notes")?.invalid && form.get("notes")?.touched) {
         <mat-error>{{ getErrorMessage("notes") }}</mat-error>
       }
@@ -66,10 +73,7 @@
       }
     </div>
 
-    <p class="help-text">
-      * Campos requeridos. El archivo debe ser PDF/JPG/JPEG/PNG/WEBP y máximo
-      10MB.
-    </p>
+    <p class="help-text">El archivo debe ser PDF/JPG/JPEG/PNG/WEBP y maximo 10MB.</p>
   </form>
 </mat-dialog-content>
 
@@ -84,7 +88,7 @@
     @if (creating) {
       <mat-spinner diameter="20"></mat-spinner>
     } @else {
-      Crear Examen
+      Crear examen
     }
   </button>
 </mat-dialog-actions>

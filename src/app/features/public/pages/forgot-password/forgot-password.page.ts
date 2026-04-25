@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { AuthApi } from '@data/api';
+import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
 
 @Component({
   selector: 'app-forgot-password-page',
@@ -21,6 +22,8 @@ import { AuthApi } from '@data/api';
     MatInputModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    FormControlErrorComponent,
+    FormLabelComponent,
   ],
   templateUrl: './forgot-password.page.html',
   styleUrl: './forgot-password.page.scss',
@@ -36,8 +39,11 @@ export class ForgotPasswordPageComponent {
   readonly isLoading = signal(false);
   readonly resultMessage = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly submitted = signal(false);
 
   onSubmit(): void {
+    this.submitted.set(true);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

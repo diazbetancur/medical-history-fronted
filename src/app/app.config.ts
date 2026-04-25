@@ -27,6 +27,7 @@ import {
   correlationIdInterceptor,
   errorInterceptor,
   jwtInterceptor,
+  loadingInterceptor,
 } from '@core/http';
 import { routes } from './app.routes';
 
@@ -46,9 +47,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
       withInterceptors([
-        correlationIdInterceptor, // 1st: Add correlation ID to all requests
-        jwtInterceptor, // 2nd: Add JWT token for auth
-        errorInterceptor, // 3rd: Handle errors and normalize
+        loadingInterceptor, // 1st: Track active API requests globally
+        correlationIdInterceptor, // 2nd: Add correlation ID to all requests
+        jwtInterceptor, // 3rd: Add JWT token for auth
+        errorInterceptor, // 4th: Handle redirects, fallback toast, and normalize
       ]),
     ),
     provideAnimationsAsync(),

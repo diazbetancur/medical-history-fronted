@@ -8,16 +8,24 @@
       <input
         matInput
         formControlName="name"
+        maxlength="200"
         placeholder="Ej: Ibuprofeno 600mg"
         required
       />
+      <mat-hint align="end">{{ form.get("name")?.value?.length || 0 }}/200</mat-hint>
       <mat-error>{{ getErrorMessage("name") }}</mat-error>
     </mat-form-field>
 
     <!-- Dose -->
     <mat-form-field appearance="outline">
       <mat-label>Dosis</mat-label>
-      <input matInput formControlName="dose" placeholder="Ej: 1 comprimido" />
+      <input
+        matInput
+        formControlName="dose"
+        placeholder="Ej: 1 comprimido"
+        maxlength="100"
+      />
+      <mat-hint align="end">{{ form.get("dose")?.value?.length || 0 }}/100</mat-hint>
     </mat-form-field>
 
     <!-- Frequency -->
@@ -26,8 +34,10 @@
       <input
         matInput
         formControlName="frequency"
+        maxlength="100"
         placeholder="Ej: Cada 8 horas"
       />
+      <mat-hint align="end">{{ form.get("frequency")?.value?.length || 0 }}/100</mat-hint>
     </mat-form-field>
 
     <!-- Route -->
@@ -36,6 +46,7 @@
       <input
         matInput
         formControlName="route"
+        maxlength="100"
         placeholder="Ej: Oral, Intravenosa, Tópica"
       />
     </mat-form-field>
@@ -46,21 +57,23 @@
       <input
         matInput
         formControlName="prescribedBy"
+        maxlength="200"
         placeholder="Nombre del profesional"
       />
+      <mat-hint align="end">{{ form.get("prescribedBy")?.value?.length || 0 }}/200</mat-hint>
     </mat-form-field>
 
     <!-- Start Date -->
     <mat-form-field appearance="outline">
-      <mat-label>Fecha de inicio *</mat-label>
-      <input matInput type="date" formControlName="startDate" required />
+      <mat-label>Fecha de inicio</mat-label>
+      <input matInput type="date" formControlName="startDate" />
       <mat-error>{{ getErrorMessage("startDate") }}</mat-error>
     </mat-form-field>
 
     <!-- Is Ongoing Toggle -->
     <div class="toggle-field">
       <mat-slide-toggle formControlName="isOngoing" color="primary">
-        Tratamiento en curso (sin fecha de fin)
+        Tratamiento en curso * (sin fecha de fin)
       </mat-slide-toggle>
     </div>
 
@@ -91,8 +104,11 @@
         matInput
         formControlName="notes"
         rows="3"
+        maxlength="500"
         placeholder="Observaciones, efectos secundarios, etc."
       ></textarea>
+      <mat-hint align="end">{{ form.get("notes")?.value?.length || 0 }}/500</mat-hint>
+      <mat-error>{{ getErrorMessage("notes") }}</mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>

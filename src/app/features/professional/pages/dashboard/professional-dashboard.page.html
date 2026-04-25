@@ -1,11 +1,11 @@
 <div class="dashboard-container">
-  <!-- Header -->
-  <div class="dashboard-header">
-    <div class="header-title">
-      <h1>Bienvenido {{ userName() }}</h1>
-      <p>Resumen de tu actividad</p>
-    </div>
-  </div>
+  <section class="dashboard-hero">
+    <img
+      src="/images/dashboard.png"
+      alt="Resumen visual del dashboard profesional"
+      class="dashboard-hero-image"
+    />
+  </section>
 
   <!-- Loading state -->
   @if (loading()) {
@@ -32,7 +32,7 @@
         </div>
       </mat-card-content>
       <mat-card-actions>
-        <a mat-button routerLink="/dashboard/appointments">
+        <a mat-button routerLink="/professional/appointments">
           Ver agenda <mat-icon iconPositionEnd>arrow_forward</mat-icon>
         </a>
       </mat-card-actions>
@@ -52,7 +52,7 @@
         </div>
       </mat-card-content>
       <mat-card-actions>
-        <a mat-button routerLink="/dashboard/patients">
+        <a mat-button routerLink="/professional/patients">
           Ver pacientes <mat-icon iconPositionEnd>arrow_forward</mat-icon>
         </a>
       </mat-card-actions>
@@ -68,18 +68,22 @@
           <span class="metric-value"
             >{{ dashboard()?.pendingEncountersCount ?? '–' }}</span
           >
-          <span class="metric-label">Citas pendientes del Mees</span>
+          <span class="metric-label">Citas pendientes del Mes</span>
         </div>
       </mat-card-content>
       <mat-card-actions>
-        <a mat-button routerLink="/dashboard/patients">
+        <a
+          mat-button
+          routerLink="/professional/appointments"
+          [queryParams]="{ tab: 'month' }"
+        >
           Revisar <mat-icon iconPositionEnd>arrow_forward</mat-icon>
         </a>
       </mat-card-actions>
     </mat-card>
 
     <!-- Ingresos del mes -->
-    <mat-card class="metric-card">
+    <mat-card class="metric-card is-hidden">
       <mat-card-content>
         <div class="metric-icon revenue">
           <mat-icon>payments</mat-icon>
@@ -113,7 +117,7 @@
 
   <!-- ── Appointments today ─────────────────────────────────────────────── -->
   @if (dashboard(); as data) {
-  <mat-card class="appointments-card" style="display: none">
+  <mat-card class="appointments-card is-hidden">
     <mat-card-header>
       <mat-card-title>
         <mat-icon>today</mat-icon>
@@ -204,7 +208,7 @@
 
     @if (data.appointmentsToday.length > 0) {
     <mat-card-actions align="end">
-      <a mat-button routerLink="/dashboard/appointments">
+      <a mat-button routerLink="/professional/appointments">
         Ver agenda completa <mat-icon iconPositionEnd>open_in_new</mat-icon>
       </a>
     </mat-card-actions>

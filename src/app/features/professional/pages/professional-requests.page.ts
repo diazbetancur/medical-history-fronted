@@ -42,9 +42,11 @@ import { ProfessionalRequestsStore } from '@data/stores/professional-requests.st
           (selectedIndexChange)="tabIndex.set($event)"
         >
           <mat-tab label="Pendientes ({{ store.pendingCount() }})"></mat-tab>
-          <mat-tab label="Aceptadas ({{ store.acceptedCount() }})"></mat-tab>
+          <mat-tab label="Contactadas ({{ store.contactedCount() }})"></mat-tab>
+          <mat-tab label="En curso ({{ store.inProgressCount() }})"></mat-tab>
           <mat-tab label="Completadas ({{ store.completedCount() }})"></mat-tab>
           <mat-tab label="Rechazadas ({{ store.rejectedCount() }})"></mat-tab>
+          <mat-tab label="Canceladas ({{ store.cancelledCount() }})"></mat-tab>
         </mat-tab-group>
 
         @if (filtered().length === 0) {
@@ -92,10 +94,10 @@ import { ProfessionalRequestsStore } from '@data/stores/professional-requests.st
                     <button
                       mat-button
                       color="primary"
-                      (click)="updateStatus(request.id, 'Accepted')"
+                      (click)="updateStatus(request.id, 'Contacted')"
                     >
                       <mat-icon>check_circle</mat-icon>
-                      Aceptar
+                      Marcar contactada
                     </button>
                     <button
                       mat-button
@@ -105,8 +107,32 @@ import { ProfessionalRequestsStore } from '@data/stores/professional-requests.st
                       <mat-icon>cancel</mat-icon>
                       Rechazar
                     </button>
+                    <button
+                      mat-button
+                      (click)="updateStatus(request.id, 'Cancelled')"
+                    >
+                      <mat-icon>event_busy</mat-icon>
+                      Cancelar
+                    </button>
                   }
-                  @if (request.status === 'Accepted') {
+                  @if (request.status === 'Contacted') {
+                    <button
+                      mat-button
+                      color="primary"
+                      (click)="updateStatus(request.id, 'InProgress')"
+                    >
+                      <mat-icon>play_circle</mat-icon>
+                      Marcar en curso
+                    </button>
+                    <button
+                      mat-button
+                      (click)="updateStatus(request.id, 'Cancelled')"
+                    >
+                      <mat-icon>event_busy</mat-icon>
+                      Cancelar
+                    </button>
+                  }
+                  @if (request.status === 'InProgress') {
                     <button
                       mat-button
                       color="primary"
@@ -170,8 +196,12 @@ import { ProfessionalRequestsStore } from '@data/stores/professional-requests.st
         background: var(--color-warning-soft);
       }
 
-      .chip-accepted {
+      .chip-contacted {
         background: var(--color-primary-soft);
+      }
+
+      .chip-in-progress {
+        background: var(--color-info-soft, var(--color-primary-soft));
       }
 
       .chip-completed {
@@ -180,6 +210,10 @@ import { ProfessionalRequestsStore } from '@data/stores/professional-requests.st
 
       .chip-rejected {
         background: var(--color-danger-soft);
+      }
+
+      .chip-cancelled {
+        background: var(--color-text-disabled);
       }
     `,
   ],
@@ -191,13 +225,17 @@ export class ProfessionalRequestsPage {
   readonly filtered = computed(() => {
     switch (this.tabIndex()) {
       case 0:
-        return this.store.pendingRequests();
+                        return this.store.pendingRequests();
       case 1:
-        return this.store.acceptedRequests();
+        return this.store.contactedRequests();
       case 2:
-        return this.store.completedRequests();
+        return this.store.inProgressRequests();
       case 3:
+        return this.store.completedRequests();
+      case 4:
         return this.store.rejectedRequests();
+      case 5:
+        return this.store.cancelledRequests();
       default:
         return this.store.requests();
     }
@@ -213,7 +251,10 @@ export class ProfessionalRequestsPage {
 
   updateStatus(
     requestId: string,
-    status: Extract<RequestStatus, 'Accepted' | 'Rejected' | 'Completed'>,
+    status: Extract<
+      RequestStatus,
+      'Contacted' | 'InProgress' | 'Rejected' | 'Completed' | 'Cancelled'
+    >,
   ): void {
     this.store.updateStatus(requestId, status).subscribe();
   }
@@ -222,12 +263,16 @@ export class ProfessionalRequestsPage {
     switch (status) {
       case 'Pending':
         return 'chip-pending';
-      case 'Accepted':
-        return 'chip-accepted';
+      case 'Contacted':
+        return 'chip-contacted';
+      case 'InProgress':
+        return 'chip-in-progress';
       case 'Completed':
         return 'chip-completed';
       case 'Rejected':
         return 'chip-rejected';
+      case 'Cancelled':
+        return 'chip-cancelled';
       default:
         return '';
     }

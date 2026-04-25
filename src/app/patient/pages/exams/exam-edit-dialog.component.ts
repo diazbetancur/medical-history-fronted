@@ -65,9 +65,9 @@ export class ExamEditDialogComponent implements OnInit {
     const exam = this.data.exam;
 
     this.form = this.fb.group({
-      title: [exam.title, [Validators.required, Validators.maxLength(200)]],
+      title: [exam.title, [Validators.required, Validators.maxLength(150)]],
       examDate: [this.normalizeDateOnly(exam.examDate), [Validators.required]],
-      notes: [exam.notes || '', [Validators.maxLength(1000)]],
+      notes: [exam.notes || '', [Validators.maxLength(1500)]],
     });
   }
 
@@ -85,9 +85,9 @@ export class ExamEditDialogComponent implements OnInit {
 
     const formValue = this.form.value;
     const dto: UpdateExamDto = {
-      title: formValue.title,
+      title: formValue.title?.trim(),
       examDate: this.normalizeDateOnly(formValue.examDate)!,
-      notes: formValue.notes || undefined,
+      notes: formValue.notes?.trim() || undefined,
     };
 
     this.examsService.update(this.data.exam.id, dto).subscribe({

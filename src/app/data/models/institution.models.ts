@@ -10,12 +10,14 @@
 export interface InstitutionDto {
   id: string;
   name: string;
-  code: string;
+  code?: string | null;
   description?: string;
   address?: string;
   phone?: string;
   email?: string;
   website?: string;
+  countryId?: string | null;
+  cityId?: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -26,12 +28,14 @@ export interface InstitutionDto {
  */
 export interface CreateInstitutionDto {
   name: string;
-  code: string;
+  code?: string;
   description?: string;
   address?: string;
   phone?: string;
   email?: string;
   website?: string;
+  countryId?: string;
+  cityId?: string;
   isActive?: boolean;
 }
 
@@ -46,6 +50,8 @@ export interface UpdateInstitutionDto {
   phone?: string;
   email?: string;
   website?: string;
+  countryId?: string;
+  cityId?: string;
   isActive?: boolean;
 }
 

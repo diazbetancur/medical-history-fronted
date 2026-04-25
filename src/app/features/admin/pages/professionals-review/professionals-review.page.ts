@@ -20,6 +20,7 @@ import type { AdminProfessionalListItem } from '@data/api/api-models';
 import type { ProfessionalStatusFilter } from '@data/stores/admin-professionals.store';
 import { AdminProfessionalsStore } from '@data/stores/admin-professionals.store';
 import { ToastService } from '@shared/services';
+import { ModerateProfessionalDialogComponent } from './moderate-professional.dialog';
 import { PERMISSIONS } from '../../admin-menu.config';
 
 @Component({
@@ -152,26 +153,19 @@ export class ProfessionalsReviewPageComponent implements OnInit {
       return;
     }
 
-    import('./moderate-professional.dialog').then(
-      ({ ModerateProfessionalDialogComponent }) => {
-        const dialogRef = this.dialog.open(
-          ModerateProfessionalDialogComponent,
-          {
-            width: '480px',
-            data: {
-              professional: p,
-              action: 'verify',
-            },
-          },
-        );
-
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result?.success) {
-            this.toast.success(`"${p.businessName}" verificado correctamente`);
-          }
-        });
+    const dialogRef = this.dialog.open(ModerateProfessionalDialogComponent, {
+      width: '480px',
+      data: {
+        professional: p,
+        action: 'verify',
       },
-    );
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.success) {
+        this.toast.success(`"${p.businessName}" verificado correctamente`);
+      }
+    });
   }
 
   disableProfessional(p: AdminProfessionalListItem, event?: Event): void {
@@ -181,26 +175,19 @@ export class ProfessionalsReviewPageComponent implements OnInit {
       return;
     }
 
-    import('./moderate-professional.dialog').then(
-      ({ ModerateProfessionalDialogComponent }) => {
-        const dialogRef = this.dialog.open(
-          ModerateProfessionalDialogComponent,
-          {
-            width: '480px',
-            data: {
-              professional: p,
-              action: 'disable',
-            },
-          },
-        );
-
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result?.success) {
-            this.toast.warning(`"${p.businessName}" desactivado`);
-          }
-        });
+    const dialogRef = this.dialog.open(ModerateProfessionalDialogComponent, {
+      width: '480px',
+      data: {
+        professional: p,
+        action: 'disable',
       },
-    );
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.success) {
+        this.toast.warning(`"${p.businessName}" desactivado`);
+      }
+    });
   }
 
   enableProfessional(p: AdminProfessionalListItem, event?: Event): void {

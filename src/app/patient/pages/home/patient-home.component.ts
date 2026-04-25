@@ -7,7 +7,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
-import { AuthStore } from '@core/auth';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { ToastService } from '@shared/services/toast.service';
 import { ConfirmDialogComponent } from '@shared/ui';
@@ -28,14 +27,12 @@ import { AppointmentDetailDialogComponent } from './appointment-detail-dialog.co
   ],
   template: `
     <div class="patient-home">
-      <!-- Hero Section -->
-      <section class="hero">
-        <div class="hero-content">
-          <h1>Bienvenido {{ userName() }}</h1>
-          <p class="subtitle">
-            Gestiona tus citas médicas de manera fácil y rápida
-          </p>
-        </div>
+      <section class="dashboard-hero">
+        <img
+          src="/images/dashboardP.png"
+          alt="Resumen visual del dashboard del paciente"
+          class="dashboard-hero-image"
+        />
       </section>
 
       <!-- Upcoming Appointments Section -->
@@ -183,35 +180,35 @@ import { AppointmentDetailDialogComponent } from './appointment-detail-dialog.co
         padding: 24px;
         max-width: 1400px;
         margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
       }
 
-      /* Hero Section */
-      .hero {
-        background: var(--color-surface);
-        color: var(--color-text-primary);
-        border: 1px solid var(--color-border);
-        padding: 40px 32px;
-        border-radius: 14px;
-        margin-bottom: 32px;
-        text-align: center;
+      .dashboard-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        width: 100%;
+        min-height: clamp(240px, 48vh, 560px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+          180deg,
+          rgba(229, 238, 252, 0.78),
+          rgba(214, 228, 248, 0.9)
+        );
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      }
 
-        .hero-content {
-          max-width: 800px;
-          margin: 0 auto;
-
-          h1 {
-            margin: 0 0 16px 0;
-            font-size: 30px;
-            font-weight: 600;
-            line-height: 1.2;
-          }
-
-          .subtitle {
-            margin: 0 0 32px 0;
-            font-size: 15px;
-            color: var(--color-text-secondary);
-          }
-        }
+      .dashboard-hero-image {
+        display: block;
+        width: min(100%, 1120px);
+        height: min(56vh, 560px);
+        max-height: 56vh;
+        object-fit: contain;
+        object-position: center;
       }
 
       /* Section Header */
@@ -449,23 +446,18 @@ import { AppointmentDetailDialogComponent } from './appointment-detail-dialog.co
       @media (max-width: 768px) {
         .patient-home {
           padding: 16px;
+          gap: 24px;
         }
 
-        .hero {
-          padding: 28px 20px;
+        .dashboard-hero {
+          min-height: clamp(150px, 24vh, 220px);
+          border-radius: 24px;
+        }
 
-          .hero-content h1 {
-            font-size: 24px;
-          }
-
-          .hero-content .subtitle {
-            font-size: 14px;
-            margin-bottom: 20px;
-          }
-
-          .cta-button {
-            width: 100%;
-          }
+        .dashboard-hero-image {
+          width: 100%;
+          height: auto;
+          max-height: none;
         }
 
         .appointments-grid {
@@ -486,9 +478,7 @@ export class PatientHomeComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
-  private readonly authStore = inject(AuthStore);
 
-  readonly userName = computed(() => this.authStore.userName() || '');
   // State
   readonly isLoading = signal(false);
   readonly allAppointments = signal<AppointmentDto[]>([]);

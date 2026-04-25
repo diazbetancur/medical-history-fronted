@@ -18,6 +18,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { formatDateOnly } from '@core/http/http-utils';
 import { PublicApi } from '@data/api';
@@ -118,7 +119,7 @@ interface BookingConfirmation {
           <div class="state-block error">{{ profileError() }}</div>
         } @else {
           <mat-form-field appearance="outline" class="date-input">
-            <mat-label>Selecciona una fecha</mat-label>
+            <mat-label>Fecha *</mat-label>
             <input
               matInput
               [matDatepicker]="picker"
@@ -132,6 +133,19 @@ interface BookingConfirmation {
               [for]="picker"
             ></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="observation-input">
+            <mat-label>Motivo de la consulta</mat-label>
+            <textarea
+              matInput
+              rows="4"
+              maxlength="1000"
+              [value]="observation()"
+              (input)="onObservationInput($any($event.target).value)"
+              placeholder="Agrega un comentario para el profesional si lo necesitas"
+            ></textarea>
+            <mat-hint align="end">{{ observation().length }}/1000</mat-hint>
           </mat-form-field>
 
           @if (loadingSlots()) {
@@ -191,8 +205,9 @@ interface BookingConfirmation {
         <button mat-flat-button color="primary" (click)="acceptConfirmation()">
           Aceptar
         </button>
+      } @else {
+        <button mat-button (click)="close()">Cerrar</button>
       }
-      <button mat-button (click)="close()">Cerrar</button>
     </mat-dialog-actions>
   `,
   styles: [
@@ -252,6 +267,11 @@ interface BookingConfirmation {
       .date-input {
         width: 100%;
       }
+
+      .observation-input {
+        width: 100%;
+      }
+
       .state-block {
         display: flex;
         align-items: center;
@@ -351,6 +371,7 @@ export class BookAppointmentDialogComponent {
   private readonly dialogRef = inject(
     MatDialogRef<BookAppointmentDialogComponent>,
   );
+  private readonly router = inject(Router);
   readonly data = inject<BookAppointmentDialogData>(MAT_DIALOG_DATA);
 
   readonly loadingProfile = signal(false);
@@ -368,6 +389,7 @@ export class BookAppointmentDialogComponent {
 
   readonly selectedDate = signal<Date | null>(null);
   readonly availableSlots = signal<SlotDto[]>([]);
+  readonly observation = signal('');
 
   readonly minDate = this.getTodayDate();
 
@@ -387,6 +409,10 @@ export class BookAppointmentDialogComponent {
     this.loadSlots(formatDateOnly(selected));
   }
 
+  onObservationInput(value: string): void {
+    this.observation.set(value);
+  }
+
   close(): void {
     this.dialogRef.close();
   }
@@ -396,10 +422,13 @@ export class BookAppointmentDialogComponent {
       success: true,
       confirmation: this.bookingConfirmation(),
     });
+    void this.router.navigate(['/patient/appointments']);
   }
 
   bookSlot(slot: SlotDto): void {
     if (this.isBooking()) return;
+
+    const observation = this.getTrimmedObservation();
 
     const professionalId = this.professionalId();
     const selectedDate = this.selectedDate();
@@ -418,6 +447,7 @@ export class BookAppointmentDialogComponent {
       slotId: slot.id,
       appointmentDate: formatDateOnly(selectedDate),
       timeSlot: `${slot.startTime}`,
+      observation,
     };
 
     this.appointmentsService.createAppointment(dto).subscribe({
@@ -505,5 +535,9 @@ export class BookAppointmentDialogComponent {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return today;
+  }
+
+  private getTrimmedObservation(): string {
+    return this.observation().trim();
   }
 }

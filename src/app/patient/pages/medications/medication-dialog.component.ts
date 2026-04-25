@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -78,21 +80,29 @@ export class MedicationDialogComponent implements OnInit {
   private initForm(): void {
     const medication = this.data.medication;
 
-    this.form = this.fb.group({
-      name: [medication?.name || '', [Validators.required]],
-      dose: [medication?.dose || ''],
-      frequency: [medication?.frequency || ''],
-      route: [medication?.route || ''],
-      prescribedBy: [medication?.prescribedBy || ''],
-      startDate: [
-        this.normalizeDateOnly(medication?.startDate) || this.todayDateOnly(),
-        [Validators.required],
-      ],
-      isOngoing: [medication?.isOngoing ?? true],
-      endDate: [this.normalizeDateOnly(medication?.endDate) || null, []],
-      notes: [medication?.notes || ''],
-      status: [medication?.status || 'Active', [Validators.required]],
-    });
+    this.form = this.fb.group(
+      {
+        name: [
+          medication?.name || '',
+          [Validators.required, Validators.maxLength(200)],
+        ],
+        dose: [medication?.dose || '', [Validators.maxLength(100)]],
+        frequency: [medication?.frequency || '', [Validators.maxLength(100)]],
+        route: [medication?.route || '', [Validators.maxLength(100)]],
+        prescribedBy: [
+          medication?.prescribedBy || '',
+          [Validators.maxLength(200)],
+        ],
+        startDate: [this.normalizeDateOnly(medication?.startDate) || null],
+        isOngoing: [medication?.isOngoing ?? true],
+        endDate: [this.normalizeDateOnly(medication?.endDate) || null, []],
+        notes: [medication?.notes || '', [Validators.maxLength(500)]],
+        status: [medication?.status || 'Active', [Validators.required]],
+      },
+      {
+        validators: [this.medicationDateRangeValidator()],
+      },
+    );
 
     // Update endDate validation and disabled state based on isOngoing
     this.form.get('isOngoing')?.valueChanges.subscribe((isOngoing) => {
@@ -135,15 +145,15 @@ export class MedicationDialogComponent implements OnInit {
     const formValue = this.form.value;
 
     const dto: CreateMedicationDto | UpdateMedicationDto = {
-      name: formValue.name,
-      dose: formValue.dose || undefined,
-      frequency: formValue.frequency || undefined,
-      route: formValue.route || undefined,
-      prescribedBy: formValue.prescribedBy || undefined,
-      startDate: this.normalizeDateOnly(formValue.startDate)!,
+      name: formValue.name?.trim(),
+      dose: formValue.dose?.trim() || undefined,
+      frequency: formValue.frequency?.trim() || undefined,
+      route: formValue.route?.trim() || undefined,
+      prescribedBy: formValue.prescribedBy?.trim() || undefined,
+      startDate: this.normalizeDateOnly(formValue.startDate) || undefined,
       isOngoing: formValue.isOngoing,
       endDate: this.normalizeDateOnly(formValue.endDate) || undefined,
-      notes: formValue.notes || undefined,
+      notes: formValue.notes?.trim() || undefined,
       status: formValue.status,
     };
 
@@ -160,11 +170,34 @@ export class MedicationDialogComponent implements OnInit {
       return 'Este campo es requerido';
     }
 
+    if (control.errors['maxlength']) {
+      const maxLength = control.errors['maxlength'].requiredLength;
+      return `Máximo ${maxLength} caracteres`;
+    }
+
+    if (
+      fieldName === 'endDate' &&
+      this.form.hasError('invalidDateRange') &&
+      (control.touched || control.dirty)
+    ) {
+      return 'La fecha de fin debe ser igual o posterior a la fecha de inicio';
+    }
+
     return '';
   }
 
-  private todayDateOnly(): string {
-    return new Date().toISOString().split('T')[0];
+  private medicationDateRangeValidator() {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const startDate = this.normalizeDateOnly(group.get('startDate')?.value);
+      const endDate = this.normalizeDateOnly(group.get('endDate')?.value);
+      const isOngoing = group.get('isOngoing')?.value;
+
+      if (!startDate || !endDate || isOngoing) {
+        return null;
+      }
+
+      return endDate >= startDate ? null : { invalidDateRange: true };
+    };
   }
 
   private normalizeDateOnly(value: unknown): string | null {

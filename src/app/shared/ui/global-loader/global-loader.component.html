@@ -1,0 +1,19 @@
+<div
+  class="global-loader"
+  [class.is-visible]="isLoading()"
+  [attr.aria-hidden]="!isLoading()"
+  [attr.aria-busy]="isLoading()"
+  aria-live="polite"
+>
+  <div class="loader-backdrop"></div>
+
+  <output class="loader-content" aria-label="Cargando contenido">
+    <div class="logo-loader">
+      <img src="/images/logo/logo.png" alt="Logo" class="logo-loader__image" />
+
+      <span class="logo-loader__shine"></span>
+    </div>
+
+    <span class="loader-text">Cargando...</span>
+  </output>
+</div>

@@ -15,6 +15,8 @@ import {
   UserSession,
 } from './api-models';
 
+type UserContextType = CurrentUserDto['defaultContext']['type'];
+
 /**
  * Auth API Client
  * Handles authentication endpoints: /api/auth/*
@@ -23,12 +25,134 @@ import {
 export class AuthApi {
   private readonly api = inject(ApiClient);
 
-  private normalizeContextType(
-    type: string,
-  ): 'ADMIN' | 'PROFESSIONAL' | 'PATIENT' {
+  private normalizeContextType(type: string): UserContextType {
     const value = (type || '').toUpperCase();
     if (value === 'ADMIN') return 'ADMIN';
     if (value === 'PROFESSIONAL') return 'PROFESSIONAL';
+    return 'PATIENT';
+  }
+
+  private buildContext(
+    raw: any,
+    type: UserContextType,
+    source?: any,
+  ): CurrentUserDto['defaultContext'] {
+    const name =
+      source?.name ??
+      raw?.fullName ??
+      raw?.name ??
+      raw?.userName ??
+      raw?.email ??
+      'Usuario';
+
+    switch (type) {
+      case 'ADMIN':
+        return {
+          type,
+          id: source?.id ?? raw?.userId ?? raw?.id ?? '',
+          name,
+        };
+      case 'PROFESSIONAL':
+        return {
+          type,
+          id:
+            source?.id ??
+            raw?.professionalProfileId ??
+            raw?.userId ??
+            raw?.id ??
+            '',
+          name,
+          slug: source?.slug ?? raw?.professionalProfileSlug,
+        };
+      default:
+        return {
+          type: 'PATIENT',
+          id:
+            source?.id ?? raw?.patientProfileId ?? raw?.userId ?? raw?.id ?? '',
+          name,
+        };
+    }
+  }
+
+  private upsertContext(
+    contexts: CurrentUserDto['contexts'],
+    nextContext: CurrentUserDto['defaultContext'],
+  ): void {
+    const existingIndex = contexts.findIndex(
+      (context) => context.type === nextContext.type,
+    );
+
+    if (existingIndex >= 0) {
+      contexts[existingIndex] = {
+        ...contexts[existingIndex],
+        ...nextContext,
+      };
+      return;
+    }
+
+    contexts.push(nextContext);
+  }
+
+  private mapRawContext(
+    raw: any,
+    context: any,
+  ): CurrentUserDto['defaultContext'] {
+    if (typeof context === 'string') {
+      return this.buildContext(raw, this.normalizeContextType(context));
+    }
+
+    return this.buildContext(
+      raw,
+      this.normalizeContextType(context?.type),
+      context,
+    );
+  }
+
+  private ensureRoleContexts(
+    raw: any,
+    contexts: CurrentUserDto['contexts'],
+    hasPatientRole: boolean,
+    hasProfessionalRole: boolean,
+    hasPrivilegedRole: boolean,
+  ): void {
+    if (
+      hasPatientRole ||
+      this.normalizeContextType(raw?.defaultContext ?? '') === 'PATIENT'
+    ) {
+      this.upsertContext(contexts, this.buildContext(raw, 'PATIENT'));
+    }
+
+    if (hasProfessionalRole) {
+      this.upsertContext(contexts, this.buildContext(raw, 'PROFESSIONAL'));
+    }
+
+    if (hasPrivilegedRole) {
+      this.upsertContext(contexts, this.buildContext(raw, 'ADMIN'));
+    }
+  }
+
+  private getDefaultContextType(
+    raw: any,
+    hasPrivilegedRole: boolean,
+    hasPatientRole: boolean,
+    hasProfessionalRole: boolean,
+  ): UserContextType {
+    if (raw?.defaultContext) {
+      return this.normalizeContextType(raw.defaultContext);
+    }
+
+    if (hasPrivilegedRole) {
+      return 'ADMIN';
+    }
+
+    if (hasPatientRole) {
+      return 'PATIENT';
+    }
+
+    if (hasProfessionalRole) {
+      return 'PROFESSIONAL';
+    }
+
     return 'PATIENT';
   }
 
@@ -36,53 +160,46 @@ export class AuthApi {
     const roles: string[] = raw?.roles ?? [];
     const permissions: string[] = raw?.permissions ?? [];
     const rawContexts = Array.isArray(raw?.contexts) ? raw.contexts : [];
+    const normalizedRoles = new Set(
+      roles
+        .map((role) =>
+          String(role ?? '')
+            .trim()
+            .toUpperCase(),
+        )
+        .filter(Boolean),
+    );
+    const hasPatientRole =
+      normalizedRoles.has('CLIENT') || normalizedRoles.has('PATIENT');
+    const hasProfessionalRole = normalizedRoles.has('PROFESSIONAL');
+    const hasPrivilegedRole = [...normalizedRoles].some(
+      (role) => !['CLIENT', 'PATIENT', 'PROFESSIONAL'].includes(role),
+    );
 
-    const contexts = rawContexts.map((context: any) => {
-      if (typeof context === 'string') {
-        const type = this.normalizeContextType(context);
-        return {
-          type,
-          id:
-            type === 'PROFESSIONAL'
-              ? (raw?.professionalProfileId ?? raw?.userId ?? raw?.id ?? '')
-              : (raw?.patientProfileId ?? raw?.userId ?? raw?.id ?? ''),
-          name:
-            raw?.fullName ??
-            raw?.name ??
-            raw?.userName ??
-            raw?.email ??
-            'Usuario',
-          slug: raw?.professionalProfileSlug,
-        };
-      }
+    const contexts = rawContexts.map((context: any) =>
+      this.mapRawContext(raw, context),
+    );
 
-      const type = this.normalizeContextType(context?.type);
-      return {
-        type,
-        id: context?.id ?? raw?.userId ?? raw?.id ?? '',
-        name:
-          context?.name ??
-          raw?.fullName ??
-          raw?.name ??
-          raw?.userName ??
-          raw?.email ??
-          'Usuario',
-        slug: context?.slug ?? raw?.professionalProfileSlug,
-      };
-    });
+    this.ensureRoleContexts(
+      raw,
+      contexts,
+      hasPatientRole,
+      hasProfessionalRole,
+      hasPrivilegedRole,
+    );
 
-    const fallbackContext = {
-      type: this.normalizeContextType(raw?.defaultContext ?? 'PATIENT'),
-      id:
-        raw?.patientProfileId ??
-        raw?.professionalProfileId ??
-        raw?.userId ??
-        raw?.id ??
-        '',
-      name:
-        raw?.fullName ?? raw?.name ?? raw?.userName ?? raw?.email ?? 'Usuario',
-      slug: raw?.professionalProfileSlug,
-    };
+    const defaultContextType = this.getDefaultContextType(
+      raw,
+      hasPrivilegedRole,
+      hasPatientRole,
+      hasProfessionalRole,
+    );
+
+    const fallbackContext =
+      contexts.find(
+        (context: CurrentUserDto['contexts'][number]) =>
+          context.type === defaultContextType,
+      ) ?? this.buildContext(raw, defaultContextType);
 
     return {
       id: raw?.id ?? raw?.userId ?? '',
@@ -94,12 +211,7 @@ export class AuthApi {
       contexts: contexts.length > 0 ? contexts : [fallbackContext],
       defaultContext:
         contexts.find(
-          (context: {
-            type: 'ADMIN' | 'PROFESSIONAL' | 'PATIENT';
-            id: string;
-            name: string;
-            slug?: string;
-          }) =>
+          (context: CurrentUserDto['contexts'][number]) =>
             context.type ===
             this.normalizeContextType(raw?.defaultContext ?? ''),
         ) ?? fallbackContext,

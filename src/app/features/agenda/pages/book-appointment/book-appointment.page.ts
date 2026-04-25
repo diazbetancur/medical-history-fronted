@@ -30,8 +30,8 @@ import { type PaginatedProfessionalsResponse } from '@data/models';
  * Multi-step form for booking an appointment:
  * 1. Select professional
  * 2. Select date
- * 3. Select time slot
- * 4. Add notes (optional)
+ * 3. Add optional consultation notes
+ * 4. Select time slot
  * 5. Confirm and create
  *
  * Features:
@@ -40,6 +40,7 @@ import { type PaginatedProfessionalsResponse } from '@data/models';
  * - Converts UTC slots to local time for display
  * - Creates appointment with UTC time
  */
+
 @Component({
   selector: 'app-book-appointment-page',
   standalone: true,
@@ -77,7 +78,7 @@ export class BookAppointmentPageComponent {
   readonly professionalForm: FormGroup;
   readonly dateForm: FormGroup;
   readonly slotForm: FormGroup;
-  readonly notesForm: FormGroup;
+  readonly observationForm: FormGroup;
 
   // Computed
   readonly selectedDate = computed(() => this.dateForm.value.date);
@@ -104,8 +105,8 @@ export class BookAppointmentPageComponent {
       slot: ['', Validators.required],
     });
 
-    this.notesForm = this.fb.group({
-      notes: ['', Validators.maxLength(500)],
+    this.observationForm = this.fb.group({
+      observation: ['', [Validators.maxLength(1000)]],
     });
 
     // Load professionals on init
@@ -182,7 +183,8 @@ export class BookAppointmentPageComponent {
     if (
       !this.professionalForm.valid ||
       !this.dateForm.valid ||
-      !this.slotForm.valid
+      !this.slotForm.valid ||
+      !this.observationForm.valid
     ) {
       return;
     }
@@ -191,13 +193,15 @@ export class BookAppointmentPageComponent {
 
     const professionalId = this.professionalForm.value.professionalId;
     const slot = this.slotForm.value.slot as TimeSlot;
-    const notes = this.notesForm.value.notes || undefined;
+    const observation =
+      (this.observationForm.value.observation as string | undefined)?.trim() ||
+      undefined;
 
     this.appointmentsApi
       .createAppointment({
         professionalId,
         startTime: slot.startTime, // Already in UTC
-        notes,
+        Observation: observation,
       })
       .subscribe({
         next: (response) => {

@@ -115,6 +115,7 @@ export class AppointmentsService {
   ): Observable<CreateAppointmentResponseDto> {
     const appointmentDate = dto.appointmentDate ?? dto.date ?? '';
     const timeSlot = dto.timeSlot ?? dto.slotId ?? '';
+    const observation = (dto.observation ?? dto.notes ?? '').trim();
 
     return this.http
       .post<CreateAppointmentResponseDto>(`${this.baseUrl}/mine`, {
@@ -123,7 +124,7 @@ export class AppointmentsService {
         timeSlot,
         date: appointmentDate,
         slotId: dto.slotId,
-        notes: dto.notes,
+        Observation: observation || undefined,
       })
       .pipe(catchError((error) => this.handleError(error)));
   }

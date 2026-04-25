@@ -164,8 +164,15 @@ export const routes: Routes = [
   // ============================================================================
   {
     path: 'professional/onboarding',
-    redirectTo: 'professional/profile',
-    pathMatch: 'full',
+    canActivate: [authStoreGuard, contextGuard],
+    data: {
+      requiredContext: 'PROFESSIONAL',
+    },
+    loadComponent: () =>
+      import('./features/professional/pages/onboarding/professional-onboarding.page').then(
+        (m) => m.ProfessionalOnboardingPage,
+      ),
+    title: 'Configurar Perfil Profesional - Directory Pro',
   },
 
   // ============================================================================
@@ -205,14 +212,6 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        canActivate: [permissionStoreGuard],
-        data: {
-          requiredPermissions: [
-            'Profiles.View',
-            'Profiles.Create',
-            'Profiles.Update',
-          ],
-        },
         loadComponent: () =>
           import('./features/professional/pages/onboarding/professional-onboarding.page').then(
             (m) => m.ProfessionalOnboardingPage,

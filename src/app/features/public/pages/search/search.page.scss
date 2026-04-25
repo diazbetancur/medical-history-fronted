@@ -64,12 +64,11 @@
     ::ng-deep input.mat-mdc-input-element,
     ::ng-deep .mat-mdc-select-value,
     ::ng-deep .mat-mdc-select-value-text {
-      text-align: center;
-      justify-content: center;
+      text-align: left;
     }
 
     ::ng-deep .mat-mdc-select-trigger {
-      justify-content: center;
+      justify-content: flex-start;
     }
 
     ::ng-deep .mdc-floating-label {

@@ -57,9 +57,9 @@ export class ExamUploadDialogComponent implements OnInit {
 
   private initForm(): void {
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(200)]],
+      title: ['', [Validators.required, Validators.maxLength(150)]],
       examDate: [new Date().toISOString().split('T')[0], [Validators.required]],
-      notes: ['', [Validators.maxLength(1000)]],
+      notes: ['', [Validators.maxLength(1500)]],
     });
   }
 
@@ -78,6 +78,7 @@ export class ExamUploadDialogComponent implements OnInit {
       'image/jpeg',
       'image/jpg',
       'image/png',
+      'image/webp',
     ];
     if (!validTypes.includes(file.type)) {
       this.fileError.set(
@@ -143,9 +144,9 @@ export class ExamUploadDialogComponent implements OnInit {
 
     const formValue = this.form.value;
     const dto: CreateExamDto = {
-      title: formValue.title,
+      title: formValue.title?.trim(),
       examDate: this.normalizeDateOnly(formValue.examDate)!,
-      notes: formValue.notes || undefined,
+      notes: formValue.notes?.trim() || undefined,
     };
 
     this.examsService.create(dto, this.selectedFile()!).subscribe({

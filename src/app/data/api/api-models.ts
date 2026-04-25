@@ -614,8 +614,8 @@ export interface ProfessionalLocation {
 export interface CreateProfessionalLocationPayload {
   name: string;
   address?: string;
-  cityId: string;
-  countryId: string;
+  cityId?: string;
+  countryId?: string;
   phone?: string;
 }
 
@@ -741,13 +741,18 @@ export interface UpdateServicePayload {
 
 export type RequestStatus =
   | 'Pending'
-  | 'Accepted'
+  | 'Contacted'
+  | 'InProgress'
   | 'Rejected'
+  | 'Cancelled'
   | 'Completed'
+  | 'Accepted'
   | 0
   | 1
   | 2
-  | 3;
+  | 3
+  | 4
+  | 5;
 
 export interface ServiceRequest {
   id: string;

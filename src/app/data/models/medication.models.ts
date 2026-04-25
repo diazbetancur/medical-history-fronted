@@ -41,7 +41,7 @@ export interface CreateMedicationDto {
   frequency?: string;
   route?: string;
   prescribedBy?: string;
-  startDate: string; // ISO date
+  startDate?: string; // ISO date
   isOngoing: boolean;
   endDate?: string; // ISO date, required if !isOngoing
   notes?: string;
@@ -54,7 +54,7 @@ export interface UpdateMedicationDto {
   frequency?: string;
   route?: string;
   prescribedBy?: string;
-  startDate: string; // ISO date
+  startDate?: string; // ISO date
   isOngoing: boolean;
   endDate?: string; // ISO date, required if !isOngoing
   notes?: string;

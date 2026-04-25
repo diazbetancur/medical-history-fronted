@@ -11,7 +11,9 @@
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <!-- Email Field -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
+          <mat-label>
+            <app-form-label text="Email" [required]="true"></app-form-label>
+          </mat-label>
           <input
             matInput
             type="email"
@@ -19,28 +21,33 @@
             placeholder="ejemplo@email.com"
             autocomplete="email"
           />
-          @if (form.controls.email.hasError('required')) {
-          <mat-error>El email es requerido</mat-error>
-          } @if (form.controls.email.hasError('email')) {
-          <mat-error>Email inválido</mat-error>
-          }
+          <app-form-control-error
+            [control]="form.controls.email"
+            [submitted]="submitted()"
+            [messages]="loginFormMessages.email"
+          ></app-form-control-error>
         </mat-form-field>
 
         <!-- Password Field -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Contraseña</mat-label>
+          <mat-label>
+            <app-form-label
+              text="Contrasena"
+              [required]="true"
+            ></app-form-label>
+          </mat-label>
           <input
             matInput
             type="password"
             formControlName="password"
-            placeholder="********"
+            placeholder="Ingresa tu contrasena"
             autocomplete="current-password"
           />
-          @if (form.controls.password.hasError('required')) {
-          <mat-error>La contraseña es requerida</mat-error>
-          } @if (form.controls.password.hasError('minlength')) {
-          <mat-error>Mínimo 6 caracteres</mat-error>
-          }
+          <app-form-control-error
+            [control]="form.controls.password"
+            [submitted]="submitted()"
+            [messages]="loginFormMessages.password"
+          ></app-form-control-error>
         </mat-form-field>
 
         <mat-checkbox
@@ -63,7 +70,7 @@
           mat-raised-button
           color="primary"
           type="submit"
-          [disabled]="isLoading()"
+          [disabled]="isLoading() || isFormInvalid()"
           class="full-width"
         >
           @if (isLoading()) {

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import {
+  AbstractControl,
   FormArray,
   FormBuilder,
   FormControl,
@@ -122,23 +123,39 @@ import { ConfirmDialogComponent } from '@shared/ui';
                           ) {
                             <div class="time-block" [formGroupName]="j">
                               <mat-form-field appearance="outline">
-                                <mat-label>Inicio</mat-label>
+                                <mat-label>Hora de inicio *</mat-label>
                                 <input
                                   matInput
                                   type="time"
                                   formControlName="startTime"
                                 />
+                                @if (
+                                  shouldShowControlError(
+                                    getTimeBlockControl(i, j, 'startTime'),
+                                    scheduleSubmitted()
+                                  )
+                                ) {
+                                  <mat-error>Selecciona la hora de inicio</mat-error>
+                                }
                               </mat-form-field>
 
                               <mat-icon class="arrow">arrow_forward</mat-icon>
 
                               <mat-form-field appearance="outline">
-                                <mat-label>Fin</mat-label>
+                                <mat-label>Hora de fin *</mat-label>
                                 <input
                                   matInput
                                   type="time"
                                   formControlName="endTime"
                                 />
+                                @if (
+                                  shouldShowControlError(
+                                    getTimeBlockControl(i, j, 'endTime'),
+                                    scheduleSubmitted()
+                                  )
+                                ) {
+                                  <mat-error>Selecciona la hora de fin</mat-error>
+                                }
                               </mat-form-field>
 
                               @if (store.locations().length > 0) {
@@ -191,26 +208,39 @@ import { ConfirmDialogComponent } from '@shared/ui';
 
               <div class="slot-config">
                 <mat-form-field appearance="outline">
-                  <mat-label>Duración de citas (minutos)</mat-label>
-                  <input
-                    matInput
-                    type="number"
-                    formControlName="defaultSlotDuration"
-                    min="5"
-                    max="240"
-                    step="5"
-                  />
+                  <mat-label>Duracion de cada slot *</mat-label>
+                  <mat-select formControlName="defaultSlotDuration">
+                    @for (minutes of slotMinuteOptions; track minutes) {
+                      <mat-option [value]="minutes">
+                        {{ minutes }} minutos
+                      </mat-option>
+                    }
+                  </mat-select>
+                  @if (
+                    shouldShowControlError(
+                      scheduleForm.get('defaultSlotDuration'),
+                      scheduleSubmitted()
+                    )
+                  ) {
+                    <mat-error>Selecciona una duracion valida</mat-error>
+                  }
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                  <mat-label>Zona horaria</mat-label>
-                  <input
-                    matInput
-                    type="text"
-                    [value]="'America/Tegucigalpa'"
-                    readonly
-                  />
-                  <mat-hint>Honduras (fijo)</mat-hint>
+                  <mat-label>Zona horaria *</mat-label>
+                  <mat-select formControlName="timeZone">
+                    @for (timeZone of timeZoneOptions; track timeZone) {
+                      <mat-option [value]="timeZone">{{ timeZone }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (
+                    shouldShowControlError(
+                      scheduleForm.get('timeZone'),
+                      scheduleSubmitted()
+                    )
+                  ) {
+                    <mat-error>Selecciona una zona horaria</mat-error>
+                  }
                 </mat-form-field>
 
                 <mat-slide-toggle formControlName="isActive"
@@ -225,7 +255,7 @@ import { ConfirmDialogComponent } from '@shared/ui';
               mat-raised-button
               color="primary"
               (click)="saveSchedule()"
-              [disabled]="store.isSaving() || scheduleForm.invalid"
+              [disabled]="store.isSaving()"
             >
               @if (store.isSaving()) {
                 <mat-spinner diameter="20"></mat-spinner>
@@ -264,7 +294,7 @@ import { ConfirmDialogComponent } from '@shared/ui';
                 <form [formGroup]="absenceForm">
                   <div class="form-row">
                     <mat-form-field appearance="outline">
-                      <mat-label>Tipo</mat-label>
+                      <mat-label>Tipo *</mat-label>
                       <mat-select formControlName="type">
                         @for (type of absenceTypes; track type) {
                           <mat-option [value]="type">{{
@@ -272,10 +302,18 @@ import { ConfirmDialogComponent } from '@shared/ui';
                           }}</mat-option>
                         }
                       </mat-select>
+                      @if (
+                        shouldShowControlError(
+                          absenceForm.get('type'),
+                          absenceSubmitted()
+                        )
+                      ) {
+                        <mat-error>Selecciona un tipo de excepcion</mat-error>
+                      }
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Fecha desde</mat-label>
+                      <mat-label>Fecha de inicio *</mat-label>
                       <input
                         matInput
                         [matDatepicker]="startPicker"
@@ -286,10 +324,18 @@ import { ConfirmDialogComponent } from '@shared/ui';
                         [for]="startPicker"
                       ></mat-datepicker-toggle>
                       <mat-datepicker #startPicker></mat-datepicker>
+                      @if (
+                        shouldShowControlError(
+                          absenceForm.get('startDate'),
+                          absenceSubmitted()
+                        )
+                      ) {
+                        <mat-error>Selecciona la fecha de inicio</mat-error>
+                      }
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Fecha hasta</mat-label>
+                      <mat-label>Fecha de fin *</mat-label>
                       <input
                         matInput
                         [matDatepicker]="endPicker"
@@ -300,27 +346,51 @@ import { ConfirmDialogComponent } from '@shared/ui';
                         [for]="endPicker"
                       ></mat-datepicker-toggle>
                       <mat-datepicker #endPicker></mat-datepicker>
+                      @if (
+                        shouldShowControlError(
+                          absenceForm.get('endDate'),
+                          absenceSubmitted()
+                        )
+                      ) {
+                        <mat-error>Selecciona la fecha de fin</mat-error>
+                      }
                     </mat-form-field>
                   </div>
 
                   @if (isOverrideType()) {
                     <div class="form-row">
                       <mat-form-field appearance="outline">
-                        <mat-label>Hora inicio (override)</mat-label>
+                        <mat-label>Hora de inicio especial *</mat-label>
                         <input
                           matInput
                           type="time"
                           formControlName="overrideStartTime"
                         />
+                        @if (
+                          shouldShowControlError(
+                            absenceForm.get('overrideStartTime'),
+                            absenceSubmitted()
+                          )
+                        ) {
+                          <mat-error>Selecciona la hora de inicio</mat-error>
+                        }
                       </mat-form-field>
 
                       <mat-form-field appearance="outline">
-                        <mat-label>Hora fin (override)</mat-label>
+                        <mat-label>Hora de fin especial *</mat-label>
                         <input
                           matInput
                           type="time"
                           formControlName="overrideEndTime"
                         />
+                        @if (
+                          shouldShowControlError(
+                            absenceForm.get('overrideEndTime'),
+                            absenceSubmitted()
+                          )
+                        ) {
+                          <mat-error>Selecciona la hora de fin</mat-error>
+                        }
                       </mat-form-field>
 
                       @if (store.locations().length > 0) {
@@ -360,12 +430,13 @@ import { ConfirmDialogComponent } from '@shared/ui';
                       mat-raised-button
                       color="primary"
                       (click)="createAbsence()"
-                      [disabled]="store.isSaving() || absenceForm.invalid"
+                      [disabled]="store.isSaving()"
+                      type="button"
                     >
                       <mat-icon>save</mat-icon>
                       Guardar
                     </button>
-                    <button mat-button (click)="cancelAbsenceForm()">
+                    <button mat-button (click)="cancelAbsenceForm()" type="button">
                       Cancelar
                     </button>
                   </div>
@@ -640,8 +711,21 @@ export class ProfessionalAvailabilityPage implements OnInit {
   protected readonly dayNames = DAY_NAMES;
   protected readonly absenceTypes: AbsenceType[] = ['Absent', 'Override'];
   protected readonly absenceTypeNames = ABSENCE_TYPE_NAMES;
+  protected readonly slotMinuteOptions = [
+    5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240,
+  ];
+  protected readonly timeZoneOptions = [
+    'America/Tegucigalpa',
+    'America/Bogota',
+    'America/Guatemala',
+    'America/Mexico_City',
+    'America/Lima',
+    'UTC',
+  ];
 
   protected readonly showAbsenceForm = signal(false);
+  protected readonly scheduleSubmitted = signal(false);
+  protected readonly absenceSubmitted = signal(false);
 
   protected scheduleForm!: FormGroup;
   protected absenceForm!: FormGroup;
@@ -735,7 +819,8 @@ export class ProfessionalAvailabilityPage implements OnInit {
 
     this.scheduleForm.patchValue({
       defaultSlotDuration: schedule.defaultSlotDuration,
-      timeZone: ProfessionalAvailabilityPage.HONDURAS_TIMEZONE,
+      timeZone:
+        schedule.timeZone || ProfessionalAvailabilityPage.HONDURAS_TIMEZONE,
       isActive: schedule.isActive,
     });
   }
@@ -821,6 +906,21 @@ export class ProfessionalAvailabilityPage implements OnInit {
     return dayGroup.get('timeBlocks') as FormArray;
   }
 
+  protected getTimeBlockControl(
+    dayIndex: number,
+    blockIndex: number,
+    controlName: 'startTime' | 'endTime' | 'professionalLocationId',
+  ): AbstractControl | null {
+    return this.getTimeBlocksFormArray(dayIndex).at(blockIndex)?.get(controlName) ?? null;
+  }
+
+  protected shouldShowControlError(
+    control: AbstractControl | null,
+    submitted: boolean,
+  ): boolean {
+    return !!control && control.invalid && (submitted || control.touched || control.dirty);
+  }
+
   protected addTimeBlock(dayIndex: number): void {
     const timeBlocks = this.getTimeBlocksFormArray(dayIndex);
     timeBlocks.push(
@@ -854,22 +954,42 @@ export class ProfessionalAvailabilityPage implements OnInit {
   }
 
   protected saveSchedule(): void {
-    if (this.scheduleForm.invalid) return;
+    this.scheduleSubmitted.set(true);
 
-    const value = this.scheduleForm.value;
+    if (this.scheduleForm.invalid) {
+      this.scheduleForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.scheduleForm.getRawValue();
+    const scheduleError = this.validateScheduleDays(value.days as DaySchedule[]);
+    if (scheduleError) {
+      this.toast.error(scheduleError);
+      return;
+    }
 
     this.store.updateWeeklySchedule(
       value.days,
       value.defaultSlotDuration,
-      ProfessionalAvailabilityPage.HONDURAS_TIMEZONE,
+      value.timeZone,
       value.isActive,
     );
   }
 
   protected createAbsence(): void {
-    if (this.absenceForm.invalid) return;
+    this.absenceSubmitted.set(true);
+
+    if (this.absenceForm.invalid) {
+      this.absenceForm.markAllAsTouched();
+      return;
+    }
 
     const value = this.absenceForm.value;
+
+    if (value.startDate && value.endDate && value.endDate < value.startDate) {
+      this.toast.error('La fecha de fin debe ser posterior a la fecha de inicio.');
+      return;
+    }
 
     if (
       value.type === 'Override' &&
@@ -894,7 +1014,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
         value.type === 'Override'
           ? (value.professionalLocationId ?? null)
           : null,
-      reason: value.reason || undefined,
+      reason: value.reason?.trim() || undefined,
       slotDurationMinutes:
         Number(this.scheduleForm.get('defaultSlotDuration')?.value) || 30,
       institutionId: null,
@@ -942,6 +1062,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
 
   protected cancelAbsenceForm(): void {
     this.showAbsenceForm.set(false);
+    this.absenceSubmitted.set(false);
     this.absenceForm.reset({
       type: 'Absent',
       startDate: null,
@@ -968,6 +1089,59 @@ export class ProfessionalAvailabilityPage implements OnInit {
       minute: '2-digit',
       hour12: false,
     });
+  }
+
+  private validateScheduleDays(days: DaySchedule[]): string | null {
+    let hasAnyWorkingWindow = false;
+
+    for (const day of days) {
+      if (!day.isWorkingDay) {
+        continue;
+      }
+
+      const rawBlocks = day.timeBlocks ?? [];
+      if (rawBlocks.length === 0) {
+        return `Agrega al menos un bloque horario para ${this.dayNames[day.dayOfWeek]}.`;
+      }
+
+      hasAnyWorkingWindow = true;
+
+      const timeBlocks = [...rawBlocks].sort(
+        (left, right) =>
+          this.timeToMinutes(left.startTime) - this.timeToMinutes(right.startTime),
+      );
+
+      for (let index = 0; index < timeBlocks.length; index += 1) {
+        const block = timeBlocks[index];
+        const start = this.timeToMinutes(block.startTime);
+        const end = this.timeToMinutes(block.endTime);
+
+        if (end <= start) {
+          return `En ${this.dayNames[day.dayOfWeek]}, cada bloque debe terminar después de iniciar.`;
+        }
+
+        const previousBlock = timeBlocks[index - 1];
+        if (!previousBlock) {
+          continue;
+        }
+
+        const previousEnd = this.timeToMinutes(previousBlock.endTime);
+        if (start < previousEnd) {
+          return `En ${this.dayNames[day.dayOfWeek]} hay bloques horarios superpuestos.`;
+        }
+      }
+    }
+
+    if (!hasAnyWorkingWindow) {
+      return 'Agrega al menos un bloque horario a la plantilla semanal.';
+    }
+
+    return null;
+  }
+
+  private timeToMinutes(value: string): number {
+    const [hours = '0', minutes = '0'] = (value || '').split(':');
+    return Number(hours) * 60 + Number(minutes);
   }
 
   private toUtcRangeStart(date: Date): string {

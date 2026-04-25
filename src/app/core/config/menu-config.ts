@@ -144,7 +144,7 @@ export const MENU_ITEMS: MenuItem[] = [
   // ADMIN MENU
   // ==========================================================================
   {
-    label: 'Dashboard',
+    label: 'Inicio',
     icon: 'dashboard',
     route: '/admin',
     context: 'ADMIN',
@@ -226,7 +226,7 @@ export const MENU_ITEMS: MenuItem[] = [
   // PROFESSIONAL MENU
   // ==========================================================================
   {
-    label: 'Dashboard',
+    label: 'Inicio',
     icon: 'dashboard',
     route: '/professional',
     context: 'PROFESSIONAL',
@@ -237,11 +237,6 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: 'manage_accounts',
     route: '/professional/profile',
     context: 'PROFESSIONAL',
-    requiredPermissions: [
-      PROFESSIONAL_PERMISSIONS.PROFILES_VIEW,
-      PROFESSIONAL_PERMISSIONS.PROFILES_CREATE,
-      PROFESSIONAL_PERMISSIONS.PROFILES_UPDATE,
-    ],
   },
   {
     label: 'Mis Citas',
@@ -281,7 +276,7 @@ export const MENU_ITEMS: MenuItem[] = [
   // PATIENT MENU
   // ==========================================================================
   {
-    label: 'Dashboard',
+    label: 'Inicio',
     icon: 'dashboard',
     route: '/patient',
     context: 'PATIENT',

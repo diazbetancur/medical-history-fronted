@@ -358,6 +358,73 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 
 // Form fields
 .mat-mdc-form-field {
+  .mat-mdc-form-field-infix {
+    min-height: 48px;
+    display: block;
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .mat-mdc-form-field-icon-prefix,
+  .mat-mdc-form-field-icon-suffix {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    padding-inline-start: 12px;
+    padding-inline-end: 8px;
+    box-sizing: border-box;
+    color: var(--color-text-secondary, #64748b);
+
+    .mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+    }
+
+    .mat-mdc-icon-button {
+      width: 36px;
+      height: 36px;
+      padding: 6px;
+    }
+  }
+
+  input.mat-mdc-input-element,
+  .mat-mdc-select-value-text {
+    line-height: 1.4;
+    text-overflow: ellipsis;
+  }
+
+  .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex {
+    align-items: center;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper,
+  .mat-mdc-form-field-bottom-align::before {
+    min-height: 22px;
+  }
+
+  &.mat-mdc-form-field-has-icon-prefix {
+    .mat-mdc-input-element,
+    .mat-mdc-select-value-text {
+      margin-left: 4px;
+    }
+  }
+
+  .mat-mdc-select-trigger {
+    align-items: center;
+    min-height: 24px;
+  }
+
+  textarea.mat-mdc-input-element {
+    line-height: 1.5;
+    min-height: 88px;
+    resize: vertical;
+    margin: 0;
+  }
+
   &.mat-focused {
     .mdc-notched-outline__leading,
     .mdc-notched-outline__notch,

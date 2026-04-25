@@ -52,8 +52,10 @@
             />
             @if (searchValue()) {
             <button
+              type="button"
               matSuffix
               mat-icon-button
+              aria-label="Limpiar busqueda"
               (click)="clearSearch()"
               matTooltip="Limpiar búsqueda"
             >
