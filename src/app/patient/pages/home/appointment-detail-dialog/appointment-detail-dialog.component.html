@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>Detalle de cita</h2>
+
+<mat-dialog-content class="dialog-content">
+  @if (loading()) {
+    <div class="state-block">
+      <mat-spinner diameter="32"></mat-spinner>
+      <p>Cargando detalle...</p>
+    </div>
+  } @else if (error()) {
+    <div class="state-block error">
+      <mat-icon>error</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (appointment()) {
+    <mat-card>
+      <mat-card-content>
+        <div class="row">
+          <strong>Profesional:</strong>
+          <span>{{ appointment()!.professionalName }}</span>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="row">
+          <strong>Dirección:</strong>
+          <span>{{ appointment()!.address }}</span>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="row">
+          <strong>Fecha:</strong>
+          <span>{{ formatDate(appointment()!.appointmentDate) }}</span>
+        </div>
+        <div class="row">
+          <strong>Hora:</strong>
+          <span>{{ appointment()!.timeSlot || "-" }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="close()">Cerrar</button>
+</mat-dialog-actions>

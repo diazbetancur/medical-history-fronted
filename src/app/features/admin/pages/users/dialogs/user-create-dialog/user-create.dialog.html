@@ -1,0 +1,204 @@
+<h2 mat-dialog-title>
+  <mat-icon>person_add</mat-icon>
+  Crear usuario
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="user-form">
+    <div class="form-section">
+      <h3>Cuenta</h3>
+
+      <mat-form-field appearance="outline">
+        <mat-label>
+          <app-form-label
+            text="Nombre de usuario"
+            [required]="true"
+          ></app-form-label>
+        </mat-label>
+        <input
+          matInput
+          formControlName="userName"
+          placeholder="Ingresa el nombre de usuario"
+        />
+        <mat-icon matPrefix>account_circle</mat-icon>
+        <app-form-control-error
+          [control]="form.controls['userName']"
+          [submitted]="submitted()"
+        ></app-form-control-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>
+          <app-form-label text="Email" [required]="true"></app-form-label>
+        </mat-label>
+        <input
+          matInput
+          formControlName="email"
+          type="email"
+          placeholder="Ingresa un correo valido"
+        />
+        <mat-icon matPrefix>email</mat-icon>
+        <app-form-control-error
+          [control]="form.controls['email']"
+          [submitted]="submitted()"
+        ></app-form-control-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>
+          <app-form-label text="Contrasena" [required]="true"></app-form-label>
+        </mat-label>
+        <input
+          matInput
+          formControlName="password"
+          [type]="showPassword() ? 'text' : 'password'"
+          placeholder="Crea una contrasena segura"
+        />
+        <mat-icon matPrefix>lock</mat-icon>
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="togglePassword()"
+          aria-label="Mostrar u ocultar contrasena"
+        >
+          <mat-icon
+            >{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon
+          >
+        </button>
+        <app-form-control-error
+          [control]="form.controls['password']"
+          [submitted]="submitted()"
+          [messages]="{
+            minlength: 'Debes ingresar al menos 8 caracteres',
+            pattern: 'La contrasena debe incluir mayuscula, minuscula, numero y simbolo'
+          }"
+        ></app-form-control-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Confirmar contrasena</mat-label>
+        <input
+          matInput
+          formControlName="confirmPassword"
+          [type]="showPassword() ? 'text' : 'password'"
+          placeholder="Confirma la contrasena"
+        />
+        <mat-icon matPrefix>lock_outline</mat-icon>
+        <app-form-control-error
+          [control]="form.controls['confirmPassword']"
+          [submitted]="submitted()"
+        ></app-form-control-error>
+        @if ( form.hasError('passwordMismatch') && (submitted() ||
+        form.controls['confirmPassword'].touched ||
+        form.controls['confirmPassword'].dirty) ) {
+        <mat-error>Las contrasenas no coinciden</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-section">
+      <h3>Perfil</h3>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>
+            <app-form-label text="Nombre" [required]="true"></app-form-label>
+          </mat-label>
+          <input
+            matInput
+            formControlName="firstName"
+            placeholder="Ingresa el nombre"
+          />
+          <mat-icon matPrefix>badge</mat-icon>
+          <app-form-control-error
+            [control]="form.controls['firstName']"
+            [submitted]="submitted()"
+          ></app-form-control-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>
+            <app-form-label text="Apellido" [required]="true"></app-form-label>
+          </mat-label>
+          <input
+            matInput
+            formControlName="lastName"
+            placeholder="Ingresa el apellido"
+          />
+          <app-form-control-error
+            [control]="form.controls['lastName']"
+            [submitted]="submitted()"
+          ></app-form-control-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Telefono</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="phone"
+          placeholder="Ingresa el telefono si aplica"
+        />
+        <mat-icon matPrefix>phone</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="form-section">
+      <h3>Roles</h3>
+
+      @if (loadingRoles()) {
+      <div class="loading-inline">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Cargando roles...</span>
+      </div>
+      } @else {
+      <mat-form-field appearance="outline">
+        <mat-label>Roles iniciales</mat-label>
+        <mat-select formControlName="roles" multiple>
+          @for (role of availableRoles(); track role) {
+          <mat-option [value]="role">{{ role }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>shield</mat-icon>
+        <mat-hint>Opcional</mat-hint>
+      </mat-form-field>
+      }
+    </div>
+
+    <div class="form-section options">
+      <mat-checkbox formControlName="sendWelcomeEmail">
+        Enviar email de bienvenida
+      </mat-checkbox>
+    </div>
+  </form>
+
+  @if (errorMessage()) {
+  <div class="error-banner">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="saving()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="saving()"
+  >
+    @if (saving()) {
+    <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+    <ng-container>
+      <mat-icon>person_add</mat-icon>
+      Crear usuario
+    </ng-container>
+    }
+  </button>
+</mat-dialog-actions>

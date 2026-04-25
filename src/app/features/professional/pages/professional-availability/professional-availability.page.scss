@@ -1,0 +1,185 @@
+.availability-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 500;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+
+  p {
+    margin-top: 16px;
+    color: var(--color-text-secondary);
+  }
+}
+
+.schedule-card,
+.absences-card {
+  margin-bottom: 24px;
+
+  mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.working-hours {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.no-work {
+  color: var(--color-text-disabled);
+}
+
+.time-blocks {
+  padding: 16px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .time-block {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr 1.4fr auto;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .arrow {
+      color: var(--color-text-disabled);
+    }
+  }
+}
+
+.slot-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
+  margin-top: 24px;
+  align-items: center;
+}
+
+mat-card-actions {
+  padding: 16px;
+
+  button {
+    mat-icon,
+    mat-spinner {
+      margin-right: 8px;
+    }
+  }
+}
+
+.absence-form {
+  padding: 16px;
+  background: var(--color-background-alt);
+  border-radius: 8px;
+  margin-bottom: 24px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+
+    button mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.absences-list {
+  margin-top: 24px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .absence-item {
+    margin-bottom: 12px;
+
+    .absence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .absence-dates,
+    .absence-reason {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--color-text-primary);
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+.empty-absences {
+  text-align: center;
+  padding: 32px;
+  color: var(--color-text-secondary);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    color: var(--color-text-disabled);
+  }
+}
+
+@media (max-width: 768px) {
+  .availability-page {
+    padding: 16px;
+  }
+
+  .time-blocks .time-block,
+  .slot-config,
+  .absence-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEditMode ? "edit" : "add_business" }}</mat-icon>
+  {{ isEditMode ? "Editar institucion" : "Nueva institucion" }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="institution-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>
+        <app-form-label text="Nombre" [required]="true"></app-form-label>
+      </mat-label>
+      <input
+        matInput
+        formControlName="name"
+        placeholder="Ingresa el nombre de la institucion"
+      />
+      <app-form-control-error
+        [control]="form.get('name')"
+        [submitted]="submitted()"
+      ></app-form-control-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Codigo</mat-label>
+      <input
+        matInput
+        formControlName="code"
+        placeholder="Ingresa un codigo unico si aplica"
+      />
+      <mat-hint>Opcional</mat-hint>
+      <app-form-control-error
+        [control]="form.get('code')"
+        [submitted]="submitted()"
+      ></app-form-control-error>
+    </mat-form-field>
+
+    <div class="toggle-container">
+      <mat-slide-toggle formControlName="isActive" color="primary">
+        Mantener activa
+      </mat-slide-toggle>
+      <p class="toggle-hint">
+        Las instituciones inactivas dejan de mostrarse en el catalogo.
+      </p>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()">
+    <mat-icon>{{ isEditMode ? "save" : "add" }}</mat-icon>
+    {{ isEditMode ? "Guardar" : "Crear" }}
+  </button>
+</mat-dialog-actions>

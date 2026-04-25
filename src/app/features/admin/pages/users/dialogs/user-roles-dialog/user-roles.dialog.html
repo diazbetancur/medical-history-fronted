@@ -1,0 +1,96 @@
+<h2 mat-dialog-title>
+  <mat-icon>shield</mat-icon>
+  Gestionar Roles
+</h2>
+
+<mat-dialog-content>
+  <div class="user-header">
+    <mat-icon class="avatar">account_circle</mat-icon>
+    <div class="user-info">
+      <strong>{{ data.user.userName }}</strong>
+      <span class="email">{{ data.user.email }}</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  @if (loadingRoles()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando roles disponibles...</p>
+  </div>
+  } @if (!loadingRoles() && roleItems().length > 0) {
+  <div class="roles-section">
+    <p class="hint">
+      <mat-icon>info</mat-icon>
+      Selecciona los roles que deseas asignar al usuario
+    </p>
+
+    <div class="roles-list">
+      @for (role of roleItems(); track role.name) {
+      <div class="role-item" [class.selected]="role.selected">
+        <mat-checkbox
+          [(ngModel)]="role.selected"
+          (ngModelChange)="onRoleToggle()"
+          [disabled]="saving()"
+        >
+          <div class="role-content">
+            <span class="role-name">{{ role.name }}</span>
+            @if (role.isSystem) {
+            <span class="role-badge system">Sistema</span>
+            }
+          </div>
+        </mat-checkbox>
+      </div>
+      }
+    </div>
+  </div>
+
+  @if (hasChanges()) {
+  <div class="changes-summary">
+    <h4>Cambios a aplicar:</h4>
+    @if (rolesToAdd().length > 0) {
+    <div class="change-item add">
+      <mat-icon>add_circle</mat-icon>
+      <span>Agregar: {{ rolesToAdd().join(', ') }}</span>
+    </div>
+    } @if (rolesToRemove().length > 0) {
+    <div class="change-item remove">
+      <mat-icon>remove_circle</mat-icon>
+      <span>Quitar: {{ rolesToRemove().join(', ') }}</span>
+    </div>
+    }
+  </div>
+  } } @if (!loadingRoles() && roleItems().length === 0) {
+  <div class="empty-state">
+    <mat-icon>info</mat-icon>
+    <p>No hay roles disponibles en el sistema</p>
+  </div>
+  } @if (errorMessage()) {
+  <div class="error-banner">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="saving()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSave()"
+    [disabled]="saving() || loadingRoles() || !hasChanges()"
+  >
+    @if (saving()) {
+    <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+    <ng-container>
+      <mat-icon>save</mat-icon>
+      Guardar Cambios
+    </ng-container>
+    }
+  </button>
+</mat-dialog-actions>

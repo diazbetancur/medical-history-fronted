@@ -1,0 +1,151 @@
+<h2 mat-dialog-title>Agendar cita</h2>
+
+<mat-dialog-content class="dialog-content">
+  @if (bookingConfirmation()) {
+    <mat-card class="success-card">
+      <mat-card-content>
+        <div class="success-title">
+          <mat-icon>check_circle</mat-icon>
+          <h3>Cita agendada exitosamente</h3>
+        </div>
+
+        <div class="summary-row">
+          <strong>Médico:</strong>
+          <span>{{ professionalName() }}</span>
+        </div>
+        <div class="summary-row">
+          <strong>Fecha:</strong>
+          <span>{{ bookingConfirmation()!.date }}</span>
+        </div>
+        <div class="summary-row">
+          <strong>Hora:</strong>
+          <span>
+            {{ bookingConfirmation()!.startTime }} -
+            {{ bookingConfirmation()!.endTime }}
+          </span>
+        </div>
+        <div class="summary-row">
+          <strong>Lugar:</strong>
+          <span>{{ bookingConfirmation()!.location }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card class="pro-card">
+      <div class="pro-layout">
+        <div class="avatar">
+          @if (imageUrl()) {
+            <img [src]="imageUrl()!" [alt]="professionalName()" />
+          } @else {
+            <mat-icon>person</mat-icon>
+          }
+        </div>
+
+        <div class="pro-info">
+          <h3>{{ professionalName() }}</h3>
+          @if (specialties().length > 0) {
+            <p>{{ specialties().join(" · ") }}</p>
+          }
+        </div>
+      </div>
+    </mat-card>
+
+    @if (loadingProfile()) {
+      <div class="state-block">
+        <mat-spinner diameter="34"></mat-spinner>
+        <p>Cargando profesional...</p>
+      </div>
+    } @else if (profileError()) {
+      <div class="state-block error">{{ profileError() }}</div>
+    } @else {
+      <mat-form-field appearance="outline" class="date-input">
+        <mat-label>Fecha *</mat-label>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          [min]="minDate"
+          [value]="selectedDate()"
+          (dateChange)="onDatepickerChange($event)"
+          placeholder="Selecciona una fecha"
+        />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="picker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="observation-input">
+        <mat-label>Motivo de la consulta</mat-label>
+        <textarea
+          matInput
+          rows="4"
+          maxlength="1000"
+          [value]="observation()"
+          (input)="onObservationInput($any($event.target).value)"
+          placeholder="Agrega un comentario para el profesional si lo necesitas"
+        ></textarea>
+        <mat-hint align="end">{{ observation().length }}/1000</mat-hint>
+      </mat-form-field>
+
+      @if (loadingSlots()) {
+        <div class="state-block">
+          <mat-spinner diameter="28"></mat-spinner>
+          <p>Cargando horarios disponibles...</p>
+        </div>
+      } @else if (slotsError()) {
+        <div class="state-block error">{{ slotsError() }}</div>
+      } @else if (selectedDate() && availableSlots().length === 0) {
+        <div class="state-block">
+          No hay horarios disponibles para esta fecha.
+        </div>
+      } @else if (availableSlots().length > 0) {
+        <div class="slots-list">
+          @for (slot of availableSlots(); track slot.id) {
+            <button
+              type="button"
+              class="slot-item"
+              (click)="bookSlot(slot)"
+              [disabled]="isBooking()"
+            >
+              <div class="slot-time">
+                {{ slot.startTime }} - {{ slot.endTime }}
+              </div>
+              @if (slot.professionalLocationName) {
+                <div class="slot-location">
+                  {{ slot.professionalLocationName }}
+                </div>
+              }
+              @if (slot.professionalLocationAddress) {
+                <div class="slot-address">
+                  {{ slot.professionalLocationAddress }}
+                </div>
+              }
+            </button>
+          }
+        </div>
+      }
+    }
+  }
+
+  @if (isBooking()) {
+    <div class="state-block">
+      <mat-spinner diameter="28"></mat-spinner>
+      <p>Confirmando cita...</p>
+    </div>
+  }
+
+  @if (bookingError()) {
+    <div class="state-block error">{{ bookingError() }}</div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (bookingConfirmation()) {
+    <button mat-flat-button color="primary" (click)="acceptConfirmation()">
+      Aceptar
+    </button>
+  } @else {
+    <button mat-button (click)="close()">Cerrar</button>
+  }
+</mat-dialog-actions>

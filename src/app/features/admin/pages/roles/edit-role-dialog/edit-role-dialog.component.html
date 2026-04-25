@@ -1,0 +1,69 @@
+<h2 mat-dialog-title>
+  <mat-icon>edit</mat-icon>
+  Editar rol
+</h2>
+
+<mat-dialog-content>
+  <form #roleForm="ngForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre del rol</mat-label>
+      <input
+        matInput
+        [(ngModel)]="roleName"
+        name="roleName"
+        #roleNameModel="ngModel"
+        [required]="!isSystemRole"
+        placeholder="Ingresa el nombre del rol"
+        [disabled]="saving() || isSystemRole"
+      />
+      @if (isSystemRole) {
+        <mat-hint>Los roles del sistema no pueden cambiar su nombre.</mat-hint>
+      }
+      @if (
+        !isSystemRole &&
+        !roleName.trim() &&
+        (roleForm.submitted || roleNameModel.touched)
+      ) {
+        <mat-error>Este campo es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descripcion</mat-label>
+      <textarea
+        matInput
+        [(ngModel)]="roleDescription"
+        name="roleDescription"
+        rows="3"
+        placeholder="Describe el objetivo del rol"
+        [disabled]="saving()"
+      ></textarea>
+    </mat-form-field>
+  </form>
+
+  @if (error()) {
+    <div class="error-message">
+      <mat-icon>error</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="saving()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onUpdate()"
+    [disabled]="saving()"
+  >
+    @if (saving()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      <mat-icon>save</mat-icon>
+    }
+    Guardar cambios
+  </button>
+</mat-dialog-actions>

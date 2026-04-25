@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Cancelar Cita</h2>
+
+<mat-dialog-content>
+  <p>¿Estás seguro que deseas cancelar esta cita?</p>
+
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Motivo de cancelación (opcional)</mat-label>
+      <textarea
+        matInput
+        formControlName="reason"
+        rows="3"
+        placeholder="Ej: Conflicto de horario"
+        maxlength="200"
+      ></textarea>
+      <mat-hint align="end">{{ form.value.reason?.length || 0 }}/200</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="false" [disabled]="cancelling()">
+    No, volver
+  </button>
+  <button
+    mat-raised-button
+    color="warn"
+    (click)="confirmCancel()"
+    [disabled]="cancelling()"
+  >
+    @if (cancelling()) {
+      <mat-spinner diameter="20"></mat-spinner>
+      Cancelando...
+    } @else {
+      Sí, cancelar cita
+    }
+  </button>
+</mat-dialog-actions>
