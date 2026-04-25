@@ -26,62 +26,8 @@ import { MenuItem } from '@core/config/menu-config';
     MatIconModule,
     MatDividerModule,
   ],
-  template: `
-    <mat-nav-list>
-      @for (item of items; track item.route) {
-        @if (item.isDivider) {
-          <mat-divider />
-        } @else {
-          <a
-            mat-list-item
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="
-              item.exactMatch ? { exact: true } : { exact: false }
-            "
-          >
-            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-            <span matListItemTitle>{{ item.label }}</span>
-          </a>
-        }
-      }
-    </mat-nav-list>
-  `,
-  styles: `
-    :host {
-      display: block;
-    }
-
-    mat-nav-list {
-      padding-top: 0;
-    }
-
-    a[mat-list-item] {
-      color: var(--color-text-primary);
-      transition: background-color 0.2s ease;
-
-      &:hover {
-        background-color: var(--color-surface-hover);
-      }
-
-      &.active {
-        background-color: rgba(63, 81, 181, 0.08);
-        color: var(--color-primary);
-
-        mat-icon {
-          color: var(--color-primary);
-        }
-      }
-    }
-
-    mat-icon {
-      color: var(--color-text-secondary);
-    }
-
-    mat-divider {
-      margin: 8px 0;
-    }
-  `,
+  templateUrl: './sidebar.component.html',
+  styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
   /**

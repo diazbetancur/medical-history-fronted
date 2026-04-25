@@ -20,7 +20,7 @@ import type { AdminProfessionalListItem } from '@data/api/api-models';
 import type { ProfessionalStatusFilter } from '@data/stores/admin-professionals.store';
 import { AdminProfessionalsStore } from '@data/stores/admin-professionals.store';
 import { ToastService } from '@shared/services';
-import { ModerateProfessionalDialogComponent } from './moderate-professional.dialog';
+import { ModerateProfessionalDialogComponent } from './moderate-professional-dialog/moderate-professional.dialog';
 import { PERMISSIONS } from '../../admin-menu.config';
 
 @Component({

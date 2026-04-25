@@ -1,0 +1,57 @@
+<div class="dashboard-container">
+  <h1>Dashboard de Administración</h1>
+
+  @if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="42"></mat-spinner>
+    <p>Cargando resumen...</p>
+  </div>
+  } @else if (error()) {
+  <mat-card class="error-card">
+    <mat-card-content>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button (click)="loadSummary()">Reintentar</button>
+    </mat-card-content>
+  </mat-card>
+  } @else {
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Pacientes Activos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="metric">{{ activePatients() }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Profesionales Activos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="metric">{{ activeProfessionalsNonAdmin() }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Solicitudes de Activación Pendientes</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="metric">{{ pendingProfessionalActivationRequests() }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Citas Solicitadas Este Mes</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="metric">{{ appointmentsRequestedThisMonth() }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <p class="generated-at">Actualizado: {{ generatedAtText() }}</p>
+  }
+</div>

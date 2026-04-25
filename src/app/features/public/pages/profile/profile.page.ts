@@ -12,9 +12,9 @@ import { PublicProfessionalDetailResponse } from '@data/api';
 import { ProfileStore } from '@data/stores';
 import { AnalyticsService, SeoService } from '@shared/services';
 import { isNotFoundError } from '@shared/utils';
-import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog.component';
-import { PublicFooterComponent } from '../../components/public-footer.component';
-import { PublicHeaderComponent } from '../../components/public-header.component';
+import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
+import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
+import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 
 @Component({
   selector: 'app-profile-page',

@@ -1,0 +1,42 @@
+.dialog-content {
+  min-width: 520px;
+  max-width: 100%;
+}
+
+.state-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--color-background-alt);
+  color: var(--color-text-secondary);
+
+  &.error {
+    color: var(--color-danger);
+  }
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  align-items: start;
+}
+
+mat-divider {
+  margin: 10px 0 14px;
+}
+
+@media (max-width: 720px) {
+  .dialog-content {
+    min-width: auto;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

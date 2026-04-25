@@ -40,7 +40,7 @@ import { ProfessionalSearchResponseDto } from '../../../../public/models/profess
 import { SpecialtyDto } from '../../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
-import { PublicHeaderComponent } from '../../components/public-header.component';
+import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 
 @Component({
   selector: 'app-search-page',

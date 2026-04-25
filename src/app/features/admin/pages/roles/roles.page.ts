@@ -79,7 +79,7 @@ export class RolesPageComponent implements OnInit {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    import('./create-role-dialog.component').then(
+    import('./create-role-dialog/create-role-dialog.component').then(
       ({ CreateRoleDialogComponent }) => {
         const dialogRef = this.dialog.open(CreateRoleDialogComponent, {
           width: '500px',
@@ -104,7 +104,7 @@ export class RolesPageComponent implements OnInit {
     // El dialog debe deshabilitar el campo 'name' si isSystem === true
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    import('./edit-role-dialog.component').then(
+    import('./edit-role-dialog/edit-role-dialog.component').then(
       ({ EditRoleDialogComponent }) => {
         const dialogRef = this.dialog.open(EditRoleDialogComponent, {
           width: '500px',

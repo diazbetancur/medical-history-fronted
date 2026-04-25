@@ -1,0 +1,138 @@
+<div class="patient-home">
+  <section class="dashboard-hero">
+    <img
+      src="/images/dashboardP.png"
+      alt="Resumen visual del dashboard del paciente"
+      class="dashboard-hero-image"
+    />
+  </section>
+
+  <section class="upcoming-section">
+    <div class="section-header">
+      <h2>Próximas Citas</h2>
+      @if (upcomingAppointments().length > 0) {
+        <button mat-button (click)="viewAllAppointments()">
+          Ver todas
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando citas...</p>
+      </div>
+    }
+
+    @if (!isLoading() && upcomingAppointments().length === 0) {
+      <mat-card class="empty-state">
+        <mat-card-content>
+          <mat-icon>event_available</mat-icon>
+          <h3>No tienes citas próximas</h3>
+          <p>¡Agenda tu primera cita con nuestros profesionales!</p>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="navigateToWizard()"
+          >
+            Agendar Ahora
+          </button>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (!isLoading() && upcomingAppointments().length > 0) {
+      <div class="appointments-grid">
+        @for (apt of upcomingAppointments(); track apt.id) {
+          <mat-card class="appointment-card">
+            <mat-card-content>
+              <div class="appointment-header">
+                <div class="professional-avatar">
+                  @if (apt.professional.photoUrl) {
+                    <img
+                      [src]="apt.professional.photoUrl"
+                      [alt]="apt.professional.name"
+                    />
+                  } @else {
+                    <mat-icon>person</mat-icon>
+                  }
+                </div>
+
+                <div class="appointment-info">
+                  <h3>{{ apt.professional.name }}</h3>
+                  <p class="specialty">{{ apt.professional.specialty }}</p>
+
+                  <div class="appointment-meta">
+                    <span class="date">
+                      <mat-icon>event</mat-icon>
+                      {{ formatDate(apt.date) }}
+                    </span>
+                    <span class="time">
+                      <mat-icon>schedule</mat-icon>
+                      {{ apt.startTime }}
+                    </span>
+                  </div>
+
+                  <mat-chip-set>
+                    <mat-chip [class]="'status-' + apt.status">
+                      {{ getStatusLabel(apt.status) }}
+                    </mat-chip>
+                  </mat-chip-set>
+                </div>
+              </div>
+
+              <div class="appointment-actions">
+                <button
+                  mat-button
+                  color="warn"
+                  (click)="cancelAppointment(apt.id)"
+                >
+                  <mat-icon>cancel</mat-icon>
+                  Cancelar
+                </button>
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="viewAppointmentDetail(apt.id)"
+                >
+                  <mat-icon>info</mat-icon>
+                  Detalles
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="quick-actions">
+    <h2>Acciones Rápidas</h2>
+    <div class="actions-grid">
+      <mat-card class="action-card" (click)="navigateToWizard()">
+        <mat-card-content>
+          <mat-icon>add_circle</mat-icon>
+          <h3>Agendar Cita</h3>
+          <p>Reserva una nueva cita</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="viewAllAppointments()">
+        <mat-card-content>
+          <mat-icon>event_note</mat-icon>
+          <h3>Mis Citas</h3>
+          <p>Ver todas mis citas</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="navigateToProfile()">
+        <mat-card-content>
+          <mat-icon>person</mat-icon>
+          <h3>Mi Perfil</h3>
+          <p>Actualizar información</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+</div>

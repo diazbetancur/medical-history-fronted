@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isVerify ? 'verified' : 'block' }}</mat-icon>
+  {{ isVerify ? 'Verificar profesional' : 'Desactivar profesional' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="dialog-description">
+    @if (isVerify) { Confirmas que deseas <strong>verificar</strong> el perfil
+    de <strong>{{ data.professional.businessName }}</strong>? El profesional
+    podra ser encontrado por los pacientes en la plataforma. } @else { Confirmas
+    que deseas <strong>desactivar</strong> el perfil de
+    <strong>{{ data.professional.businessName }}</strong>? El perfil dejara de
+    ser visible para los pacientes. }
+  </p>
+
+  <mat-form-field appearance="outline" class="notes-field">
+    <mat-label>
+      {{ isVerify ? 'Nota interna' : 'Motivo de desactivacion' }}
+    </mat-label>
+    <textarea
+      matInput
+      [(ngModel)]="adminNotes"
+      rows="3"
+      maxlength="500"
+      [placeholder]="
+        isVerify
+          ? 'Escribe una nota interna si la necesitas'
+          : 'Explica brevemente el motivo'
+      "
+    ></textarea>
+    <mat-hint align="end">{{ adminNotes.length }}/500</mat-hint>
+  </mat-form-field>
+
+  @if (isVerify) {
+  <mat-checkbox [(ngModel)]="isFeatured" [disabled]="store.saving()">
+    Marcar como profesional destacado
+  </mat-checkbox>
+  } @if (error()) {
+  <p class="dialog-error">
+    <mat-icon>error</mat-icon>
+    {{ error() }}
+  </p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="store.saving()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    [color]="isVerify ? 'primary' : 'warn'"
+    (click)="confirm()"
+    [disabled]="store.saving()"
+  >
+    @if (store.saving()) {
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="20"
+      strokeWidth="2"
+    ></mat-progress-spinner>
+    } @else {
+    <mat-icon>{{ isVerify ? 'verified' : 'block' }}</mat-icon>
+    } {{ isVerify ? 'Verificar' : 'Desactivar' }}
+  </button>
+</mat-dialog-actions>

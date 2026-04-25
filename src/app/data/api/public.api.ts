@@ -4,7 +4,9 @@ import { ApiClient } from './api-client';
 import {
   CreateServiceRequestPayload,
   CreateServiceRequestResponse,
+  Department,
   HomePageResponse,
+  City,
   MetadataResponse,
   ProfilePageResponse,
   PublicProfessionalDetailResponse,
@@ -110,6 +112,30 @@ export class PublicApi {
    */
   getMetadata(): Observable<MetadataResponse> {
     return this.api.get<MetadataResponse>('/public/metadata');
+  }
+
+  /**
+   * GET /api/public/metadata/departments?countryId={countryId}
+   * Get departments for a specific country.
+   */
+  getDepartmentsByCountry(countryId: string): Observable<Department[]> {
+    const params = new URLSearchParams();
+    params.set('countryId', countryId);
+
+    return this.api.get<Department[]>(
+      `/public/metadata/departments?${params.toString()}`,
+    );
+  }
+
+  /**
+   * GET /api/public/metadata/cities?departmentId={departmentId}
+   * Get active cities for a specific department.
+   */
+  getCitiesByDepartment(departmentId: string): Observable<City[]> {
+    const params = new URLSearchParams();
+    params.set('departmentId', departmentId);
+
+    return this.api.get<City[]>(`/public/metadata/cities?${params.toString()}`);
   }
 
   /**

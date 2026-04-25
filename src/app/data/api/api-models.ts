@@ -135,11 +135,19 @@ export interface Country {
   slug: string;
 }
 
+export interface Department {
+  id: string;
+  name: string;
+  slug: string;
+  countryId: string;
+}
+
 export interface City {
   id: string;
   name: string;
   slug: string;
   countryId: string;
+  departmentId?: string;
   stateRegion?: string;
   countryName?: string;
   countrySlug?: string;
@@ -460,6 +468,7 @@ export interface ProfessionalProfile {
   categoryId?: string;
   categoryName?: string;
   categorySlug?: string;
+  departmentId?: string;
   cityId: string;
   cityName: string;
   countryId: string;

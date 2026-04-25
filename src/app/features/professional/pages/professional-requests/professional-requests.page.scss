@@ -1,0 +1,63 @@
+.requests-page {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+}
+
+.empty-state {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.requests-list {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.row {
+  margin-bottom: 8px;
+}
+
+.status-row {
+  margin-top: 8px;
+}
+
+.chip-pending {
+  background: var(--color-warning-soft);
+}
+
+.chip-contacted {
+  background: var(--color-primary-soft);
+}
+
+.chip-in-progress {
+  background: var(--color-info-soft, var(--color-primary-soft));
+}
+
+.chip-completed {
+  background: var(--color-success-soft);
+}
+
+.chip-rejected {
+  background: var(--color-danger-soft);
+}
+
+.chip-cancelled {
+  background: var(--color-text-disabled);
+}

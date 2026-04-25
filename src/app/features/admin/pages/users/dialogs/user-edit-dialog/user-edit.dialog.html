@@ -1,0 +1,96 @@
+<h2 mat-dialog-title>
+  <mat-icon>edit</mat-icon>
+  Editar Usuario
+</h2>
+
+<mat-dialog-content>
+  <div class="user-header">
+    <mat-icon class="avatar">account_circle</mat-icon>
+    <div class="user-info">
+      <strong>{{ data.user.userName }}</strong>
+      <span class="email">{{ data.user.email }}</span>
+    </div>
+  </div>
+
+  <form [formGroup]="form" class="edit-form">
+    <div class="form-section">
+      <h3>Información del Perfil</h3>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="firstName" />
+          <mat-icon matPrefix>badge</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Apellido</mat-label>
+          <input matInput formControlName="lastName" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" />
+        <mat-icon matPrefix>email</mat-icon>
+        @if (form.get('email')?.hasError('email')) {
+        <mat-error>Formato de email inválido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="phone"
+          placeholder="50478988900"
+        />
+        <mat-icon matPrefix>phone</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="form-section">
+      <h3>Estado de la Cuenta</h3>
+
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="isLockedOut" color="warn">
+          Marcar como bloqueada
+        </mat-slide-toggle>
+        <span class="toggle-hint">
+          @if (form.get('isLockedOut')?.value) { Estado administrativo. El
+          backend actual no aplica lockout completo por sí solo. } @else { El
+          usuario queda marcado como activo. }
+        </span>
+      </div>
+    </div>
+  </form>
+
+  @if (errorMessage()) {
+  <div class="error-banner">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="saving()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="saving() || !hasChanges()"
+  >
+    @if (saving()) {
+    <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+    <ng-container>
+      <mat-icon>save</mat-icon>
+      Guardar Cambios
+    </ng-container>
+    }
+  </button>
+</mat-dialog-actions>

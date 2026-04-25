@@ -11,8 +11,8 @@ import { AppointmentsApi, type Appointment } from '@data/api';
 import {
   RequestAppointmentDialogComponent,
   SelectedProfessionalForBooking,
-} from '../../../../patient/pages/home/request-appointment-dialog.component';
-import { BookAppointmentDialogComponent } from '../../../public/components/book-appointment-dialog.component';
+} from '../../../../patient/pages/home/request-appointment-dialog/request-appointment-dialog.component';
+import { BookAppointmentDialogComponent } from '../../../public/components/book-appointment-dialog/book-appointment-dialog.component';
 
 /**
  * Appointments List Page

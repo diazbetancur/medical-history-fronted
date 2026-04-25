@@ -1,0 +1,392 @@
+<div class="availability-page">
+  <header class="page-header">
+    <h1>Mi Disponibilidad</h1>
+  </header>
+
+  @if (store.isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando información...</p>
+    </div>
+  } @else {
+    <mat-card class="schedule-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>schedule</mat-icon>
+          Horario Semanal
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="scheduleForm">
+          <mat-accordion>
+            @for (day of daysOfWeek; track day; let i = $index) {
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-slide-toggle
+                      [formControl]="getIsWorkingDayControl(i)"
+                      (click)="$event.stopPropagation()"
+                    >
+                      {{ dayNames[day] }}
+                    </mat-slide-toggle>
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    @if (getDayScheduleFormGroup(i).get('isWorkingDay')?.value) {
+                      <span class="working-hours">{{ getWorkingHoursSummary(i) }}</span>
+                    } @else {
+                      <span class="no-work">No laborable</span>
+                    }
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                @if (getDayScheduleFormGroup(i).get('isWorkingDay')?.value) {
+                  <div class="time-blocks" [formGroup]="getDayScheduleFormGroup(i)">
+                    <h4>Bloques de tiempo</h4>
+
+                    <div formArrayName="timeBlocks">
+                      @for (
+                        block of getTimeBlocksFormArray(i).controls;
+                        track $index;
+                        let j = $index
+                      ) {
+                        <div class="time-block" [formGroupName]="j">
+                          <mat-form-field appearance="outline">
+                            <mat-label>Hora de inicio *</mat-label>
+                            <input matInput type="time" formControlName="startTime" />
+                            @if (
+                              shouldShowControlError(
+                                getTimeBlockControl(i, j, 'startTime'),
+                                scheduleSubmitted()
+                              )
+                            ) {
+                              <mat-error>Selecciona la hora de inicio</mat-error>
+                            }
+                          </mat-form-field>
+
+                          <mat-icon class="arrow">arrow_forward</mat-icon>
+
+                          <mat-form-field appearance="outline">
+                            <mat-label>Hora de fin *</mat-label>
+                            <input matInput type="time" formControlName="endTime" />
+                            @if (
+                              shouldShowControlError(
+                                getTimeBlockControl(i, j, 'endTime'),
+                                scheduleSubmitted()
+                              )
+                            ) {
+                              <mat-error>Selecciona la hora de fin</mat-error>
+                            }
+                          </mat-form-field>
+
+                          @if (store.locations().length > 0) {
+                            <mat-form-field appearance="outline" class="location-field">
+                              <mat-label>Sede</mat-label>
+                              <mat-select formControlName="professionalLocationId">
+                                @for (location of store.locations(); track location.id) {
+                                  <mat-option [value]="location.id">
+                                    {{ location.name }}
+                                  </mat-option>
+                                }
+                              </mat-select>
+                            </mat-form-field>
+                          }
+
+                          <button
+                            mat-icon-button
+                            color="warn"
+                            (click)="removeTimeBlock(i, j)"
+                            type="button"
+                          >
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                      }
+                    </div>
+
+                    <button
+                      mat-stroked-button
+                      color="primary"
+                      (click)="addTimeBlock(i)"
+                      type="button"
+                    >
+                      <mat-icon>add</mat-icon>
+                      Agregar bloque
+                    </button>
+                  </div>
+                }
+              </mat-expansion-panel>
+            }
+          </mat-accordion>
+
+          <div class="slot-config">
+            <mat-form-field appearance="outline">
+              <mat-label>Duracion de cada slot *</mat-label>
+              <mat-select formControlName="defaultSlotDuration">
+                @for (minutes of slotMinuteOptions; track minutes) {
+                  <mat-option [value]="minutes">{{ minutes }} minutos</mat-option>
+                }
+              </mat-select>
+              @if (
+                shouldShowControlError(
+                  scheduleForm.get('defaultSlotDuration'),
+                  scheduleSubmitted()
+                )
+              ) {
+                <mat-error>Selecciona una duracion valida</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Zona horaria *</mat-label>
+              <mat-select formControlName="timeZone">
+                @for (timeZone of timeZoneOptions; track timeZone) {
+                  <mat-option [value]="timeZone">{{ timeZone }}</mat-option>
+                }
+              </mat-select>
+              @if (
+                shouldShowControlError(
+                  scheduleForm.get('timeZone'),
+                  scheduleSubmitted()
+                )
+              ) {
+                <mat-error>Selecciona una zona horaria</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-slide-toggle formControlName="isActive">
+              Plantilla activa
+            </mat-slide-toggle>
+          </div>
+        </form>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="saveSchedule()"
+          [disabled]="store.isSaving()"
+        >
+          @if (store.isSaving()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>Guardando...</span>
+          } @else {
+            <ng-container>
+              <mat-icon>save</mat-icon>
+              <span>Guardar Horario</span>
+            </ng-container>
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-card class="absences-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>event_busy</mat-icon>
+          Excepciones de Disponibilidad
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (!showAbsenceForm()) {
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="showAbsenceForm.set(true)"
+          >
+            <mat-icon>add</mat-icon>
+            Agregar Excepción
+          </button>
+        } @else {
+          <div class="absence-form">
+            <h4>Nueva Excepción</h4>
+            <form [formGroup]="absenceForm">
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Tipo *</mat-label>
+                  <mat-select formControlName="type">
+                    @for (type of absenceTypes; track type) {
+                      <mat-option [value]="type">
+                        {{ absenceTypeNames[type] }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  @if (
+                    shouldShowControlError(
+                      absenceForm.get('type'),
+                      absenceSubmitted()
+                    )
+                  ) {
+                    <mat-error>Selecciona un tipo de excepcion</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Fecha de inicio *</mat-label>
+                  <input matInput [matDatepicker]="startPicker" formControlName="startDate" />
+                  <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startPicker></mat-datepicker>
+                  @if (
+                    shouldShowControlError(
+                      absenceForm.get('startDate'),
+                      absenceSubmitted()
+                    )
+                  ) {
+                    <mat-error>Selecciona la fecha de inicio</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Fecha de fin *</mat-label>
+                  <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
+                  <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endPicker></mat-datepicker>
+                  @if (
+                    shouldShowControlError(
+                      absenceForm.get('endDate'),
+                      absenceSubmitted()
+                    )
+                  ) {
+                    <mat-error>Selecciona la fecha de fin</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              @if (isOverrideType()) {
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Hora de inicio especial *</mat-label>
+                    <input matInput type="time" formControlName="overrideStartTime" />
+                    @if (
+                      shouldShowControlError(
+                        absenceForm.get('overrideStartTime'),
+                        absenceSubmitted()
+                      )
+                    ) {
+                      <mat-error>Selecciona la hora de inicio</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Hora de fin especial *</mat-label>
+                    <input matInput type="time" formControlName="overrideEndTime" />
+                    @if (
+                      shouldShowControlError(
+                        absenceForm.get('overrideEndTime'),
+                        absenceSubmitted()
+                      )
+                    ) {
+                      <mat-error>Selecciona la hora de fin</mat-error>
+                    }
+                  </mat-form-field>
+
+                  @if (store.locations().length > 0) {
+                    <mat-form-field appearance="outline">
+                      <mat-label>Sede</mat-label>
+                      <mat-select formControlName="professionalLocationId">
+                        @for (location of store.locations(); track location.id) {
+                          <mat-option [value]="location.id">
+                            {{ location.name }}
+                          </mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  }
+                </div>
+              }
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Motivo (opcional)</mat-label>
+                <textarea
+                  matInput
+                  formControlName="reason"
+                  rows="2"
+                  maxlength="200"
+                ></textarea>
+                <mat-hint align="end">
+                  {{ absenceForm.get('reason')?.value?.length || 0 }} / 200
+                </mat-hint>
+              </mat-form-field>
+
+              <div class="form-actions">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="createAbsence()"
+                  [disabled]="store.isSaving()"
+                  type="button"
+                >
+                  <mat-icon>save</mat-icon>
+                  Guardar
+                </button>
+                <button mat-button (click)="cancelAbsenceForm()" type="button">
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        }
+
+        @if (store.futureAbsences().length > 0) {
+          <div class="absences-list">
+            <h4>Excepciones Programadas</h4>
+            @for (absence of store.futureAbsences(); track absence.id) {
+              <mat-card class="absence-item">
+                <mat-card-content>
+                  <div class="absence-header">
+                    <mat-chip [color]="getAbsenceChipColor(absence.type)">
+                      {{ absenceTypeNames[absence.type] }}
+                    </mat-chip>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      [disabled]="!canDeleteAbsence(absence.startDateTime)"
+                      (click)="deleteAbsence(absence.id, absence.startDateTime)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="absence-dates">
+                    <mat-icon>event</mat-icon>
+                    <span>
+                      {{ formatDateTime(absence.startDateTime) }} -
+                      {{ formatDateTime(absence.endDateTime) }}
+                    </span>
+                  </div>
+
+                  @if (absence.type === 'Override') {
+                    <div class="absence-reason">
+                      <mat-icon>schedule</mat-icon>
+                      <span>
+                        Horario: {{ absence.overrideStartTime }} -
+                        {{ absence.overrideEndTime }}
+                        @if (absence.professionalLocationName) {
+                          · {{ absence.professionalLocationName }}
+                        }
+                      </span>
+                    </div>
+                  }
+
+                  @if (absence.reason) {
+                    <div class="absence-reason">
+                      <mat-icon>note</mat-icon>
+                      <span>{{ absence.reason }}</span>
+                    </div>
+                  }
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        } @else if (!showAbsenceForm()) {
+          <div class="empty-absences">
+            <mat-icon>check_circle</mat-icon>
+            <p>No tienes excepciones programadas</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

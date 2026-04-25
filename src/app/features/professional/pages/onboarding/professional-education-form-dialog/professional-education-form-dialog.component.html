@@ -1,0 +1,74 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo *</mat-label>
+      <mat-select formControlName="type">
+        @for (type of data.educationTypeOptions; track type.value) {
+          <mat-option [value]="type.value">{{ type.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Título *</mat-label>
+      <input matInput formControlName="degreeTitle" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Institución *</mat-label>
+      <input matInput formControlName="institutionName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>País</mat-label>
+      <input matInput formControlName="institutionCountry" />
+    </mat-form-field>
+
+    <div class="row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Año inicio</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="startYear"
+          min="1900"
+          max="2100"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Año graduación</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="graduationYear"
+          min="1900"
+          max="2100"
+        />
+        @if (
+          form.hasError("graduationBeforeStart") &&
+          (form.get("graduationYear")?.touched ||
+            form.get("startYear")?.touched)
+        ) {
+          <mat-error>
+            El aÃ±o de graduaciÃ³n debe ser igual o posterior al de inicio
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput rows="3" formControlName="description"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">
+    {{ data.submitLabel }}
+  </button>
+</mat-dialog-actions>
