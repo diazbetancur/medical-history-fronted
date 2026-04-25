@@ -1,0 +1,284 @@
+.professional-allergies-tab {
+  padding: 24px;
+
+  .tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    .summary-info {
+      display: flex;
+      gap: 12px;
+
+      mat-chip {
+        height: 32px;
+        padding: 0 12px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          margin-right: 6px;
+        }
+
+        &.active-chip {
+          background-color: var(--color-error-light);
+          color: var(--color-error);
+        }
+
+        &.total-chip {
+          background-color: var(--color-primary-soft);
+          color: var(--color-primary);
+        }
+      }
+    }
+  }
+
+  .no-relation-banner {
+    background: linear-gradient(135deg, var(--color-primary-soft) 0%, var(--color-primary-light) 100%);
+    border-left: 4px solid var(--color-primary);
+
+    mat-card-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+
+      .no-relation-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: var(--color-primary);
+        flex-shrink: 0;
+      }
+
+      .no-relation-content {
+        h3 {
+          margin: 0 0 8px 0;
+          font-size: 18px;
+          font-weight: 500;
+          color: var(--color-text-primary);
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: var(--color-text-secondary);
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    gap: 16px;
+
+    p {
+      margin: 0;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .error-card,
+  .empty-card {
+    mat-card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 24px;
+      text-align: center;
+      gap: 16px;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+
+        &.error-icon {
+          color: var(--color-error);
+        }
+
+        &.empty-icon {
+          color: var(--color-text-disabled);
+        }
+      }
+
+      .error-message,
+      .empty-message {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      button {
+        margin-top: 8px;
+      }
+    }
+  }
+
+  .filters-bar {
+    margin-bottom: 24px;
+    display: flex;
+    gap: 16px;
+
+    .status-filter {
+      width: 200px;
+    }
+  }
+
+  .allergies-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .allergy-card {
+      display: flex;
+      flex-direction: column;
+
+      mat-card-header {
+        padding-bottom: 16px;
+
+        .allergy-icon {
+          background-color: var(--color-error);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        mat-card-title {
+          font-size: 18px;
+          font-weight: 500;
+        }
+
+        mat-card-subtitle {
+          margin-top: 8px;
+        }
+
+        .allergy-meta {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-top: 4px;
+
+          mat-chip {
+            height: 24px;
+            font-size: 12px;
+            min-height: unset;
+
+            &.status-chip {
+              &.status-active {
+                background-color: var(--color-error-light);
+                color: var(--color-error);
+              }
+
+              &.status-resolved {
+                background-color: var(--color-success-bg);
+                color: var(--color-success-dark);
+              }
+            }
+
+            &.severity-chip {
+              &.severity-mild {
+                background-color: var(--color-warning-light);
+                color: var(--color-warning-dark);
+              }
+
+              &.severity-moderate {
+                background-color: var(--color-warning-light);
+                color: var(--color-warning-dark);
+              }
+
+              &.severity-severe {
+                background-color: var(--color-error-light);
+                color: var(--color-error-dark);
+              }
+            }
+          }
+        }
+      }
+
+      mat-card-content {
+        flex: 1;
+
+        .allergy-details {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+
+          .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 14px;
+
+            mat-icon {
+              color: var(--color-text-secondary);
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+              flex-shrink: 0;
+            }
+
+            .detail-label {
+              font-weight: 500;
+              color: var(--color-text-primary);
+              min-width: 140px;
+            }
+
+            .detail-value {
+              color: var(--color-text-secondary);
+              flex: 1;
+            }
+
+            &.notes {
+              flex-direction: column;
+              align-items: flex-start;
+
+              .detail-label {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+              }
+
+              .detail-value {
+                margin-left: 32px;
+                line-height: 1.5;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  mat-paginator {
+    display: block;
+    margin-top: 24px;
+    background: transparent;
+  }
+}

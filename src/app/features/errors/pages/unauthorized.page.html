@@ -1,0 +1,29 @@
+<div class="error-page">
+  <mat-card class="error-card">
+    <mat-card-content>
+      <div class="error-icon">
+        <mat-icon color="warn">lock</mat-icon>
+      </div>
+      <h1>Acceso No Autorizado</h1>
+      <p class="error-code">401 Unauthorized</p>
+      <p class="error-message">
+        No tienes el contexto necesario para acceder a esta sección.
+      </p>
+      <p class="error-hint">
+        Puede que necesites cambiar a un perfil diferente (cliente o
+        profesional).
+      </p>
+
+      <div class="error-actions">
+        <button mat-raised-button color="primary" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Volver Atrás
+        </button>
+        <button mat-stroked-button (click)="goHome()">
+          <mat-icon>home</mat-icon>
+          Ir al Inicio
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

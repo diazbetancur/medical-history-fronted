@@ -1,5 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   AdminApi,
   AdminRequestListItem,
@@ -7,6 +6,7 @@ import {
   getErrorMessage,
   PaginationMeta,
 } from '@data/api';
+import { Observable, of } from 'rxjs';
 
 export interface AdminRequestsState {
   requests: AdminRequestListItem[];
@@ -49,36 +49,28 @@ export class AdminRequestsStore {
 
   // Filtered computed signals
   readonly pendingRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Pending')
+    this._state().requests.filter((r) => r.status === 'Pending'),
   );
-  readonly contactedRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Contacted')
-  );
-  readonly inProgressRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'InProgress')
+  readonly acceptedRequests = computed(() =>
+    this._state().requests.filter((r) => r.status === 'Accepted'),
   );
   readonly completedRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Completed')
+    this._state().requests.filter((r) => r.status === 'Completed'),
   );
   readonly rejectedRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Rejected')
-  );
-  readonly cancelledRequests = computed(() =>
-    this._state().requests.filter((r) => r.status === 'Cancelled')
+    this._state().requests.filter((r) => r.status === 'Rejected'),
   );
   readonly closedRequests = computed(() =>
     this._state().requests.filter(
-      (r) =>
-        r.status === 'Completed' ||
-        r.status === 'Rejected' ||
-        r.status === 'Cancelled'
-    )
+      (r) => r.status === 'Completed' || r.status === 'Rejected',
+    ),
   );
 
   // Counts
   readonly pendingCount = computed(() => this.pendingRequests().length);
-  readonly contactedCount = computed(() => this.contactedRequests().length);
+  readonly acceptedCount = computed(() => this.acceptedRequests().length);
   readonly closedCount = computed(() => this.closedRequests().length);
+  readonly completedCount = computed(() => this.completedRequests().length);
   readonly rejectedCount = computed(() => this.rejectedRequests().length);
   readonly totalCount = computed(() => this._state().requests.length);
 
@@ -96,7 +88,7 @@ export class AdminRequestsStore {
    */
   load(
     params: AdminRequestsParams = {},
-    forceRefresh = false
+    forceRefresh = false,
   ): Observable<AdminRequestListItem[]> {
     // Return cached if valid and params match
     if (!forceRefresh && this.isCacheValid()) {
@@ -147,7 +139,7 @@ export class AdminRequestsStore {
    */
   rejectRequest(
     requestId: string,
-    adminNotes?: string
+    adminNotes?: string,
   ): Observable<AdminRequestListItem> {
     // Optimistic update
     const previousRequests = this._state().requests;
@@ -156,7 +148,7 @@ export class AdminRequestsStore {
       requests: s.requests.map((r) =>
         r.id === requestId
           ? { ...r, status: 'Rejected' as const, adminNotes }
-          : r
+          : r,
       ),
     }));
 
@@ -176,13 +168,13 @@ export class AdminRequestsStore {
                       adminNotes: response.adminNotes,
                       dateUpdated: response.dateUpdated,
                     }
-                  : r
+                  : r,
               ),
             }));
 
             // Return the full updated request
             const updated = this._state().requests.find(
-              (r) => r.id === requestId
+              (r) => r.id === requestId,
             );
             if (updated) {
               subscriber.next(updated);
@@ -207,13 +199,13 @@ export class AdminRequestsStore {
    */
   addAdminNotes(
     requestId: string,
-    adminNotes: string
+    adminNotes: string,
   ): Observable<AdminRequestListItem> {
     const previousRequests = this._state().requests;
     this._state.update((s) => ({
       ...s,
       requests: s.requests.map((r) =>
-        r.id === requestId ? { ...r, adminNotes } : r
+        r.id === requestId ? { ...r, adminNotes } : r,
       ),
     }));
 
@@ -229,12 +221,12 @@ export class AdminRequestsStore {
                     adminNotes: response.adminNotes,
                     dateUpdated: response.dateUpdated,
                   }
-                : r
+                : r,
             ),
           }));
 
           const updated = this._state().requests.find(
-            (r) => r.id === requestId
+            (r) => r.id === requestId,
           );
           if (updated) {
             subscriber.next(updated);
@@ -267,7 +259,7 @@ export class AdminRequestsStore {
         ...currentParams,
         page: pagination.currentPage + 1,
       },
-      true
+      true,
     );
   }
 

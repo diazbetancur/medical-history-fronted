@@ -1,0 +1,24 @@
+@if (pwaUpdate.updateAvailable()) {
+  <div class="update-banner" role="alert" aria-label="Nueva versión disponible">
+    <div class="update-content">
+      <mat-icon class="update-icon">system_update</mat-icon>
+      <span class="update-text">Nueva versión disponible</span>
+      <button
+        mat-flat-button
+        color="accent"
+        (click)="update()"
+        class="update-btn"
+      >
+        Actualizar
+      </button>
+      <button
+        mat-icon-button
+        (click)="dismiss()"
+        aria-label="Cerrar"
+        class="close-btn"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+}

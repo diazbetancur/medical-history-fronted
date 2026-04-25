@@ -7,7 +7,9 @@ import {
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TokenStorage } from '@core/auth';
+import { ProblemDetails } from '@core/models';
 import { environment } from '@env';
+import { ToastService } from '@shared/services';
 import { catchError, throwError } from 'rxjs';
 
 /**
@@ -30,7 +32,7 @@ const ERROR_MESSAGES: Record<number, string> = {
 };
 
 /**
- * Routes that should redirect to login on 401
+ * Routes that should redirect to home on 401
  */
 const AUTH_ROUTES = ['/dashboard', '/admin', '/api/professional', '/api/admin'];
 
@@ -39,9 +41,20 @@ const AUTH_ROUTES = ['/dashboard', '/admin', '/api/professional', '/api/admin'];
  * These endpoints handle errors gracefully in the component/store level
  */
 const SILENT_ERROR_URLS = ['/public/search/suggest'];
+const GENERIC_API_FAILURE_MESSAGE =
+  'Estamos presentando fallas. Inténtalo nuevamente más tarde.';
+const GENERIC_API_FAILURE_STATUSES = new Set([0, 502, 503, 504]);
+const NETWORK_FAILURE_TOAST_WINDOW_MS = 4000;
+
+let lastNetworkFailureToastAt = 0;
+
+function isApiRequest(url: string): boolean {
+  const apiBase = environment.apiBaseUrl.replace(/\/+$/, '');
+  return url.startsWith(apiBase) || url.includes('/api/');
+}
 
 /**
- * Check if error should trigger redirect to login
+ * Check if error should trigger redirect to home
  */
 function shouldRedirectToLogin(url: string): boolean {
   return AUTH_ROUTES.some((route) => url.includes(route));
@@ -61,13 +74,33 @@ function shouldSilenceError(url: string, status: number): boolean {
   return false;
 }
 
+function isNetworkOrUnavailableError(error: HttpErrorResponse): boolean {
+  if (GENERIC_API_FAILURE_STATUSES.has(error.status)) {
+    return true;
+  }
+
+  return error.status === 0 || error.error instanceof ProgressEvent;
+}
+
+function showGenericApiFailureToast(toast: ToastService): void {
+  const now = Date.now();
+
+  if (now - lastNetworkFailureToastAt < NETWORK_FAILURE_TOAST_WINDOW_MS) {
+    return;
+  }
+
+  lastNetworkFailureToastAt = now;
+  toast.error(GENERIC_API_FAILURE_MESSAGE);
+}
+
 /**
  * Global Error Interceptor
  *
  * Responsibilities:
- * - Standardize error messages for UI
- * - Handle 401 with redirect to login
- * - Log errors in development (suppressed in production)
+ * - Normalize errors to ProblemDetails format
+ * - Handle 401 with redirect to home
+ * - Handle 403 with redirect to forbidden page
+ * - Show only a generic toast for network/API-unavailable failures
  * - Never expose stack traces or technical errors to users
  */
 export const errorInterceptor: HttpInterceptorFn = (
@@ -76,6 +109,7 @@ export const errorInterceptor: HttpInterceptorFn = (
 ) => {
   const router = inject(Router);
   const tokenStorage = inject(TokenStorage);
+  const toast = inject(ToastService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -85,73 +119,104 @@ export const errorInterceptor: HttpInterceptorFn = (
         return throwError(() => error);
       }
 
-      // Log in development only
-      if (!environment.production) {
-        console.error(`[HTTP Error] ${req.method} ${req.url}`, {
-          status: error.status,
-          message: error.message,
-          error: error.error,
-        });
-      }
+      // Extract correlation ID from request headers
+      const correlationId = req.headers.get('X-Correlation-ID') || 'unknown';
+
+      // Normalize error to ProblemDetails format
+      const problemDetails = normalizeToProblemDetails(error, correlationId);
 
       // Handle 401 Unauthorized
       if (error.status === 401 && shouldRedirectToLogin(req.url)) {
         tokenStorage.clearToken();
 
-        // Only redirect if not already on login page
-        if (!router.url.startsWith('/login')) {
-          router.navigate(['/login'], {
-            queryParams: { returnUrl: router.url, reason: 'session_expired' },
+        // Only redirect if not already on home
+        if (router.url !== '/') {
+          router.navigate(['/'], {
+            queryParams: {
+              returnUrl: router.url,
+              reason: 'session_expired',
+              authRequired: '1',
+            },
           });
         }
       }
-
-      // Handle 403 Forbidden - redirect to appropriate page
-      if (error.status === 403) {
-        // Could redirect to an unauthorized page or home
-        // For now, just let the error propagate with a clear message
+      // Handle 403 Forbidden
+      else if (error.status === 403) {
+        toast.error(problemDetails.title);
+        router.navigate(['/forbidden']);
+      }
+      // Phase 1: only show a global fallback toast for network/API outages.
+      else if (isApiRequest(req.url) && isNetworkOrUnavailableError(error)) {
+        showGenericApiFailureToast(toast);
       }
 
-      // Handle 404 on profile pages - could redirect to not-found
-      if (error.status === 404 && req.url.includes('/public/pages/profile/')) {
-        // Let the component handle this for now
-        // Could navigate to /not-found in the future
-      }
-
-      // Enhance error with user-friendly message if not already present
-      const enhancedError = enhanceErrorMessage(error);
-
-      return throwError(() => enhancedError);
+      // Return error with ProblemDetails format
+      return throwError(
+        () =>
+          new HttpErrorResponse({
+            error: problemDetails,
+            headers: error.headers,
+            status: error.status,
+            statusText: error.statusText,
+            url: error.url || undefined,
+          }),
+      );
     }),
   );
 };
 
 /**
- * Enhance error response with user-friendly message
+ * Normalize error response to ProblemDetails format
  */
-function enhanceErrorMessage(error: HttpErrorResponse): HttpErrorResponse {
-  // If error already has a user-friendly message from API, keep it
-  if (error.error?.message || error.error?.detail || error.error?.title) {
-    return error;
+function normalizeToProblemDetails(
+  error: HttpErrorResponse,
+  correlationId: string,
+): ProblemDetails {
+  // If backend already sent ProblemDetails, use it
+  if (isProblemDetails(error.error)) {
+    return {
+      ...error.error,
+      traceId: error.error.traceId || correlationId,
+      timestamp: error.error.timestamp || new Date().toISOString(),
+    };
   }
 
-  // Get user-friendly message based on status
-  const userMessage =
+  // Extract error details from various formats
+  const title =
+    error.error?.title ||
+    error.error?.message ||
     ERROR_MESSAGES[error.status] ||
-    'Ha ocurrido un error inesperado. Por favor, intenta nuevamente.';
+    'Ha ocurrido un error inesperado';
 
-  // Create enhanced error object
-  const enhancedErrorBody = {
-    ...error.error,
-    userMessage,
-    originalStatus: error.status,
-  };
+  const detail =
+    error.error?.detail || error.error?.message || error.message || undefined;
 
-  return new HttpErrorResponse({
-    error: enhancedErrorBody,
-    headers: error.headers,
+  const errorCode = error.error?.code || error.error?.errorCode || undefined;
+
+  const validationErrors = error.error?.errors || undefined;
+
+  // Construct standardized ProblemDetails
+  return {
+    type: `https://httpstatuses.com/${error.status}`,
+    title,
     status: error.status,
-    statusText: error.statusText,
-    url: error.url || undefined,
-  });
+    detail,
+    traceId: correlationId,
+    errorCode,
+    errors: validationErrors,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+/**
+ * Type guard to check if error is already ProblemDetails format
+ */
+function isProblemDetails(obj: any): obj is ProblemDetails {
+  return (
+    obj &&
+    typeof obj === 'object' &&
+    typeof obj.type === 'string' &&
+    typeof obj.title === 'string' &&
+    typeof obj.status === 'number'
+  );
 }

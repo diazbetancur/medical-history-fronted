@@ -1,0 +1,116 @@
+<div class="exams-list-container">
+  <!-- Header with create button -->
+  <div class="list-header">
+    <h2>Mis Exámenes y Resultados</h2>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openCreateDialog()"
+      [disabled]="store.loading()"
+    >
+      <mat-icon>add</mat-icon>
+      Nuevo Examen
+    </button>
+  </div>
+
+  <!-- Loading spinner -->
+  @if (store.loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando exámenes...</p>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (store.error() && !store.loading()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <div class="error-content">
+          <mat-icon color="warn">error</mat-icon>
+          <div>
+            <h3>Error al cargar exámenes</h3>
+            <p>{{ store.error() }}</p>
+            @if (store.error()?.includes('PATIENT_PROFILE_NOT_FOUND')) {
+              <button mat-raised-button color="primary" (click)="goToWizard()">
+                Completar mi Perfil
+              </button>
+            }
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Empty state -->
+  @if (store.isEmpty() && !store.loading() && !store.error()) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <div class="empty-content">
+          <mat-icon>description</mat-icon>
+          <h3>No tienes exámenes registrados</h3>
+          <p>Comienza agregando tus resultados médicos y exámenes</p>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="openCreateDialog()"
+          >
+            <mat-icon>add</mat-icon>
+            Agregar Primer Examen
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Exams list -->
+  @if (store.hasExams() && !store.loading()) {
+    <div class="exams-grid">
+      @for (exam of store.exams(); track exam.id) {
+        <mat-card class="exam-card" (click)="openExamDetail(exam.id)">
+          <mat-card-content>
+            <div class="exam-header">
+              <h3 class="exam-title">{{ exam.title }}</h3>
+              @if (exam.category) {
+                <mat-chip class="category-chip">
+                  {{ categoryLabels[exam.category] }}
+                </mat-chip>
+              }
+            </div>
+
+            <div class="exam-meta">
+              <div class="meta-item">
+                <mat-icon>calendar_today</mat-icon>
+                <span>{{ formatDate(exam.examDate) }}</span>
+              </div>
+              <div class="meta-item">
+                <mat-icon>attach_file</mat-icon>
+                <span>{{ exam.attachments.length }} archivo(s)</span>
+              </div>
+            </div>
+
+            @if (exam.notes) {
+              <p class="exam-notes">{{ exam.notes }}</p>
+            }
+
+            <div class="exam-footer">
+              <span class="exam-date">
+                Creado: {{ formatDate(exam.createdAt) }}
+              </span>
+              <mat-icon class="arrow-icon">chevron_right</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [length]="store.total()"
+      [pageSize]="store.pageSize()"
+      [pageIndex]="store.currentPage() - 1"
+      [pageSizeOptions]="[10, 25, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    ></mat-paginator>
+  }
+</div>

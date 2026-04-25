@@ -7,6 +7,9 @@
  * the centralized roles module for any role logic.
  */
 
+// Re-export current user models from core
+export type { ContextDto, CurrentUserDto } from '@core/models';
+
 // =============================================================================
 // Auth Models
 // =============================================================================
@@ -22,11 +25,42 @@ export interface RegisterRequest {
   confirmPassword: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
 }
 
 export interface RegisterResponse {
+  success?: boolean;
   message: string;
-  userId: string;
+  userId?: string;
+  errors?: string[];
+}
+
+export interface UserOperationResultDto {
+  success: boolean;
+  message: string;
+  userId?: string | null;
+  errors?: string[];
+}
+
+export interface BecomeProfessionalRequest {
+  reason?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+  confirmNewPassword: string;
 }
 
 export interface LoginResponse {
@@ -123,7 +157,13 @@ export interface Category {
 export interface MetadataResponse {
   countries: Country[];
   cities: City[];
-  categories: Category[];
+  categories?: Category[];
+}
+
+export interface PublicSpecialtyCatalogItem {
+  id: string;
+  name: string;
+  description?: string | null;
 }
 
 // =============================================================================
@@ -138,18 +178,33 @@ export interface FeaturedCategory {
   professionalCount?: number;
 }
 
+export interface FeaturedSpecialty {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  professionalCount?: number;
+}
+
+export interface FeaturedProfessionalSpecialty {
+  specialtyId: string;
+  specialtyName: string;
+  isPrimary: boolean;
+}
+
 export interface FeaturedProfessional {
   id: string;
   slug: string;
   businessName: string;
   profileImageUrl?: string;
-  categoryName: string;
-  categorySlug: string;
+  specialties: FeaturedProfessionalSpecialty[];
   cityName: string;
   citySlug: string;
   isVerified: boolean;
   isFeatured: boolean;
   priceFrom?: number;
+  categoryName?: string;
+  categorySlug?: string;
 }
 
 export interface PopularCity {
@@ -164,12 +219,15 @@ export interface PopularCity {
 
 export interface HomePageTotals {
   totalProfessionals: number;
-  totalCategories: number;
+  totalPatients: number;
+  totalAppointments: number;
   totalCities: number;
+  totalCategories?: number;
 }
 
 export interface HomePageResponse {
-  featuredCategories: FeaturedCategory[];
+  featuredSpecialties: FeaturedSpecialty[];
+  featuredCategories?: FeaturedCategory[];
   featuredProfessionals: FeaturedProfessional[];
   popularCities: PopularCity[];
   totals: HomePageTotals;
@@ -194,6 +252,11 @@ export interface SearchProfessional {
   slug: string;
   businessName: string;
   profileImageUrl?: string;
+  specialties?: Array<{
+    id: string;
+    name: string;
+    isPrimary: boolean;
+  }>;
   categoryName: string;
   categorySlug: string;
   cityName: string;
@@ -210,9 +273,9 @@ export interface SearchFilterItem {
 }
 
 export interface SearchFilters {
-  categories: SearchFilterItem[];
   cities: SearchFilterItem[];
-  priceRange: { min: number; max: number };
+  categories?: SearchFilterItem[];
+  priceRange?: { min: number; max: number };
 }
 
 export interface AppliedFilters {
@@ -291,6 +354,48 @@ export interface ProfilePageResponse {
   seo: SeoMeta;
 }
 
+export interface PublicProfessionalDetailSpecialty {
+  id: string;
+  name: string;
+  isPrimary: boolean;
+}
+
+export interface PublicProfessionalDetailService {
+  title: string;
+  description?: string | null;
+}
+
+export interface PublicProfessionalDetailStudy {
+  title: string;
+  university: string;
+  country?: string | null;
+  graduationYear?: number | null;
+}
+
+export interface PublicProfessionalDetailLocation {
+  name: string;
+  address?: string | null;
+  cityName?: string | null;
+  countryName?: string | null;
+}
+
+export interface PublicProfessionalDetailResponse {
+  id: string;
+  displayName: string;
+  slug: string;
+  bio?: string | null;
+  cityName?: string | null;
+  countryName?: string | null;
+  address?: string | null;
+  consultationValue?: number | null;
+  specialtyNames?: string[] | null;
+  specialties?: PublicProfessionalDetailSpecialty[] | null;
+  services?: PublicProfessionalDetailService[] | null;
+  studies?: PublicProfessionalDetailStudy[] | null;
+  locations?: PublicProfessionalDetailLocation[] | null;
+  profileImageUrl?: string | null;
+}
+
 // =============================================================================
 // Suggest (Typeahead) Models
 // =============================================================================
@@ -352,9 +457,9 @@ export interface ProfessionalProfile {
   businessName: string;
   slug: string;
   description?: string;
-  categoryId: string;
-  categoryName: string;
-  categorySlug: string;
+  categoryId?: string;
+  categoryName?: string;
+  categorySlug?: string;
   cityId: string;
   cityName: string;
   countryId: string;
@@ -377,7 +482,7 @@ export interface CreateProfessionalProfilePayload {
   businessName: string;
   slug?: string;
   description?: string;
-  categoryId: string;
+  categoryId?: string;
   cityId: string;
   countryId: string;
   phone?: string;
@@ -398,6 +503,199 @@ export interface UpdateProfessionalProfilePayload {
   email?: string;
   address?: string;
   profileImageUrl?: string;
+}
+
+export interface ProfessionalProfilePhotoResponse {
+  profileImageUrl: string;
+}
+
+export interface ProfessionalSpecialty {
+  id: string;
+  name: string;
+}
+
+export interface AssignProfessionalSpecialtiesPayload {
+  specialtyIds: string[];
+}
+
+export interface ProfessionalSpecialtySelectionItem {
+  specialtyId: string;
+  isPrimary: boolean;
+}
+
+export interface CreateProfessionalSpecialtyPayload {
+  specialtyId: string;
+  isPrimary: boolean;
+}
+
+export interface ReplaceProfessionalSpecialtiesPayload {
+  specialties: ProfessionalSpecialtySelectionItem[];
+}
+
+export type ProfessionalSpecialtyProposalStatus =
+  | 'Pending'
+  | 'Approved'
+  | 'Rejected';
+
+export interface ProfessionalSpecialtyProposal {
+  id: string;
+  name: string;
+  justification?: string;
+  status: ProfessionalSpecialtyProposalStatus;
+  dateCreated: string;
+}
+
+export interface ProposeProfessionalSpecialtyPayload {
+  name: string;
+  justification?: string;
+}
+
+export type ProfessionalEducationType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export interface ProfessionalEducationSummary {
+  id: string;
+  professionalProfileId: string;
+  type: ProfessionalEducationType;
+  typeName: string;
+  degreeTitle: string;
+  institutionName: string;
+  institutionCountry: string | null;
+  startYear: number | null;
+  graduationYear: number | null;
+  description: string | null;
+  sortOrder: number;
+  hasDiploma: boolean;
+  diplomaOriginalFileName: string | null;
+  diplomaUrl: string | null;
+  diplomaUrlExpiresAtUtc: string | null;
+  dateCreated: string;
+}
+
+export interface ProfessionalEducationDetail extends ProfessionalEducationSummary {
+  dateUpdated?: string;
+}
+
+export interface CreateProfessionalEducationPayload {
+  type: ProfessionalEducationType;
+  degreeTitle: string;
+  institutionName: string;
+  institutionCountry?: string;
+  startYear?: number;
+  graduationYear?: number;
+  description?: string;
+  sortOrder: number;
+}
+
+export interface UpdateProfessionalEducationPayload {
+  type?: ProfessionalEducationType;
+  degreeTitle?: string;
+  institutionName?: string;
+  institutionCountry?: string;
+  startYear?: number;
+  graduationYear?: number;
+  description?: string;
+  sortOrder?: number;
+}
+
+export interface ProfessionalLocation {
+  id: string;
+  name: string;
+  address: string | null;
+  cityId: string;
+  cityName: string;
+  countryId: string;
+  countryName: string;
+  phone: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  dateCreated: string;
+}
+
+export interface CreateProfessionalLocationPayload {
+  name: string;
+  address?: string;
+  cityId?: string;
+  countryId?: string;
+  phone?: string;
+}
+
+export interface UpdateProfessionalLocationPayload {
+  name?: string;
+  address?: string;
+  cityId?: string;
+  countryId?: string;
+  phone?: string;
+}
+
+export interface ProfessionalSetDefaultLocationResponse {
+  message: string;
+}
+
+export type ProfessionalAvailabilityDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface ProfessionalAvailabilityWindow {
+  id?: string;
+  dayOfWeek: ProfessionalAvailabilityDayOfWeek;
+  dayName?: string;
+  startTime: string;
+  endTime: string;
+  locationId: string;
+  locationName?: string;
+  slotDurationMinutes: number;
+  isActive?: boolean;
+}
+
+export interface ProfessionalAvailabilityTemplateResponse {
+  windows: ProfessionalAvailabilityWindow[];
+}
+
+export interface UpsertProfessionalAvailabilityTemplatePayload {
+  windows: Array<{
+    dayOfWeek: ProfessionalAvailabilityDayOfWeek;
+    startTime: string;
+    endTime: string;
+    locationId: string;
+    slotDurationMinutes: number;
+  }>;
+}
+
+export type ProfessionalAvailabilityExceptionType = 'Absent' | 'Override';
+
+export interface ProfessionalAvailabilityOverrideWindow {
+  startTime: string;
+  endTime: string;
+  locationId: string;
+  slotDurationMinutes: number;
+}
+
+export interface ProfessionalAvailabilityException {
+  id: string;
+  date: string;
+  type: ProfessionalAvailabilityExceptionType;
+  typeName: string;
+  reason: string | null;
+  overrideWindows: ProfessionalAvailabilityOverrideWindow[] | null;
+}
+
+export interface CreateProfessionalAvailabilityExceptionPayload {
+  date: string;
+  type: ProfessionalAvailabilityExceptionType;
+  reason?: string;
+  overrideWindows?: ProfessionalAvailabilityOverrideWindow[];
+}
+
+export interface ProfessionalAvailabilitySlot {
+  startTime: string;
+  endTime: string;
+  locationId: string;
+  locationName: string;
+  isAvailable: boolean;
+}
+
+export interface ProfessionalAvailabilitySlotsResponse {
+  date: string;
+  professionalId: string;
+  slots: ProfessionalAvailabilitySlot[];
 }
 
 // =============================================================================
@@ -445,9 +743,16 @@ export type RequestStatus =
   | 'Pending'
   | 'Contacted'
   | 'InProgress'
-  | 'Completed'
   | 'Rejected'
-  | 'Cancelled';
+  | 'Cancelled'
+  | 'Completed'
+  | 'Accepted'
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5;
 
 export interface ServiceRequest {
   id: string;
@@ -474,8 +779,49 @@ export interface ProfessionalRequestsParams {
   to?: string;
 }
 
-export interface ProfessionalRequestsResponse
-  extends PaginatedResponse<ServiceRequest> {}
+export interface ProfessionalRequestsResponse {
+  items: ServiceRequest[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+// =============================================================================
+// Professional Dashboard
+// =============================================================================
+
+export interface ProfessionalDashboardAppointment {
+  id: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone?: string;
+  timeSlot: string;
+  startUtc: string;
+  endUtc: string;
+  durationMinutes: number;
+  status: string;
+  reason?: string;
+  serviceId?: string | null;
+  institutionName?: string | null;
+}
+
+export interface ProfessionalDashboardResponse {
+  appointmentsTodayCount: number;
+  appointmentsToday: ProfessionalDashboardAppointment[];
+  activePatientsCount: number;
+  pendingEncountersCount: number;
+  monthlyRevenue: number;
+  completedAppointmentsThisMonth: number;
+  revenueMonth: string;
+}
+
+export interface ProfessionalDashboardSummaryResponse {
+  todayAppointments: number;
+  activePatientsLast6Months: number;
+  pendingAppointmentsThisMonth: number;
+  approxMonthlyIncome: number;
+}
 
 export interface UpdateRequestStatusPayload {
   status: RequestStatus;
@@ -527,8 +873,7 @@ export interface AdminProfessionalListItem {
   phone?: string;
 }
 
-export interface AdminProfessionalsResponse
-  extends PaginatedResponse<AdminProfessionalListItem> {}
+export interface AdminProfessionalsResponse extends PaginatedResponse<AdminProfessionalListItem> {}
 
 export interface AdminProfessionalDetail extends AdminProfessionalListItem {
   description?: string;
@@ -555,6 +900,24 @@ export interface ModerateProfileResponse {
   dateUpdated: string;
 }
 
+export interface ApproveProfessionalPayload {
+  adminNotes?: string;
+  isFeatured?: boolean;
+}
+
+export interface RejectProfessionalPayload {
+  reason?: string;
+}
+
+export interface ProfessionalActivationResponse {
+  id: string;
+  action: 'approved' | 'rejected';
+  isActive: boolean;
+  isVerified: boolean;
+  adminNotes?: string;
+  dateUpdated: string;
+}
+
 export interface ModerateServicePayload {
   isActive?: boolean;
   sortOrder?: number;
@@ -574,8 +937,7 @@ export interface AdminRequestsParams {
   to?: string;
 }
 
-export interface AdminRequestsResponse
-  extends PaginatedResponse<AdminRequestListItem> {}
+export interface AdminRequestsResponse extends PaginatedResponse<AdminRequestListItem> {}
 
 export interface ModerateRequestPayload {
   status?: 'Rejected';
@@ -597,6 +959,14 @@ export interface AdminCatalogsResponse {
   categories: Array<
     Category & { sortOrder: number; isActive: boolean; profilesCount: number }
   >;
+}
+
+export interface AdminDashboardSummaryResponse {
+  activePatients: number;
+  activeProfessionalsNonAdmin: number;
+  appointmentsRequestedThisMonth: number;
+  pendingProfessionalActivationRequests: number;
+  generatedAtUtc: string;
 }
 
 // =============================================================================
@@ -634,7 +1004,7 @@ export function isProblemDetails(error: unknown): error is ProblemDetails {
  * Type guard to check if error has field errors
  */
 export function hasFieldErrors(
-  error: unknown
+  error: unknown,
 ): error is ProblemDetails & { errors: Record<string, string[]> } {
   return (
     isProblemDetails(error) &&

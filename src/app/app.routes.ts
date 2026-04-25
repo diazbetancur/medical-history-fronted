@@ -1,64 +1,468 @@
 import { Routes } from '@angular/router';
+import { authStoreGuard, contextGuard, permissionStoreGuard } from '@core/auth';
 
+/**
+ * ============================================================================
+ * Directory Pro - Routing MVP
+ * ============================================================================
+ *
+ * Estructura de 3 áreas separadas:
+ * - /admin/* → AdminLayoutComponent (contexto ADMIN)
+ * - /professional/* → ProfessionalLayoutComponent (contexto PROFESSIONAL)
+ * - /patient/* → PatientLayoutComponent (contexto PATIENT)
+ *
+ * Cada área tiene:
+ * - Topbar con usuario + ContextSelector + Logout
+ * - Sidebar con navegación específica
+ * - RouterOutlet para contenido dinámico
+ *
+ * Guards:
+ * - authStoreGuard: Verifica autenticación (token + user)
+ * - contextGuard: Verifica contexto específico (ADMIN/PROFESSIONAL/PATIENT)
+ */
 export const routes: Routes = [
-  // Public routes (SSR optimized)
+  // ============================================================================
+  // PUBLIC ROUTES (Sin autenticación)
+  // ============================================================================
   {
     path: '',
-    loadChildren: () =>
-      import('@features/public/public.routes').then((m) => m.publicRoutes),
+    loadComponent: () =>
+      import('./features/public/pages/home/home.page').then(
+        (m) => m.HomePageComponent,
+      ),
+    title: 'Inicio - Directory Pro',
   },
-
-  // Login page (standalone, no layout)
   {
     path: 'login',
     loadComponent: () =>
-      import('@features/app/pages/login/login.page').then(
+      import('./features/public/pages/login/login.page').then(
         (m) => m.LoginPageComponent,
       ),
-    title: 'Iniciar Sesión - ProDirectory',
+    title: 'Iniciar Sesión - Directory Pro',
   },
-
-  // Dashboard routes (CSR, requires auth)
   {
-    path: 'dashboard',
-    loadChildren: () =>
-      import('@features/app/app.routes').then((m) => m.appRoutes),
+    path: 'register',
+    loadComponent: () =>
+      import('./features/public/pages/register/register.page').then(
+        (m) => m.RegisterPageComponent,
+      ),
+    title: 'Registro - Directory Pro',
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/public/pages/forgot-password/forgot-password.page').then(
+        (m) => m.ForgotPasswordPageComponent,
+      ),
+    title: 'Recuperar Contraseña - Directory Pro',
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/public/pages/reset-password/reset-password.page').then(
+        (m) => m.ResetPasswordPageComponent,
+      ),
+    title: 'Restablecer Contraseña - Directory Pro',
+  },
+  {
+    path: 'search',
+    loadComponent: () =>
+      import('./features/public/pages/search/search.page').then(
+        (m) => m.SearchPageComponent,
+      ),
+    title: 'Buscar Médicos - Directory Pro',
+  },
+  {
+    path: 'pro/:slug',
+    loadComponent: () =>
+      import('./features/public/pages/profile/profile.page').then(
+        (m) => m.ProfilePageComponent,
+      ),
+    title: 'Perfil Profesional - Directory Pro',
+  },
+  {
+    path: 'buscar-medicos',
+    redirectTo: 'search',
+    pathMatch: 'full',
   },
 
-  // Admin routes (CSR, requires auth + admin role)
+  // ============================================================================
+  // ADMIN AREA (/admin/*)
+  // Guards: authStoreGuard + contextGuard('ADMIN')
+  // ============================================================================
   {
     path: 'admin',
-    loadChildren: () =>
-      import('@features/admin/admin.routes').then((m) => m.adminRoutes),
+    canActivate: [authStoreGuard, contextGuard],
+    data: {
+      requiredContext: 'ADMIN',
+    },
+    loadComponent: () =>
+      import('./layouts/admin-layout/admin-layout.component').then(
+        (m) => m.AdminLayoutComponent,
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/admin/pages/dashboard/admin-dashboard.page').then(
+            (m) => m.AdminDashboardPage,
+          ),
+        title: 'Dashboard Admin - Directory Pro',
+      },
+      {
+        path: 'users',
+        loadChildren: () =>
+          import('./features/admin/pages/users/users.routes').then(
+            (m) => m.usersRoutes,
+          ),
+      },
+      {
+        path: 'roles',
+        loadChildren: () =>
+          import('./features/admin/pages/roles/roles.routes').then(
+            (m) => m.rolesRoutes,
+          ),
+      },
+      {
+        path: 'specialties',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Catalog.ManageCategories',
+            'Profiles.View',
+            'Profiles.Update',
+          ],
+        },
+        loadChildren: () =>
+          import('./features/admin/pages/specialties/specialties.routes').then(
+            (m) => m.specialtiesRoutes,
+          ),
+      },
+      {
+        path: 'solicitudes',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Profiles.View',
+            'Profiles.Verify',
+            'Profiles.Update',
+          ],
+          defaultFilter: 'pending',
+        },
+        loadComponent: () =>
+          import('./features/admin/pages/professionals-review/professionals-review.page').then(
+            (m) => m.ProfessionalsReviewPageComponent,
+          ),
+        title: 'Solicitudes de Activación - Admin',
+      },
+    ],
   },
 
-  // 404 Not Found page
+  // ============================================================================
+  // PROFESSIONAL ONBOARDING (standalone, only requires auth)
+  // Accessible right after become-professional before context switches
+  // ============================================================================
   {
-    path: 'not-found',
+    path: 'professional/onboarding',
+    canActivate: [authStoreGuard, contextGuard],
+    data: {
+      requiredContext: 'PROFESSIONAL',
+    },
     loadComponent: () =>
-      import('@features/public/pages/not-found/not-found.page').then(
-        (m) => m.NotFoundPageComponent,
+      import('./features/professional/pages/onboarding/professional-onboarding.page').then(
+        (m) => m.ProfessionalOnboardingPage,
       ),
-    title: 'Página no encontrada - ProDirectory',
+    title: 'Configurar Perfil Profesional - Directory Pro',
   },
 
-  // 403 Forbidden page (alias /forbidden for backwards compatibility)
+  // ============================================================================
+  // PROFESSIONAL AREA (/professional/*)
+  // Guards: authStoreGuard + contextGuard('PROFESSIONAL')
+  // ============================================================================
   {
-    path: '403',
+    path: 'professional',
+    canActivate: [authStoreGuard, contextGuard],
+    data: {
+      requiredContext: 'PROFESSIONAL',
+    },
     loadComponent: () =>
-      import('@features/public/pages/not-authorized/not-authorized.page').then(
-        (m) => m.NotAuthorizedPageComponent,
+      import('./layouts/professional-layout/professional-layout.component').then(
+        (m) => m.ProfessionalLayoutComponent,
       ),
-    title: 'Acceso No Autorizado - ProDirectory',
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/professional/pages/dashboard/professional-dashboard.page').then(
+            (m) => m.ProfessionalDashboardPage,
+          ),
+        title: 'Dashboard Profesional - Directory Pro',
+      },
+      {
+        path: 'appointments',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Appointments.ViewOwn', 'Appointments.Create'],
+        },
+        loadComponent: () =>
+          import('./features/professional/pages/professional-appointments.page').then(
+            (m) => m.ProfessionalAppointmentsPage,
+          ),
+        title: 'Mis Citas - Directory Pro',
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/professional/pages/onboarding/professional-onboarding.page').then(
+            (m) => m.ProfessionalOnboardingPage,
+          ),
+        title: 'Mi Perfil Profesional - Directory Pro',
+      },
+      {
+        path: 'availability',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Appointments.Slots.View',
+            'Profiles.View',
+            'Profiles.Update',
+          ],
+        },
+        loadComponent: () =>
+          import('./features/professional/pages/professional-availability.page').then(
+            (m) => m.ProfessionalAvailabilityPage,
+          ),
+        title: 'Mi Disponibilidad - Directory Pro',
+      },
+      {
+        path: 'patients',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.History.ViewOwn',
+            'Patients.Medications.ViewOwn',
+            'Patients.Allergies.ViewOwn',
+            'Patients.Exams.ViewOwn',
+            'Patients.Background.ViewOwn',
+          ],
+        },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/professional/pages/patients/professional-patients-list.page').then(
+                (m) => m.ProfessionalPatientsListPage,
+              ),
+            title: 'Mis Pacientes - Directory Pro',
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/professional/pages/patients/professional-patient-detail.page').then(
+                (m) => m.ProfessionalPatientDetailPage,
+              ),
+            title: 'Detalle de Paciente - Directory Pro',
+          },
+        ],
+      },
+      {
+        path: 'requests',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'ServiceRequests.View',
+            'ServiceRequests.Update',
+          ],
+        },
+        loadComponent: () =>
+          import('./features/professional/pages/professional-requests.page').then(
+            (m) => m.ProfessionalRequestsPage,
+          ),
+        title: 'Solicitudes - Directory Pro',
+      },
+      {
+        path: 'agenda',
+        redirectTo: 'appointments',
+        pathMatch: 'full',
+      },
+    ],
+  },
+
+  // ============================================================================
+  // PATIENT AREA (/patient/*)
+  // Guards: authStoreGuard + contextGuard('PATIENT')
+  // ============================================================================
+  {
+    path: 'patient',
+    canActivate: [authStoreGuard, contextGuard],
+    data: {
+      requiredContext: 'PATIENT',
+    },
+    loadComponent: () =>
+      import('./patient/layout/patient-layout.component').then(
+        (m) => m.PatientLayoutComponent,
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./patient/pages/home/patient-home.component').then(
+            (m) => m.PatientHomeComponent,
+          ),
+        title: 'Inicio - Directory Pro',
+      },
+      {
+        path: 'wizard',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Appointments.Create',
+            'Appointments.Slots.View',
+          ],
+        },
+        loadComponent: () =>
+          import('./patient/pages/wizard/patient-wizard.page').then(
+            (m) => m.PatientWizardPage,
+          ),
+        title: 'Agenda tu Cita - Directory Pro',
+      },
+      {
+        path: 'appointments/:id',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Appointments.ViewOwn'],
+        },
+        loadComponent: () =>
+          import('./features/agenda/pages/appointment-detail/appointment-detail.page').then(
+            (m) => m.AppointmentDetailPageComponent,
+          ),
+        title: 'Detalle de Cita - Directory Pro',
+      },
+      {
+        path: 'appointments',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Appointments.ViewOwn'],
+        },
+        loadComponent: () =>
+          import('./patient/pages/appointments/patient-appointments.page').then(
+            (m) => m.PatientAppointmentsPageComponent,
+          ),
+        title: 'Mis Citas - Directory Pro',
+      },
+      {
+        path: 'profile',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Patients.History.ViewOwn'],
+        },
+        loadComponent: () =>
+          import('./patient/profile/pages/profile-page.component').then(
+            (m) => m.ProfilePageComponent,
+          ),
+        title: 'Mi Perfil - Directory Pro',
+      },
+      {
+        path: 'change-password',
+        loadComponent: () =>
+          import('./patient/pages/change-password/patient-change-password.page').then(
+            (m) => m.PatientChangePasswordPage,
+          ),
+        title: 'Cambiar Contraseña - Directory Pro',
+      },
+      {
+        path: 'medications',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.Medications.ViewOwn',
+            'Patients.Medications.ManageOwn',
+          ],
+        },
+        loadComponent: () =>
+          import('./patient/pages/medications/patient-medications.page').then(
+            (m) => m.PatientMedicationsPage,
+          ),
+        title: 'Mis Medicamentos - Directory Pro',
+      },
+      {
+        path: 'allergies',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.Allergies.ViewOwn',
+            'Patients.Allergies.ManageOwn',
+          ],
+        },
+        loadComponent: () =>
+          import('./patient/pages/allergies/patient-allergies.page').then(
+            (m) => m.PatientAllergiesPage,
+          ),
+        title: 'Mis Alergias - Directory Pro',
+      },
+      {
+        path: 'background',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.Background.ViewOwn',
+            'Patients.Background.ManageOwn',
+          ],
+        },
+        loadComponent: () =>
+          import('./patient/pages/background/patient-background.page').then(
+            (m) => m.PatientBackgroundPage,
+          ),
+        title: 'Mis Antecedentes - Directory Pro',
+      },
+      {
+        path: 'exams',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Patients.Exams.ViewOwn',
+            'Patients.Exams.ManageOwn',
+          ],
+        },
+        loadComponent: () =>
+          import('./patient/pages/exams/patient-exams.page').then(
+            (m) => m.PatientExamsPage,
+          ),
+        title: 'Mis Exámenes - Directory Pro',
+      },
+      {
+        path: 'history',
+        redirectTo: 'profile',
+        pathMatch: 'full',
+      },
+      {
+        path: 'documents',
+        redirectTo: 'exams',
+        pathMatch: 'full',
+      },
+      {
+        path: 'settings',
+        redirectTo: 'profile',
+        pathMatch: 'full',
+      },
+    ],
+  },
+
+  // ============================================================================
+  // ERROR ROUTES
+  // ============================================================================
+  {
+    path: 'unauthorized',
+    redirectTo: '',
+    pathMatch: 'full',
   },
   {
     path: 'forbidden',
-    redirectTo: '403', // Redirect to 403 for consistency
+    redirectTo: '',
+    pathMatch: 'full',
   },
-
-  // Fallback redirect to not-found
   {
     path: '**',
-    redirectTo: 'not-found',
+    redirectTo: '',
   },
 ];

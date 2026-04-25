@@ -16,6 +16,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import type { AdminUsersSegment } from '../api/admin-users.api';
 import { AdminUsersApi } from '../api/admin-users.api';
 import type {
   AdminApiError,
@@ -34,6 +35,7 @@ import { RolesApi, type Role } from '../api/roles.api';
 
 interface AdminUsersState {
   // Query/Filter state
+  segment: AdminUsersSegment;
   query: string;
   page: number;
   pageSize: number;
@@ -68,6 +70,7 @@ const initialPagination: PaginationInfo = {
 };
 
 const initialState: AdminUsersState = {
+  segment: 'others',
   query: '',
   page: 1,
   pageSize: DEFAULT_PAGE_SIZE,
@@ -151,6 +154,7 @@ export class AdminUsersStore {
   // ---------------------------------------------------------------------------
 
   // Query state
+  readonly segment = computed(() => this._state().segment);
   readonly query = computed(() => this._state().query);
   readonly page = computed(() => this._state().page);
   readonly pageSize = computed(() => this._state().pageSize);
@@ -230,9 +234,10 @@ export class AdminUsersStore {
     this.updateState({ loading: true, error: null });
 
     const { query, page, pageSize } = this._state();
+    const segment = this._state().segment;
 
     return this.usersApi
-      .listUsers({
+      .listUsersBySegment(segment, {
         q: query || undefined,
         page,
         pageSize,
@@ -300,6 +305,21 @@ export class AdminUsersStore {
    */
   setQuery(query: string): void {
     this.searchSubject.next(query);
+  }
+
+  /**
+   * Set users segment (others/professionals/patients) and reload from page 1.
+   */
+  setSegment(segment: AdminUsersSegment): void {
+    if (segment === this._state().segment) return;
+
+    this.updateState({
+      segment,
+      page: 1,
+      selectedUser: null,
+    });
+
+    this.loadUsers();
   }
 
   /**

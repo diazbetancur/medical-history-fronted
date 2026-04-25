@@ -8,10 +8,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
-import { AuthService } from '@core/auth';
+import { AuthStore } from '@core/auth';
 import type { Role } from '@data/api/roles.api';
 import { RolesStore } from '@data/stores/roles.store';
 import { ToastService } from '@shared/services';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { PERMISSIONS } from '../../admin-menu.config';
 
 @Component({
@@ -30,7 +31,7 @@ import { PERMISSIONS } from '../../admin-menu.config';
   styleUrl: './roles.page.scss',
 })
 export class RolesPageComponent implements OnInit {
-  private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
   private readonly rolesStore = inject(RolesStore);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
@@ -40,28 +41,27 @@ export class RolesPageComponent implements OnInit {
   readonly roles = this.rolesStore.roles;
   readonly loading = this.rolesStore.loading;
   readonly error = this.rolesStore.error;
-  readonly totalRoles = this.rolesStore.totalRoles;
-  readonly systemRoles = this.rolesStore.systemRoles;
-  readonly customRoles = this.rolesStore.customRoles;
 
   // Table configuration
   displayedColumns = ['name', 'description', 'type', 'actions'];
 
   // Permission checks
   readonly canCreate = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.ROLES_CREATE),
+    this.authStore.userPermissions().includes(PERMISSIONS.ROLES_CREATE),
   );
 
   readonly canUpdate = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.ROLES_UPDATE),
+    this.authStore.userPermissions().includes(PERMISSIONS.ROLES_UPDATE),
   );
 
   readonly canDelete = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.ROLES_DELETE),
+    this.authStore.userPermissions().includes(PERMISSIONS.ROLES_DELETE),
   );
 
   readonly canManagePermissions = computed(() =>
-    this.authService.hasPermission(PERMISSIONS.ROLES_MANAGE_PERMISSIONS),
+    this.authStore
+      .userPermissions()
+      .includes(PERMISSIONS.ROLES_MANAGE_PERMISSIONS),
   );
 
   ngOnInit() {
@@ -131,7 +131,21 @@ export class RolesPageComponent implements OnInit {
       return;
     }
 
-    if (confirm(`¿Estás seguro de eliminar el rol "${role.name}"?`)) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Eliminar rol',
+        message: `¿Estás seguro de eliminar el rol "${role.name}"?`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'delete_forever',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
       this.rolesStore.deleteRole(role.id).subscribe({
         next: () => {
           this.toast.success('Rol eliminado correctamente');
@@ -140,7 +154,7 @@ export class RolesPageComponent implements OnInit {
           this.toast.error('Error al eliminar el rol');
         },
       });
-    }
+    });
   }
 
   managePermissions(role: Role) {

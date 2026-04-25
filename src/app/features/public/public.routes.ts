@@ -1,19 +1,27 @@
 import { Routes } from '@angular/router';
-import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
+import { PublicShellComponent } from './layouts/public-shell.component';
 
+/**
+ * Public Routes
+ *
+ * Accessible to all users (authenticated or not).
+ * Uses PublicShellComponent for consistent layout.
+ *
+ * **Note:** No guards required - public area is accessible to everyone.
+ */
 export const publicRoutes: Routes = [
   // Offline page (no layout, standalone)
   {
     path: 'offline',
     loadComponent: () =>
       import('./pages/offline/offline.page').then(
-        (m) => m.OfflinePageComponent
+        (m) => m.OfflinePageComponent,
       ),
     title: 'Sin Conexión - ProDirectory',
   },
   {
     path: '',
-    component: PublicLayoutComponent,
+    component: PublicShellComponent,
     children: [
       {
         path: '',
@@ -25,7 +33,7 @@ export const publicRoutes: Routes = [
         path: 'search',
         loadComponent: () =>
           import('./pages/search/search.page').then(
-            (m) => m.SearchPageComponent
+            (m) => m.SearchPageComponent,
           ),
         title: 'Buscar Profesionales - ProDirectory',
       },
@@ -33,7 +41,7 @@ export const publicRoutes: Routes = [
         path: 'pro/:slug',
         loadComponent: () =>
           import('./pages/profile/profile.page').then(
-            (m) => m.ProfilePageComponent
+            (m) => m.ProfilePageComponent,
           ),
         title: 'Perfil Profesional - ProDirectory',
       },

@@ -1,0 +1,146 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Especialidades</h1>
+    </div>
+
+    @if (canManageCatalog()) {
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Nueva especialidad
+    </button>
+    }
+  </div>
+
+  @if (!canViewPage()) {
+  <mat-card class="warning-card">
+    <mat-card-content>
+      <div class="warning-content">
+        <mat-icon>lock</mat-icon>
+        <div>
+          <h3>Sin permisos de visualización</h3>
+          <p>
+            No cuentas con permisos para consultar especialidades en el módulo
+            de administración.
+          </p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  } @else {
+  <mat-card class="search-card">
+    <mat-card-content>
+      <div class="row-controls only-catalog-filter">
+        <mat-form-field class="catalog-filter" appearance="outline">
+          <mat-label>Filtrar especialidades</mat-label>
+          <input
+            matInput
+            placeholder="Nombre"
+            [ngModel]="catalogFilter()"
+            (ngModelChange)="catalogFilter.set($event)"
+          />
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <button
+          mat-stroked-button
+          (click)="reload()"
+          [disabled]="store.loading()"
+        >
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="catalog-card">
+    <mat-card-content>
+      <div class="catalog-header">
+        <h2>Listado de especialidades</h2>
+        <div class="stats">
+          <span>Total: {{ store.totalSpecialties() }}</span>
+          <span>Activas: {{ store.activeSpecialties() }}</span>
+        </div>
+      </div>
+
+      @if (store.loading()) {
+      <div class="loading-area">
+        <mat-spinner diameter="44"></mat-spinner>
+        <p>Cargando especialidades...</p>
+      </div>
+      } @else if (filteredCatalog().length > 0) {
+      <div class="table-container">
+        <table mat-table [dataSource]="filteredCatalog()" class="catalog-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let specialty">
+              <strong>{{ specialty.name }}</strong>
+              @if (specialty.description) {
+              <p class="description">{{ specialty.description }}</p>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="stats">
+            <th mat-header-cell *matHeaderCellDef>Profesionales</th>
+            <td mat-cell *matCellDef="let specialty">
+              {{ specialty.professionalsCount ?? 0 }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let specialty">
+              <mat-chip
+                [class.active-chip]="specialty.isActive"
+                [class.inactive-chip]="!specialty.isActive"
+              >
+                {{ specialty.isActive ? 'Activa' : 'Inactiva' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let specialty">
+              <button
+                mat-icon-button
+                (click)="openEditDialog(specialty)"
+                [disabled]="!canManageCatalog()"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="deleteSpecialty(specialty)"
+                [disabled]="!canManageCatalog()"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      } @else {
+      <div class="empty-state">
+        <mat-icon>category</mat-icon>
+        <h3>No hay especialidades registradas</h3>
+        <p>Crea la primera especialidad para comenzar.</p>
+        @if (canManageCatalog()) {
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          Crear especialidad
+        </button>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

@@ -7,6 +7,8 @@ import {
   HomePageResponse,
   MetadataResponse,
   ProfilePageResponse,
+  PublicProfessionalDetailResponse,
+  PublicSpecialtyCatalogItem,
   SearchPageResponse,
   SearchParams,
   SuggestResponse,
@@ -29,8 +31,17 @@ export class PublicApi {
    * GET /api/public/pages/home
    * Get home page data with featured content
    */
-  getHomePage(): Observable<HomePageResponse> {
-    return this.api.get<HomePageResponse>('/public/pages/home');
+  getHomePage(
+    featuredLimit = 8,
+    popularCitiesLimit = 6,
+  ): Observable<HomePageResponse> {
+    const params = new URLSearchParams();
+    params.set('featuredLimit', String(featuredLimit));
+    params.set('popularCitiesLimit', String(popularCitiesLimit));
+
+    return this.api.get<HomePageResponse>(
+      `/public/pages/home?${params.toString()}`,
+    );
   }
 
   /**
@@ -53,6 +64,18 @@ export class PublicApi {
   getProfilePage(slug: string): Observable<ProfilePageResponse> {
     return this.api.get<ProfilePageResponse>(
       `/public/pages/profile/${encodeURIComponent(slug)}`,
+    );
+  }
+
+  /**
+   * GET /api/public/professionals/{id}
+   * Get professional public detail by profile id
+   */
+  getProfessionalById(
+    id: string,
+  ): Observable<PublicProfessionalDetailResponse> {
+    return this.api.get<PublicProfessionalDetailResponse>(
+      `/public/professionals/${encodeURIComponent(id)}`,
     );
   }
 
@@ -83,10 +106,18 @@ export class PublicApi {
 
   /**
    * GET /api/public/metadata
-   * Get catalogs for dropdowns (countries, cities, categories)
+   * Get catalogs for dropdowns (countries, cities)
    */
   getMetadata(): Observable<MetadataResponse> {
     return this.api.get<MetadataResponse>('/public/metadata');
+  }
+
+  /**
+   * GET /api/public/specialties
+   * Get specialties catalog for selectors
+   */
+  getSpecialties(): Observable<PublicSpecialtyCatalogItem[]> {
+    return this.api.get<PublicSpecialtyCatalogItem[]>('/public/specialties');
   }
 
   // ===========================================================================
@@ -128,7 +159,7 @@ export class PublicApi {
     if (params.page && params.page > 1) {
       searchParams.set('page', String(params.page));
     }
-    if (params.pageSize && params.pageSize !== 20) {
+    if (params.pageSize && params.pageSize > 0) {
       searchParams.set('pageSize', String(params.pageSize));
     }
 

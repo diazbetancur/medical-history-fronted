@@ -1,18 +1,46 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
+  AssignProfessionalSpecialtiesPayload,
+  CreateProfessionalAvailabilityExceptionPayload,
+  CreateProfessionalEducationPayload,
+  CreateProfessionalLocationPayload,
   CreateProfessionalProfilePayload,
+  CreateProfessionalSpecialtyPayload,
   CreateServicePayload,
+  ProfessionalAvailabilityException,
+  ProfessionalAvailabilitySlotsResponse,
+  ProfessionalAvailabilityTemplateResponse,
+  ProfessionalDashboardSummaryResponse,
+  ProfessionalEducationDetail,
+  ProfessionalEducationSummary,
+  ProfessionalLocation,
   ProfessionalProfile,
+  ProfessionalProfilePhotoResponse,
   ProfessionalRequestsParams,
   ProfessionalRequestsResponse,
+  ProfessionalSetDefaultLocationResponse,
+  ProfessionalSpecialty,
+  ProfessionalSpecialtyProposal,
+  ProposeProfessionalSpecialtyPayload,
+  ReplaceProfessionalSpecialtiesPayload,
   Service,
+  UpdateProfessionalEducationPayload,
+  UpdateProfessionalLocationPayload,
   UpdateProfessionalProfilePayload,
   UpdateRequestResponse,
   UpdateRequestStatusPayload,
   UpdateServicePayload,
+  UpsertProfessionalAvailabilityTemplatePayload,
 } from './api-models';
+
+interface ProfessionalSpecialtyApiResponse {
+  specialtyId: string;
+  specialtyName: string;
+  isPrimary: boolean;
+  dateCreated: string;
+}
 
 /**
  * Professional API Client
@@ -40,7 +68,7 @@ export class ProfessionalApi {
    * Create professional profile (onboarding)
    */
   createProfile(
-    payload: CreateProfessionalProfilePayload
+    payload: CreateProfessionalProfilePayload,
   ): Observable<ProfessionalProfile> {
     return this.api.post<ProfessionalProfile>('/professional/profile', payload);
   }
@@ -50,9 +78,257 @@ export class ProfessionalApi {
    * Update professional profile
    */
   updateProfile(
-    payload: UpdateProfessionalProfilePayload
+    payload: UpdateProfessionalProfilePayload,
   ): Observable<ProfessionalProfile> {
     return this.api.put<ProfessionalProfile>('/professional/profile', payload);
+  }
+
+  uploadProfilePhoto(
+    photo: File,
+  ): Observable<ProfessionalProfilePhotoResponse> {
+    const formData = new FormData();
+    formData.append('photo', photo);
+    return this.api.postMultipart<ProfessionalProfilePhotoResponse>(
+      '/professional/profile/photo',
+      formData,
+    );
+  }
+
+  deleteProfilePhoto(): Observable<void> {
+    return this.api.delete<void>('/professional/profile/photo');
+  }
+
+  // ===========================================================================
+  // Specialties
+  // ===========================================================================
+
+  getSpecialties(): Observable<ProfessionalSpecialty[]> {
+    return this.api
+      .get<ProfessionalSpecialtyApiResponse[]>('/professional/specialties')
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  getProfessionalSpecialtiesByProfile(
+    professionalProfileId: string,
+  ): Observable<ProfessionalSpecialty[]> {
+    return this.api
+      .get<
+        ProfessionalSpecialtyApiResponse[]
+      >(`/professional/specialties/professional/${professionalProfileId}`)
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  addSpecialty(
+    payload: CreateProfessionalSpecialtyPayload,
+  ): Observable<ProfessionalSpecialty[]> {
+    return this.api
+      .post<
+        ProfessionalSpecialtyApiResponse[]
+      >('/professional/specialties', payload)
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  replaceSpecialties(
+    payload: ReplaceProfessionalSpecialtiesPayload,
+  ): Observable<ProfessionalSpecialty[]> {
+    return this.api
+      .put<
+        ProfessionalSpecialtyApiResponse[]
+      >('/professional/specialties', payload)
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  deleteSpecialty(specialtyId: string): Observable<void> {
+    return this.api.delete<void>(`/professional/specialties/${specialtyId}`);
+  }
+
+  assignSpecialties(
+    payload: AssignProfessionalSpecialtiesPayload,
+  ): Observable<ProfessionalSpecialty[]> {
+    return this.api
+      .put<
+        ProfessionalSpecialtyApiResponse[]
+      >('/professional/specialties', payload)
+      .pipe(map((items) => this.mapProfessionalSpecialties(items)));
+  }
+
+  getSpecialtyProposals(): Observable<ProfessionalSpecialtyProposal[]> {
+    return this.api.get<ProfessionalSpecialtyProposal[]>(
+      '/professional/specialties/proposals',
+    );
+  }
+
+  createSpecialtyProposal(
+    payload: ProposeProfessionalSpecialtyPayload,
+  ): Observable<ProfessionalSpecialtyProposal> {
+    return this.api.post<ProfessionalSpecialtyProposal>(
+      '/professional/specialties/proposals',
+      payload,
+    );
+  }
+
+  // ===========================================================================
+  // Education
+  // ===========================================================================
+
+  getEducation(): Observable<ProfessionalEducationSummary[]> {
+    return this.api.get<ProfessionalEducationSummary[]>(
+      '/professional/education',
+    );
+  }
+
+  getEducationById(id: string): Observable<ProfessionalEducationDetail> {
+    return this.api.get<ProfessionalEducationDetail>(
+      `/professional/education/${id}`,
+    );
+  }
+
+  createEducation(
+    payload: CreateProfessionalEducationPayload,
+  ): Observable<ProfessionalEducationSummary> {
+    return this.api.post<ProfessionalEducationSummary>(
+      '/professional/education',
+      payload,
+    );
+  }
+
+  updateEducation(
+    id: string,
+    payload: UpdateProfessionalEducationPayload,
+  ): Observable<ProfessionalEducationSummary> {
+    return this.api.put<ProfessionalEducationSummary>(
+      `/professional/education/${id}`,
+      payload,
+    );
+  }
+
+  deleteEducation(id: string): Observable<void> {
+    return this.api.delete<void>(`/professional/education/${id}`);
+  }
+
+  uploadEducationDiploma(
+    id: string,
+    file: File,
+  ): Observable<{ message: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.api.postMultipart<{ message: string }>(
+      `/professional/education/${id}/diploma`,
+      formData,
+    );
+  }
+
+  deleteEducationDiploma(id: string): Observable<void> {
+    return this.api.delete<void>(`/professional/education/${id}/diploma`);
+  }
+
+  // ===========================================================================
+  // Locations
+  // ===========================================================================
+
+  getLocations(all = false): Observable<ProfessionalLocation[]> {
+    return this.api.get<ProfessionalLocation[]>('/professional/locations', {
+      params: { all },
+    });
+  }
+
+  createLocation(
+    payload: CreateProfessionalLocationPayload,
+  ): Observable<ProfessionalLocation> {
+    return this.api.post<ProfessionalLocation>(
+      '/professional/locations',
+      payload,
+    );
+  }
+
+  updateLocation(
+    id: string,
+    payload: UpdateProfessionalLocationPayload,
+  ): Observable<ProfessionalLocation> {
+    return this.api.put<ProfessionalLocation>(
+      `/professional/locations/${id}`,
+      payload,
+    );
+  }
+
+  setDefaultLocation(
+    id: string,
+  ): Observable<ProfessionalSetDefaultLocationResponse> {
+    return this.api.patch<ProfessionalSetDefaultLocationResponse>(
+      `/professional/locations/${id}/set-default`,
+      {},
+    );
+  }
+
+  deleteLocation(id: string): Observable<void> {
+    return this.api.delete<void>(`/professional/locations/${id}`);
+  }
+
+  // ===========================================================================
+  // Availability
+  // ===========================================================================
+
+  getAvailabilityTemplate(
+    professionalProfileId: string,
+  ): Observable<ProfessionalAvailabilityTemplateResponse> {
+    return this.api.get<ProfessionalAvailabilityTemplateResponse>(
+      `/professional/${professionalProfileId}/availability/template`,
+    );
+  }
+
+  upsertAvailabilityTemplate(
+    professionalProfileId: string,
+    payload: UpsertProfessionalAvailabilityTemplatePayload,
+  ): Observable<ProfessionalAvailabilityTemplateResponse> {
+    return this.api.put<ProfessionalAvailabilityTemplateResponse>(
+      `/professional/${professionalProfileId}/availability/template`,
+      payload,
+    );
+  }
+
+  getAvailabilityExceptions(
+    professionalProfileId: string,
+    params?: { from?: string; to?: string; type?: 'Absent' | 'Override' },
+  ): Observable<ProfessionalAvailabilityException[]> {
+    return this.api.get<ProfessionalAvailabilityException[]>(
+      `/professional/${professionalProfileId}/availability/exceptions`,
+      { params: params ?? {} },
+    );
+  }
+
+  createAvailabilityException(
+    professionalProfileId: string,
+    payload: CreateProfessionalAvailabilityExceptionPayload,
+  ): Observable<ProfessionalAvailabilityException> {
+    return this.api.post<ProfessionalAvailabilityException>(
+      `/professional/${professionalProfileId}/availability/exceptions`,
+      payload,
+    );
+  }
+
+  deleteAvailabilityException(
+    professionalProfileId: string,
+    exceptionId: string,
+  ): Observable<void> {
+    return this.api.delete<void>(
+      `/professional/${professionalProfileId}/availability/exceptions/${exceptionId}`,
+    );
+  }
+
+  getAvailabilitySlots(
+    professionalProfileId: string,
+    date: string,
+    durationMinutes?: number,
+  ): Observable<ProfessionalAvailabilitySlotsResponse> {
+    return this.api.get<ProfessionalAvailabilitySlotsResponse>(
+      `/professional/${professionalProfileId}/availability/slots`,
+      {
+        params: {
+          date,
+          ...(durationMinutes ? { durationMinutes } : {}),
+        },
+      },
+    );
   }
 
   // ===========================================================================
@@ -82,7 +358,7 @@ export class ProfessionalApi {
    */
   updateService(
     id: string,
-    payload: UpdateServicePayload
+    payload: UpdateServicePayload,
   ): Observable<Service> {
     return this.api.put<Service>(`/professional/services/${id}`, payload);
   }
@@ -104,7 +380,7 @@ export class ProfessionalApi {
    * List contact requests received by the professional
    */
   getRequests(
-    params: ProfessionalRequestsParams = {}
+    params: ProfessionalRequestsParams = {},
   ): Observable<ProfessionalRequestsResponse> {
     const queryParams = this.buildRequestParams(params);
     const queryString = queryParams.toString();
@@ -120,11 +396,25 @@ export class ProfessionalApi {
    */
   updateRequestStatus(
     id: string,
-    payload: UpdateRequestStatusPayload
+    payload: UpdateRequestStatusPayload,
   ): Observable<UpdateRequestResponse> {
     return this.api.patch<UpdateRequestResponse>(
       `/professional/requests/${id}`,
-      payload
+      payload,
+    );
+  }
+
+  // ===========================================================================
+  // Dashboard
+  // ===========================================================================
+
+  /**
+   * GET /api/professional/dashboard/summary
+   * Returns aggregated dashboard metrics for the authenticated professional.
+   */
+  getDashboardSummary(): Observable<ProfessionalDashboardSummaryResponse> {
+    return this.api.get<ProfessionalDashboardSummaryResponse>(
+      '/professional/dashboard/summary',
     );
   }
 
@@ -133,7 +423,7 @@ export class ProfessionalApi {
   // ===========================================================================
 
   private buildRequestParams(
-    params: ProfessionalRequestsParams
+    params: ProfessionalRequestsParams,
   ): URLSearchParams {
     const searchParams = new URLSearchParams();
 
@@ -143,8 +433,8 @@ export class ProfessionalApi {
     if (params.pageSize && params.pageSize !== 20) {
       searchParams.set('pageSize', String(params.pageSize));
     }
-    if (params.status) {
-      searchParams.set('status', params.status);
+    if (params.status !== undefined && params.status !== null) {
+      searchParams.set('status', String(params.status));
     }
     if (params.from) {
       searchParams.set('from', params.from);
@@ -154,5 +444,14 @@ export class ProfessionalApi {
     }
 
     return searchParams;
+  }
+
+  private mapProfessionalSpecialties(
+    items: ProfessionalSpecialtyApiResponse[],
+  ): ProfessionalSpecialty[] {
+    return (items ?? []).map((item) => ({
+      id: item.specialtyId,
+      name: item.specialtyName,
+    }));
   }
 }

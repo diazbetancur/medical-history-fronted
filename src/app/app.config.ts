@@ -4,7 +4,9 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import {
+  APP_INITIALIZER,
   ApplicationConfig,
+  inject,
   isDevMode,
   provideZoneChangeDetection,
 } from '@angular/core';
@@ -20,8 +22,23 @@ import {
   withEventReplay,
 } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
-import { errorInterceptor, jwtInterceptor } from '@core/http';
+import { AuthStore } from '@core/auth';
+import {
+  correlationIdInterceptor,
+  errorInterceptor,
+  jwtInterceptor,
+  loadingInterceptor,
+} from '@core/http';
 import { routes } from './app.routes';
+
+/**
+ * Initialize AuthStore on app startup
+ * Checks for valid token and loads user session
+ */
+function initializeAuth() {
+  const authStore = inject(AuthStore);
+  return () => authStore.initialize();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,7 +46,12 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
     provideHttpClient(
       withFetch(),
-      withInterceptors([jwtInterceptor, errorInterceptor]),
+      withInterceptors([
+        loadingInterceptor, // 1st: Track active API requests globally
+        correlationIdInterceptor, // 2nd: Add correlation ID to all requests
+        jwtInterceptor, // 3rd: Add JWT token for auth
+        errorInterceptor, // 4th: Handle redirects, fallback toast, and normalize
+      ]),
     ),
     provideAnimationsAsync(),
     provideClientHydration(withEventReplay()),
@@ -37,5 +59,11 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
+    // Initialize AuthStore on app startup
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuth,
+      multi: true,
+    },
   ],
 };

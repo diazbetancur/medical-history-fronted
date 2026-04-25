@@ -1,0 +1,42 @@
+mat-dialog-content {
+  padding: 1.5rem;
+  min-width: 500px;
+  max-width: 600px;
+
+  @media (max-width: 768px) {
+    min-width: unset;
+  }
+}
+
+.dialog-description {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.error-message {
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.full-width {
+  width: 100%;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+mat-dialog-actions {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}

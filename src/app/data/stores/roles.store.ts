@@ -165,9 +165,9 @@ export class RolesStore {
     this.error.set(null);
 
     return this.rolesApi.createRole(payload).pipe(
-      tap((response) => {
-        // Add new role to the list
-        this.roles.update((roles) => [...roles, response.role]);
+      tap(() => {
+        // Backend returns operation result; refresh list from source of truth
+        this.loadRoles();
       }),
       catchError((err) => {
         const errorMessage =
@@ -189,16 +189,9 @@ export class RolesStore {
     this.error.set(null);
 
     return this.rolesApi.updateRole(roleId, payload).pipe(
-      tap((response) => {
-        // Update role in the list
-        this.roles.update((roles) =>
-          roles.map((r) => (r.id === roleId ? response.role : r)),
-        );
-
-        // Update selected role if it's the same
-        if (this.selectedRole()?.id === roleId) {
-          this.selectedRole.set(response.role);
-        }
+      tap(() => {
+        // Backend returns operation result; refresh list from source of truth
+        this.loadRoles();
       }),
       catchError((err) => {
         const errorMessage =

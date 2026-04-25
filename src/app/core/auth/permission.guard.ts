@@ -1,4 +1,4 @@
-import { inject, isDevMode } from '@angular/core';
+import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
@@ -68,19 +68,7 @@ export const permissionGuard: CanActivateFn = (
   const hasPermissionsAll = permissionsAll && permissionsAll.length > 0;
 
   if (!hasPermissionsAny && !hasPermissionsAll) {
-    // In dev mode, warn about misconfigured route
-    if (isDevMode()) {
-      console.warn(
-        `⚠️ [permissionGuard] Route "${state.url}" has permissionGuard but no permission configuration (permissionsAny/permissionsAll). Access denied (fail-closed).`,
-        {
-          routePath: route.routeConfig?.path || 'unknown',
-          routeData: route.data,
-          fullUrl: state.url,
-        },
-      );
-    }
-
-    // Deny access and redirect to /403
+    // Route misconfigured - deny access and redirect to /403
     return router.createUrlTree(['/403']);
   }
 

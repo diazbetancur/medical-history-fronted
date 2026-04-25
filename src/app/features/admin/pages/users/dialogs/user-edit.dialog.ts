@@ -102,13 +102,13 @@ export interface UserEditDialogData {
 
           <div class="toggle-row">
             <mat-slide-toggle formControlName="isLockedOut" color="warn">
-              Cuenta bloqueada
+              Marcar como bloqueada
             </mat-slide-toggle>
             <span class="toggle-hint">
               @if (form.get('isLockedOut')?.value) {
-                El usuario no podrá iniciar sesión
+                Estado administrativo. El backend actual no aplica lockout completo por sí solo.
               } @else {
-                El usuario puede iniciar sesión normalmente
+                El usuario queda marcado como activo.
               }
             </span>
           </div>
@@ -137,8 +137,10 @@ export interface UserEditDialogData {
         @if (saving()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
-          <mat-icon>save</mat-icon>
-          Guardar Cambios
+          <ng-container>
+            <mat-icon>save</mat-icon>
+            Guardar Cambios
+          </ng-container>
         }
       </button>
     </mat-dialog-actions>

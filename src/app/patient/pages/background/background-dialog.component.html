@@ -1,0 +1,83 @@
+<h2 mat-dialog-title>{{ dialogTitle }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="background-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de antecedente *</mat-label>
+      <mat-select formControlName="type">
+        @for (option of typeOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error>{{ getErrorMessage("type") }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Titulo *</mat-label>
+      <input
+        matInput
+        formControlName="title"
+        placeholder="Ej: Apendicectomia"
+        maxlength="120"
+      />
+      <mat-hint>{{ getRemainingChars("title", 120) }}</mat-hint>
+      <mat-error>{{ getErrorMessage("title") }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Descripcion</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        placeholder="Detalles adicionales sobre este antecedente"
+        rows="4"
+        maxlength="1000"
+      ></textarea>
+      <mat-hint>{{ getRemainingChars("description", 1000) }}</mat-hint>
+      <mat-error>{{ getErrorMessage("description") }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha del evento</mat-label>
+      <input
+        matInput
+        type="date"
+        formControlName="eventDate"
+        placeholder="Selecciona una fecha"
+      />
+      <mat-hint>Fecha aproximada en que ocurrio</mat-hint>
+      <mat-error>{{ getErrorMessage("eventDate") }}</mat-error>
+    </mat-form-field>
+
+    <div class="chronic-toggle">
+      <mat-slide-toggle formControlName="isChronic" color="primary">
+        <div class="toggle-label">
+          <span class="toggle-text">Condicion cronica</span>
+          <span class="toggle-hint">
+            Indica si es una condicion de largo plazo o recurrente
+          </span>
+        </div>
+      </mat-slide-toggle>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSubmitting()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="form.invalid || isSubmitting()"
+  >
+    @if (isSubmitting()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      {{ submitButtonText }}
+    }
+  </button>
+</mat-dialog-actions>

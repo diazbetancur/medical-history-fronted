@@ -23,6 +23,7 @@
       "@shared/*": ["src/app/shared/*"],
       "@data/*": ["src/app/data/*"],
       "@features/*": ["src/app/features/*"],
+      "@patient/*": ["src/app/patient/*"],
       "@env": ["src/environments/environment"],
       "@env/*": ["src/environments/*"]
     }

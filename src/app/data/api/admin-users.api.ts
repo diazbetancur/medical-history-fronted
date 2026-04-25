@@ -24,6 +24,8 @@ import {
 } from './admin-users.types';
 import { ApiClient } from './api-client';
 
+export type AdminUsersSegment = 'others' | 'professionals' | 'patients';
+
 /**
  * Admin Users API Service
  *
@@ -36,29 +38,6 @@ import { ApiClient } from './api-client';
  * - Users.Update: Update user details
  * - Users.Delete: Delete users
  * - Users.AssignRoles: Manage user roles
- *
- * @example
- * ```typescript
- * // List users with search
- * this.adminUsersApi.listUsers({ q: 'john', page: 1, pageSize: 20 })
- *   .subscribe(response => {
- *     console.log(response.data); // AdminUserListDto[]
- *     console.log(response.pagination); // PaginationInfo
- *   });
- *
- * // Create user
- * this.adminUsersApi.createUser({
- *   userName: 'johndoe',
- *   email: 'john@example.com',
- *   password: 'SecurePass123!',
- *   confirmPassword: 'SecurePass123!',
- *   roles: ['User']
- * }).subscribe(result => {
- *   if (result.success) {
- *     console.log('User created:', result.userId);
- *   }
- * });
- * ```
  */
 @Injectable({ providedIn: 'root' })
 export class AdminUsersApi {
@@ -88,6 +67,34 @@ export class AdminUsersApi {
         | PaginatedResponseFormatA<AdminUserListDto>
         | PaginatedResponseFormatB<AdminUserListDto>
       >(this.basePath, { params: queryParams })
+      .pipe(
+        map((response) =>
+          this.normalizePaginatedResponse<AdminUserListDto>(response, params),
+        ),
+        catchError((error) => this.handleError(error)),
+      );
+  }
+
+  /**
+   * GET /api/admin/rbac/users/{segment}
+   *
+   * List users by segment:
+   * - others: administrative/non-patient/non-professional users
+   * - professionals: professional users
+   * - patients: patient users
+   */
+  listUsersBySegment(
+    segment: AdminUsersSegment,
+    params: AdminUsersQueryParams = {},
+  ): Observable<PaginatedResponse<AdminUserListDto>> {
+    const queryParams = this.buildQueryParams(params);
+    const endpoint = `${this.basePath}/${segment}`;
+
+    return this.api
+      .get<
+        | PaginatedResponseFormatA<AdminUserListDto>
+        | PaginatedResponseFormatB<AdminUserListDto>
+      >(endpoint, { params: queryParams })
       .pipe(
         map((response) =>
           this.normalizePaginatedResponse<AdminUserListDto>(response, params),
@@ -289,7 +296,6 @@ export class AdminUsersApi {
     }
 
     // Unknown format - return empty with default pagination
-    console.warn('[AdminUsersApi] Unknown response format:', response);
     return {
       data: [],
       pagination: {

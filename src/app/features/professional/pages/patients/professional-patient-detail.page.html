@@ -1,0 +1,354 @@
+<div class="professional-patient-detail">
+  <!-- Header with back button -->
+  <div class="page-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <h1>Historia Clínica del Paciente</h1>
+      <p class="subtitle">Gestión de atenciones médicas</p>
+    </div>
+  </div>
+
+  <!-- Privacy Disclaimer (if applicable) -->
+  @if (showPrivacyDisclaimer()) {
+  <mat-card class="disclaimer-card">
+    <mat-card-content>
+      <mat-icon>info</mat-icon>
+      <div class="disclaimer-text">
+        <strong>Información de Privacidad</strong>
+        <p>
+          Por preferencia de privacidad del paciente, solo ves las atenciones
+          que has registrado.
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Tabs -->
+  <mat-tab-group class="patient-tabs" animationDuration="300ms">
+    <!-- Tab: Resumen -->
+    <mat-tab label="Resumen">
+      <div class="tab-content">
+        @if (isLoadingSummary()) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Cargando resumen del paciente...</p>
+        </div>
+        } @else if (summaryError()) {
+        <mat-card class="error-card">
+          <mat-card-content>
+            <mat-icon class="error-icon">error_outline</mat-icon>
+            <p class="error-message">{{ summaryError() }}</p>
+          </mat-card-content>
+        </mat-card>
+        } @else {
+        <section class="summary-grid" aria-label="Resumen del paciente">
+          <div class="summary-item">
+            <mat-icon>person</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Nombre</span>
+              <span class="summary-value">
+                {{ patientSummary()?.fullName || 'No disponible' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>phone</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Teléfono</span>
+              <span class="summary-value">
+                {{ patientSummary()?.phone || 'No disponible' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>location_on</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Ciudad / País</span>
+              <span class="summary-value">{{ patientAddress() }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>mail</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Correo electrónico</span>
+              <span class="summary-value">
+                {{ patientSummary()?.email || 'No disponible' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>badge</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Documento</span>
+              <span class="summary-value">{{ patientDocument() }}</span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>cake</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Fecha de nacimiento</span>
+              <span class="summary-value">
+                {{ patientSummary()?.dateOfBirth ?
+                (patientSummary()!.dateOfBirth | date: 'dd/MM/yyyy') : 'No
+                disponible' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>wc</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Género</span>
+              <span class="summary-value">
+                {{ patientSummary()?.gender || 'No disponible' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>water_drop</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Tipo de sangre</span>
+              <span class="summary-value">
+                {{ patientSummary()?.bloodType || 'No disponible' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-item summary-item--full">
+            <mat-icon>visibility</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Compartir historial completo</span>
+              <span class="summary-value">
+                {{ patientSummary()?.shareFullHistoryFlag ? 'Sí' : 'No' }}
+              </span>
+            </div>
+          </div>
+        </section>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Historia -->
+    <mat-tab label="Historia">
+      <div class="tab-content history-tab">
+        <!-- Action Bar -->
+        <div class="action-bar">
+          <button mat-raised-button color="primary" (click)="createEncounter()">
+            <mat-icon>add</mat-icon>
+            Nueva Atención
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Cargando historia clínica...</p>
+        </div>
+        }
+
+        <!-- Error State -->
+        @else if (error()) {
+        <mat-card class="error-card">
+          <mat-card-content>
+            <mat-icon class="error-icon">error_outline</mat-icon>
+            <p class="error-message">{{ error() }}</p>
+            <button mat-raised-button color="primary" (click)="retry()">
+              Reintentar
+            </button>
+          </mat-card-content>
+        </mat-card>
+        }
+
+        <!-- Empty State -->
+        @else if (encounters().length === 0) {
+        <mat-card class="empty-card">
+          <mat-card-content>
+            <mat-icon class="empty-icon">medical_information</mat-icon>
+            <p class="empty-message">Aún no hay atenciones registradas</p>
+            <p class="empty-subtitle">
+              Crea la primera atención médica para este paciente
+            </p>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="createEncounter()"
+            >
+              <mat-icon>add</mat-icon>
+              Crear Primera Atención
+            </button>
+          </mat-card-content>
+        </mat-card>
+        }
+
+        <!-- Content -->
+        @else {
+        <div class="encounters-list">
+          @for (encounter of encounters(); track encounter.id) {
+          <mat-card class="encounter-card">
+            <mat-card-header>
+              <mat-card-title>
+                <div class="encounter-title">
+                  <span class="date">
+                    <mat-icon>event</mat-icon>
+                    {{ encounter.encounterDateUtc | date: 'dd/MM/yyyy' }}
+                  </span>
+                  <span
+                    class="status"
+                    [class.draft]="encounter.status === 'Draft'"
+                    [class.closed]="encounter.status === 'Closed'"
+                  >
+                    {{ encounter.status === 'Draft' ? 'Borrador' : 'Cerrada' }}
+                  </span>
+                  @if (!encounter.isOwnEncounter) {
+                  <span
+                    class="own-indicator"
+                    matTooltip="Atención de otro profesional"
+                  >
+                    <mat-icon>info</mat-icon>
+                  </span>
+                  }
+                </div>
+              </mat-card-title>
+              <mat-card-subtitle>
+                <div class="professional-info">
+                  <mat-icon>person</mat-icon>
+                  {{ encounter.professionalName }}
+                </div>
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              @if (encounter.summary) {
+              <div class="encounter-summary">
+                <strong>Resumen:</strong>
+                <p>{{ encounter.summary }}</p>
+              </div>
+              <mat-divider></mat-divider>
+              }
+
+              <!-- Notes -->
+              <div class="notes-section">
+                <h4>Notas Clínicas ({{ encounter.notesCount }})</h4>
+                <p class="notes-preview">
+                  Haz clic en "Ver Detalle" para ver todas las notas
+                </p>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button
+                mat-button
+                color="primary"
+                (click)="viewEncounter(encounter)"
+              >
+                <mat-icon>visibility</mat-icon>
+                Ver Detalle
+              </button>
+
+              <!-- Draft actions -->
+              @if (canEdit(encounter)) {
+              <button
+                mat-button
+                color="primary"
+                (click)="editEncounter(encounter)"
+              >
+                <mat-icon>edit</mat-icon>
+                Editar
+              </button>
+              <button
+                mat-button
+                color="accent"
+                (click)="closeEncounter(encounter)"
+              >
+                <mat-icon>check_circle</mat-icon>
+                Cerrar Atención
+              </button>
+              }
+
+              <!-- Closed actions -->
+              @if (canAddAddendum(encounter)) {
+              <button
+                mat-button
+                color="primary"
+                (click)="addAddendum(encounter)"
+              >
+                <mat-icon>note_add</mat-icon>
+                Agregar Addendum
+              </button>
+              } @if (!canEdit(encounter) && !canAddAddendum(encounter)) {
+              <span class="no-actions-hint">Solo lectura</span>
+              }
+            </mat-card-actions>
+          </mat-card>
+          }
+        </div>
+
+        <!-- Pagination -->
+        <mat-paginator
+          [length]="totalItems()"
+          [pageSize]="pageSize()"
+          [pageIndex]="currentPage()"
+          [pageSizeOptions]="[5, 10, 20]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons
+        >
+        </mat-paginator>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Medicamentos -->
+    <mat-tab label="Medicamentos">
+      <div class="tab-content">
+        @if (patientProfileId()) {
+        <app-professional-patient-medications-tab
+          [patientProfileId]="patientProfileId()!"
+        />
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Alergias -->
+    <mat-tab label="Alergias">
+      <div class="tab-content">
+        @if (patientProfileId()) {
+        <app-professional-patient-allergies-tab
+          [patientProfileId]="patientProfileId()!"
+        />
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Antecedentes -->
+    <mat-tab label="Antecedentes">
+      <div class="tab-content">
+        @if (patientProfileId()) {
+        <app-professional-patient-background-tab
+          [patientProfileId]="patientProfileId()!"
+        />
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Tab: Exámenes -->
+    <mat-tab label="Exámenes">
+      <div class="tab-content">
+        @if (patientProfileId()) {
+        <app-professional-patient-exams-tab
+          [patientProfileId]="patientProfileId()!"
+        />
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

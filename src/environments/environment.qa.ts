@@ -1,10 +1,10 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:5254/api',
+  apiBaseUrl: 'https://qa-api.meditigo.com/api',
   analytics: {
-    enabled: true, // Enable in dev for testing
+    enabled: true,
     provider: 'ga4' as const,
-    measurementId: 'G-XXXXXXXXXX', // Replace with your dev/test GA4 ID
-    debug: true, // Log events to console in dev
+    measurementId: 'G-XXXXXXXXXX',
+    debug: false,
   },
 };

@@ -1,0 +1,110 @@
+<div class="professional-background-tab">
+  <div class="tab-header">
+    <h2>Antecedentes del Paciente</h2>
+    @if (!noRelation() && !isLoading() && backgrounds().length > 0) {
+      <div class="summary-info">
+        <mat-chip class="total-chip">
+          <mat-icon>medical_information</mat-icon>
+          {{ totalItems() }} total
+        </mat-chip>
+        <mat-chip class="chronic-chip">
+          <mat-icon>autorenew</mat-icon>
+          {{ chronicCount() }} crónicos
+        </mat-chip>
+      </div>
+    }
+  </div>
+
+  <!-- No Relation Banner -->
+  @if (noRelation()) {
+    <mat-card class="no-relation-banner">
+      <mat-card-content>
+        <mat-icon class="no-relation-icon">info</mat-icon>
+        <div class="no-relation-content">
+          <h3>Sin relación terapéutica</h3>
+          <p>
+            No tienes relación terapéutica con este paciente. Solo puedes ver
+            antecedentes de pacientes con los que tienes una relación
+            establecida.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Loading State -->
+  @else if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando antecedentes...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <p class="error-message">{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="retry()">
+          Reintentar
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Empty State -->
+  @else if (backgrounds().length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <mat-icon class="empty-icon">medical_information</mat-icon>
+        <p class="empty-message">
+          Este paciente no tiene antecedentes registrados
+        </p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Content -->
+  @else {
+    <div class="backgrounds-list">
+      @for (background of sortedBackgrounds(); track background.id) {
+        <mat-card class="background-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="background-icon"
+              >history_edu</mat-icon
+            >
+            <mat-card-title>{{ background.title }}</mat-card-title>
+            <mat-card-subtitle>
+              <div class="background-meta">
+                <mat-chip class="type-chip">
+                  {{ getTypeLabel(background.type) }}
+                </mat-chip>
+                @if (background.isChronic) {
+                  <mat-chip class="chronic-chip">
+                    <mat-icon>autorenew</mat-icon>
+                    Crónico
+                  </mat-chip>
+                }
+                @if (background.eventDate) {
+                  <mat-chip class="date-chip">
+                    <mat-icon>event</mat-icon>
+                    {{ background.eventDate | date: "dd/MM/yyyy" }}
+                  </mat-chip>
+                }
+              </div>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            @if (background.description) {
+              <div class="background-description">
+                <p>{{ background.description }}</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

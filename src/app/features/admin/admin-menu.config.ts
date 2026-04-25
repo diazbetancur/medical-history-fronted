@@ -77,6 +77,8 @@ export const PERMISSIONS = {
   CATALOG_MANAGE_COUNTRIES: 'Catalog.ManageCountries',
   CATALOG_MANAGE_CITIES: 'Catalog.ManageCities',
   CATALOG_MANAGE_CATEGORIES: 'Catalog.ManageCategories',
+  CATALOG_MANAGE_INSTITUTIONS: 'Catalog.ManageInstitutions',
+  CATALOG_VIEW_INSTITUTIONS: 'Catalog.ViewInstitutions',
 
   // Users Management
   USERS_VIEW: 'Users.View',
@@ -139,16 +141,16 @@ export const ADMIN_MENU: AdminMenuSection[] = [
         tooltip: 'Revisar y verificar perfiles de profesionales',
       },
       {
-        id: 'requests',
+        id: 'solicitudes',
         label: 'Solicitudes',
-        icon: 'mail',
-        route: '/admin/requests',
+        icon: 'pending_actions',
+        route: '/admin/solicitudes',
         permissionsAny: [
-          PERMISSIONS.SERVICE_REQUESTS_VIEW_ALL,
-          PERMISSIONS.SERVICE_REQUESTS_UPDATE,
-          PERMISSIONS.SERVICE_REQUESTS_DELETE,
+          PERMISSIONS.PROFILES_VIEW,
+          PERMISSIONS.PROFILES_VERIFY,
+          PERMISSIONS.PROFILES_UPDATE,
         ],
-        tooltip: 'Gestionar solicitudes de servicio',
+        tooltip: 'Profesionales pendientes de activación de cuenta',
       },
     ],
     dividerAfter: true,

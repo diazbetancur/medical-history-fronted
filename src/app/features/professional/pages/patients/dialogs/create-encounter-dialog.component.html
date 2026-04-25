@@ -1,0 +1,91 @@
+<h2 mat-dialog-title>Nueva Atencion Medica</h2>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <p class="dialog-description">
+      Crea una nueva atencion medica. Se guardara como borrador hasta que la
+      cierres.
+    </p>
+
+    @if (data.appointmentId) {
+      <p class="dialog-description">
+        Esta atencion quedara asociada a la cita seleccionada.
+      </p>
+    }
+
+    @if (error()) {
+      <div class="error-message">
+        {{ error() }}
+      </div>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Resumen</mat-label>
+      <input
+        matInput
+        formControlName="summary"
+        maxlength="200"
+        placeholder="Ej: Control de presion arterial"
+      />
+      <mat-hint align="end">
+        {{ form.get("summary")?.value?.length || 0 }}/200
+      </mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Titulo de la nota</mat-label>
+      <input
+        matInput
+        formControlName="noteTitle"
+        maxlength="100"
+        placeholder="Ej: Evaluacion inicial"
+      />
+      <mat-hint align="end">
+        {{ form.get("noteTitle")?.value?.length || 0 }}/100
+      </mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nota inicial *</mat-label>
+      <textarea
+        matInput
+        formControlName="initialNote"
+        rows="8"
+        maxlength="20000"
+        placeholder="Escribe la nota clinica inicial"
+      ></textarea>
+      <mat-hint align="end">
+        {{ form.get("initialNote")?.value?.length || 0 }}/20000
+      </mat-hint>
+      @if (
+        form.get("initialNote")?.hasError("required") &&
+        form.get("initialNote")?.touched
+      ) {
+        <mat-error>Este campo es obligatorio</mat-error>
+      }
+      @if (
+        form.get("initialNote")?.hasError("maxlength") &&
+        form.get("initialNote")?.touched
+      ) {
+        <mat-error>El maximo permitido es 20000 caracteres</mat-error>
+      }
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()" [disabled]="isSaving()">
+      Cancelar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="isSaving()"
+    >
+      @if (isSaving()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      }
+      Crear atencion
+    </button>
+  </mat-dialog-actions>
+</form>

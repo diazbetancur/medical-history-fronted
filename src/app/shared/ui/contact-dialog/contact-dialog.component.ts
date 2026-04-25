@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -20,6 +20,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { RequestFormStore } from '@data/stores';
 import { AnalyticsService } from '@shared/services';
+import { FormControlErrorComponent } from '../forms/form-control-error.component';
+import { FormLabelComponent } from '../forms/form-label.component';
 
 export interface ContactDialogData {
   professionalId: string;
@@ -41,6 +43,8 @@ export interface ContactDialogData {
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    FormControlErrorComponent,
+    FormLabelComponent,
   ],
   templateUrl: './contact-dialog.component.html',
   styleUrl: './contact-dialog.component.scss',
@@ -57,14 +61,21 @@ export class ContactDialogComponent {
   readonly loading = this.formStore.loading;
   readonly success = this.formStore.success;
   readonly error = this.formStore.error;
+  readonly submitted = signal(false);
 
   // Form
   readonly form: FormGroup = this.fb.group({
-    name: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    phone: [''],
+    name: ['', [Validators.required, Validators.maxLength(100)]],
+    email: [
+      '',
+      [Validators.required, Validators.email, Validators.maxLength(100)],
+    ],
+    phone: ['', [Validators.maxLength(20)]],
     serviceId: [null],
-    message: ['', [Validators.required, Validators.minLength(10)]],
+    message: [
+      '',
+      [Validators.required, Validators.minLength(10), Validators.maxLength(1000)],
+    ],
   });
 
   constructor() {
@@ -73,6 +84,8 @@ export class ContactDialogComponent {
   }
 
   submit(): void {
+    this.submitted.set(true);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -80,17 +93,17 @@ export class ContactDialogComponent {
 
     const formValue = this.form.value;
     const selectedService = this.data.services?.find(
-      (s) => s.id === formValue.serviceId
+      (s) => s.id === formValue.serviceId,
     );
 
     this.formStore
       .submit({
         profileId: this.data.professionalId,
         serviceId: formValue.serviceId || undefined,
-        clientName: formValue.name,
-        clientEmail: formValue.email,
-        clientPhone: formValue.phone || undefined,
-        message: formValue.message,
+        clientName: formValue.name?.trim(),
+        clientEmail: formValue.email?.trim(),
+        clientPhone: formValue.phone?.trim() || undefined,
+        message: formValue.message?.trim(),
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

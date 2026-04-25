@@ -9,6 +9,36 @@
 @use "design-tokens" as tokens;
 
 // ============================================================================
+// TOAST NOTIFICATIONS (Snackbar) - Override styles.scss without editing it
+// ============================================================================
+// styles.scss defines .toast-* after importing utilities, so we use a more
+// specific selector that matches the actual MDC snackbar container.
+
+.mat-mdc-snack-bar-container.toast-success {
+  --mdc-snackbar-container-color: #15803d;
+}
+
+.mat-mdc-snack-bar-container.toast-error {
+  --mdc-snackbar-container-color: #b91c1c;
+}
+
+.mat-mdc-snack-bar-container.toast-warning {
+  --mdc-snackbar-container-color: #b45309;
+}
+
+.mat-mdc-snack-bar-container.toast-info {
+  --mdc-snackbar-container-color: #1d4ed8;
+}
+
+.mat-mdc-snack-bar-container.toast-success,
+.mat-mdc-snack-bar-container.toast-error,
+.mat-mdc-snack-bar-container.toast-warning,
+.mat-mdc-snack-bar-container.toast-info {
+  --mdc-snackbar-supporting-text-color: white;
+  --mat-snack-bar-button-color: white;
+}
+
+// ============================================================================
 // BACKGROUND COLORS
 // ============================================================================
 

@@ -1,17 +1,14 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { environment } from '@env';
 
 const TOKEN_KEY = 'auth_token';
 const TOKEN_EXPIRY_KEY = 'auth_token_expiry';
 
 /**
- * Debug log helper - only logs in development
+ * Debug log helper (removed for production)
  */
-function debugLog(message: string, ...args: unknown[]): void {
-  if (!environment.production) {
-    console.warn(message, ...args);
-  }
+function debugLog(_message: string, ..._args: unknown[]): void {
+  // Debug logging removed
 }
 
 /**

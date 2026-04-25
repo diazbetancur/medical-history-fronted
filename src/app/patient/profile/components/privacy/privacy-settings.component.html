@@ -1,0 +1,67 @@
+<div class="privacy-settings">
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando configuracion...</p>
+    </div>
+  }
+
+  @else if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <p class="error-message">{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="retry()">
+          Reintentar
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @else {
+    <mat-card class="settings-card">
+      <mat-card-header>
+        <mat-card-title>Privacidad de Historia Clinica</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="privacy-info">
+          <p class="info-text">
+            Controla quien puede ver tu historia clinica completa.
+          </p>
+        </div>
+
+        <div class="privacy-option">
+          <mat-slide-toggle
+            [checked]="shareFullHistory()"
+            [disabled]="isSaving()"
+            (change)="onToggleChange($event.checked)"
+            color="primary"
+          >
+            <span class="toggle-label">
+              Compartir historial completo con medicos tratantes *
+            </span>
+          </mat-slide-toggle>
+
+          @if (isSaving()) {
+            <mat-spinner diameter="20" class="saving-spinner"></mat-spinner>
+          }
+        </div>
+
+        <div class="privacy-explanation">
+          @if (shareFullHistory()) {
+            <p class="explanation-text enabled">
+              Tus medicos tratantes pueden ver tu historia clinica completa,
+              incluyendo atenciones registradas por otros profesionales.
+            </p>
+          } @else {
+            <p class="explanation-text disabled">
+              Tus medicos solo podran ver las atenciones que ellos han
+              registrado contigo. Tu historial de otros profesionales permanece
+              privado.
+            </p>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

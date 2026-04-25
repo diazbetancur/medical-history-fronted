@@ -1,0 +1,57 @@
+.error-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background: var(--gradient-primary);
+}
+
+.error-card {
+  max-width: 500px;
+  text-align: center;
+}
+
+.error-icon {
+  margin: 2rem 0 1rem;
+}
+
+.error-icon mat-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+}
+
+h1 {
+  margin: 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.error-code {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0.5rem 0;
+}
+
+.error-message {
+  font-size: 1.1rem;
+  margin: 1rem 0;
+}
+
+.error-hint {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.error-actions button {
+  min-width: 150px;
+}

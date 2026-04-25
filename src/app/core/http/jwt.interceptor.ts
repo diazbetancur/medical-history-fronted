@@ -10,21 +10,37 @@ import { environment } from '@env';
 import { catchError, throwError } from 'rxjs';
 
 /**
- * Routes that require JWT authentication.
- * Bearer token will ONLY be added to these paths.
- * Public endpoints (/public/*) never get the token.
+ * Public/anonymous endpoints.
+ * JWT token MUST NOT be attached to these routes.
  */
-const AUTH_REQUIRED_PATTERNS = [
-  '/api/auth/me',
-  '/api/professional/',
-  '/api/admin/',
+const PUBLIC_OR_ANONYMOUS_PATTERNS = [
+  '/api/public/',
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
 ];
 
 /**
- * Check if the request URL requires authentication
+ * Check if URL targets our API backend
+ */
+function isApiRequest(url: string): boolean {
+  const apiBase = environment.apiBaseUrl.replace(/\/+$/, '');
+  return url.startsWith(apiBase) || url.includes('/api/');
+}
+
+/**
+ * Check if endpoint is public/anonymous
+ */
+function isPublicOrAnonymous(url: string): boolean {
+  return PUBLIC_OR_ANONYMOUS_PATTERNS.some((pattern) => url.includes(pattern));
+}
+
+/**
+ * Check if request should include JWT
  */
 function requiresAuth(url: string): boolean {
-  return AUTH_REQUIRED_PATTERNS.some((pattern) => url.includes(pattern));
+  return isApiRequest(url) && !isPublicOrAnonymous(url);
 }
 
 /**
@@ -64,11 +80,6 @@ export const jwtInterceptor: HttpInterceptorFn = (
       if (error.status === 401 && requiresAuth(req.url)) {
         // Clear invalid token
         tokenStorage.clearToken();
-
-        // Log only in development
-        if (!environment.production) {
-          console.warn('[JWT Interceptor] Unauthorized - Token cleared');
-        }
       }
 
       return throwError(() => error);

@@ -1,0 +1,163 @@
+<div class="professional-allergies-tab">
+  <div class="tab-header">
+    <h2>Alergias del Paciente</h2>
+    @if (!noRelation() && !isLoading() && allergies().length > 0) {
+      <div class="summary-info">
+        <mat-chip class="active-chip">
+          <mat-icon>warning</mat-icon>
+          {{ activeCount() }} activas
+        </mat-chip>
+        <mat-chip class="total-chip">
+          <mat-icon>list</mat-icon>
+          {{ totalItems() }} total
+        </mat-chip>
+      </div>
+    }
+  </div>
+
+  <!-- No Relation Banner -->
+  @if (noRelation()) {
+    <mat-card class="no-relation-banner">
+      <mat-card-content>
+        <mat-icon class="no-relation-icon">info</mat-icon>
+        <div class="no-relation-content">
+          <h3>Sin relación terapéutica</h3>
+          <p>
+            No tienes relación terapéutica con este paciente. Solo puedes ver
+            información de pacientes con los que tienes una relación
+            establecida.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Loading State -->
+  @else if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando alergias...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <p class="error-message">{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="retry()">
+          Reintentar
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Empty State -->
+  @else if (allergies().length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <mat-icon class="empty-icon">warning</mat-icon>
+        <p class="empty-message">Este paciente no tiene alergias registradas</p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Content -->
+  @else {
+    <!-- Filters -->
+    <div class="filters-bar">
+      <mat-form-field appearance="outline" class="status-filter">
+        <mat-label>Filtrar por estado</mat-label>
+        <mat-select
+          [value]="statusFilter()"
+          (selectionChange)="onStatusFilterChange($event.value)"
+        >
+          <mat-option value="All">Todas</mat-option>
+          <mat-option value="Active">Activas</mat-option>
+          <mat-option value="Resolved">Resueltas</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Allergies List -->
+    <div class="allergies-list">
+      @for (allergy of allergies(); track allergy.id) {
+        <mat-card class="allergy-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="allergy-icon">warning</mat-icon>
+            <mat-card-title>{{ allergy.allergen }}</mat-card-title>
+            <mat-card-subtitle>
+              <div class="allergy-meta">
+                <mat-chip
+                  [class.status-active]="allergy.status === 'Active'"
+                  [class.status-resolved]="allergy.status === 'Resolved'"
+                  class="status-chip"
+                >
+                  {{ allergy.status === "Active" ? "Activa" : "Resuelta" }}
+                </mat-chip>
+                @if (allergy.severity) {
+                  <mat-chip
+                    [class.severity-mild]="allergy.severity === 'Mild'"
+                    [class.severity-moderate]="allergy.severity === 'Moderate'"
+                    [class.severity-severe]="allergy.severity === 'Severe'"
+                    class="severity-chip"
+                  >
+                    @if (allergy.severity === "Mild") {
+                      Leve
+                    } @else if (allergy.severity === "Moderate") {
+                      Moderada
+                    } @else {
+                      Severa
+                    }
+                  </mat-chip>
+                }
+              </div>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="allergy-details">
+              @if (allergy.reaction) {
+                <div class="detail-item">
+                  <mat-icon>local_hospital</mat-icon>
+                  <span class="detail-label">Reacción:</span>
+                  <span class="detail-value">{{ allergy.reaction }}</span>
+                </div>
+              }
+
+              @if (allergy.onsetDate) {
+                <div class="detail-item">
+                  <mat-icon>event</mat-icon>
+                  <span class="detail-label">Fecha de aparición:</span>
+                  <span class="detail-value">
+                    {{ allergy.onsetDate | date: "dd/MM/yyyy" }}
+                  </span>
+                </div>
+              }
+
+              @if (allergy.notes) {
+                <div class="detail-item notes">
+                  <mat-icon>notes</mat-icon>
+                  <span class="detail-label">Notas:</span>
+                  <span class="detail-value">{{ allergy.notes }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator
+      [length]="totalItems()"
+      [pageSize]="pageSize()"
+      [pageIndex]="currentPage()"
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  }
+</div>

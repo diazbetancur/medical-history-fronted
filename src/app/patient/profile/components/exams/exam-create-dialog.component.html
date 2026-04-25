@@ -1,0 +1,94 @@
+<h2 mat-dialog-title>Nuevo Examen</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="exam-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Titulo del examen *</mat-label>
+      <input
+        matInput
+        formControlName="title"
+        maxlength="150"
+        placeholder="Ej: Analisis de sangre"
+      />
+      <mat-hint align="end">
+        {{ form.get("title")?.value?.length || 0 }}/150
+      </mat-hint>
+      @if (form.get("title")?.invalid && form.get("title")?.touched) {
+        <mat-error>{{ getErrorMessage("title") }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Categoria</mat-label>
+      <mat-select formControlName="category">
+        <mat-option [value]="''">Sin categoria</mat-option>
+        @for (category of categories; track category) {
+          <mat-option [value]="category">
+            {{ categoryLabels[category] }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fecha del examen *</mat-label>
+      <input
+        matInput
+        type="date"
+        formControlName="examDate"
+        placeholder="Selecciona una fecha"
+      />
+      @if (form.get("examDate")?.invalid && form.get("examDate")?.touched) {
+        <mat-error>{{ getErrorMessage("examDate") }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        rows="4"
+        maxlength="1500"
+        placeholder="Observaciones, instrucciones del medico, etc."
+      ></textarea>
+      <mat-hint align="end">
+        {{ form.get("notes")?.value?.length || 0 }}/1500
+      </mat-hint>
+      @if (form.get("notes")?.invalid && form.get("notes")?.touched) {
+        <mat-error>{{ getErrorMessage("notes") }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="file-field">
+      <label for="examFile">Archivo del examen *</label>
+      <input
+        id="examFile"
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        (change)="onFileSelected($event)"
+      />
+      @if (selectedFile) {
+        <p class="selected-file">Seleccionado: {{ selectedFile.name }}</p>
+      }
+    </div>
+
+    <p class="help-text">El archivo debe ser PDF/JPG/JPEG/PNG/WEBP y maximo 10MB.</p>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="creating">Cancelar</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="create()"
+    [disabled]="form.invalid || creating || !selectedFile"
+  >
+    @if (creating) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      Crear examen
+    }
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,173 @@
+<div class="appointment-detail-container">
+  <header class="page-header">
+    <button mat-icon-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Detalle de Cita</h1>
+  </header>
+
+  <!-- Loading State -->
+  @if (loading()) {
+  <div class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Cargando detalles...</p>
+  </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+  <mat-card class="error-card">
+    <mat-card-content>
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-button color="primary" (click)="goBack()">
+        Volver al listado
+      </button>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Appointment Details -->
+  @if (!loading() && !error() && appointment()) {
+  <mat-card class="detail-card">
+    <mat-card-header>
+      <div class="header-content">
+        <mat-chip [color]="getStatusColor(appointment()!.status)">
+          {{ getStatusText(appointment()!.status) }}
+        </mat-chip>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Professional Info -->
+      <section class="info-section">
+        <h2>
+          <mat-icon>person</mat-icon>
+          Profesional
+        </h2>
+        <div class="info-content">
+          <p class="name">
+            {{ appointment()!.professional.firstName }} {{
+            appointment()!.professional.lastName }}
+          </p>
+          @if (appointment()!.professional.specialization) {
+          <p class="secondary">
+            {{ appointment()!.professional.specialization }}
+          </p>
+          }
+          <p class="secondary">{{ appointment()!.professional.email }}</p>
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <!-- Date & Time -->
+      <section class="info-section">
+        <h2>
+          <mat-icon>schedule</mat-icon>
+          Fecha y Hora
+        </h2>
+        <div class="info-content">
+          <p class="primary-info">
+            {{ toLocalTime(appointment()!.startTime) }}
+          </p>
+          <p class="secondary">
+            Duración: {{ appointment()!.startTime | date: 'shortTime' : '' :
+            'es-ES' }} - {{ appointment()!.endTime | date: 'shortTime' : '' :
+            'es-ES' }}
+          </p>
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <!-- Client Info -->
+      @if (appointment()!.client) {
+      <section class="info-section">
+        <h2>
+          <mat-icon>account_circle</mat-icon>
+          Cliente
+        </h2>
+        <div class="info-content">
+          <p class="name">
+            {{ appointment()!.client.firstName }} {{
+            appointment()!.client.lastName }}
+          </p>
+          <p class="secondary">{{ appointment()!.client.email }}</p>
+          @if (appointment()!.client.phone) {
+          <p class="secondary">{{ appointment()!.client.phone }}</p>
+          }
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+      }
+
+      <!-- Notes -->
+      @if (appointment()!.notes) {
+      <section class="info-section">
+        <h2>
+          <mat-icon>note</mat-icon>
+          Notas
+        </h2>
+        <div class="info-content">
+          <p class="notes">{{ appointment()!.notes }}</p>
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+      }
+
+      <!-- Additional Info -->
+      <section class="info-section">
+        <h2>
+          <mat-icon>info</mat-icon>
+          Información Adicional
+        </h2>
+        <div class="info-content">
+          <p class="secondary">
+            <strong>Creada:</strong>
+            {{ toLocalTime(appointment()!.createdAt) }}
+          </p>
+          @if (appointment()!.confirmedAt) {
+          <p class="secondary">
+            <strong>Confirmada:</strong>
+            {{ toLocalTime(appointment()!.confirmedAt) }}
+          </p>
+          } @if (appointment()!.cancelledAt) {
+          <p class="secondary">
+            <strong>Cancelada:</strong>
+            {{ toLocalTime(appointment()!.cancelledAt) }}
+          </p>
+          } @if (appointment()!.cancellationReason) {
+          <p class="secondary">
+            <strong>Motivo de cancelación:</strong>
+            {{ appointment()!.cancellationReason }}
+          </p>
+          }
+        </div>
+      </section>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Volver
+      </button>
+
+      @if (canCancel(appointment()!)) {
+      <button mat-button color="warn" (click)="openCancelDialog()">
+        <mat-icon>cancel</mat-icon>
+        Cancelar Cita
+      </button>
+      } @if ( appointment()!.status === 'confirmed' || appointment()!.status ===
+      'pending' ) {
+      <button mat-raised-button color="primary" (click)="exportToCalendar()">
+        <mat-icon>download</mat-icon>
+        Exportar a Calendario
+      </button>
+      }
+    </mat-card-actions>
+  </mat-card>
+  }
+</div>

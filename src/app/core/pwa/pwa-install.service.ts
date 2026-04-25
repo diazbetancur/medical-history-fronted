@@ -40,6 +40,9 @@ export class PwaInstallService {
   /** Whether running on iOS Safari (needs manual install guide) */
   readonly isIOS = signal(false);
 
+  /** Whether current iOS browser is Safari */
+  readonly isIOSSafari = signal(false);
+
   /** Whether app is already installed as PWA */
   readonly isInstalled = signal(false);
 
@@ -128,8 +131,9 @@ export class PwaInstallService {
 
     const isSafari = /safari/.test(ua) && !/chrome|crios|fxios|edgios/.test(ua);
 
-    // iOS Safari (not in standalone mode)
-    this.isIOS.set(isIOSDevice && isSafari);
+    // Show iOS install guidance in any iOS browser
+    this.isIOS.set(isIOSDevice);
+    this.isIOSSafari.set(isIOSDevice && isSafari);
   }
 
   private checkIfInstalled(): void {

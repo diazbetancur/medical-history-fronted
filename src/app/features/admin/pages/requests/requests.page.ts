@@ -50,9 +50,9 @@ export class AdminRequestsPageComponent implements OnInit {
       case 0:
         return this.store.pendingRequests();
       case 1:
-        return this.store.contactedRequests();
+        return this.store.acceptedRequests();
       case 2:
-        return this.store.closedRequests();
+        return this.store.completedRequests();
       case 3:
         return this.store.rejectedRequests();
       default:
@@ -109,6 +109,10 @@ export class AdminRequestsPageComponent implements OnInit {
       month: 'short',
       year: diffDays > 365 ? 'numeric' : undefined,
     });
+  }
+
+  getStatusCssClass(status: AdminRequestListItem['status']): string {
+    return `status-${String(status).toLowerCase()}`;
   }
 
   rejectRequest(request: AdminRequestListItem): void {

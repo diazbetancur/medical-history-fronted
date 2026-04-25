@@ -1,0 +1,215 @@
+.professional-background-tab {
+  padding: 24px;
+
+  .tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    .summary-info {
+      display: flex;
+      gap: 12px;
+
+      mat-chip {
+        height: 32px;
+        padding: 0 12px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          margin-right: 6px;
+        }
+
+        &.total-chip {
+          background-color: var(--color-primary-soft);
+          color: var(--color-primary);
+        }
+
+        &.chronic-chip {
+          background-color: var(--color-warning-light);
+          color: var(--color-warning);
+        }
+      }
+    }
+  }
+
+  .no-relation-banner {
+    background: linear-gradient(135deg, var(--color-primary-soft) 0%, var(--color-primary-light) 100%);
+    border-left: 4px solid var(--color-primary);
+
+    mat-card-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+
+      .no-relation-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: var(--color-primary);
+        flex-shrink: 0;
+      }
+
+      .no-relation-content {
+        h3 {
+          margin: 0 0 8px 0;
+          font-size: 18px;
+          font-weight: 500;
+          color: var(--color-text-primary);
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: var(--color-text-secondary);
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    gap: 16px;
+
+    p {
+      margin: 0;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .error-card,
+  .empty-card {
+    mat-card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 48px 24px;
+      gap: 16px;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+      }
+
+      .error-icon {
+        color: var(--color-error);
+      }
+
+      .empty-icon {
+        color: var(--color-text-disabled);
+      }
+
+      .error-message,
+      .empty-message {
+        margin: 0;
+        font-size: 16px;
+        color: var(--color-text-primary);
+      }
+    }
+  }
+
+  .backgrounds-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .background-card {
+      display: flex;
+      flex-direction: column;
+
+      mat-card-header {
+        .background-icon {
+          font-size: 40px;
+          width: 40px;
+          height: 40px;
+          color: var(--mat-sys-primary);
+        }
+
+        mat-card-title {
+          font-size: 18px;
+          font-weight: 500;
+        }
+
+        mat-card-subtitle {
+          margin-top: 8px;
+
+          .background-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+
+            mat-chip {
+              height: 28px;
+              padding: 0 10px;
+              font-size: 12px;
+
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                margin-right: 4px;
+              }
+
+              &.type-chip {
+                background-color: var(--color-primary-soft);
+                color: var(--color-primary);
+              }
+
+              &.chronic-chip {
+                background-color: var(--color-warning-light);
+                color: var(--color-warning);
+              }
+
+              &.date-chip {
+                background-color: var(--color-background-alt);
+                color: var(--color-text-primary);
+              }
+            }
+          }
+        }
+      }
+
+      mat-card-content {
+        flex: 1;
+        padding: 16px;
+
+        .background-description {
+          p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            white-space: pre-wrap;
+          }
+        }
+      }
+    }
+  }
+}
