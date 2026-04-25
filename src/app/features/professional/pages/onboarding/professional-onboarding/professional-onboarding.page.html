@@ -133,18 +133,18 @@
 
             <div class="row-2">
               <mat-form-field appearance="outline">
-                <mat-label>País *</mat-label>
-                <mat-select formControlName="countryId">
-                  @for (country of countries(); track country.id) {
-                  <mat-option [value]="country.id"
-                    >{{ country.name }}</mat-option
+                <mat-label>Departamento *</mat-label>
+                <mat-select formControlName="departmentId">
+                  @for (department of departments(); track department.id) {
+                  <mat-option [value]="department.id"
+                    >{{ department.name }}</mat-option
                   >
                   }
                 </mat-select>
-                @if ( profileForm.controls.countryId.hasError('required') &&
-                (profileForm.controls.countryId.touched ||
-                profileForm.controls.countryId.dirty) ) {
-                <mat-error>Selecciona un país</mat-error>
+                @if ( profileForm.controls.departmentId.hasError('required') &&
+                (profileForm.controls.departmentId.touched ||
+                profileForm.controls.departmentId.dirty) ) {
+                <mat-error>Selecciona un departamento</mat-error>
                 }
               </mat-form-field>
 
@@ -152,13 +152,18 @@
                 <mat-label>Ciudad *</mat-label>
                 <mat-select
                   formControlName="cityId"
-                  [disabled]="!profileForm.controls.countryId.value"
+                  [disabled]="
+                    !profileForm.controls.departmentId.value ||
+                    loadingProfileCities()
+                  "
                 >
                   @for (city of filteredCities(); track city.id) {
                   <mat-option [value]="city.id">{{ city.name }}</mat-option>
                   }
                 </mat-select>
-                @if ( profileForm.controls.cityId.hasError('required') &&
+                @if (loadingProfileCities()) {
+                <mat-hint>Cargando ciudades...</mat-hint>
+                } @if ( profileForm.controls.cityId.hasError('required') &&
                 (profileForm.controls.cityId.touched ||
                 profileForm.controls.cityId.dirty) ) {
                 <mat-error>Selecciona una ciudad</mat-error>
@@ -187,14 +192,15 @@
                 autocomplete="off"
               ></textarea>
               <mat-hint align="end"
-                >{{ profileForm.controls.description.value.length }}/1500</mat-hint
+                >{{ profileForm.controls.description.value.length
+                }}/1500</mat-hint
               >
-              @if (
-                profileForm.controls.description.hasError('maxlength') &&
-                (profileForm.controls.description.touched ||
-                  profileForm.controls.description.dirty)
-              ) {
-                <mat-error>La descripción no puede exceder 1500 caracteres</mat-error>
+              @if ( profileForm.controls.description.hasError('maxlength') &&
+              (profileForm.controls.description.touched ||
+              profileForm.controls.description.dirty) ) {
+              <mat-error
+                >La descripción no puede exceder 1500 caracteres</mat-error
+              >
               }
             </mat-form-field>
 
@@ -548,8 +554,7 @@
             <mat-spinner diameter="24"></mat-spinner>
             <span>Cargando sedes...</span>
           </div>
-          } @else {
-          @if (locations().length > 0) {
+          } @else { @if (locations().length > 0) {
           <div class="items-grid">
             @for (location of locations(); track location.id) {
             <div class="item-card">

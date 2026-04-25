@@ -1,6 +1,12 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ApiError, createApiError, isApiError } from '@core/http/api-error';
-import { City, Country, Department, MetadataResponse, PublicApi } from '@data/api';
+import {
+  City,
+  Country,
+  Department,
+  MetadataResponse,
+  PublicApi,
+} from '@data/api';
 import {
   catchError,
   finalize,
@@ -40,14 +46,19 @@ export class GeographyMetadataService {
   private readonly _state = signal<GeographyMetadataState>(INITIAL_STATE);
   private loadHondurasInFlight$: Observable<void> | null = null;
   private readonly departmentCitiesCache = new Map<string, City[]>();
-  private readonly departmentCitiesInFlight = new Map<string, Observable<City[]>>();
+  private readonly departmentCitiesInFlight = new Map<
+    string,
+    Observable<City[]>
+  >();
 
   readonly state = this._state.asReadonly();
   readonly status = computed(() => this._state().status);
   readonly error = computed(() => this._state().error);
   readonly hondurasCountry = computed(() => this._state().hondurasCountry);
   readonly hondurasCountryId = computed(() => this._state().hondurasCountryId);
-  readonly hondurasDepartments = computed(() => this._state().hondurasDepartments);
+  readonly hondurasDepartments = computed(
+    () => this._state().hondurasDepartments,
+  );
 
   loadHondurasGeographyIfNeeded(): Observable<void> {
     if (this.hasCompleteHondurasMetadata(this._state())) {
@@ -67,9 +78,11 @@ export class GeographyMetadataService {
     const request$ = this.publicApi.getMetadata().pipe(
       map((metadata) => this.resolveHondurasCountry(metadata)),
       switchMap((country) =>
-        this.publicApi.getDepartmentsByCountry(country.id).pipe(
-          map((departments) => ({ country, departments: departments ?? [] })),
-        ),
+        this.publicApi
+          .getDepartmentsByCountry(country.id)
+          .pipe(
+            map((departments) => ({ country, departments: departments ?? [] })),
+          ),
       ),
       map(({ country, departments }) => {
         if (!departments.length) {
@@ -98,7 +111,9 @@ export class GeographyMetadataService {
         this._state.set({
           ...INITIAL_STATE,
           status: 'error',
-          error: apiError.message || 'No se pudo preparar la metadata geográfica de Honduras.',
+          error:
+            apiError.message ||
+            'No se pudo preparar la metadata geográfica de Honduras.',
         });
 
         console.error(
@@ -148,44 +163,53 @@ export class GeographyMetadataService {
       return of(cachedCities);
     }
 
-    const inFlightCities = this.departmentCitiesInFlight.get(normalizedDepartmentId);
+    const inFlightCities = this.departmentCitiesInFlight.get(
+      normalizedDepartmentId,
+    );
     if (inFlightCities) {
       return inFlightCities;
     }
 
-    const request$ = this.publicApi.getCitiesByDepartment(normalizedDepartmentId).pipe(
-      map((cities) => cities ?? []),
-      tap((cities) => {
-        this.departmentCitiesCache.set(normalizedDepartmentId, cities);
-      }),
-      catchError((error) => {
-        const apiError = isApiError(error) ? error : createApiError(error);
+    const request$ = this.publicApi
+      .getCitiesByDepartment(normalizedDepartmentId)
+      .pipe(
+        map((cities) => cities ?? []),
+        tap((cities) => {
+          this.departmentCitiesCache.set(normalizedDepartmentId, cities);
+        }),
+        catchError((error) => {
+          const apiError = isApiError(error) ? error : createApiError(error);
 
-        console.error(
-          '[GeographyMetadataService] Failed to load cities by department.',
-          { departmentId: normalizedDepartmentId, error: apiError },
-        );
+          console.error(
+            '[GeographyMetadataService] Failed to load cities by department.',
+            { departmentId: normalizedDepartmentId, error: apiError },
+          );
 
-        return throwError(() => apiError);
-      }),
-      finalize(() => {
-        this.departmentCitiesInFlight.delete(normalizedDepartmentId);
-      }),
-      shareReplay({ bufferSize: 1, refCount: false }),
-    );
+          return throwError(() => apiError);
+        }),
+        finalize(() => {
+          this.departmentCitiesInFlight.delete(normalizedDepartmentId);
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
 
     this.departmentCitiesInFlight.set(normalizedDepartmentId, request$);
     return request$;
   }
 
-  private hasCompleteHondurasMetadata(
-    state: GeographyMetadataState,
-  ): boolean {
-    return !!state.hondurasCountry && !!state.hondurasCountryId && state.hondurasDepartments.length > 0;
+  private hasCompleteHondurasMetadata(state: GeographyMetadataState): boolean {
+    return (
+      !!state.hondurasCountry &&
+      !!state.hondurasCountryId &&
+      state.hondurasDepartments.length > 0
+    );
   }
 
   private resolveHondurasCountry(metadata: MetadataResponse): Country {
-    if (!Array.isArray(metadata?.countries) || metadata.countries.length === 0) {
+    if (
+      !Array.isArray(metadata?.countries) ||
+      metadata.countries.length === 0
+    ) {
       throw this.createControlledError(
         400,
         'BAD_REQUEST',

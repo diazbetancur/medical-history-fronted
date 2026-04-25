@@ -22,10 +22,11 @@ import { ProblemDetails } from '@core/models';
 import { ProfessionalApi, PublicApi } from '@data/api';
 import {
   City,
-  Country,
   CreateProfessionalProfilePayload,
+  Department,
   ProfessionalEducationSummary,
   ProfessionalLocation,
+  ProfessionalProfile,
   ProfessionalSpecialty,
   ProfessionalSpecialtyProposal,
   PublicSpecialtyCatalogItem,
@@ -35,6 +36,7 @@ import {
 } from '@data/api/api-models';
 import { ToastService } from '@shared/services';
 import { ConfirmDialogComponent } from '@shared/ui';
+import { GeographyMetadataService } from '../../../../../public/services';
 import {
   ProfessionalEducationFormDialogComponent,
   ProfessionalEducationFormDialogData,
@@ -45,6 +47,7 @@ import {
   ProfessionalLocationFormDialogData,
   ProfessionalLocationFormDialogResult,
 } from '../professional-location-form-dialog/professional-location-form-dialog.component';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-professional-onboarding',
@@ -73,15 +76,12 @@ export class ProfessionalOnboardingPage implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  private readonly geographyMetadataService = inject(GeographyMetadataService);
 
   // ─── Catalog data ──────────────────────────────────────────────────────────
-  readonly countries = signal<Country[]>([]);
+  readonly departments = signal<Department[]>([]);
   readonly cities = signal<City[]>([]);
-  readonly filteredCities = computed(() => {
-    const countryId = this.profileForm.get('countryId')?.value;
-    if (!countryId) return this.cities();
-    return this.cities().filter((c) => c.countryId === countryId);
-  });
+  readonly filteredCities = computed(() => this.cities());
 
   // ─── Status ────────────────────────────────────────────────────────────────
   readonly isSubmitting = signal(false);
@@ -115,6 +115,7 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly servicesLoaded = signal(false);
   readonly educationLoaded = signal(false);
   readonly locationsLoaded = signal(false);
+  readonly loadingProfileCities = signal(false);
 
   readonly educationTypeOptions: Array<{ value: number; label: string }> = [
     { value: 0, label: 'Pregrado' },
@@ -131,6 +132,7 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly profileForm = this.fb.nonNullable.group({
     businessName: ['', [Validators.required, Validators.maxLength(150)]],
     description: ['', [Validators.maxLength(1500)]],
+    departmentId: ['', [Validators.required]],
     countryId: ['', [Validators.required]],
     cityId: ['', [Validators.required]],
     phone: ['', [Validators.maxLength(20)]],
@@ -195,10 +197,135 @@ export class ProfessionalOnboardingPage implements OnInit {
   ngOnInit(): void {
     this.loadProfile();
     this.prefillEmailFromUser();
-    // When country changes, reset city
-    this.profileForm.get('countryId')?.valueChanges.subscribe(() => {
-      this.profileForm.get('cityId')?.reset('');
-    });
+    this.profileForm.controls.departmentId.valueChanges.subscribe(
+      (departmentId) => {
+        this.profileForm.controls.cityId.reset('');
+        this.cities.set([]);
+
+        if (!departmentId) {
+          return;
+        }
+
+        this.loadCitiesByDepartment(departmentId);
+      },
+    );
+  }
+
+  private loadProfileGeography(profile: ProfessionalProfile): void {
+    const profileCity = this.buildProfileCity(profile);
+
+    this.geographyMetadataService
+      .loadHondurasGeographyIfNeeded()
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          const hondurasCountryId =
+            this.geographyMetadataService.getHondurasCountryId() ??
+            profile.countryId;
+
+          this.departments.set(
+            this.geographyMetadataService.getHondurasDepartments(),
+          );
+          this.profileForm.patchValue(
+            {
+              countryId: hondurasCountryId,
+              departmentId: profile.departmentId ?? '',
+            },
+            { emitEvent: false },
+          );
+
+          if (profile.departmentId) {
+            this.loadCitiesByDepartment(profile.departmentId, profileCity, () =>
+              this.loadingCatalogs.set(false),
+            );
+            return;
+          }
+
+          this.cities.set([profileCity]);
+          this.loadingCatalogs.set(false);
+        },
+        error: () => {
+          this.cities.set([profileCity]);
+          this.loadingCatalogs.set(false);
+        },
+      });
+  }
+
+  private loadCitiesByDepartment(
+    departmentId: string,
+    preferredCity?: City,
+    onComplete?: () => void,
+  ): void {
+    this.loadingProfileCities.set(true);
+
+    this.geographyMetadataService
+      .getCitiesByDepartment(departmentId)
+      .pipe(take(1))
+      .subscribe({
+        next: (cities) => {
+          const hasPreferredCity =
+            !!preferredCity &&
+            cities.some((city) => city.id === preferredCity.id);
+
+          this.cities.set(
+            preferredCity && !hasPreferredCity
+              ? [preferredCity, ...cities]
+              : cities,
+          );
+          this.loadingProfileCities.set(false);
+          onComplete?.();
+        },
+        error: () => {
+          this.cities.set(preferredCity ? [preferredCity] : []);
+          this.loadingProfileCities.set(false);
+          onComplete?.();
+        },
+      });
+  }
+
+  private buildProfileCity(profile: ProfessionalProfile): City {
+    return {
+      id: profile.cityId,
+      name: profile.cityName,
+      slug: profile.cityName.toLowerCase().replaceAll(/\s+/g, '-'),
+      countryId: profile.countryId,
+      departmentId: profile.departmentId,
+    };
+  }
+
+  private applyHondurasDefaults(): void {
+    const hondurasCountryId =
+      this.geographyMetadataService.getHondurasCountryId();
+
+    this.departments.set(
+      this.geographyMetadataService.getHondurasDepartments(),
+    );
+    this.cities.set([]);
+    this.profileForm.patchValue(
+      {
+        countryId: hondurasCountryId ?? '',
+        departmentId: '',
+        cityId: '',
+      },
+      { emitEvent: false },
+    );
+  }
+
+  private loadCatalogs(): void {
+    this.loadingCatalogs.set(true);
+
+    this.geographyMetadataService
+      .loadHondurasGeographyIfNeeded()
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.applyHondurasDefaults();
+          this.loadingCatalogs.set(false);
+        },
+        error: () => {
+          this.loadingCatalogs.set(false);
+        },
+      });
   }
 
   private loadProfile(): void {
@@ -207,25 +334,11 @@ export class ProfessionalOnboardingPage implements OnInit {
       next: (profile) => {
         this.hasExistingProfile.set(true);
         this.professionalProfileId.set(profile.id);
-        this.countries.set([
-          {
-            id: profile.countryId,
-            name: profile.countryName,
-            slug: profile.countryName.toLowerCase().replace(/\s+/g, '-'),
-          },
-        ]);
-        this.cities.set([
-          {
-            id: profile.cityId,
-            name: profile.cityName,
-            slug: profile.cityName.toLowerCase().replace(/\s+/g, '-'),
-            countryId: profile.countryId,
-          },
-        ]);
         this.profileForm.patchValue(
           {
             businessName: profile.businessName,
             description: profile.description ?? '',
+            departmentId: profile.departmentId ?? '',
             countryId: profile.countryId,
             cityId: profile.cityId,
             phone: profile.phone ?? '',
@@ -236,7 +349,7 @@ export class ProfessionalOnboardingPage implements OnInit {
           { emitEvent: false },
         );
         this.profileImageUrl.set(profile.profileImageUrl ?? null);
-        this.loadingCatalogs.set(false);
+        this.loadProfileGeography(profile);
       },
       error: () => {
         this.hasExistingProfile.set(false);
@@ -257,20 +370,6 @@ export class ProfessionalOnboardingPage implements OnInit {
     if (email) {
       this.profileForm.patchValue({ email });
     }
-  }
-
-  private loadCatalogs(): void {
-    this.loadingCatalogs.set(true);
-    this.publicApi.getMetadata().subscribe({
-      next: (meta) => {
-        this.countries.set(meta.countries ?? []);
-        this.cities.set(meta.cities ?? []);
-        this.loadingCatalogs.set(false);
-      },
-      error: () => {
-        this.loadingCatalogs.set(false);
-      },
-    });
   }
 
   private loadSpecialtiesCatalog(force = false): void {
@@ -848,25 +947,28 @@ export class ProfessionalOnboardingPage implements OnInit {
   }
 
   private openLocationDialog(location?: ProfessionalLocation): void {
-    const dialogRef = this.dialog.open(ProfessionalLocationFormDialogComponent, {
-      width: '720px',
-      maxWidth: '96vw',
-      data: {
-        title: location ? 'Editar sede' : 'Adicionar sede',
-        submitLabel: location ? 'Guardar cambios' : 'Guardar sede',
-        initial: location
-          ? {
-              name: location.name,
-              address: location.address ?? '',
-              phone: location.phone ?? '',
-              cityId: location.cityId,
-              cityName: location.cityName,
-              countryId: location.countryId,
-              countryName: location.countryName,
-            }
-          : undefined,
-      } satisfies ProfessionalLocationFormDialogData,
-    });
+    const dialogRef = this.dialog.open(
+      ProfessionalLocationFormDialogComponent,
+      {
+        width: '720px',
+        maxWidth: '96vw',
+        data: {
+          title: location ? 'Editar sede' : 'Adicionar sede',
+          submitLabel: location ? 'Guardar cambios' : 'Guardar sede',
+          initial: location
+            ? {
+                name: location.name,
+                address: location.address ?? '',
+                phone: location.phone ?? '',
+                cityId: location.cityId,
+                cityName: location.cityName,
+                countryId: location.countryId,
+                countryName: location.countryName,
+              }
+            : undefined,
+        } satisfies ProfessionalLocationFormDialogData,
+      },
+    );
 
     dialogRef
       .afterClosed()

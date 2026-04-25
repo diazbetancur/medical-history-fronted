@@ -85,10 +85,7 @@ export class ProfessionalLocationFormDialogComponent implements OnInit {
         this.requiredTrimmedValidator(),
       ],
     ],
-    address: [
-      this.data.initial?.address ?? '',
-      [Validators.maxLength(300)],
-    ],
+    address: [this.data.initial?.address ?? '', [Validators.maxLength(300)]],
     departmentId: [''],
     cityId: [this.data.initial?.cityId ?? ''],
     phone: [

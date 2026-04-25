@@ -468,6 +468,7 @@ export interface ProfessionalProfile {
   categoryId?: string;
   categoryName?: string;
   categorySlug?: string;
+  departmentId?: string;
   cityId: string;
   cityName: string;
   countryId: string;

@@ -5,20 +5,16 @@
     <div class="row-2">
       <mat-form-field appearance="outline">
         <mat-label>Nombre sede *</mat-label>
-        <input
-          matInput
-          formControlName="name"
-          placeholder="Ej. Sede Norte"
-        />
+        <input matInput formControlName="name" placeholder="Ej. Sede Norte" />
         @if (
-          (form.controls.name.hasError('required') ||
-            form.controls.name.hasError('requiredTrimmed')) &&
+          (form.controls.name.hasError("required") ||
+            form.controls.name.hasError("requiredTrimmed")) &&
           (form.controls.name.touched || form.controls.name.dirty)
         ) {
           <mat-error>El nombre de la sede es requerido</mat-error>
         }
         @if (
-          form.controls.name.hasError('maxlength') &&
+          form.controls.name.hasError("maxlength") &&
           (form.controls.name.touched || form.controls.name.dirty)
         ) {
           <mat-error>El nombre no puede exceder 200 caracteres</mat-error>
@@ -35,13 +31,13 @@
           autocomplete="tel"
         />
         @if (
-          form.controls.phone.hasError('maxlength') &&
+          form.controls.phone.hasError("maxlength") &&
           (form.controls.phone.touched || form.controls.phone.dirty)
         ) {
           <mat-error>El teléfono no puede exceder 30 caracteres</mat-error>
         }
         @if (
-          form.controls.phone.hasError('invalidPhone') &&
+          form.controls.phone.hasError("invalidPhone") &&
           (form.controls.phone.touched || form.controls.phone.dirty)
         ) {
           <mat-error>Ingresa un teléfono válido</mat-error>
@@ -57,7 +53,7 @@
         placeholder="Ej. Calle 80 #45-23"
       />
       @if (
-        form.controls.address.hasError('maxlength') &&
+        form.controls.address.hasError("maxlength") &&
         (form.controls.address.touched || form.controls.address.dirty)
       ) {
         <mat-error>La dirección no puede exceder 300 caracteres</mat-error>
@@ -73,7 +69,9 @@
         >
           <mat-option value="">Sin seleccionar</mat-option>
           @for (department of departments(); track department.id) {
-            <mat-option [value]="department.id">{{ department.name }}</mat-option>
+            <mat-option [value]="department.id">{{
+              department.name
+            }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -99,9 +97,11 @@
       <div class="loading-inline">
         <mat-spinner diameter="20"></mat-spinner>
         <span>
-          {{ isLoadingGeography()
-            ? 'Cargando departamentos...'
-            : 'Cargando ciudades...' }}
+          {{
+            isLoadingGeography()
+              ? "Cargando departamentos..."
+              : "Cargando ciudades..."
+          }}
         </span>
       </div>
     }
