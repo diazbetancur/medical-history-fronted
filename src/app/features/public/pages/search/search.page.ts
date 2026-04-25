@@ -11,6 +11,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -24,7 +25,7 @@ import {
   PublicApi,
   SearchProfessional,
 } from '@data/api';
-import { SeoService } from '@shared/services';
+import { SeoService, ToastService } from '@shared/services';
 import {
   Subject,
   catchError,
@@ -40,6 +41,7 @@ import { ProfessionalSearchResponseDto } from '../../../../public/models/profess
 import { SpecialtyDto } from '../../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
+import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 
 @Component({
@@ -70,6 +72,8 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly seoService = inject(SeoService);
+  private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
 
   private readonly destroy$ = new Subject<void>();
   private readonly pageSize = 10;
@@ -269,6 +273,13 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     return guidRegex.test(value) ? value : undefined;
   }
 
+  private normalizePage(value: string | null): number | null {
+    if (!value) return null;
+
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+  }
+
   onSearchClick(): void {
     this.searchWithCurrentFilters(1);
   }
@@ -283,7 +294,39 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   }
 
   goToProfile(professionalId: string): void {
-    this.router.navigate(['/pro', professionalId]);
+    this.router.navigate(['/pro', professionalId], {
+      queryParams: {
+        returnTo: 'search',
+        q: this.route.snapshot.queryParamMap.get('q') || null,
+        specialtyId:
+          this.normalizeGuid(
+            this.route.snapshot.queryParamMap.get('specialtyId'),
+          ) || null,
+        cityId:
+          this.normalizeGuid(this.route.snapshot.queryParamMap.get('cityId')) ||
+          null,
+        page: this.normalizePage(this.route.snapshot.queryParamMap.get('page')),
+      },
+    });
+  }
+
+  bookAppointment(doctor: SearchProfessional): void {
+    if (!doctor.slug) {
+      this.toast.warning('No pudimos abrir el perfil para agendar la cita');
+      return;
+    }
+
+    this.dialog.open(BookAppointmentDialogComponent, {
+      width: '760px',
+      maxWidth: '96vw',
+      data: {
+        slug: doctor.slug,
+        professionalId: doctor.id,
+        name: doctor.businessName,
+        imageUrl: doctor.profileImageUrl,
+        specialties: this.getSpecialtyNames(doctor),
+      },
+    });
   }
 
   getSpecialtyNames(doctor: SearchProfessional): string[] {

@@ -1,287 +1,258 @@
-<mat-sidenav-container class="professionals-container">
-  <!-- ══ Main content ══════════════════════════════════════════════════════ -->
-  <mat-sidenav-content>
-    <mat-card>
-      <!-- Header -->
-      <mat-card-header>
-        <mat-card-title>
-          <div class="header-row">
-            <div class="header-title">
-              <mat-icon>medical_services</mat-icon>
-              <h1>Revisión de Profesionales</h1>
-            </div>
-            <button
-              mat-icon-button
-              matTooltip="Recargar"
-              (click)="reload()"
-              [disabled]="store.loading()"
-            >
-              <mat-icon>refresh</mat-icon>
-            </button>
+<div class="professionals-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <div class="header-row">
+          <div class="header-title">
+            <mat-icon>medical_services</mat-icon>
+            <h1>Revisión de Profesionales</h1>
           </div>
-        </mat-card-title>
-        <mat-card-subtitle>
-          Revisa, verifica y modera los perfiles profesionales registrados en la
-          plataforma
-        </mat-card-subtitle>
-      </mat-card-header>
-
-      <mat-card-content>
-        <!-- Status Tabs -->
-        <mat-tab-group
-          class="status-tabs"
-          (selectedIndexChange)="onTabChange($event)"
-          [selectedIndex]="activeTabIndex()"
-        >
-          @for (tab of statusTabs; track tab.filter) {
-          <mat-tab [label]="tab.label"></mat-tab>
-          }
-        </mat-tab-group>
-
-        <!-- Search bar -->
-        <div class="search-bar">
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-label>Buscar profesionales</mat-label>
-            <mat-icon matPrefix>search</mat-icon>
-            <input
-              matInput
-              type="text"
-              placeholder="Buscar por nombre..."
-              [value]="searchValue()"
-              (input)="onSearchChange($any($event.target).value)"
-            />
-            @if (searchValue()) {
-            <button
-              type="button"
-              matSuffix
-              mat-icon-button
-              aria-label="Limpiar busqueda"
-              (click)="clearSearch()"
-              matTooltip="Limpiar búsqueda"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
-            }
-          </mat-form-field>
-        </div>
-
-        <!-- Error state -->
-        @if (store.error()) {
-        <div class="error-banner">
-          <mat-icon>error</mat-icon>
-          <span>{{ store.error() }}</span>
-          <button mat-stroked-button (click)="store.clearError(); reload()">
-            <mat-icon>refresh</mat-icon>
-            Reintentar
-          </button>
-        </div>
-        }
-
-        <!-- Loading state -->
-        @if (store.loading()) {
-        <div class="loading-container">
-          <mat-progress-spinner
-            mode="indeterminate"
-            diameter="50"
-          ></mat-progress-spinner>
-          <p>Cargando profesionales...</p>
-        </div>
-        }
-
-        <!-- Table -->
-        @if (!store.loading() && store.professionals().length > 0) {
-        <div class="table-container">
-          <table
-            mat-table
-            [dataSource]="store.professionals()"
-            [trackBy]="trackById"
+          <button
+            mat-icon-button
+            matTooltip="Recargar"
+            (click)="reload()"
+            [disabled]="store.loading()"
           >
-            <!-- Business Name Column -->
-            <ng-container matColumnDef="businessName">
-              <th mat-header-cell *matHeaderCellDef>Profesional</th>
-              <td mat-cell *matCellDef="let p">
-                <div class="pro-cell">
-                  <mat-icon class="pro-icon">person</mat-icon>
-                  <div class="pro-info">
-                    <span class="pro-name">{{ p.businessName }}</span>
-                    @if (p.email) {
-                    <span class="pro-email">{{ p.email }}</span>
-                    }
-                  </div>
-                  @if (p.isFeatured) {
-                  <mat-icon class="featured-icon" matTooltip="Destacado"
-                    >star</mat-icon
-                  >
-                  }
-                </div>
-              </td>
-            </ng-container>
-
-            <!-- Category Column -->
-            <ng-container matColumnDef="category">
-              <th mat-header-cell *matHeaderCellDef>Categoría</th>
-              <td mat-cell *matCellDef="let p">
-                <span class="category-text">{{ p.categoryName }}</span>
-              </td>
-            </ng-container>
-
-            <!-- Location Column -->
-            <ng-container matColumnDef="location">
-              <th mat-header-cell *matHeaderCellDef>Ubicación</th>
-              <td mat-cell *matCellDef="let p">
-                <span class="location-text"
-                  >{{ p.cityName }}, {{ p.countryName }}</span
-                >
-              </td>
-            </ng-container>
-
-            <!-- Status Column -->
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Estado</th>
-              <td mat-cell *matCellDef="let p">
-                <mat-chip
-                  class="status-chip"
-                  [class.status-verified]="p.isActive && p.isVerified"
-                  [class.status-pending]="p.isActive && !p.isVerified"
-                  [class.status-disabled]="!p.isActive"
-                >
-                  <mat-icon>{{ getStatusChip(p).icon }}</mat-icon>
-                  {{ getStatusChip(p).label }}
-                </mat-chip>
-              </td>
-            </ng-container>
-
-            <!-- Date Column -->
-            <ng-container matColumnDef="dateCreated">
-              <th mat-header-cell *matHeaderCellDef>Registrado</th>
-              <td mat-cell *matCellDef="let p">
-                <span class="date-text"
-                  >{{ p.dateCreated | date: 'dd/MM/yyyy' }}</span
-                >
-              </td>
-            </ng-container>
-
-            <!-- Actions Column -->
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Acciones</th>
-              <td mat-cell *matCellDef="let p">
-                <div class="actions-cell" (click)="$event.stopPropagation()">
-                  <!-- View detail -->
-                  <button
-                    mat-icon-button
-                    matTooltip="Ver detalle"
-                    (click)="viewProfessional(p)"
-                  >
-                    <mat-icon>visibility</mat-icon>
-                  </button>
-
-                  <!-- Verify (only for pending) -->
-                  @if (p.isActive && !p.isVerified) {
-                  <button
-                    mat-icon-button
-                    color="primary"
-                    [matTooltip]="canVerify() ? 'Verificar profesional' : 'No tienes permisos para verificar'"
-                    (click)="verifyProfessional(p, $event)"
-                    [disabled]="store.saving() || !canVerify()"
-                  >
-                    <mat-icon>verified</mat-icon>
-                  </button>
-                  }
-
-                  <!-- Feature / Unfeature -->
-                  @if (p.isActive && canFeature()) {
-                  <button
-                    mat-icon-button
-                    [matTooltip]="p.isFeatured ? 'Quitar de destacados' : 'Destacar'"
-                    (click)="toggleFeatured(p, $event)"
-                    [disabled]="store.saving()"
-                  >
-                    <mat-icon
-                      >{{ p.isFeatured ? 'star' : 'star_border' }}</mat-icon
-                    >
-                  </button>
-                  }
-
-                  <!-- Disable active / Enable disabled -->
-                  @if (p.isActive && canUpdate()) {
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    matTooltip="Desactivar perfil"
-                    (click)="disableProfessional(p, $event)"
-                    [disabled]="store.saving()"
-                  >
-                    <mat-icon>block</mat-icon>
-                  </button>
-                  } @if (!p.isActive && canUpdate()) {
-                  <button
-                    mat-icon-button
-                    color="primary"
-                    matTooltip="Reactivar perfil"
-                    (click)="enableProfessional(p, $event)"
-                    [disabled]="store.saving()"
-                  >
-                    <mat-icon>check_circle</mat-icon>
-                  </button>
-                  }
-                </div>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr
-              mat-row
-              *matRowDef="let row; columns: displayedColumns"
-              class="clickable-row"
-              (click)="viewProfessional(row)"
-            ></tr>
-          </table>
-        </div>
-
-        <!-- Paginator -->
-        <mat-paginator
-          [length]="store.pagination().totalItems"
-          [pageSize]="store.pageSize()"
-          [pageIndex]="store.page() - 1"
-          [pageSizeOptions]="pageSizeOptions"
-          (page)="onPageChange($event)"
-          showFirstLastButtons
-          aria-label="Seleccionar página de profesionales"
-        ></mat-paginator>
-        }
-
-        <!-- Empty state -->
-        @if (store.isEmpty()) {
-        <div class="empty-state">
-          <mat-icon>inbox</mat-icon>
-          @if (searchValue()) {
-          <h3>Sin resultados</h3>
-          <p>No hay profesionales que coincidan con "{{ searchValue() }}"</p>
-          <button mat-stroked-button (click)="clearSearch()">
-            <mat-icon>clear</mat-icon>
-            Limpiar búsqueda
+            <mat-icon>refresh</mat-icon>
           </button>
-          } @else {
-          <h3>No hay profesionales en esta categoría</h3>
-          <p>Los profesionales aparecerán aquí cuando se registren</p>
-          }
         </div>
-        }
-      </mat-card-content>
-    </mat-card>
-  </mat-sidenav-content>
+      </mat-card-title>
+      <mat-card-subtitle>
+        Revisa, verifica y modera los perfiles profesionales registrados en la
+        plataforma
+      </mat-card-subtitle>
+    </mat-card-header>
 
-  <!-- ══ Detail Drawer ═════════════════════════════════════════════════════ -->
-  <mat-sidenav
-    [opened]="drawerOpen()"
-    position="end"
-    mode="over"
-    class="pro-drawer"
-    (closedStart)="closeDrawer()"
-  >
+    <mat-card-content>
+      <mat-tab-group
+        class="status-tabs"
+        (selectedIndexChange)="onTabChange($event)"
+        [selectedIndex]="activeTabIndex()"
+      >
+        @for (tab of statusTabs; track tab.filter) {
+        <mat-tab [label]="tab.label"></mat-tab>
+        }
+      </mat-tab-group>
+
+      <div class="search-bar">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar profesionales</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            type="text"
+            placeholder="Buscar por nombre..."
+            [value]="searchValue()"
+            (input)="onSearchChange($any($event.target).value)"
+          />
+          @if (searchValue()) {
+          <button
+            type="button"
+            matSuffix
+            mat-icon-button
+            aria-label="Limpiar busqueda"
+            (click)="clearSearch()"
+            matTooltip="Limpiar búsqueda"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          }
+        </mat-form-field>
+      </div>
+
+      @if (store.error()) {
+      <div class="error-banner">
+        <mat-icon>error</mat-icon>
+        <span>{{ store.error() }}</span>
+        <button mat-stroked-button (click)="store.clearError(); reload()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+      } @if (store.loading()) {
+      <div class="loading-container">
+        <mat-progress-spinner
+          mode="indeterminate"
+          diameter="50"
+        ></mat-progress-spinner>
+        <p>Cargando profesionales...</p>
+      </div>
+      } @if (!store.loading() && store.professionals().length > 0) {
+      <div class="table-container">
+        <table
+          mat-table
+          [dataSource]="store.professionals()"
+          [trackBy]="trackById"
+        >
+          <ng-container matColumnDef="businessName">
+            <th mat-header-cell *matHeaderCellDef>Profesional</th>
+            <td mat-cell *matCellDef="let p">
+              <div class="pro-cell">
+                <mat-icon class="pro-icon">person</mat-icon>
+                <div class="pro-info">
+                  <span class="pro-name">{{ p.businessName }}</span>
+                  @if (p.email) {
+                  <span class="pro-email">{{ p.email }}</span>
+                  }
+                </div>
+                @if (p.isFeatured) {
+                <mat-icon class="featured-icon" matTooltip="Destacado"
+                  >star</mat-icon
+                >
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Categoría</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="category-text">{{ p.categoryName }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="location">
+            <th mat-header-cell *matHeaderCellDef>Ubicación</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="location-text"
+                >{{ p.cityName }}, {{ p.countryName }}</span
+              >
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let p">
+              <mat-chip
+                class="status-chip"
+                [class.status-verified]="p.isActive && p.isVerified"
+                [class.status-pending]="p.isActive && !p.isVerified"
+                [class.status-disabled]="!p.isActive"
+              >
+                <mat-icon>{{ getStatusChip(p).icon }}</mat-icon>
+                {{ getStatusChip(p).label }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateCreated">
+            <th mat-header-cell *matHeaderCellDef>Registrado</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="date-text"
+                >{{ p.dateCreated | date: 'dd/MM/yyyy' }}</span
+              >
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let p">
+              <div class="actions-cell" (click)="$event.stopPropagation()">
+                <button
+                  mat-icon-button
+                  matTooltip="Ver detalle"
+                  (click)="viewProfessional(p)"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+
+                @if (p.isActive && !p.isVerified) {
+                <button
+                  mat-icon-button
+                  color="primary"
+                  [matTooltip]="canVerify() ? 'Verificar profesional' : 'No tienes permisos para verificar'"
+                  (click)="verifyProfessional(p, $event)"
+                  [disabled]="store.saving() || !canVerify()"
+                >
+                  <mat-icon>verified</mat-icon>
+                </button>
+                } @if (p.isActive && canFeature()) {
+                <button
+                  mat-icon-button
+                  [matTooltip]="p.isFeatured ? 'Quitar de destacados' : 'Destacar'"
+                  (click)="toggleFeatured(p, $event)"
+                  [disabled]="store.saving()"
+                >
+                  <mat-icon
+                    >{{ p.isFeatured ? 'star' : 'star_border' }}</mat-icon
+                  >
+                </button>
+                } @if (p.isActive && canUpdate()) {
+                <button
+                  mat-icon-button
+                  color="warn"
+                  matTooltip="Desactivar perfil"
+                  (click)="disableProfessional(p, $event)"
+                  [disabled]="store.saving()"
+                >
+                  <mat-icon>block</mat-icon>
+                </button>
+                } @if (!p.isActive && canUpdate()) {
+                <button
+                  mat-icon-button
+                  color="primary"
+                  matTooltip="Reactivar perfil"
+                  (click)="enableProfessional(p, $event)"
+                  [disabled]="store.saving()"
+                >
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            class="clickable-row"
+            (click)="viewProfessional(row)"
+          ></tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [length]="store.pagination().totalItems"
+        [pageSize]="store.pageSize()"
+        [pageIndex]="store.page() - 1"
+        [pageSizeOptions]="pageSizeOptions"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+        aria-label="Seleccionar página de profesionales"
+      ></mat-paginator>
+      } @if (store.isEmpty()) {
+      <div class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        @if (searchValue()) {
+        <h3>Sin resultados</h3>
+        <p>No hay profesionales que coincidan con "{{ searchValue() }}"</p>
+        <button mat-stroked-button (click)="clearSearch()">
+          <mat-icon>clear</mat-icon>
+          Limpiar búsqueda
+        </button>
+        } @else {
+        <h3>No hay profesionales en esta categoría</h3>
+        <p>Los profesionales aparecerán aquí cuando se registren</p>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<ng-template #detailDialog>
+  <div class="detail-dialog">
     <div class="drawer-header">
-      <h2>Detalle del Perfil</h2>
-      <button mat-icon-button (click)="closeDrawer()">
+      <div>
+        <p class="drawer-kicker">Solicitud</p>
+        <h2>Detalle del Perfil</h2>
+      </div>
+      <button
+        mat-icon-button
+        (click)="closeDetailDialog()"
+        aria-label="Cerrar detalle del perfil"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -294,182 +265,218 @@
       ></mat-progress-spinner>
       <p>Cargando perfil...</p>
     </div>
-    } @if (store.selectedProfessional(); as pro) {
+    } @else { @if (store.selectedProfessional(); as pro) {
     <div class="drawer-content">
-      <!-- Profile header -->
-      <div class="pro-header">
-        @if (pro.profileImageUrl) {
-        <img
-          [src]="pro.profileImageUrl"
-          [alt]="pro.businessName"
-          title="Foto de perfil del profesional"
-          class="pro-avatar"
-        />
-        } @else {
-        <div class="pro-avatar-placeholder"><mat-icon>person</mat-icon></div>
-        }
-        <div class="pro-main-info">
-          <h3>{{ pro.businessName }}</h3>
-          <p class="category">{{ pro.categoryName }}</p>
-          <p class="location">
-            <mat-icon>location_on</mat-icon>
-            {{ pro.cityName }}, {{ pro.countryName }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Status badges -->
-      <div class="status-badges">
-        <mat-chip
-          [class.status-pending]="!pro.isVerified && pro.isActive"
-          [class.status-verified]="pro.isVerified && pro.isActive"
-          [class.status-disabled]="!pro.isActive"
-        >
-          <mat-icon>{{ getStatusChip(pro).icon }}</mat-icon>
-          {{ getStatusChip(pro).label }}
-        </mat-chip>
-        @if (pro.isFeatured) {
-        <mat-chip class="featured-chip">
-          <mat-icon>star</mat-icon>
-          Destacado
-        </mat-chip>
-        }
-      </div>
-
-      <!-- Contact info -->
-      <div class="detail-section">
-        <h4>Información de Contacto</h4>
-        <div class="detail-grid">
-          @if (pro.email) {
-          <div class="detail-item">
-            <mat-icon>email</mat-icon>
-            <a [href]="'mailto:' + pro.email">{{ pro.email }}</a>
-          </div>
-          } @if (pro.phone) {
-          <div class="detail-item">
-            <mat-icon>phone</mat-icon>
-            <span>{{ pro.phone }}</span>
-          </div>
-          } @if (pro.whatsApp) {
-          <div class="detail-item">
-            <mat-icon>chat</mat-icon>
-            <span>{{ pro.whatsApp }}</span>
-          </div>
-          } @if (pro.address) {
-          <div class="detail-item">
-            <mat-icon>location_on</mat-icon>
-            <span>{{ pro.address }}</span>
+      <section class="detail-hero">
+        <div class="pro-header">
+          @if (pro.profileImageUrl) {
+          <img
+            [src]="pro.profileImageUrl"
+            [alt]="getDetailTitle(pro)"
+            title="Foto de perfil del profesional"
+            class="pro-avatar"
+          />
+          } @else {
+          <div class="pro-avatar-placeholder" aria-hidden="true">
+            <span>{{ getAvatarInitials(pro) }}</span>
           </div>
           }
+
+          <div class="pro-main-info">
+            <div class="pro-title-row">
+              <div class="pro-title-block">
+                <h3>{{ getDetailTitle(pro) }}</h3>
+                @if (shouldShowCategory(pro)) {
+                <p class="category">{{ pro.categoryName }}</p>
+                }
+              </div>
+
+              <div class="status-badges">
+                <mat-chip
+                  class="status-chip"
+                  [class.status-pending]="!pro.isVerified && pro.isActive"
+                  [class.status-verified]="pro.isVerified && pro.isActive"
+                  [class.status-disabled]="!pro.isActive"
+                >
+                  <mat-icon>{{ getStatusChip(pro).icon }}</mat-icon>
+                  {{ getStatusChip(pro).label }}
+                </mat-chip>
+                @if (pro.isFeatured) {
+                <mat-chip class="featured-chip">
+                  <mat-icon>star</mat-icon>
+                  Destacado
+                </mat-chip>
+                }
+              </div>
+            </div>
+
+            <div class="hero-meta">
+              @if (getLocationText(pro)) {
+              <span class="hero-meta-item">
+                <mat-icon>location_on</mat-icon>
+                {{ getLocationText(pro) }}
+              </span>
+              }
+              <span class="hero-meta-item">
+                <mat-icon>schedule</mat-icon>
+                Solicitud creada: {{ pro.dateCreated | date: 'dd/MM/yyyy HH:mm'
+                }}
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      @if (pro.description) {
-      <div class="detail-section">
-        <h4>Descripción</h4>
-        <p class="description-text">{{ pro.description }}</p>
-      </div>
-      }
+      <div class="detail-layout">
+        <div class="detail-column detail-column-main">
+          @if (hasContactInfo(pro)) {
+          <section class="detail-card detail-section">
+            <div class="section-heading">
+              <mat-icon>contact_mail</mat-icon>
+              <h4>Información de contacto</h4>
+            </div>
 
-      <!-- Metrics -->
-      <div class="detail-section">
-        <h4>Métricas</h4>
-        <div class="metrics-row">
-          <div class="metric">
-            <span class="metric-value">{{ pro.viewCount }}</span>
-            <span class="metric-label">Visitas</span>
-          </div>
-          <div class="metric">
-            <span class="metric-value">{{ pro.servicesCount }}</span>
-            <span class="metric-label">Servicios</span>
-          </div>
-        </div>
-      </div>
-
-      @if (pro.adminNotes) {
-      <div class="detail-section">
-        <h4>Notas de Admin</h4>
-        <p class="admin-notes">{{ pro.adminNotes }}</p>
-      </div>
-      }
-
-      <!-- Dates -->
-      <div class="detail-section">
-        <h4>Fechas</h4>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <mat-icon>calendar_today</mat-icon>
-            <span
-              >Creado: {{ pro.dateCreated | date: 'dd/MM/yyyy HH:mm' }}</span
-            >
-          </div>
-          @if (pro.dateUpdated) {
-          <div class="detail-item">
-            <mat-icon>update</mat-icon>
-            <span
-              >Actualizado: {{ pro.dateUpdated | date: 'dd/MM/yyyy HH:mm'
-              }}</span
-            >
-          </div>
+            <div class="contact-list">
+              @if (pro.email) {
+              <div class="contact-row">
+                <div class="contact-key">
+                  <mat-icon>email</mat-icon>
+                  <span>Email</span>
+                </div>
+                <a class="contact-value" [href]="'mailto:' + pro.email"
+                  >{{ pro.email }}</a
+                >
+              </div>
+              } @if (pro.phone) {
+              <div class="contact-row">
+                <div class="contact-key">
+                  <mat-icon>phone</mat-icon>
+                  <span>Teléfono</span>
+                </div>
+                <span class="contact-value">{{ pro.phone }}</span>
+              </div>
+              } @if (pro.whatsApp) {
+              <div class="contact-row">
+                <div class="contact-key">
+                  <mat-icon>chat</mat-icon>
+                  <span>WhatsApp</span>
+                </div>
+                <span class="contact-value">{{ pro.whatsApp }}</span>
+              </div>
+              } @if (pro.address) {
+              <div class="contact-row">
+                <div class="contact-key">
+                  <mat-icon>location_on</mat-icon>
+                  <span>Dirección</span>
+                </div>
+                <span class="contact-value">{{ pro.address }}</span>
+              </div>
+              }
+            </div>
+          </section>
+          } @if (pro.description) {
+          <section class="detail-card detail-section">
+            <div class="section-heading">
+              <mat-icon>description</mat-icon>
+              <h4>Descripción</h4>
+            </div>
+            <p class="description-text">{{ pro.description }}</p>
+          </section>
           }
         </div>
-      </div>
 
-      <!-- Drawer actions -->
-      <div class="drawer-actions">
-        <a
-          mat-stroked-button
-          [routerLink]="['/pro', pro.slug]"
-          target="_blank"
-          rel="noopener"
-        >
-          <mat-icon>open_in_new</mat-icon>
-          Ver perfil público
-        </a>
-
-        @if (pro.isActive && !pro.isVerified) {
-        <button
-          mat-raised-button
-          color="primary"
-          [matTooltip]="canVerify() ? 'Verificar profesional' : 'No tienes permisos para verificar'"
-          (click)="verifyProfessional(pro)"
-          [disabled]="store.saving() || !canVerify()"
-        >
-          <mat-icon>verified</mat-icon>
-          Verificar
-        </button>
-        } @if (pro.isActive && canFeature()) {
-        <button
-          mat-stroked-button
-          (click)="toggleFeatured(pro)"
-          [disabled]="store.saving()"
-        >
-          <mat-icon>{{ pro.isFeatured ? 'star' : 'star_border' }}</mat-icon>
-          {{ pro.isFeatured ? 'Quitar de destacados' : 'Destacar' }}
-        </button>
-        } @if (pro.isActive && canUpdate()) {
-        <button
-          mat-stroked-button
-          color="warn"
-          (click)="disableProfessional(pro)"
-          [disabled]="store.saving()"
-        >
-          <mat-icon>block</mat-icon>
-          Desactivar
-        </button>
-        } @if (!pro.isActive && canUpdate()) {
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="enableProfessional(pro)"
-          [disabled]="store.saving()"
-        >
-          <mat-icon>check_circle</mat-icon>
-          Reactivar
-        </button>
-        }
+        <div class="detail-column detail-column-side">
+          @if (pro.adminNotes) {
+          <section class="detail-card detail-section">
+            <div class="section-heading">
+              <mat-icon>sticky_note_2</mat-icon>
+              <h4>Notas internas</h4>
+            </div>
+            <p class="admin-notes">{{ pro.adminNotes }}</p>
+          </section>
+          } @if (pro.dateUpdated) {
+          <section class="detail-card detail-section">
+            <div class="section-heading">
+              <mat-icon>event</mat-icon>
+              <h4>Fechas</h4>
+            </div>
+            <div class="detail-grid detail-grid-dates">
+              <div class="detail-item detail-item-date">
+                <mat-icon>update</mat-icon>
+                <div>
+                  <span class="detail-label">Actualizado</span>
+                  <span class="detail-value"
+                    >{{ pro.dateUpdated | date: 'dd/MM/yyyy HH:mm' }}</span
+                  >
+                </div>
+              </div>
+            </div>
+          </section>
+          }
+        </div>
       </div>
     </div>
-    }
-  </mat-sidenav>
-</mat-sidenav-container>
+
+    <div class="drawer-actions">
+      <a
+        mat-stroked-button
+        [routerLink]="['/pro', pro.slug]"
+        target="_blank"
+        rel="noopener"
+      >
+        <mat-icon>open_in_new</mat-icon>
+        Ver perfil público
+      </a>
+
+      @if (pro.isActive && !pro.isVerified) {
+      <button
+        mat-raised-button
+        color="primary"
+        [matTooltip]="canVerify() ? 'Verificar profesional' : 'No tienes permisos para verificar'"
+        (click)="verifyProfessional(pro)"
+        [disabled]="store.saving() || !canVerify()"
+      >
+        <mat-icon>verified</mat-icon>
+        Verificar
+      </button>
+      } @if (pro.isActive && canFeature()) {
+      <button
+        mat-stroked-button
+        (click)="toggleFeatured(pro)"
+        [disabled]="store.saving()"
+      >
+        <mat-icon>{{ pro.isFeatured ? 'star' : 'star_border' }}</mat-icon>
+        {{ pro.isFeatured ? 'Quitar de destacados' : 'Destacar' }}
+      </button>
+      } @if (pro.isActive && canUpdate()) {
+      <button
+        mat-stroked-button
+        color="warn"
+        (click)="disableProfessional(pro)"
+        [disabled]="store.saving()"
+      >
+        <mat-icon>block</mat-icon>
+        Desactivar
+      </button>
+      } @if (!pro.isActive && canUpdate()) {
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="enableProfessional(pro)"
+        [disabled]="store.saving()"
+      >
+        <mat-icon>check_circle</mat-icon>
+        Reactivar
+      </button>
+      }
+    </div>
+    } @else {
+    <div class="drawer-empty">
+      <mat-icon>error_outline</mat-icon>
+      <h3>No se pudo cargar el detalle</h3>
+      <p>Vuelve a intentarlo desde el listado.</p>
+      <button mat-stroked-button (click)="closeDetailDialog()">Cerrar</button>
+    </div>
+    } }
+  </div>
+</ng-template>
