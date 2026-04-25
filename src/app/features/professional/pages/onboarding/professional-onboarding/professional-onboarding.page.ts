@@ -40,6 +40,11 @@ import {
   ProfessionalEducationFormDialogData,
   ProfessionalEducationFormDialogResult,
 } from '../professional-education-form-dialog/professional-education-form-dialog.component';
+import {
+  ProfessionalLocationFormDialogComponent,
+  ProfessionalLocationFormDialogData,
+  ProfessionalLocationFormDialogResult,
+} from '../professional-location-form-dialog/professional-location-form-dialog.component';
 
 @Component({
   selector: 'app-professional-onboarding',
@@ -94,7 +99,6 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly sectionBusy = signal(false);
   readonly showServiceForm = signal(false);
   readonly editingServiceId = signal<string | null>(null);
-  readonly editingLocationId = signal<string | null>(null);
   readonly sectionsTab = signal(0);
   readonly selectedSpecialtyIds = signal<string[]>([]);
   readonly showSpecialtyProposal = signal(false);
@@ -126,7 +130,7 @@ export class ProfessionalOnboardingPage implements OnInit {
   // ─── Form ──────────────────────────────────────────────────────────────────
   readonly profileForm = this.fb.nonNullable.group({
     businessName: ['', [Validators.required, Validators.maxLength(150)]],
-    description: ['', [Validators.maxLength(2000)]],
+    description: ['', [Validators.maxLength(1500)]],
     countryId: ['', [Validators.required]],
     cityId: ['', [Validators.required]],
     phone: ['', [Validators.maxLength(20)]],
@@ -146,20 +150,6 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly serviceForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(150)]],
     description: ['', [Validators.maxLength(1000)]],
-  });
-
-  readonly locationForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(200)]],
-    address: ['', [Validators.maxLength(300)]],
-    countryId: [''],
-    cityId: [''],
-    phone: ['', [Validators.maxLength(30)]],
-  });
-
-  readonly filteredLocationCities = computed(() => {
-    const countryId = this.locationForm.get('countryId')?.value;
-    if (!countryId) return this.cities();
-    return this.cities().filter((city) => city.countryId === countryId);
   });
 
   readonly selectedSpecialties = computed(() => {
@@ -208,9 +198,6 @@ export class ProfessionalOnboardingPage implements OnInit {
     // When country changes, reset city
     this.profileForm.get('countryId')?.valueChanges.subscribe(() => {
       this.profileForm.get('cityId')?.reset('');
-    });
-    this.locationForm.get('countryId')?.valueChanges.subscribe(() => {
-      this.locationForm.get('cityId')?.reset('');
     });
   }
 
@@ -852,22 +839,55 @@ export class ProfessionalOnboardingPage implements OnInit {
     });
   }
 
-  saveLocation(): void {
-    if (this.locationForm.invalid) {
-      this.locationForm.markAllAsTouched();
-      return;
-    }
+  openCreateLocationDialog(): void {
+    this.openLocationDialog();
+  }
 
-    const value = this.locationForm.getRawValue();
+  openEditLocationDialog(location: ProfessionalLocation): void {
+    this.openLocationDialog(location);
+  }
+
+  private openLocationDialog(location?: ProfessionalLocation): void {
+    const dialogRef = this.dialog.open(ProfessionalLocationFormDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      data: {
+        title: location ? 'Editar sede' : 'Adicionar sede',
+        submitLabel: location ? 'Guardar cambios' : 'Guardar sede',
+        initial: location
+          ? {
+              name: location.name,
+              address: location.address ?? '',
+              phone: location.phone ?? '',
+              cityId: location.cityId,
+              cityName: location.cityName,
+              countryId: location.countryId,
+              countryName: location.countryName,
+            }
+          : undefined,
+      } satisfies ProfessionalLocationFormDialogData,
+    });
+
+    dialogRef
+      .afterClosed()
+      .subscribe((result?: ProfessionalLocationFormDialogResult) => {
+        if (!result) return;
+        this.saveLocationFromDialog(result, location?.id);
+      });
+  }
+
+  private saveLocationFromDialog(
+    value: ProfessionalLocationFormDialogResult,
+    editingId?: string,
+  ): void {
     const payload = {
-      name: value.name.trim(),
-      address: value.address.trim() || undefined,
-      countryId: value.countryId || undefined,
-      cityId: value.cityId || undefined,
-      phone: value.phone.trim() || undefined,
+      name: value.name,
+      address: value.address,
+      countryId: value.countryId,
+      cityId: value.cityId,
+      phone: value.phone,
     };
 
-    const editingId = this.editingLocationId();
     this.sectionBusy.set(true);
 
     const request$ = editingId
@@ -885,7 +905,7 @@ export class ProfessionalOnboardingPage implements OnInit {
         } else {
           this.locations.update((current) => [location, ...current]);
         }
-        this.cancelLocationEdit();
+
         this.locationsLoaded.set(true);
         this.toast.success(editingId ? 'Sede actualizada' : 'Sede agregada');
         this.sectionBusy.set(false);
@@ -894,28 +914,6 @@ export class ProfessionalOnboardingPage implements OnInit {
         this.toast.error('No fue posible guardar la sede');
         this.sectionBusy.set(false);
       },
-    });
-  }
-
-  editLocation(location: ProfessionalLocation): void {
-    this.editingLocationId.set(location.id);
-    this.locationForm.patchValue({
-      name: location.name,
-      address: location.address ?? '',
-      countryId: location.countryId,
-      cityId: location.cityId,
-      phone: location.phone ?? '',
-    });
-  }
-
-  cancelLocationEdit(): void {
-    this.editingLocationId.set(null);
-    this.locationForm.reset({
-      name: '',
-      address: '',
-      countryId: '',
-      cityId: '',
-      phone: '',
     });
   }
 

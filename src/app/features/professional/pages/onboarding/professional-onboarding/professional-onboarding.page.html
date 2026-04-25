@@ -183,8 +183,19 @@
                 formControlName="description"
                 placeholder="Cuéntale a tus pacientes quién eres, tu experiencia y especialidad..."
                 rows="4"
+                maxlength="1500"
                 autocomplete="off"
               ></textarea>
+              <mat-hint align="end"
+                >{{ profileForm.controls.description.value.length }}/1500</mat-hint
+              >
+              @if (
+                profileForm.controls.description.hasError('maxlength') &&
+                (profileForm.controls.description.touched ||
+                  profileForm.controls.description.dirty)
+              ) {
+                <mat-error>La descripción no puede exceder 1500 caracteres</mat-error>
+              }
             </mat-form-field>
 
             @if (submitError()) {
@@ -518,9 +529,18 @@
 
       <mat-tab label="Sedes">
         <div class="form-section nested-section">
-          <div class="section-header">
+          <div class="section-header section-header-with-action">
             <mat-icon>apartment</mat-icon>
             <span>Sedes</span>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              [disabled]="sectionBusy()"
+              (click)="openCreateLocationDialog()"
+            >
+              Adicionar sede
+            </button>
           </div>
 
           @if (sectionBusy() && !locationsLoaded()) {
@@ -529,85 +549,6 @@
             <span>Cargando sedes...</span>
           </div>
           } @else {
-          <form
-            class="inline-form"
-            [formGroup]="locationForm"
-            (ngSubmit)="saveLocation()"
-          >
-            <div class="row-2">
-              <mat-form-field appearance="outline">
-                <mat-label>Nombre sede *</mat-label>
-                <input
-                  matInput
-                  formControlName="name"
-                  placeholder="Ej. Sede Norte"
-                />
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Teléfono</mat-label>
-                <input
-                  matInput
-                  formControlName="phone"
-                  placeholder="50489077887"
-                  type="number"
-                />
-              </mat-form-field>
-            </div>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Dirección</mat-label>
-              <input
-                matInput
-                formControlName="address"
-                placeholder="Ej. Calle 80 #45-23"
-              />
-            </mat-form-field>
-
-            <div class="row-2">
-              <mat-form-field appearance="outline">
-                <mat-label>País</mat-label>
-                <mat-select formControlName="countryId">
-                  @for (country of countries(); track country.id) {
-                  <mat-option [value]="country.id"
-                    >{{ country.name }}</mat-option
-                  >
-                  }
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Ciudad</mat-label>
-                <mat-select
-                  formControlName="cityId"
-                  [disabled]="!locationForm.controls.countryId.value"
-                >
-                  @for (city of filteredLocationCities(); track city.id) {
-                  <mat-option [value]="city.id">{{ city.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
-
-            <div class="inline-actions">
-              @if (editingLocationId()) {
-              <button mat-button type="button" (click)="cancelLocationEdit()">
-                Cancelar
-              </button>
-              }
-            </div>
-
-            <div class="inline-actions tab-save-actions">
-              <button
-                mat-flat-button
-                color="primary"
-                type="submit"
-                [disabled]="sectionBusy()"
-              >
-                {{ editingLocationId() ? 'Actualizar sede' : 'Guardar sede' }}
-              </button>
-            </div>
-          </form>
-
           @if (locations().length > 0) {
           <div class="items-grid">
             @for (location of locations(); track location.id) {
@@ -627,7 +568,7 @@
                 <button
                   mat-button
                   type="button"
-                  (click)="editLocation(location)"
+                  (click)="openEditLocationDialog(location)"
                 >
                   Editar
                 </button>

@@ -1,0 +1,129 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form" novalidate>
+    <div class="row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre sede *</mat-label>
+        <input
+          matInput
+          formControlName="name"
+          placeholder="Ej. Sede Norte"
+        />
+        @if (
+          (form.controls.name.hasError('required') ||
+            form.controls.name.hasError('requiredTrimmed')) &&
+          (form.controls.name.touched || form.controls.name.dirty)
+        ) {
+          <mat-error>El nombre de la sede es requerido</mat-error>
+        }
+        @if (
+          form.controls.name.hasError('maxlength') &&
+          (form.controls.name.touched || form.controls.name.dirty)
+        ) {
+          <mat-error>El nombre no puede exceder 200 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono</mat-label>
+        <input
+          matInput
+          type="tel"
+          formControlName="phone"
+          placeholder="Ej. +504 2222-3333"
+          autocomplete="tel"
+        />
+        @if (
+          form.controls.phone.hasError('maxlength') &&
+          (form.controls.phone.touched || form.controls.phone.dirty)
+        ) {
+          <mat-error>El teléfono no puede exceder 30 caracteres</mat-error>
+        }
+        @if (
+          form.controls.phone.hasError('invalidPhone') &&
+          (form.controls.phone.touched || form.controls.phone.dirty)
+        ) {
+          <mat-error>Ingresa un teléfono válido</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Dirección</mat-label>
+      <input
+        matInput
+        formControlName="address"
+        placeholder="Ej. Calle 80 #45-23"
+      />
+      @if (
+        form.controls.address.hasError('maxlength') &&
+        (form.controls.address.touched || form.controls.address.dirty)
+      ) {
+        <mat-error>La dirección no puede exceder 300 caracteres</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Departamento</mat-label>
+        <mat-select
+          formControlName="departmentId"
+          [disabled]="isLoadingGeography() || departments().length === 0"
+        >
+          <mat-option value="">Sin seleccionar</mat-option>
+          @for (department of departments(); track department.id) {
+            <mat-option [value]="department.id">{{ department.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Ciudad</mat-label>
+        <mat-select
+          formControlName="cityId"
+          [disabled]="
+            isLoadingCities() ||
+            (!form.controls.departmentId.value && cities().length === 0)
+          "
+        >
+          <mat-option value="">Sin seleccionar</mat-option>
+          @for (city of cities(); track city.id) {
+            <mat-option [value]="city.id">{{ city.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    @if (isLoadingGeography() || isLoadingCities()) {
+      <div class="loading-inline">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>
+          {{ isLoadingGeography()
+            ? 'Cargando departamentos...'
+            : 'Cargando ciudades...' }}
+        </span>
+      </div>
+    }
+
+    @if (data.initial?.cityId && !form.controls.departmentId.value) {
+      <p class="helper-text">
+        La ciudad actual se conserva. Si deseas cambiarla, selecciona primero un
+        departamento.
+      </p>
+    }
+
+    @if (geographyError()) {
+      <div class="error-banner">
+        <span>{{ geographyError() }}</span>
+      </div>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">
+    {{ data.submitLabel }}
+  </button>
+</mat-dialog-actions>

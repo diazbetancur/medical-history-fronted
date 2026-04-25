@@ -4,10 +4,10 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import {
-  APP_INITIALIZER,
   ApplicationConfig,
   inject,
   isDevMode,
+  provideAppInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -29,16 +29,9 @@ import {
   jwtInterceptor,
   loadingInterceptor,
 } from '@core/http';
+import { GeographyMetadataService } from './public/services';
+import { catchError, of } from 'rxjs';
 import { routes } from './app.routes';
-
-/**
- * Initialize AuthStore on app startup
- * Checks for valid token and loads user session
- */
-function initializeAuth() {
-  const authStore = inject(AuthStore);
-  return () => authStore.initialize();
-}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -59,11 +52,12 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
-    // Initialize AuthStore on app startup
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeAuth,
-      multi: true,
-    },
+    provideAppInitializer(() => inject(AuthStore).initialize()),
+    provideAppInitializer(() => {
+      inject(GeographyMetadataService)
+        .loadHondurasGeographyIfNeeded()
+        .pipe(catchError(() => of(void 0)))
+        .subscribe();
+    }),
   ],
 };
