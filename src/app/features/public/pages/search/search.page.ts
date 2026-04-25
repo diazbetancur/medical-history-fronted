@@ -299,8 +299,9 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         returnTo: 'search',
         q: this.route.snapshot.queryParamMap.get('q') || null,
         specialtyId:
-          this.normalizeGuid(this.route.snapshot.queryParamMap.get('specialtyId')) ||
-          null,
+          this.normalizeGuid(
+            this.route.snapshot.queryParamMap.get('specialtyId'),
+          ) || null,
         cityId:
           this.normalizeGuid(this.route.snapshot.queryParamMap.get('cityId')) ||
           null,

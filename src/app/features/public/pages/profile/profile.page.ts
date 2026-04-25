@@ -109,11 +109,13 @@ export class ProfilePageComponent {
         queryParams: {
           q: this.route.snapshot.queryParamMap.get('q') || null,
           specialtyId:
-            this.normalizeGuid(this.route.snapshot.queryParamMap.get('specialtyId')) ||
-            null,
+            this.normalizeGuid(
+              this.route.snapshot.queryParamMap.get('specialtyId'),
+            ) || null,
           cityId:
-            this.normalizeGuid(this.route.snapshot.queryParamMap.get('cityId')) ||
-            null,
+            this.normalizeGuid(
+              this.route.snapshot.queryParamMap.get('cityId'),
+            ) || null,
           searched:
             this.route.snapshot.queryParamMap.get('searched') === '1'
               ? '1'
@@ -128,12 +130,16 @@ export class ProfilePageComponent {
         queryParams: {
           q: this.route.snapshot.queryParamMap.get('q') || null,
           specialtyId:
-            this.normalizeGuid(this.route.snapshot.queryParamMap.get('specialtyId')) ||
-            null,
+            this.normalizeGuid(
+              this.route.snapshot.queryParamMap.get('specialtyId'),
+            ) || null,
           cityId:
-            this.normalizeGuid(this.route.snapshot.queryParamMap.get('cityId')) ||
-            null,
-          page: this.normalizePage(this.route.snapshot.queryParamMap.get('page')),
+            this.normalizeGuid(
+              this.route.snapshot.queryParamMap.get('cityId'),
+            ) || null,
+          page: this.normalizePage(
+            this.route.snapshot.queryParamMap.get('page'),
+          ),
         },
       });
       return;
