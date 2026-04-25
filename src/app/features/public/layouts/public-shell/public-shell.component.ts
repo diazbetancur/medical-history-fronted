@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { UiProfileService } from '@core/auth';
-import { PublicLayoutComponent } from './public-layout/public-layout.component';
+import { PublicLayoutComponent } from '../public-layout/public-layout.component';
 
 /**
  * Public Shell Component

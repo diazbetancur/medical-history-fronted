@@ -16,7 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
-import { ProfessionalPatientsService } from '../../../services/professional-patients.service';
+import { ProfessionalPatientsService } from '../../../../services/professional-patients.service';
 
 export interface AddAddendumDialogData {
   encounterId: string;

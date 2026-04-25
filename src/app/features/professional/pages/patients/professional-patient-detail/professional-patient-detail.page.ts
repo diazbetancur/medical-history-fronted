@@ -36,10 +36,10 @@ import { ProfessionalPatientMedicationsTabComponent } from '@patient/pages/medic
 import { ConfirmDialogComponent } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { ProfessionalPatientsService } from '../../../services/professional-patients.service';
-import { AddAddendumDialogComponent } from '../dialogs/add-addendum-dialog.component';
-import { CreateEncounterDialogComponent } from '../dialogs/create-encounter-dialog.component';
-import { EditEncounterDialogComponent } from '../dialogs/edit-encounter-dialog.component';
-import { ViewEncounterDialogComponent } from '../dialogs/view-encounter-dialog.component';
+import { AddAddendumDialogComponent } from '../dialogs/add-addendum-dialog/add-addendum-dialog.component';
+import { CreateEncounterDialogComponent } from '../dialogs/create-encounter-dialog/create-encounter-dialog.component';
+import { EditEncounterDialogComponent } from '../dialogs/edit-encounter-dialog/edit-encounter-dialog.component';
+import { ViewEncounterDialogComponent } from '../dialogs/view-encounter-dialog/view-encounter-dialog.component';
 
 @Component({
   selector: 'app-professional-patient-detail',

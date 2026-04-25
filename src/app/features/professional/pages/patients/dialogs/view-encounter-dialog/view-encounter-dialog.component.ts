@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MedicalEncounterDto } from '@data/models';
 import { finalize } from 'rxjs';
-import { ProfessionalPatientsService } from '../../../services/professional-patients.service';
+import { ProfessionalPatientsService } from '../../../../services/professional-patients.service';
 
 export interface ViewEncounterDialogData {
   encounterId: string;
