@@ -1,22 +1,36 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  TemplateRef,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthStore } from '@core/auth';
-import type { AdminProfessionalListItem } from '@data/api/api-models';
+import type {
+  AdminProfessionalDetail,
+  AdminProfessionalListItem,
+} from '@data/api/api-models';
 import type { ProfessionalStatusFilter } from '@data/stores/admin-professionals.store';
 import { AdminProfessionalsStore } from '@data/stores/admin-professionals.store';
 import { ToastService } from '@shared/services';
@@ -35,11 +49,11 @@ import { PERMISSIONS } from '../../admin-menu.config';
     MatIconModule,
     MatTableModule,
     MatChipsModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
-    MatSidenavModule,
     MatTabsModule,
     MatTooltipModule,
   ],
@@ -52,11 +66,13 @@ export class ProfessionalsReviewPageComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
+  private detailDialogRef: MatDialogRef<unknown> | null = null;
 
   // ── UI state ──────────────────────────────────────────────────────────────
   readonly searchValue = signal('');
-  readonly drawerOpen = signal(false);
   readonly activeTabIndex = signal(0);
+  readonly detailDialogTemplate =
+    viewChild.required<TemplateRef<unknown>>('detailDialog');
 
   // ── Table config ──────────────────────────────────────────────────────────
   readonly displayedColumns = [
@@ -134,15 +150,31 @@ export class ProfessionalsReviewPageComponent implements OnInit {
     }
   }
 
-  // ── Detail drawer ─────────────────────────────────────────────────────────
+  // ── Detail dialog ─────────────────────────────────────────────────────────
   viewProfessional(p: AdminProfessionalListItem): void {
     this.store.selectProfessional(p.id);
-    this.drawerOpen.set(true);
+
+    if (this.detailDialogRef) {
+      return;
+    }
+
+    this.detailDialogRef = this.dialog.open(this.detailDialogTemplate(), {
+      width: '1040px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      autoFocus: false,
+      restoreFocus: false,
+      panelClass: 'professional-detail-dialog-panel',
+    });
+
+    this.detailDialogRef.afterClosed().subscribe(() => {
+      this.detailDialogRef = null;
+      this.store.clearSelectedProfessional();
+    });
   }
 
-  closeDrawer(): void {
-    this.drawerOpen.set(false);
-    this.store.clearSelectedProfessional();
+  closeDetailDialog(): void {
+    this.detailDialogRef?.close();
   }
 
   // ── Moderation actions ────────────────────────────────────────────────────
@@ -235,11 +267,46 @@ export class ProfessionalsReviewPageComponent implements OnInit {
     return { label: 'Pendiente', icon: 'schedule', color: 'accent' };
   }
 
+  getDetailTitle(p: AdminProfessionalListItem): string {
+    return p.businessName?.trim() || p.categoryName?.trim();
+  }
+
+  shouldShowCategory(p: AdminProfessionalListItem): boolean {
+    const category = p.categoryName?.trim();
+    return (
+      !!category &&
+      this.normalizeText(category) !==
+        this.normalizeText(this.getDetailTitle(p))
+    );
+  }
+
+  getLocationText(p: AdminProfessionalListItem): string {
+    return [p.cityName, p.countryName].filter((value) => !!value).join(', ');
+  }
+
+  hasContactInfo(p: AdminProfessionalDetail): boolean {
+    return !!(p.email || p.phone || p.whatsApp || p.address);
+  }
+
+  getAvatarInitials(p: AdminProfessionalListItem): string {
+    const source = this.getDetailTitle(p);
+    return source
+      .split(/\s+/)
+      .filter((part) => !!part)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('');
+  }
+
   trackById(_: number, p: AdminProfessionalListItem): string {
     return p.id;
   }
 
   reload(): void {
     this.store.reload();
+  }
+
+  private normalizeText(value: string | undefined): string {
+    return value?.trim().toLowerCase() ?? '';
   }
 }

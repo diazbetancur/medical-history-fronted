@@ -18,7 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { PublicApi } from '@data/api';
 import { City } from '@data/api/api-models';
@@ -121,6 +121,7 @@ export class PatientWizardPage implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly searchControl = new FormControl<string>('');
   readonly specialtyControl = new FormControl<string | null>(null);
@@ -140,7 +141,7 @@ export class PatientWizardPage implements OnInit {
   ngOnInit(): void {
     this.loadCatalogs();
     this.setupDebounce();
-    this.loadInitialProfessionals();
+    this.restoreNavigationState();
   }
 
   searchProfessionals(): void {
@@ -188,7 +189,15 @@ export class PatientWizardPage implements OnInit {
       return;
     }
 
-    this.router.navigate(['/pro', item.professionalProfileId]);
+    this.router.navigate(['/pro', item.professionalProfileId], {
+      queryParams: {
+        returnTo: 'wizard',
+        q: this.searchControl.value?.trim() || null,
+        specialtyId: this.normalizeGuid(this.specialtyControl.value) || null,
+        cityId: this.normalizeGuid(this.cityControl.value) || null,
+        searched: this.hasSearched() ? '1' : null,
+      },
+    });
   }
 
   bookAppointment(item: ProfessionalSearchResultDto): void {
@@ -383,6 +392,31 @@ export class PatientWizardPage implements OnInit {
     this.cityControl.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.searchProfessionals());
+  }
+
+  private restoreNavigationState(): void {
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const queryText = typeof params['q'] === 'string' ? params['q'] : '';
+        const specialtyId = this.normalizeGuid(params['specialtyId']);
+        const cityId = this.normalizeGuid(params['cityId']);
+        const searched = params['searched'] === '1';
+
+        this.searchControl.setValue(queryText, { emitEvent: false });
+        this.specialtyControl.setValue(specialtyId ?? null, {
+          emitEvent: false,
+        });
+        this.cityControl.setValue(cityId ?? null, { emitEvent: false });
+
+        if (searched || queryText || specialtyId || cityId) {
+          this.searchProfessionals();
+          return;
+        }
+
+        this.hasSearched.set(false);
+        this.loadInitialProfessionals();
+      });
   }
 
   private loadCatalogs(): void {
