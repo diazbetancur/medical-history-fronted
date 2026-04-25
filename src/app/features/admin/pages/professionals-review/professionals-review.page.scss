@@ -360,12 +360,11 @@
   padding: 20px 22px;
   border: 1px solid var(--mat-app-outline-variant);
   border-radius: 20px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--mat-app-surface-container-low) 88%, white 12%),
-      var(--mat-app-surface)
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--mat-app-surface-container-low) 88%, white 12%),
+    var(--mat-app-surface)
+  );
 }
 
 .pro-avatar {
@@ -384,7 +383,11 @@
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--mat-app-primary) 24%, transparent),
-    color-mix(in srgb, var(--mat-app-primary) 8%, var(--mat-app-surface-container))
+    color-mix(
+      in srgb,
+      var(--mat-app-primary) 8%,
+      var(--mat-app-surface-container)
+    )
   );
   display: flex;
   align-items: center;
@@ -449,7 +452,11 @@
   min-height: 32px;
   padding: 0 12px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--mat-app-surface-container-low) 88%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--mat-app-surface-container-low) 88%,
+    transparent
+  );
   color: var(--mat-app-on-surface-variant);
   font-size: 13px;
 
@@ -483,7 +490,11 @@
 .detail-card {
   border: 1px solid var(--mat-app-outline-variant);
   border-radius: 18px;
-  background: color-mix(in srgb, var(--mat-app-surface) 92%, var(--mat-app-surface-container-low) 8%);
+  background: color-mix(
+    in srgb,
+    var(--mat-app-surface) 92%,
+    var(--mat-app-surface-container-low) 8%
+  );
   padding: 18px 20px;
 }
 
