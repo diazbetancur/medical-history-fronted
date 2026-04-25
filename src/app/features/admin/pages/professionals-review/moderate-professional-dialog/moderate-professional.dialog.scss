@@ -1,0 +1,55 @@
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.dialog-description {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--mat-app-on-surface-variant);
+}
+
+.notes-field {
+  width: 100%;
+}
+
+.dialog-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mat-app-error);
+  margin: 0;
+  font-size: 14px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+mat-dialog-actions {
+  gap: 12px;
+  padding: 16px 24px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+}

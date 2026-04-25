@@ -1,0 +1,44 @@
+.dashboard-container {
+  padding: 0;
+
+  h1 {
+    margin: 0 0 24px;
+    font-size: 2rem;
+    font-weight: 500;
+  }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 0;
+  color: var(--color-text-secondary);
+}
+
+.error-card {
+  p {
+    margin: 0 0 12px;
+    color: var(--color-danger, #b3261e);
+  }
+}
+
+.metric {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 16px 0 0;
+}
+
+.generated-at {
+  margin: 16px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}

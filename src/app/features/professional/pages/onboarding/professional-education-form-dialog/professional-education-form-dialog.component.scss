@@ -1,0 +1,18 @@
+.dialog-form {
+  display: grid;
+  gap: 12px;
+  min-width: min(92vw, 640px);
+  padding-top: 4px;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .row-2 {
+    grid-template-columns: 1fr;
+  }
+}

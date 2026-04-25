@@ -10,7 +10,7 @@ export const rolesRoutes: Routes = [
   {
     path: ':id/permissions',
     loadComponent: () =>
-      import('./role-permissions.page').then(
+      import('./role-permissions/role-permissions.page').then(
         (m) => m.RolePermissionsPageComponent,
       ),
     title: 'Permisos del Rol - Admin',

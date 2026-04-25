@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { PublicShellComponent } from './layouts/public-shell.component';
+import { PublicShellComponent } from './layouts/public-shell/public-shell.component';
 
 /**
  * Public Routes

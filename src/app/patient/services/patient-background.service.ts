@@ -79,6 +79,7 @@ export class PatientBackgroundService {
     return this.http
       .post<any>(this.baseUrl, {
         type: dto.type,
+        title: dto.title,
         description: dto.description || dto.title,
         diagnosedYear: dto.eventDate
           ? Number(dto.eventDate.slice(0, 4))

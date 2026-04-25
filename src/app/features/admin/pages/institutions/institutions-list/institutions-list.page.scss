@@ -1,0 +1,163 @@
+.page-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  button {
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.page-title {
+  margin: 0 0 4px 0;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.filters-card {
+  margin-bottom: 24px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.clear-filters-btn {
+  margin-top: 8px;
+
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
+.table-card {
+  .mat-mdc-card-content {
+    padding: 0;
+  }
+}
+
+.institutions-table {
+  width: 100%;
+
+  th {
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  td {
+    code {
+      background: rgba(0, 0, 0, 0.05);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+    }
+  }
+}
+
+.chip-active {
+  background-color: var(--color-success) !important;
+  color: white !important;
+}
+
+.chip-inactive {
+  background-color: var(--color-text-disabled) !important;
+  color: white !important;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--color-text-disabled);
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0 0 24px 0;
+    color: var(--color-text-secondary);
+  }
+
+  button mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+  }
+}
+
+mat-paginator {
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    .filter-field {
+      width: 100%;
+    }
+  }
+}

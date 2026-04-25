@@ -1,0 +1,78 @@
+<mat-toolbar class="public-header">
+  <div class="header-container">
+    <a routerLink="/" class="logo">
+      <span class="logo-text">MediTigo</span>
+    </a>
+
+    <nav class="nav-links desktop-only">
+      <a routerLink="/" class="nav-link">Inicio</a>
+      <a routerLink="/search" class="nav-link">Buscar Médicos</a>
+      @if (isPatientAuthenticated()) {
+        <a routerLink="/patient/profile" class="nav-link">Mi Perfil</a>
+        <a routerLink="/patient/wizard" class="nav-link">Nueva Cita</a>
+      }
+    </nav>
+
+    <div class="header-actions">
+      @if (!isAuthenticated()) {
+        <button
+          mat-stroked-button
+          class="desktop-only"
+          (click)="navigateToProfessional()"
+        >
+          Soy Médico
+        </button>
+        <button mat-flat-button color="primary" (click)="navigateToLogin()">
+          Iniciar Sesión
+        </button>
+      } @else {
+        <button mat-stroked-button class="desktop-only" (click)="logout()">
+          Cerrar Sesión
+        </button>
+      }
+      <button
+        mat-icon-button
+        class="mobile-only"
+        [matMenuTriggerFor]="mobileMenu"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+  </div>
+</mat-toolbar>
+
+<mat-menu #mobileMenu="matMenu">
+  <button mat-menu-item routerLink="/">
+    <mat-icon>home</mat-icon>
+    Inicio
+  </button>
+  <button mat-menu-item routerLink="/search">
+    <mat-icon>search</mat-icon>
+    Buscar Médicos
+  </button>
+  @if (isPatientAuthenticated()) {
+    <button mat-menu-item routerLink="/patient/profile">
+      <mat-icon>person</mat-icon>
+      Mi Perfil
+    </button>
+    <button mat-menu-item routerLink="/patient/wizard">
+      <mat-icon>event</mat-icon>
+      Nueva Cita
+    </button>
+  }
+  @if (!isAuthenticated()) {
+    <button mat-menu-item (click)="navigateToProfessional()">
+      <mat-icon>work</mat-icon>
+      Soy Médico
+    </button>
+    <button mat-menu-item (click)="navigateToLogin()">
+      <mat-icon>login</mat-icon>
+      Iniciar Sesión
+    </button>
+  } @else {
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Cerrar Sesión
+    </button>
+  }
+</mat-menu>

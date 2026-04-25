@@ -1,135 +1,147 @@
 <div class="contact-dialog">
   @if (success()) {
-  <!-- Success State -->
-  <div class="success-state">
-    <div class="success-icon">
-      <mat-icon>check_circle</mat-icon>
-    </div>
-    <h2 mat-dialog-title>¡Solicitud Enviada!</h2>
-    <mat-dialog-content>
-      <p>
-        Tu solicitud ha sido enviada a
-        <strong>{{ data.professionalName }}</strong
-        >.
-      </p>
-      <p class="hint">El profesional se pondrá en contacto contigo pronto.</p>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-flat-button color="primary" (click)="close()">Cerrar</button>
-    </mat-dialog-actions>
-  </div>
-  } @else {
-  <!-- Form State -->
-  <h2 mat-dialog-title>Contactar a {{ data.professionalName }}</h2>
-
-  <mat-dialog-content>
-    <form [formGroup]="form" class="contact-form">
-      <mat-form-field appearance="outline">
-        <mat-label>
-          <app-form-label
-            text="Nombre completo"
-            [required]="true"
-          ></app-form-label>
-        </mat-label>
-        <input
-          matInput
-          formControlName="name"
-          placeholder="Tu nombre"
-          maxlength="100"
-        />
-        <mat-hint align="end">{{ form.get("name")?.value?.length || 0 }}/100</mat-hint>
-        <app-form-control-error
-          [control]="form.get('name')"
-          [submitted]="submitted()"
-        ></app-form-control-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>
-          <app-form-label
-            text="Correo electronico"
-            [required]="true"
-          ></app-form-label>
-        </mat-label>
-        <input
-          matInput
-          formControlName="email"
-          type="email"
-          placeholder="correo@ejemplo.com"
-          maxlength="100"
-        />
-        <mat-hint align="end">{{ form.get("email")?.value?.length || 0 }}/100</mat-hint>
-        <app-form-control-error
-          [control]="form.get('email')"
-          [submitted]="submitted()"
-        ></app-form-control-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Teléfono (opcional)</mat-label>
-        <input
-          matInput
-          formControlName="phone"
-          type="tel"
-          placeholder="+52 55 1234 5678"
-          maxlength="20"
-        />
-        <mat-hint align="end">{{ form.get("phone")?.value?.length || 0 }}/20</mat-hint>
-      </mat-form-field>
-
-      @if (data.services && data.services.length > 0) {
-      <mat-form-field appearance="outline">
-        <mat-label>Servicio (opcional)</mat-label>
-        <mat-select formControlName="serviceId">
-          <mat-option [value]="null">-- Seleccionar --</mat-option>
-          @for (service of data.services; track service.id) {
-          <mat-option [value]="service.id">{{ service.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      }
-
-      <mat-form-field appearance="outline">
-        <mat-label>
-          <app-form-label text="Mensaje" [required]="true"></app-form-label>
-        </mat-label>
-        <textarea
-          matInput
-          formControlName="message"
-          rows="4"
-          placeholder="Describe brevemente lo que necesitas..."
-          maxlength="1000"
-        ></textarea>
-        <mat-hint align="end">{{ form.get("message")?.value?.length || 0 }}/1000</mat-hint>
-        <app-form-control-error
-          [control]="form.get('message')"
-          [submitted]="submitted()"
-        ></app-form-control-error>
-      </mat-form-field>
-
-      @if (error()) {
-      <div class="error-message">
-        <mat-icon>error</mat-icon>
-        <span>{{ error() }}</span>
+    <!-- Success State -->
+    <div class="success-state">
+      <div class="success-icon">
+        <mat-icon>check_circle</mat-icon>
       </div>
-      }
-    </form>
-  </mat-dialog-content>
+      <h2 mat-dialog-title>¡Solicitud Enviada!</h2>
+      <mat-dialog-content>
+        <p>
+          Tu solicitud ha sido enviada a
+          <strong>{{ data.professionalName }}</strong
+          >.
+        </p>
+        <p class="hint">El profesional se pondrá en contacto contigo pronto.</p>
+      </mat-dialog-content>
+      <mat-dialog-actions align="end">
+        <button mat-flat-button color="primary" (click)="close()">
+          Cerrar
+        </button>
+      </mat-dialog-actions>
+    </div>
+  } @else {
+    <!-- Form State -->
+    <h2 mat-dialog-title>Contactar a {{ data.professionalName }}</h2>
 
-  <mat-dialog-actions align="end">
-    <button mat-button [mat-dialog-close]="false" [disabled]="loading()">
-      Cancelar
-    </button>
-    <button
-      mat-flat-button
-      color="primary"
-      [disabled]="loading() || form.invalid"
-      (click)="submit()"
-    >
-      @if (loading()) {
-      <mat-spinner diameter="20"></mat-spinner>
-      } @else { Enviar Solicitud }
-    </button>
-  </mat-dialog-actions>
+    <mat-dialog-content>
+      <form [formGroup]="form" class="contact-form">
+        <mat-form-field appearance="outline">
+          <mat-label>
+            <app-form-label
+              text="Nombre completo"
+              [required]="true"
+            ></app-form-label>
+          </mat-label>
+          <input
+            matInput
+            formControlName="name"
+            placeholder="Tu nombre"
+            maxlength="100"
+          />
+          <mat-hint align="end"
+            >{{ form.get("name")?.value?.length || 0 }}/100</mat-hint
+          >
+          <app-form-control-error
+            [control]="form.get('name')"
+            [submitted]="submitted()"
+          ></app-form-control-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>
+            <app-form-label
+              text="Correo electronico"
+              [required]="true"
+            ></app-form-label>
+          </mat-label>
+          <input
+            matInput
+            formControlName="email"
+            type="email"
+            placeholder="correo@ejemplo.com"
+            maxlength="100"
+          />
+          <mat-hint align="end"
+            >{{ form.get("email")?.value?.length || 0 }}/100</mat-hint
+          >
+          <app-form-control-error
+            [control]="form.get('email')"
+            [submitted]="submitted()"
+          ></app-form-control-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono (opcional)</mat-label>
+          <input
+            matInput
+            formControlName="phone"
+            type="number"
+            placeholder="50412345678"
+            maxlength="20"
+          />
+          <mat-hint align="end"
+            >{{ form.get("phone")?.value?.length || 0 }}/20</mat-hint
+          >
+        </mat-form-field>
+
+        @if (data.services && data.services.length > 0) {
+          <mat-form-field appearance="outline">
+            <mat-label>Servicio (opcional)</mat-label>
+            <mat-select formControlName="serviceId">
+              <mat-option [value]="null">-- Seleccionar --</mat-option>
+              @for (service of data.services; track service.id) {
+                <mat-option [value]="service.id">{{ service.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>
+            <app-form-label text="Mensaje" [required]="true"></app-form-label>
+          </mat-label>
+          <textarea
+            matInput
+            formControlName="message"
+            rows="4"
+            placeholder="Describe brevemente lo que necesitas..."
+            maxlength="1000"
+          ></textarea>
+          <mat-hint align="end"
+            >{{ form.get("message")?.value?.length || 0 }}/1000</mat-hint
+          >
+          <app-form-control-error
+            [control]="form.get('message')"
+            [submitted]="submitted()"
+          ></app-form-control-error>
+        </mat-form-field>
+
+        @if (error()) {
+          <div class="error-message">
+            <mat-icon>error</mat-icon>
+            <span>{{ error() }}</span>
+          </div>
+        }
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button [mat-dialog-close]="false" [disabled]="loading()">
+        Cancelar
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="loading() || form.invalid"
+        (click)="submit()"
+      >
+        @if (loading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          Enviar Solicitud
+        }
+      </button>
+    </mat-dialog-actions>
   }
 </div>

@@ -20,8 +20,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { RequestFormStore } from '@data/stores';
 import { AnalyticsService } from '@shared/services';
-import { FormControlErrorComponent } from '../forms/form-control-error.component';
-import { FormLabelComponent } from '../forms/form-label.component';
+import { FormControlErrorComponent } from '../forms/form-control-error/form-control-error.component';
+import { FormLabelComponent } from '../forms/form-label/form-label.component';
 
 export interface ContactDialogData {
   professionalId: string;
@@ -74,7 +74,11 @@ export class ContactDialogComponent {
     serviceId: [null],
     message: [
       '',
-      [Validators.required, Validators.minLength(10), Validators.maxLength(1000)],
+      [
+        Validators.required,
+        Validators.minLength(10),
+        Validators.maxLength(1000),
+      ],
     ],
   });
 

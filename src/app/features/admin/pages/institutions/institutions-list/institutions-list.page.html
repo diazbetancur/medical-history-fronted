@@ -1,0 +1,153 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Instituciones</h1>
+      <p class="page-subtitle">Gestión de instituciones del catálogo</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Nueva Institución
+    </button>
+  </div>
+
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field class="filter-field">
+          <mat-label>Nombre</mat-label>
+          <input
+            matInput
+            [(ngModel)]="filterName"
+            (ngModelChange)="onFilterChange()"
+            placeholder="Buscar por nombre..."
+          />
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="filter-field">
+          <mat-label>Código</mat-label>
+          <input
+            matInput
+            [(ngModel)]="filterCode"
+            (ngModelChange)="onFilterChange()"
+            placeholder="Buscar por código..."
+          />
+        </mat-form-field>
+
+        <mat-form-field class="filter-field">
+          <mat-label>Estado</mat-label>
+          <mat-select
+            [(ngModel)]="filterIsActive"
+            (ngModelChange)="onFilterChange()"
+          >
+            <mat-option [value]="undefined">Todos</mat-option>
+            <mat-option [value]="true">Activos</mat-option>
+            <mat-option [value]="false">Inactivos</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button
+          mat-stroked-button
+          (click)="clearFilters()"
+          class="clear-filters-btn"
+        >
+          <mat-icon>clear</mat-icon>
+          Limpiar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="table-card">
+    <mat-card-content>
+      @if (store.isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando instituciones...</p>
+      </div>
+      } @else if (store.hasInstitutions()) {
+      <table
+        mat-table
+        [dataSource]="store.institutions()"
+        class="institutions-table"
+      >
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let institution">
+            <strong>{{ institution.name }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="code">
+          <th mat-header-cell *matHeaderCellDef>Código</th>
+          <td mat-cell *matCellDef="let institution">
+            <code>{{ institution.code || '-' }}</code>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="address">
+          <th mat-header-cell *matHeaderCellDef>Dirección</th>
+          <td mat-cell *matCellDef="let institution">
+            {{ institution.address || '-' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="isActive">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let institution">
+            <mat-chip
+              [class.chip-active]="institution.isActive"
+              [class.chip-inactive]="!institution.isActive"
+            >
+              {{ institution.isActive ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let institution">
+            <button
+              mat-icon-button
+              (click)="openEditDialog(institution)"
+              matTooltip="Editar"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteInstitution(institution)"
+              matTooltip="Eliminar"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="store.total()"
+        [pageSize]="store.filters().pageSize || 10"
+        [pageIndex]="(store.filters().page || 1) - 1"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+      ></mat-paginator>
+      } @else {
+      <div class="empty-state">
+        <mat-icon>business</mat-icon>
+        <h3>No hay instituciones</h3>
+        <p>Comienza creando tu primera institución</p>
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          Crear Institución
+        </button>
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
