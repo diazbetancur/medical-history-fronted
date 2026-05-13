@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppointmentsApi, type Appointment } from '@data/api';
-import { CancelAppointmentDialogComponent } from './cancel-appointment-dialog.component';
+import { CancelAppointmentDialogComponent } from './cancel-appointment-dialog/cancel-appointment-dialog.component';
 
 /**
  * Appointment Detail Page

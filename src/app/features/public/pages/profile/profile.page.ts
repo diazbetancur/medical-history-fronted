@@ -6,15 +6,15 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, AuthStore } from '@core/auth';
 import { PublicProfessionalDetailResponse } from '@data/api';
 import { ProfileStore } from '@data/stores';
 import { AnalyticsService, SeoService } from '@shared/services';
 import { isNotFoundError } from '@shared/utils';
-import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog.component';
-import { PublicFooterComponent } from '../../components/public-footer.component';
-import { PublicHeaderComponent } from '../../components/public-header.component';
+import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
+import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
+import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 
 @Component({
   selector: 'app-profile-page',
@@ -41,6 +41,7 @@ export class ProfilePageComponent {
   private readonly authStore = inject(AuthStore);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly estimatedTariff = computed(() => {
     const value = this.store.profile()?.consultationValue;
@@ -101,6 +102,49 @@ export class ProfilePageComponent {
   }
 
   goToSearch(): void {
+    const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
+
+    if (returnTo === 'wizard') {
+      this.router.navigate(['/patient/wizard'], {
+        queryParams: {
+          q: this.route.snapshot.queryParamMap.get('q') || null,
+          specialtyId:
+            this.normalizeGuid(
+              this.route.snapshot.queryParamMap.get('specialtyId'),
+            ) || null,
+          cityId:
+            this.normalizeGuid(
+              this.route.snapshot.queryParamMap.get('cityId'),
+            ) || null,
+          searched:
+            this.route.snapshot.queryParamMap.get('searched') === '1'
+              ? '1'
+              : null,
+        },
+      });
+      return;
+    }
+
+    if (returnTo === 'search') {
+      this.router.navigate(['/search'], {
+        queryParams: {
+          q: this.route.snapshot.queryParamMap.get('q') || null,
+          specialtyId:
+            this.normalizeGuid(
+              this.route.snapshot.queryParamMap.get('specialtyId'),
+            ) || null,
+          cityId:
+            this.normalizeGuid(
+              this.route.snapshot.queryParamMap.get('cityId'),
+            ) || null,
+          page: this.normalizePage(
+            this.route.snapshot.queryParamMap.get('page'),
+          ),
+        },
+      });
+      return;
+    }
+
     this.router.navigate(['/search']);
   }
 
@@ -151,5 +195,21 @@ export class ProfilePageComponent {
         addressCountry: profile.countryName,
       },
     });
+  }
+
+  private normalizeGuid(value: string | null): string | null {
+    if (!value) return null;
+
+    const guidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    return guidRegex.test(value) ? value : null;
+  }
+
+  private normalizePage(value: string | null): number | null {
+    if (!value) return null;
+
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
   }
 }

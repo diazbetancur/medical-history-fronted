@@ -17,20 +17,8 @@ import {
     InstallPromptComponent,
     UpdateBannerComponent,
   ],
-  template: `
-    <app-global-loader />
-    <app-update-banner />
-    <router-outlet />
-    <app-install-prompt />
-  `,
-  styles: [
-    `
-      :host {
-        display: block;
-        min-height: 100vh;
-      }
-    `,
-  ],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
   private readonly analytics = inject(AnalyticsService);

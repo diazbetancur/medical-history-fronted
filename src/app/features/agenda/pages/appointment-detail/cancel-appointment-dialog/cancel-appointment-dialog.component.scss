@@ -1,0 +1,16 @@
+.full-width {
+  width: 100%;
+}
+
+mat-dialog-content {
+  min-width: 350px;
+
+  p {
+    margin-bottom: 16px;
+  }
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}

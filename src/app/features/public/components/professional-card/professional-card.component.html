@@ -1,0 +1,33 @@
+<mat-card
+  class="professional-card"
+  [class.unavailable]="!professional.isAvailable"
+>
+  <div class="card-image" [style.background-image]="'url(' + imageUrl + ')'">
+    <div class="card-overlay">
+      <div class="card-info">
+        <h3 class="professional-name">{{ professional.fullName }}</h3>
+        <p class="professional-specialty">{{ professional.specialty }}</p>
+        <div class="card-meta">
+          <span class="rating">
+            <mat-icon>star</mat-icon>
+            {{ professional.rating }} ({{ professional.reviewsCount }})
+          </span>
+          <span class="experience"
+            >{{ professional.yearsOfExperience }} años</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+  <mat-card-actions>
+    <button
+      mat-flat-button
+      color="primary"
+      class="book-button"
+      [disabled]="!professional.isAvailable"
+      (click)="onBookAppointment()"
+    >
+      {{ professional.isAvailable ? "Agendar Cita" : "No Disponible" }}
+    </button>
+  </mat-card-actions>
+</mat-card>

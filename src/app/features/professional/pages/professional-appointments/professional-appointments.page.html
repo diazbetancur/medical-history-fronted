@@ -1,0 +1,390 @@
+<div class="appointments-page">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Mis Citas</h1>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="store.loadUpcomingAppointments()"
+      >
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+  </header>
+
+  @if (store.isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando citas...</p>
+  </div>
+  } @else {
+  <mat-tab-group
+    [selectedIndex]="selectedTabIndex()"
+    (selectedTabChange)="onTabChange($event.index)"
+  >
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>today</mat-icon>
+        <span>Hoy</span>
+      </ng-template>
+
+      @if (store.todayAppointments().length === 0) {
+      <div class="empty-tab">
+        <mat-icon>check_circle</mat-icon>
+        <p>No tienes citas para hoy</p>
+      </div>
+      } @else {
+      <div class="appointments-list">
+        @for (appointment of store.todayAppointments(); track appointment.id) {
+        <mat-card class="appointment-card">
+          <mat-card-header>
+            <div mat-card-avatar class="appointment-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <mat-card-title>
+              {{ getPatientDisplayName(appointment) }}
+            </mat-card-title>
+            <mat-card-subtitle>
+              <mat-icon>schedule</mat-icon>
+              {{ appointment.startTime }} - {{ appointment.endTime }}
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="appointment-info">
+              <div class="info-row">
+                <mat-icon>event</mat-icon>
+                <span>{{ formatDate(appointment.date) }}</span>
+              </div>
+
+              @if (appointment.notes) {
+              <div class="info-row notes">
+                <mat-icon>note</mat-icon>
+                <span>{{ appointment.notes }}</span>
+              </div>
+              }
+
+              <div class="status-chip">
+                <mat-chip
+                  [class]="'status-' + appointment.status.toLowerCase()"
+                >
+                  {{ getStatusLabel(appointment.status) }}
+                </mat-chip>
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+              Acciones
+            </button>
+            <mat-menu #menu="matMenu">
+              @if (appointment.status === 'PENDING') {
+              <button
+                mat-menu-item
+                (click)="confirmAppointment(appointment.id)"
+              >
+                <mat-icon>check_circle</mat-icon>
+                <span>Confirmar</span>
+              </button>
+              } @if (appointment.status === 'CONFIRMED') {
+              <button
+                mat-menu-item
+                (click)="completeAppointment(appointment.id)"
+              >
+                <mat-icon>done_all</mat-icon>
+                <span>Marcar como completada</span>
+              </button>
+              <button mat-menu-item (click)="markAsNoShow(appointment.id)">
+                <mat-icon>event_busy</mat-icon>
+                <span>Paciente no asistió</span>
+              </button>
+              } @if (canCreateHistoryFromAppointment(appointment)) {
+              <button
+                mat-menu-item
+                (click)="openClinicalHistoryFromAppointment(appointment)"
+              >
+                <mat-icon>description</mat-icon>
+                <span>Adicionar historia clínica</span>
+              </button>
+              } @if ( appointment.status !== 'CANCELLED' && appointment.status
+              !== 'COMPLETED' ) {
+              <button mat-menu-item (click)="cancelAppointment(appointment.id)">
+                <mat-icon>cancel</mat-icon>
+                <span>Cancelar cita</span>
+              </button>
+              }
+            </mat-menu>
+          </mat-card-actions>
+        </mat-card>
+        }
+      </div>
+      }
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>event</mat-icon>
+        <span>Próximos 7 días</span>
+      </ng-template>
+
+      @if (store.upcomingAppointments().length === 0) {
+      <div class="empty-tab">
+        <mat-icon>event</mat-icon>
+        <p>No tienes citas programadas</p>
+      </div>
+      } @else { @for (dateGroup of appointmentsByDate() | keyvalue; track
+      dateGroup.key) {
+      <div class="date-group">
+        <h3 class="date-header">
+          <mat-icon>calendar_today</mat-icon>
+          {{ formatDate(dateGroup.key) }}
+          <span class="count">({{ dateGroup.value.length }} citas)</span>
+        </h3>
+
+        <div class="appointments-list">
+          @for (appointment of dateGroup.value; track appointment.id) {
+          <mat-card class="appointment-card">
+            <mat-card-header>
+              <div mat-card-avatar class="appointment-avatar">
+                <mat-icon>person</mat-icon>
+              </div>
+              <mat-card-title>
+                {{ getPatientDisplayName(appointment) }}
+              </mat-card-title>
+              <mat-card-subtitle>
+                <mat-icon>schedule</mat-icon>
+                {{ appointment.startTime }} - {{ appointment.endTime }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="appointment-info">
+                @if (appointment.notes) {
+                <div class="info-row notes">
+                  <mat-icon>note</mat-icon>
+                  <span>{{ appointment.notes }}</span>
+                </div>
+                }
+
+                <div class="status-chip">
+                  <mat-chip
+                    [class]="'status-' + appointment.status.toLowerCase()"
+                  >
+                    {{ getStatusLabel(appointment.status) }}
+                  </mat-chip>
+                </div>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-button [matMenuTriggerFor]="menu2">
+                <mat-icon>more_vert</mat-icon>
+                Acciones
+              </button>
+              <mat-menu #menu2="matMenu">
+                @if (appointment.status === 'PENDING') {
+                <button
+                  mat-menu-item
+                  (click)="confirmAppointment(appointment.id)"
+                >
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Confirmar</span>
+                </button>
+                } @if ( appointment.status !== 'CANCELLED' && appointment.status
+                !== 'COMPLETED' ) {
+                <button
+                  mat-menu-item
+                  (click)="cancelAppointment(appointment.id)"
+                >
+                  <mat-icon>cancel</mat-icon>
+                  <span>Cancelar cita</span>
+                </button>
+                }
+              </mat-menu>
+            </mat-card-actions>
+          </mat-card>
+          }
+        </div>
+      </div>
+      } }
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>calendar_month</mat-icon>
+        <span>Este mes</span>
+        @if (monthAppointments().length > 0) {
+        <span class="badge">{{ monthAppointments().length }}</span>
+        }
+      </ng-template>
+
+      @if (monthLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando citas del mes...</p>
+      </div>
+      } @else if (monthAppointments().length === 0) {
+      <div class="empty-tab">
+        <mat-icon>calendar_month</mat-icon>
+        <p>No tienes citas registradas para este mes</p>
+      </div>
+      } @else { @for (dateGroup of groupedMonthEntries(); track dateGroup.date)
+      {
+      <div class="date-group">
+        <h3 class="date-header">
+          <mat-icon>calendar_today</mat-icon>
+          {{ formatDate(dateGroup.date) }}
+          <span class="count">
+            ({{ dateGroup.appointments.length }} citas)
+          </span>
+        </h3>
+
+        <div class="appointments-list">
+          @for (appointment of dateGroup.appointments; track appointment.id) {
+          <mat-card class="appointment-card">
+            <mat-card-header>
+              <div mat-card-avatar class="appointment-avatar">
+                <mat-icon>person</mat-icon>
+              </div>
+              <mat-card-title>
+                {{ getPatientDisplayName(appointment) }}
+              </mat-card-title>
+              <mat-card-subtitle>
+                <mat-icon>schedule</mat-icon>
+                {{ appointment.startTime }} - {{ appointment.endTime }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="appointment-info">
+                @if (appointment.notes) {
+                <div class="info-row notes">
+                  <mat-icon>note</mat-icon>
+                  <span>{{ appointment.notes }}</span>
+                </div>
+                }
+
+                <div class="status-chip">
+                  <mat-chip
+                    [class]="'status-' + appointment.status.toLowerCase()"
+                  >
+                    {{ getStatusLabel(appointment.status) }}
+                  </mat-chip>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          }
+        </div>
+      </div>
+      } }
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>date_range</mat-icon>
+        <span>Por rango</span>
+        @if (rangeAppointments().length > 0) {
+        <span class="badge">{{ rangeAppointments().length }}</span>
+        }
+      </ng-template>
+
+      <div class="range-filter">
+        <mat-form-field appearance="outline">
+          <mat-label>Desde</mat-label>
+          <input
+            matInput
+            type="date"
+            [ngModel]="rangeFrom()"
+            (ngModelChange)="rangeFrom.set($event)"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Hasta</mat-label>
+          <input
+            matInput
+            type="date"
+            [ngModel]="rangeTo()"
+            (ngModelChange)="rangeTo.set($event)"
+          />
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="applyDateRangeFilter()"
+          [disabled]="rangeLoading()"
+        >
+          <mat-icon>search</mat-icon>
+          Buscar
+        </button>
+      </div>
+
+      @if (rangeLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando citas del rango...</p>
+      </div>
+      } @else if (hasRangeFilterResult() && rangeAppointments().length === 0) {
+      <div class="empty-tab">
+        <mat-icon>event_busy</mat-icon>
+        <p>No hay citas para ese rango de fechas</p>
+      </div>
+      } @else if (rangeAppointments().length > 0) { @for (dateGroup of
+      groupedRangeEntries(); track dateGroup.date) {
+      <div class="date-group">
+        <h3 class="date-header">
+          <mat-icon>calendar_today</mat-icon>
+          {{ formatDate(dateGroup.date) }}
+          <span class="count">
+            ({{ dateGroup.appointments.length }} citas)
+          </span>
+        </h3>
+
+        <div class="appointments-list">
+          @for (appointment of dateGroup.appointments; track appointment.id) {
+          <mat-card class="appointment-card">
+            <mat-card-header>
+              <div mat-card-avatar class="appointment-avatar">
+                <mat-icon>person</mat-icon>
+              </div>
+              <mat-card-title>
+                {{ getPatientDisplayName(appointment) }}
+              </mat-card-title>
+              <mat-card-subtitle>
+                <mat-icon>schedule</mat-icon>
+                {{ appointment.startTime }} - {{ appointment.endTime }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="appointment-info">
+                @if (appointment.notes) {
+                <div class="info-row notes">
+                  <mat-icon>note</mat-icon>
+                  <span>{{ appointment.notes }}</span>
+                </div>
+                }
+
+                <div class="status-chip">
+                  <mat-chip
+                    [class]="'status-' + appointment.status.toLowerCase()"
+                  >
+                    {{ getStatusLabel(appointment.status) }}
+                  </mat-chip>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          }
+        </div>
+      </div>
+      } }
+    </mat-tab>
+  </mat-tab-group>
+  }
+</div>

@@ -1,0 +1,56 @@
+<h2 mat-dialog-title class="warn-title">
+  <mat-icon>warning</mat-icon>
+  Confirmar Eliminación
+</h2>
+
+<mat-dialog-content>
+  <div class="warning-content">
+    <div class="user-to-delete">
+      <mat-icon class="avatar">account_circle</mat-icon>
+      <div class="user-info">
+        <strong>{{ data.user.userName }}</strong>
+        <span class="email">{{ data.user.email }}</span>
+      </div>
+    </div>
+
+    <div class="warning-message">
+      <p>
+        <strong>¿Estás seguro de que deseas eliminar este usuario?</strong>
+      </p>
+      <p>Esta acción no se puede deshacer. Se eliminarán:</p>
+      <ul>
+        <li>Todos los datos del perfil</li>
+        <li>Historial de accesos</li>
+        <li>Configuraciones asociadas</li>
+      </ul>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+  <div class="error-banner">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="saving()">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="warn"
+    (click)="onConfirm()"
+    [disabled]="saving()"
+  >
+    @if (saving()) {
+    <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+    <ng-container>
+      <mat-icon>delete_forever</mat-icon>
+      Eliminar Usuario
+    </ng-container>
+    }
+  </button>
+</mat-dialog-actions>

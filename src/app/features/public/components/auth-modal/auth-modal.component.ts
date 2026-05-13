@@ -425,11 +425,9 @@ export class AuthModalComponent implements OnInit {
   /**
    * Flujo según contrato API:
    * 1. asProfessional = false → navigateByContext normal
-   * 2. Rol incluye 'Professional':
-   *    a. hasProfessionalProfile = true  → switch context + /professional
-   *    b. hasProfessionalProfile = false → /professional/onboarding
+   * 2. Rol incluye 'Professional' → /professional
    * 3. Solo 'Client' → POST become-professional → re-login (nuevo token)
-   *    → loadMe → /professional/onboarding
+   *    → loadMe → /professional
    */
   private handlePostLogin(user: CurrentUserDto, asProfessional: boolean): void {
     this.authIntent.clear();
@@ -523,30 +521,19 @@ export class AuthModalComponent implements OnInit {
   }
 
   /**
-   * Decide entre ir al dashboard (perfil ya existe) o al onboarding (nuevo).
+   * Entra al panel profesional respetando la prioridad centralizada.
    */
   private navigateAsProfessional(user: CurrentUserDto): void {
     const displayName = user.name || user.email || 'usuario';
-    const professionalContext = user.contexts.find(
-      (ctx) => ctx.type === 'PROFESSIONAL',
-    );
-
-    if (professionalContext) {
-      this.authStore.switchContext(professionalContext);
-    }
 
     this.isLoginLoading.set(false);
     this.dialogRef.close(true);
 
-    if (user.hasProfessionalProfile) {
-      this.toast.success(`¡Bienvenido, ${displayName}!`);
-      this.router.navigate(['/professional']);
-    } else {
-      this.toast.success(
-        `¡Hola ${displayName}! Configura tu perfil para empezar.`,
-      );
-      this.router.navigate(['/professional/onboarding']);
-    }
+    this.postLoginNavigation.navigateByContext({
+      preferProfessional: true,
+    });
+
+    this.toast.success(`¡Bienvenido, ${displayName}!`);
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

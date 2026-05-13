@@ -20,7 +20,7 @@ import { SpecialtiesAdminStore } from '@data/stores/specialties-admin.store';
 import { ToastService } from '@shared/services';
 import { ConfirmDialogComponent } from '@shared/ui';
 import { PERMISSIONS } from '../../admin-menu.config';
-import { SpecialtyFormDialogComponent } from './specialty-form-dialog.component';
+import { SpecialtyFormDialogComponent } from './specialty-form-dialog/specialty-form-dialog.component';
 
 @Component({
   selector: 'app-specialties-page',

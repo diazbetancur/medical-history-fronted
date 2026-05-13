@@ -19,9 +19,9 @@ import {
   AuthModalComponent,
   AuthModalData,
 } from '../../components/auth-modal/auth-modal.component';
-import { ProfessionalCardComponent } from '../../components/professional-card.component';
-import { PublicFooterComponent } from '../../components/public-footer.component';
-import { PublicHeaderComponent } from '../../components/public-header.component';
+import { ProfessionalCardComponent } from '../../components/professional-card/professional-card.component';
+import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
+import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 import { AuthIntentService } from '../../services/auth-intent.service';
 
 @Component({

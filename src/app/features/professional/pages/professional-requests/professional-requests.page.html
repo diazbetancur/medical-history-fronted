@@ -1,0 +1,125 @@
+<div class="requests-page">
+  <header class="page-header">
+    <h1>Solicitudes</h1>
+    <button mat-raised-button color="primary" (click)="refresh()">
+      <mat-icon>refresh</mat-icon>
+      Actualizar
+    </button>
+  </header>
+
+  @if (store.loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="46"></mat-spinner>
+      <p>Cargando solicitudes...</p>
+    </div>
+  } @else {
+    <mat-tab-group
+      [selectedIndex]="tabIndex()"
+      (selectedIndexChange)="tabIndex.set($event)"
+    >
+      <mat-tab label="Pendientes ({{ store.pendingCount() }})"></mat-tab>
+      <mat-tab label="Contactadas ({{ store.contactedCount() }})"></mat-tab>
+      <mat-tab label="En curso ({{ store.inProgressCount() }})"></mat-tab>
+      <mat-tab label="Completadas ({{ store.completedCount() }})"></mat-tab>
+      <mat-tab label="Rechazadas ({{ store.rejectedCount() }})"></mat-tab>
+      <mat-tab label="Canceladas ({{ store.cancelledCount() }})"></mat-tab>
+    </mat-tab-group>
+
+    @if (filtered().length === 0) {
+      <mat-card class="empty-state">
+        <mat-card-content>
+          <mat-icon>inbox</mat-icon>
+          <p>No hay solicitudes en esta categoría</p>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="requests-list">
+        @for (request of filtered(); track request.id) {
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>{{ request.clientName }}</mat-card-title>
+              <mat-card-subtitle>{{ request.clientEmail }}</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="row">
+                <strong>Servicio:</strong>
+                {{ request.serviceName || 'General' }}
+              </div>
+              @if (request.clientPhone) {
+                <div class="row">
+                  <strong>Teléfono:</strong> {{ request.clientPhone }}
+                </div>
+              }
+              @if (request.message) {
+                <div class="row">
+                  <strong>Mensaje:</strong> {{ request.message }}
+                </div>
+              }
+              <div class="row status-row">
+                <mat-chip [class]="chipClass(request.status)">
+                  {{ request.status }}
+                </mat-chip>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              @if (request.status === 'Pending') {
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="updateStatus(request.id, 'Contacted')"
+                >
+                  <mat-icon>check_circle</mat-icon>
+                  Marcar contactada
+                </button>
+                <button
+                  mat-button
+                  color="warn"
+                  (click)="updateStatus(request.id, 'Rejected')"
+                >
+                  <mat-icon>cancel</mat-icon>
+                  Rechazar
+                </button>
+                <button
+                  mat-button
+                  (click)="updateStatus(request.id, 'Cancelled')"
+                >
+                  <mat-icon>event_busy</mat-icon>
+                  Cancelar
+                </button>
+              }
+              @if (request.status === 'Contacted') {
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="updateStatus(request.id, 'InProgress')"
+                >
+                  <mat-icon>play_circle</mat-icon>
+                  Marcar en curso
+                </button>
+                <button
+                  mat-button
+                  (click)="updateStatus(request.id, 'Cancelled')"
+                >
+                  <mat-icon>event_busy</mat-icon>
+                  Cancelar
+                </button>
+              }
+              @if (request.status === 'InProgress') {
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="updateStatus(request.id, 'Completed')"
+                >
+                  <mat-icon>done_all</mat-icon>
+                  Marcar completada
+                </button>
+              }
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>

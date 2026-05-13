@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEditMode ? "edit" : "add" }}</mat-icon>
+  {{ isEditMode ? "Editar" : "Nueva" }} Especialidad
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Nombre *</mat-label>
+      <input matInput formControlName="name" placeholder="Ej: Cardiología" />
+      @if (form.get("name")?.invalid && form.get("name")?.touched) {
+        <mat-error>El nombre es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+    <div class="toggle-row">
+      <mat-slide-toggle color="primary" formControlName="isActive">
+        Activa
+      </mat-slide-toggle>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="form.invalid"
+  >
+    {{ isEditMode ? "Guardar" : "Crear" }}
+  </button>
+</mat-dialog-actions>
