@@ -82,7 +82,7 @@ export class RegisterPageComponent implements OnInit {
   readonly passwordComplexityHelpText = PasswordComplexityHelpText;
 
   // Monitor form validity using a signal that updates on value changes
-  private formValidityTrigger = signal(0);
+  private readonly formValidityTrigger = signal(0);
   readonly isFormInvalid = computed(() => {
     // Force update when form validity changes
     this.formValidityTrigger();
@@ -124,7 +124,7 @@ export class RegisterPageComponent implements OnInit {
         confirmPassword: value.confirmPassword!,
         firstName: value.firstName!.trim(),
         lastName: value.lastName!.trim(),
-        phoneNumber: value.phoneNumber?.trim() || undefined,
+        phoneNumber: this.normalizeOptionalPhone(value.phoneNumber),
       })
       .subscribe({
         next: (response) => {
@@ -150,6 +150,24 @@ export class RegisterPageComponent implements OnInit {
           this.isLoading.set(false);
         },
       });
+  }
+
+  private normalizeOptionalPhone(value: unknown): string | undefined {
+    if (value == null) {
+      return undefined;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim();
+      return normalized.length > 0 ? normalized : undefined;
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      const normalized = String(value).trim();
+      return normalized.length > 0 ? normalized : undefined;
+    }
+
+    return undefined;
   }
 
   private passwordMatchValidator(): ValidatorFn {

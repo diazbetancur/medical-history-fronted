@@ -209,8 +209,9 @@
             <mat-icon matPrefix>phone</mat-icon>
             <input
               matInput
-              type="number"
+              type="tel"
               formControlName="phoneNumber"
+              autocomplete="tel"
               placeholder="Ingresa tu telefono"
             />
             @if (getRegisterPhoneError(); as error) {
