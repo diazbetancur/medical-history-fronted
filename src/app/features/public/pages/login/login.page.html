@@ -8,7 +8,7 @@
     </mat-card-header>
 
     <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <!-- Email Field -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>
@@ -70,7 +70,7 @@
           mat-raised-button
           color="primary"
           type="submit"
-          [disabled]="isLoading() || isFormInvalid()"
+          [disabled]="isLoading()"
           class="full-width"
         >
           @if (isLoading()) {
