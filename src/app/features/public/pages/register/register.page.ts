@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -18,8 +18,14 @@ import { Router, RouterLink } from '@angular/router';
 import { ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services';
-import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
-import { RegisterFormMessages, PasswordComplexityHelpText } from '../auth-form-messages';
+import {
+  FormControlErrorComponent,
+  FormLabelComponent,
+} from '@shared/ui/forms';
+import {
+  PasswordComplexityHelpText,
+  RegisterFormMessages,
+} from '../auth-form-messages';
 
 @Component({
   selector: 'app-register-page',
@@ -95,12 +101,12 @@ export class RegisterPageComponent implements OnInit {
 
   private setupFormValidationTracking(): void {
     this.form.valueChanges.subscribe(() => {
-      this.formValidityTrigger.update(v => v + 1);
+      this.formValidityTrigger.update((v) => v + 1);
     });
-    
+
     // Also trigger on status changes (for validators)
     this.form.statusChanges.subscribe(() => {
-      this.formValidityTrigger.update(v => v + 1);
+      this.formValidityTrigger.update((v) => v + 1);
     });
   }
 
