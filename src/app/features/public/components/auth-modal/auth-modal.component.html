@@ -27,7 +27,7 @@
   >
     <mat-tab label="Iniciar sesion">
       <div class="tab-content">
-        <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
+        <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" novalidate>
           <mat-form-field
             appearance="outline"
             class="full-width"
@@ -100,7 +100,7 @@
               mat-flat-button
               color="primary"
               type="submit"
-              [disabled]="isLoginLoading() || loginForm.invalid"
+              [disabled]="isLoginLoading()"
               class="full-width submit-btn"
             >
               @if (isLoginLoading()) {
@@ -133,7 +133,11 @@
           </div>
         }
 
-        <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
+        <form
+          [formGroup]="registerForm"
+          (ngSubmit)="onRegisterSubmit()"
+          novalidate
+        >
           <div class="name-row">
             <mat-form-field
               appearance="outline"
@@ -322,7 +326,7 @@
               mat-flat-button
               color="primary"
               type="submit"
-              [disabled]="isRegisterLoading() || registerForm.invalid"
+              [disabled]="isRegisterLoading()"
               class="full-width submit-btn"
             >
               @if (isRegisterLoading()) {
