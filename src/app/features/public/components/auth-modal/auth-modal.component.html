@@ -133,7 +133,11 @@
           </div>
         }
 
-        <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" novalidate>
+        <form
+          [formGroup]="registerForm"
+          (ngSubmit)="onRegisterSubmit()"
+          novalidate
+        >
           <div class="name-row">
             <mat-form-field
               appearance="outline"

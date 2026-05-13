@@ -98,7 +98,9 @@
             autocomplete="new-password"
             placeholder="Crea una contrasena segura"
           />
-          <mat-hint class="password-hint">{{ passwordComplexityHelpText }}</mat-hint>
+          <mat-hint class="password-hint"
+            >{{ passwordComplexityHelpText }}</mat-hint
+          >
           <app-form-control-error
             [control]="form.controls.password"
             [submitted]="submitted()"
@@ -125,17 +127,17 @@
             [submitted]="submitted()"
             [messages]="registerFormMessages.confirmPassword"
           ></app-form-control-error>
-          @if (
-            form.hasError('passwordMismatch') &&
-            (submitted() ||
-              form.controls.confirmPassword.touched ||
-              form.controls.confirmPassword.dirty)
-          ) {
+          @if ( form.hasError('passwordMismatch') && (submitted() ||
+          form.controls.confirmPassword.touched ||
+          form.controls.confirmPassword.dirty) ) {
           <mat-error>Las contraseñas no coinciden</mat-error>
           }
         </mat-form-field>
 
-        <mat-checkbox formControlName="asProfessional" class="professional-check">
+        <mat-checkbox
+          formControlName="asProfessional"
+          class="professional-check"
+        >
           Soy médico / profesional de salud
         </mat-checkbox>
 
