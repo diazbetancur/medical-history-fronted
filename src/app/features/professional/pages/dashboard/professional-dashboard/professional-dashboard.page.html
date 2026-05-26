@@ -17,6 +17,17 @@
     />
   </section>
 
+  <!-- Pending profile banner -->
+  @if (pendingProfile()) {
+  <div class="pending-banner">
+    <mat-icon>hourglass_top</mat-icon>
+    <div>
+      <strong>Perfil en revisión</strong>
+      <p>Tu perfil profesional está siendo revisado. Las estadísticas estarán disponibles una vez que sea aprobado.</p>
+    </div>
+  </div>
+  }
+
   <!-- Loading state -->
   @if (loading()) {
   <div class="loading-container">

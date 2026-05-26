@@ -27,6 +27,7 @@
           </mat-select>
         </mat-form-field>
 
+        @if (cities().length > 0) {
         <mat-form-field appearance="outline">
           <mat-label>Ciudad</mat-label>
           <mat-select [formControl]="cityControl">
@@ -36,6 +37,7 @@
             }
           </mat-select>
         </mat-form-field>
+        }
 
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>Buscar médico</mat-label>
