@@ -121,7 +121,7 @@
 
           <div class="slot-config">
             <mat-form-field appearance="outline">
-              <mat-label>Duracion de cada slot *</mat-label>
+              <mat-label>Duración de cada slot *</mat-label>
               <mat-select formControlName="defaultSlotDuration">
                 @for (minutes of slotMinuteOptions; track minutes) {
                   <mat-option [value]="minutes">{{ minutes }} minutos</mat-option>
@@ -133,7 +133,7 @@
                   scheduleSubmitted()
                 )
               ) {
-                <mat-error>Selecciona una duracion valida</mat-error>
+                <mat-error>Selecciona una duración válida</mat-error>
               }
             </mat-form-field>
 
@@ -202,7 +202,7 @@
                       absenceSubmitted()
                     )
                   ) {
-                    <mat-error>Selecciona un tipo de excepcion</mat-error>
+                    <mat-error>Selecciona un tipo de excepción</mat-error>
                   }
                 </mat-form-field>
 

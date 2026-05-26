@@ -28,12 +28,12 @@ function resolveDefaultMessage(
 ): string {
   switch (errorKey) {
     case 'required':
-      if (requiredMode === 'selection') return 'Selecciona una opcion';
+      if (requiredMode === 'selection') return 'Selecciona una opción';
       return 'Este campo es obligatorio';
     case 'requiredTrue':
-      return 'Debes aceptar esta opcion';
+      return 'Debes aceptar esta opción';
     case 'email':
-      return 'Ingresa un correo valido';
+      return 'Ingresa un correo válido';
     case 'trimmedMinLength': {
       const requiredLength =
         typeof errorValue === 'object' &&
@@ -59,26 +59,26 @@ function resolveDefaultMessage(
         'requiredLength' in errorValue
           ? (errorValue as { requiredLength: number }).requiredLength
           : 0;
-      return `El maximo permitido es ${requiredLength} caracteres`;
+      return `El máximo permitido es ${requiredLength} caracteres`;
     }
     case 'min': {
       const minValue =
         typeof errorValue === 'object' && errorValue !== null && 'min' in errorValue
           ? (errorValue as { min: number }).min
           : '';
-      return `El valor minimo permitido es ${minValue}`;
+      return `El valor mínimo permitido es ${minValue}`;
     }
     case 'max': {
       const maxValue =
         typeof errorValue === 'object' && errorValue !== null && 'max' in errorValue
           ? (errorValue as { max: number }).max
           : '';
-      return `El valor maximo permitido es ${maxValue}`;
+      return `El valor máximo permitido es ${maxValue}`;
     }
     case 'pattern':
-      return 'El formato ingresado no es valido';
+      return 'El formato ingresado no es válido';
     case 'passwordMismatch':
-      return 'Las contrasenas no coinciden';
+      return 'Las contraseñas no coinciden';
     default:
       return 'Revisa este campo';
   }
