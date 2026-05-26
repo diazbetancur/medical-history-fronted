@@ -78,7 +78,7 @@ export class CreateEncounterDialogComponent {
           this.dialogRef.close(encounter);
         },
         error: (error) => {
-          this.error.set(error.message || 'Error al crear atencion');
+          this.error.set(error.message || 'Error al crear atención');
         },
       });
   }

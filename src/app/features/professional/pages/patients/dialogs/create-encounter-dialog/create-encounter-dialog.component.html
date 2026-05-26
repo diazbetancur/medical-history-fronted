@@ -1,15 +1,15 @@
-<h2 mat-dialog-title>Nueva Atencion Medica</h2>
+<h2 mat-dialog-title>Nueva Atención Médica</h2>
 
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <mat-dialog-content>
     <p class="dialog-description">
-      Crea una nueva atencion medica. Se guardara como borrador hasta que la
+      Crea una nueva atención médica. Se guardará como borrador hasta que la
       cierres.
     </p>
 
     @if (data.appointmentId) {
       <p class="dialog-description">
-        Esta atencion quedara asociada a la cita seleccionada.
+        Esta atención quedará asociada a la cita seleccionada.
       </p>
     }
 
@@ -52,7 +52,7 @@
         formControlName="initialNote"
         rows="8"
         maxlength="20000"
-        placeholder="Escribe la nota clinica inicial"
+        placeholder="Escribe la nota clínica inicial"
       ></textarea>
       <mat-hint align="end">
         {{ form.get("initialNote")?.value?.length || 0 }}/20000
@@ -67,7 +67,7 @@
         form.get("initialNote")?.hasError("maxlength") &&
         form.get("initialNote")?.touched
       ) {
-        <mat-error>El maximo permitido es 20000 caracteres</mat-error>
+        <mat-error>El máximo permitido es 20000 caracteres</mat-error>
       }
     </mat-form-field>
   </mat-dialog-content>
@@ -85,7 +85,7 @@
       @if (isSaving()) {
         <mat-spinner diameter="20"></mat-spinner>
       }
-      Crear atencion
+      Crear atención
     </button>
   </mat-dialog-actions>
 </form>

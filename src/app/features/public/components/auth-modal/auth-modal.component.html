@@ -6,14 +6,14 @@
     @if (data.asProfessional) {
       <div class="professional-badge">
         <mat-icon>medical_services</mat-icon>
-        <span>Acceso para medicos</span>
+        <span>Acceso para médicos</span>
       </div>
     }
     <button
       type="button"
       mat-icon-button
       class="close-btn"
-      aria-label="Cerrar dialogo de autenticacion"
+      aria-label="Cerrar diálogo de autenticación"
       (click)="dialogRef.close(false)"
     >
       <mat-icon>close</mat-icon>
@@ -25,7 +25,7 @@
     animationDuration="200ms"
     class="auth-tabs"
   >
-    <mat-tab label="Iniciar sesion">
+    <mat-tab label="Iniciar sesión">
       <div class="tab-content">
         <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" novalidate>
           <mat-form-field
@@ -56,13 +56,13 @@
             hideRequiredMarker
             subscriptSizing="dynamic"
           >
-            <mat-label>Contrasena</mat-label>
+            <mat-label>Contraseña</mat-label>
             <mat-icon matPrefix>lock</mat-icon>
             <input
               matInput
               [type]="showLoginPassword() ? 'text' : 'password'"
               formControlName="password"
-              placeholder="Ingresa tu contrasena"
+              placeholder="Ingresa tu contraseña"
               [attr.autocomplete]="
                 showLoginPassword() ? 'off' : 'current-password'
               "
@@ -75,8 +75,8 @@
               (click)="toggleLoginPasswordVisibility()"
               [attr.aria-label]="
                 showLoginPassword()
-                  ? 'Ocultar contrasena'
-                  : 'Mostrar contrasena'
+                  ? 'Ocultar contraseña'
+                  : 'Mostrar contraseña'
               "
             >
               <mat-icon>
@@ -116,7 +116,7 @@
 
             <div class="forgot-link">
               <a routerLink="/forgot-password" (click)="dialogRef.close(false)">
-                Olvidaste tu contrasena?
+                ¿Olvidaste tu contraseña?
               </a>
             </div>
           </div>
@@ -129,7 +129,7 @@
         @if (registerSuccess()) {
           <div class="success-banner">
             <mat-icon>check_circle</mat-icon>
-            <p>Cuenta creada. Ingresa tus credenciales para iniciar sesion.</p>
+            <p>Cuenta creada. Ingresa tus credenciales para iniciar sesión.</p>
           </div>
         }
 
@@ -205,14 +205,14 @@
             floatLabel="always"
             subscriptSizing="dynamic"
           >
-            <mat-label>Telefono</mat-label>
+            <mat-label>Teléfono</mat-label>
             <mat-icon matPrefix>phone</mat-icon>
             <input
               matInput
               type="tel"
               formControlName="phoneNumber"
               autocomplete="tel"
-              placeholder="Ingresa tu telefono"
+              placeholder="Ingresa tu teléfono"
             />
             @if (getRegisterPhoneError(); as error) {
               <mat-error>{{ error }}</mat-error>
@@ -226,7 +226,7 @@
             hideRequiredMarker
             subscriptSizing="dynamic"
           >
-            <mat-label>Contrasena</mat-label>
+            <mat-label>Contraseña</mat-label>
             <mat-icon matPrefix>lock</mat-icon>
             <input
               matInput
@@ -235,7 +235,7 @@
               [attr.autocomplete]="
                 showRegisterPassword() ? 'off' : 'new-password'
               "
-              placeholder="Crea una contrasena segura"
+              placeholder="Crea una contraseña segura"
             />
             <button
               mat-icon-button
@@ -245,8 +245,8 @@
               (click)="toggleRegisterPasswordVisibility()"
               [attr.aria-label]="
                 showRegisterPassword()
-                  ? 'Ocultar contrasena'
-                  : 'Mostrar contrasena'
+                  ? 'Ocultar contraseña'
+                  : 'Mostrar contraseña'
               "
             >
               <mat-icon>
@@ -283,7 +283,7 @@
             hideRequiredMarker
             subscriptSizing="dynamic"
           >
-            <mat-label>Confirmar contrasena</mat-label>
+            <mat-label>Confirmar contraseña</mat-label>
             <mat-icon matPrefix>lock_reset</mat-icon>
             <input
               matInput
@@ -292,7 +292,7 @@
               [attr.autocomplete]="
                 showConfirmPassword() ? 'off' : 'new-password'
               "
-              placeholder="Confirma tu contrasena"
+              placeholder="Confirma tu contraseña"
             />
             <button
               mat-icon-button
@@ -302,8 +302,8 @@
               (click)="toggleConfirmPasswordVisibility()"
               [attr.aria-label]="
                 showConfirmPassword()
-                  ? 'Ocultar contrasena'
-                  : 'Mostrar contrasena'
+                  ? 'Ocultar contraseña'
+                  : 'Mostrar contraseña'
               "
             >
               <mat-icon>

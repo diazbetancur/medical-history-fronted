@@ -1,9 +1,9 @@
-<h2 mat-dialog-title>Editar Atencion Medica</h2>
+<h2 mat-dialog-title>Editar Atención Médica</h2>
 
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <mat-dialog-content>
     <p class="dialog-description">
-      Edita la atencion medica mientras siga en estado borrador.
+      Edita la atención médica mientras siga en estado borrador.
     </p>
 
     @if (error()) {
@@ -41,7 +41,7 @@
         form.get("initialNote")?.hasError("maxlength") &&
         form.get("initialNote")?.touched
       ) {
-        <mat-error>El maximo permitido es 20000 caracteres</mat-error>
+        <mat-error>El máximo permitido es 20000 caracteres</mat-error>
       }
     </mat-form-field>
   </mat-dialog-content>

@@ -74,7 +74,7 @@ export class EditEncounterDialogComponent {
           this.dialogRef.close(encounter);
         },
         error: (error) => {
-          this.error.set(error.message || 'Error al actualizar atencion');
+          this.error.set(error.message || 'Error al actualizar atención');
         },
       });
   }

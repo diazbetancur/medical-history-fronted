@@ -87,7 +87,7 @@
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>
             <app-form-label
-              text="Contrasena"
+              text="Contraseña"
               [required]="true"
             ></app-form-label>
           </mat-label>
@@ -96,7 +96,7 @@
             type="password"
             formControlName="password"
             autocomplete="new-password"
-            placeholder="Crea una contrasena segura"
+            placeholder="Crea una contraseña segura"
           />
           <mat-hint class="password-hint"
             >{{ passwordComplexityHelpText }}</mat-hint
@@ -111,7 +111,7 @@
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>
             <app-form-label
-              text="Confirmar contrasena"
+              text="Confirmar contraseña"
               [required]="true"
             ></app-form-label>
           </mat-label>
@@ -120,7 +120,7 @@
             type="password"
             formControlName="confirmPassword"
             autocomplete="new-password"
-            placeholder="Confirma tu contrasena"
+            placeholder="Confirma tu contraseña"
           />
           <app-form-control-error
             [control]="form.controls.confirmPassword"
