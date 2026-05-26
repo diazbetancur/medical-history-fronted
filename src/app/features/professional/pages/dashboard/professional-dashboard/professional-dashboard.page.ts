@@ -1,4 +1,4 @@
-﻿import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,7 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService, AuthStore } from '@core/auth';
 import { ProfessionalApi } from '@data/api';
 import type {
@@ -41,10 +41,14 @@ export class ProfessionalDashboardPage {
   private readonly destroyRef = inject(DestroyRef);
   private readonly authStore = inject(AuthStore);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   readonly userName = computed(() => this.authStore.userName() || '');
   readonly loading = signal(true);
   readonly dashboard = signal<ProfessionalDashboardResponse | null>(null);
+
+  /** True while we are redirecting — prevents the template from flashing */
+  readonly redirecting = signal(false);
 
   readonly appointmentColumns = [
     'time',
@@ -67,6 +71,20 @@ export class ProfessionalDashboardPage {
   }
 
   private loadDashboard(): void {
+    // ── New-professional onboarding redirect ──────────────────────────────
+    // If the user has the Professional role but hasn't created their profile
+    // yet, send them to the profile/onboarding page so they can complete
+    // their registration while waiting for admin approval.
+    const user = this.authStore.user();
+    if (user && !user.hasProfessionalProfile) {
+      this.redirecting.set(true);
+      this.toast.info(
+        'Bienvenido. Por favor completa tu perfil profesional para continuar.',
+      );
+      this.router.navigate(['/professional/profile']);
+      return;
+    }
+
     this.loading.set(true);
     this.professionalApi.getDashboardSummary().subscribe({
       next: (data: ProfessionalDashboardSummaryResponse) => {

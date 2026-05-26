@@ -2,9 +2,9 @@ export const environment = {
   production: false,
   apiBaseUrl: 'http://localhost:5254/api',
   analytics: {
-    enabled: true, // Enable in dev for testing
+    enabled: false, // I-12: disabled until real GA4 ID is configured
     provider: 'ga4' as const,
-    measurementId: 'G-XXXXXXXXXX', // Replace with your dev/test GA4 ID
-    debug: true, // Log events to console in dev
+    measurementId: 'G-XXXXXXXXXX', // set a real GA4 ID and flip enabled to true when ready
+    debug: true,
   },
 };

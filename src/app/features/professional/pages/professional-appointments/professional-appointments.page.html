@@ -2,389 +2,481 @@
   <header class="page-header">
     <div class="header-content">
       <h1>Mis Citas</h1>
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="store.loadUpcomingAppointments()"
-      >
-        <mat-icon>refresh</mat-icon>
-        Actualizar
-      </button>
+      <div class="header-actions">
+        <button
+          type="button"
+          mat-stroked-button
+          color="primary"
+          (click)="openAddExternalDialog()"
+          matTooltip="Agregar cita recibida por teléfono, WhatsApp u otro canal externo"
+        >
+          <mat-icon>add_circle_outline</mat-icon>
+          Cita externa
+        </button>
+        <button
+          type="button"
+          mat-raised-button
+          color="primary"
+          (click)="store.loadUpcomingAppointments()"
+        >
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </button>
+      </div>
     </div>
   </header>
 
   @if (store.isLoading()) {
-  <div class="loading-container">
-    <mat-spinner diameter="50"></mat-spinner>
-    <p>Cargando citas...</p>
-  </div>
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando citas...</p>
+    </div>
   } @else {
-  <mat-tab-group
-    [selectedIndex]="selectedTabIndex()"
-    (selectedTabChange)="onTabChange($event.index)"
-  >
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon>today</mat-icon>
-        <span>Hoy</span>
-      </ng-template>
+    <mat-tab-group
+      [selectedIndex]="selectedTabIndex()"
+      (selectedTabChange)="onTabChange($event.index)"
+    >
 
-      @if (store.todayAppointments().length === 0) {
-      <div class="empty-tab">
-        <mat-icon>check_circle</mat-icon>
-        <p>No tienes citas para hoy</p>
-      </div>
-      } @else {
-      <div class="appointments-list">
-        @for (appointment of store.todayAppointments(); track appointment.id) {
-        <mat-card class="appointment-card">
-          <mat-card-header>
-            <div mat-card-avatar class="appointment-avatar">
-              <mat-icon>person</mat-icon>
-            </div>
-            <mat-card-title>
-              {{ getPatientDisplayName(appointment) }}
-            </mat-card-title>
-            <mat-card-subtitle>
-              <mat-icon>schedule</mat-icon>
-              {{ appointment.startTime }} - {{ appointment.endTime }}
-            </mat-card-subtitle>
-          </mat-card-header>
-
-          <mat-card-content>
-            <div class="appointment-info">
-              <div class="info-row">
-                <mat-icon>event</mat-icon>
-                <span>{{ formatDate(appointment.date) }}</span>
-              </div>
-
-              @if (appointment.notes) {
-              <div class="info-row notes">
-                <mat-icon>note</mat-icon>
-                <span>{{ appointment.notes }}</span>
-              </div>
-              }
-
-              <div class="status-chip">
-                <mat-chip
-                  [class]="'status-' + appointment.status.toLowerCase()"
-                >
-                  {{ getStatusLabel(appointment.status) }}
-                </mat-chip>
-              </div>
-            </div>
-          </mat-card-content>
-
-          <mat-card-actions>
-            <button mat-button [matMenuTriggerFor]="menu">
-              <mat-icon>more_vert</mat-icon>
-              Acciones
-            </button>
-            <mat-menu #menu="matMenu">
-              @if (appointment.status === 'PENDING') {
-              <button
-                mat-menu-item
-                (click)="confirmAppointment(appointment.id)"
-              >
-                <mat-icon>check_circle</mat-icon>
-                <span>Confirmar</span>
-              </button>
-              } @if (appointment.status === 'CONFIRMED') {
-              <button
-                mat-menu-item
-                (click)="completeAppointment(appointment.id)"
-              >
-                <mat-icon>done_all</mat-icon>
-                <span>Marcar como completada</span>
-              </button>
-              <button mat-menu-item (click)="markAsNoShow(appointment.id)">
-                <mat-icon>event_busy</mat-icon>
-                <span>Paciente no asistió</span>
-              </button>
-              } @if (canCreateHistoryFromAppointment(appointment)) {
-              <button
-                mat-menu-item
-                (click)="openClinicalHistoryFromAppointment(appointment)"
-              >
-                <mat-icon>description</mat-icon>
-                <span>Adicionar historia clínica</span>
-              </button>
-              } @if ( appointment.status !== 'CANCELLED' && appointment.status
-              !== 'COMPLETED' ) {
-              <button mat-menu-item (click)="cancelAppointment(appointment.id)">
-                <mat-icon>cancel</mat-icon>
-                <span>Cancelar cita</span>
-              </button>
-              }
-            </mat-menu>
-          </mat-card-actions>
-        </mat-card>
-        }
-      </div>
-      }
-    </mat-tab>
-
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon>event</mat-icon>
-        <span>Próximos 7 días</span>
-      </ng-template>
-
-      @if (store.upcomingAppointments().length === 0) {
-      <div class="empty-tab">
-        <mat-icon>event</mat-icon>
-        <p>No tienes citas programadas</p>
-      </div>
-      } @else { @for (dateGroup of appointmentsByDate() | keyvalue; track
-      dateGroup.key) {
-      <div class="date-group">
-        <h3 class="date-header">
-          <mat-icon>calendar_today</mat-icon>
-          {{ formatDate(dateGroup.key) }}
-          <span class="count">({{ dateGroup.value.length }} citas)</span>
-        </h3>
-
-        <div class="appointments-list">
-          @for (appointment of dateGroup.value; track appointment.id) {
-          <mat-card class="appointment-card">
-            <mat-card-header>
-              <div mat-card-avatar class="appointment-avatar">
-                <mat-icon>person</mat-icon>
-              </div>
-              <mat-card-title>
-                {{ getPatientDisplayName(appointment) }}
-              </mat-card-title>
-              <mat-card-subtitle>
-                <mat-icon>schedule</mat-icon>
-                {{ appointment.startTime }} - {{ appointment.endTime }}
-              </mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content>
-              <div class="appointment-info">
-                @if (appointment.notes) {
-                <div class="info-row notes">
-                  <mat-icon>note</mat-icon>
-                  <span>{{ appointment.notes }}</span>
-                </div>
-                }
-
-                <div class="status-chip">
-                  <mat-chip
-                    [class]="'status-' + appointment.status.toLowerCase()"
-                  >
-                    {{ getStatusLabel(appointment.status) }}
-                  </mat-chip>
-                </div>
-              </div>
-            </mat-card-content>
-
-            <mat-card-actions>
-              <button mat-button [matMenuTriggerFor]="menu2">
-                <mat-icon>more_vert</mat-icon>
-                Acciones
-              </button>
-              <mat-menu #menu2="matMenu">
-                @if (appointment.status === 'PENDING') {
-                <button
-                  mat-menu-item
-                  (click)="confirmAppointment(appointment.id)"
-                >
-                  <mat-icon>check_circle</mat-icon>
-                  <span>Confirmar</span>
-                </button>
-                } @if ( appointment.status !== 'CANCELLED' && appointment.status
-                !== 'COMPLETED' ) {
-                <button
-                  mat-menu-item
-                  (click)="cancelAppointment(appointment.id)"
-                >
-                  <mat-icon>cancel</mat-icon>
-                  <span>Cancelar cita</span>
-                </button>
-                }
-              </mat-menu>
-            </mat-card-actions>
-          </mat-card>
+      <!-- ── Tab 1: Hoy ──────────────────────────────────────────────────── -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>today</mat-icon>
+          <span>Hoy</span>
+          @if (sortedTodayAppointments().length > 0) {
+            <span class="tab-badge">{{ sortedTodayAppointments().length }}</span>
           }
-        </div>
-      </div>
-      } }
-    </mat-tab>
+        </ng-template>
 
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon>calendar_month</mat-icon>
-        <span>Este mes</span>
-        @if (monthAppointments().length > 0) {
-        <span class="badge">{{ monthAppointments().length }}</span>
+        @if (sortedTodayAppointments().length === 0) {
+          <div class="empty-tab">
+            <mat-icon>check_circle</mat-icon>
+            <p>No tienes citas para hoy</p>
+          </div>
+        } @else {
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="sortedTodayAppointments()" class="appointments-table">
+
+              <!-- Fecha -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+              </ng-container>
+
+              <!-- Hora -->
+              <ng-container matColumnDef="time">
+                <th mat-header-cell *matHeaderCellDef>Hora</th>
+                <td mat-cell *matCellDef="let row" class="cell-time">
+                  {{ row.startTime }} – {{ row.endTime }}
+                </td>
+              </ng-container>
+
+              <!-- Paciente -->
+              <ng-container matColumnDef="patient">
+                <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                <td mat-cell *matCellDef="let row" class="cell-patient">
+                  {{ getPatientDisplayName(row) }}
+                </td>
+              </ng-container>
+
+              <!-- Estado -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="status-pill status-{{ row.status.toLowerCase() }}">
+                    {{ getStatusLabel(row.status) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Acciones -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let row" class="cell-actions">
+                  <button type="button" mat-icon-button [matMenuTriggerFor]="menuToday" matTooltip="Acciones">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menuToday="matMenu">
+                    @if (row.status === 'PENDING') {
+                      <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Confirmar</span>
+                      </button>
+                    }
+                    @if (row.status === 'CONFIRMED') {
+                      <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
+                        <mat-icon>done_all</mat-icon>
+                        <span>Marcar como completada</span>
+                      </button>
+                      <button type="button" mat-menu-item (click)="markAsNoShow(row.id)">
+                        <mat-icon>event_busy</mat-icon>
+                        <span>Paciente no asistió</span>
+                      </button>
+                    }
+                    @if (canCreateHistoryFromAppointment(row)) {
+                      <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row)">
+                        <mat-icon>description</mat-icon>
+                        <span>Adicionar historia clínica</span>
+                      </button>
+                    }
+                    @if (row.status !== 'CANCELLED' && row.status !== 'COMPLETED') {
+                      <mat-divider></mat-divider>
+                      <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.id)">
+                        <mat-icon>cancel</mat-icon>
+                        <span>Cancelar cita</span>
+                      </button>
+                    }
+                  </mat-menu>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
         }
-      </ng-template>
+      </mat-tab>
 
-      @if (monthLoading()) {
-      <div class="loading-container">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Cargando citas del mes...</p>
-      </div>
-      } @else if (monthAppointments().length === 0) {
-      <div class="empty-tab">
-        <mat-icon>calendar_month</mat-icon>
-        <p>No tienes citas registradas para este mes</p>
-      </div>
-      } @else { @for (dateGroup of groupedMonthEntries(); track dateGroup.date)
-      {
-      <div class="date-group">
-        <h3 class="date-header">
-          <mat-icon>calendar_today</mat-icon>
-          {{ formatDate(dateGroup.date) }}
-          <span class="count">
-            ({{ dateGroup.appointments.length }} citas)
-          </span>
-        </h3>
-
-        <div class="appointments-list">
-          @for (appointment of dateGroup.appointments; track appointment.id) {
-          <mat-card class="appointment-card">
-            <mat-card-header>
-              <div mat-card-avatar class="appointment-avatar">
-                <mat-icon>person</mat-icon>
-              </div>
-              <mat-card-title>
-                {{ getPatientDisplayName(appointment) }}
-              </mat-card-title>
-              <mat-card-subtitle>
-                <mat-icon>schedule</mat-icon>
-                {{ appointment.startTime }} - {{ appointment.endTime }}
-              </mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content>
-              <div class="appointment-info">
-                @if (appointment.notes) {
-                <div class="info-row notes">
-                  <mat-icon>note</mat-icon>
-                  <span>{{ appointment.notes }}</span>
-                </div>
-                }
-
-                <div class="status-chip">
-                  <mat-chip
-                    [class]="'status-' + appointment.status.toLowerCase()"
-                  >
-                    {{ getStatusLabel(appointment.status) }}
-                  </mat-chip>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
+      <!-- ── Tab 2: Próximos 7 días ──────────────────────────────────────── -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>event</mat-icon>
+          <span>Próximos 7 días</span>
+          @if (upcomingAppointments().length > 0) {
+            <span class="tab-badge">{{ upcomingAppointments().length }}</span>
           }
-        </div>
-      </div>
-      } }
-    </mat-tab>
+        </ng-template>
 
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon>date_range</mat-icon>
-        <span>Por rango</span>
-        @if (rangeAppointments().length > 0) {
-        <span class="badge">{{ rangeAppointments().length }}</span>
+        @if (upcomingAppointments().length === 0) {
+          <div class="empty-tab">
+            <mat-icon>event</mat-icon>
+            <p>No tienes citas programadas en los próximos 7 días</p>
+          </div>
+        } @else {
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="upcomingAppointments()" class="appointments-table">
+
+              <!-- Fecha -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+              </ng-container>
+
+              <!-- Hora -->
+              <ng-container matColumnDef="time">
+                <th mat-header-cell *matHeaderCellDef>Hora</th>
+                <td mat-cell *matCellDef="let row" class="cell-time">
+                  {{ row.startTime }} – {{ row.endTime }}
+                </td>
+              </ng-container>
+
+              <!-- Paciente -->
+              <ng-container matColumnDef="patient">
+                <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                <td mat-cell *matCellDef="let row" class="cell-patient">
+                  {{ getPatientDisplayName(row) }}
+                </td>
+              </ng-container>
+
+              <!-- Estado -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="status-pill status-{{ row.status.toLowerCase() }}">
+                    {{ getStatusLabel(row.status) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Acciones -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let row" class="cell-actions">
+                  <button type="button" mat-icon-button [matMenuTriggerFor]="menuUpcoming" matTooltip="Acciones">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menuUpcoming="matMenu">
+                    @if (row.status === 'PENDING') {
+                      <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Confirmar</span>
+                      </button>
+                    }
+                    @if (row.status === 'CONFIRMED') {
+                      <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
+                        <mat-icon>done_all</mat-icon>
+                        <span>Marcar como completada</span>
+                      </button>
+                      <button type="button" mat-menu-item (click)="markAsNoShow(row.id)">
+                        <mat-icon>event_busy</mat-icon>
+                        <span>Paciente no asistió</span>
+                      </button>
+                    }
+                    @if (canCreateHistoryFromAppointment(row)) {
+                      <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row)">
+                        <mat-icon>description</mat-icon>
+                        <span>Adicionar historia clínica</span>
+                      </button>
+                    }
+                    @if (row.status !== 'CANCELLED' && row.status !== 'COMPLETED') {
+                      <mat-divider></mat-divider>
+                      <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.id)">
+                        <mat-icon>cancel</mat-icon>
+                        <span>Cancelar cita</span>
+                      </button>
+                    }
+                  </mat-menu>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
         }
-      </ng-template>
+      </mat-tab>
 
-      <div class="range-filter">
-        <mat-form-field appearance="outline">
-          <mat-label>Desde</mat-label>
-          <input
-            matInput
-            type="date"
-            [ngModel]="rangeFrom()"
-            (ngModelChange)="rangeFrom.set($event)"
-          />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Hasta</mat-label>
-          <input
-            matInput
-            type="date"
-            [ngModel]="rangeTo()"
-            (ngModelChange)="rangeTo.set($event)"
-          />
-        </mat-form-field>
-
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="applyDateRangeFilter()"
-          [disabled]="rangeLoading()"
-        >
-          <mat-icon>search</mat-icon>
-          Buscar
-        </button>
-      </div>
-
-      @if (rangeLoading()) {
-      <div class="loading-container">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Cargando citas del rango...</p>
-      </div>
-      } @else if (hasRangeFilterResult() && rangeAppointments().length === 0) {
-      <div class="empty-tab">
-        <mat-icon>event_busy</mat-icon>
-        <p>No hay citas para ese rango de fechas</p>
-      </div>
-      } @else if (rangeAppointments().length > 0) { @for (dateGroup of
-      groupedRangeEntries(); track dateGroup.date) {
-      <div class="date-group">
-        <h3 class="date-header">
-          <mat-icon>calendar_today</mat-icon>
-          {{ formatDate(dateGroup.date) }}
-          <span class="count">
-            ({{ dateGroup.appointments.length }} citas)
-          </span>
-        </h3>
-
-        <div class="appointments-list">
-          @for (appointment of dateGroup.appointments; track appointment.id) {
-          <mat-card class="appointment-card">
-            <mat-card-header>
-              <div mat-card-avatar class="appointment-avatar">
-                <mat-icon>person</mat-icon>
-              </div>
-              <mat-card-title>
-                {{ getPatientDisplayName(appointment) }}
-              </mat-card-title>
-              <mat-card-subtitle>
-                <mat-icon>schedule</mat-icon>
-                {{ appointment.startTime }} - {{ appointment.endTime }}
-              </mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content>
-              <div class="appointment-info">
-                @if (appointment.notes) {
-                <div class="info-row notes">
-                  <mat-icon>note</mat-icon>
-                  <span>{{ appointment.notes }}</span>
-                </div>
-                }
-
-                <div class="status-chip">
-                  <mat-chip
-                    [class]="'status-' + appointment.status.toLowerCase()"
-                  >
-                    {{ getStatusLabel(appointment.status) }}
-                  </mat-chip>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
+      <!-- ── Tab 3: Este mes ─────────────────────────────────────────────── -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>calendar_month</mat-icon>
+          <span>Este mes</span>
+          @if (sortedMonthAppointments().length > 0) {
+            <span class="tab-badge">{{ sortedMonthAppointments().length }}</span>
           }
+        </ng-template>
+
+        @if (monthLoading()) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Cargando citas del mes...</p>
+          </div>
+        } @else if (sortedMonthAppointments().length === 0) {
+          <div class="empty-tab">
+            <mat-icon>calendar_month</mat-icon>
+            <p>No tienes citas registradas para este mes</p>
+          </div>
+        } @else {
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="sortedMonthAppointments()" class="appointments-table">
+
+              <!-- Fecha -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+              </ng-container>
+
+              <!-- Hora -->
+              <ng-container matColumnDef="time">
+                <th mat-header-cell *matHeaderCellDef>Hora</th>
+                <td mat-cell *matCellDef="let row" class="cell-time">
+                  {{ row.startTime }} – {{ row.endTime }}
+                </td>
+              </ng-container>
+
+              <!-- Paciente -->
+              <ng-container matColumnDef="patient">
+                <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                <td mat-cell *matCellDef="let row" class="cell-patient">
+                  {{ getPatientDisplayName(row) }}
+                </td>
+              </ng-container>
+
+              <!-- Estado -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="status-pill status-{{ row.status.toLowerCase() }}">
+                    {{ getStatusLabel(row.status) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Acciones -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let row" class="cell-actions">
+                  <button type="button" mat-icon-button [matMenuTriggerFor]="menuMonth" matTooltip="Acciones">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menuMonth="matMenu">
+                    @if (row.status === 'PENDING') {
+                      <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Confirmar</span>
+                      </button>
+                    }
+                    @if (row.status === 'CONFIRMED') {
+                      <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
+                        <mat-icon>done_all</mat-icon>
+                        <span>Marcar como completada</span>
+                      </button>
+                      <button type="button" mat-menu-item (click)="markAsNoShow(row.id)">
+                        <mat-icon>event_busy</mat-icon>
+                        <span>Paciente no asistió</span>
+                      </button>
+                    }
+                    @if (canCreateHistoryFromAppointment(row)) {
+                      <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row)">
+                        <mat-icon>description</mat-icon>
+                        <span>Adicionar historia clínica</span>
+                      </button>
+                    }
+                    @if (row.status !== 'CANCELLED' && row.status !== 'COMPLETED') {
+                      <mat-divider></mat-divider>
+                      <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.id)">
+                        <mat-icon>cancel</mat-icon>
+                        <span>Cancelar cita</span>
+                      </button>
+                    }
+                  </mat-menu>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        }
+      </mat-tab>
+
+      <!-- ── Tab 4: Por rango ────────────────────────────────────────────── -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>date_range</mat-icon>
+          <span>Por rango</span>
+          @if (sortedRangeAppointments().length > 0) {
+            <span class="tab-badge">{{ sortedRangeAppointments().length }}</span>
+          }
+        </ng-template>
+
+        <div class="range-filter">
+          <mat-form-field appearance="outline">
+            <mat-label>Desde</mat-label>
+            <input
+              matInput
+              type="date"
+              aria-label="Fecha de inicio"
+              [ngModel]="rangeFrom()"
+              (ngModelChange)="rangeFrom.set($event)"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Hasta</mat-label>
+            <input
+              matInput
+              type="date"
+              aria-label="Fecha de fin"
+              [ngModel]="rangeTo()"
+              (ngModelChange)="rangeTo.set($event)"
+            />
+          </mat-form-field>
+
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="applyDateRangeFilter()"
+            [disabled]="rangeLoading()"
+          >
+            <mat-icon>search</mat-icon>
+            Buscar
+          </button>
         </div>
-      </div>
-      } }
-    </mat-tab>
-  </mat-tab-group>
+
+        @if (rangeLoading()) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Cargando citas del rango...</p>
+          </div>
+        } @else if (hasRangeFilterResult() && sortedRangeAppointments().length === 0) {
+          <div class="empty-tab">
+            <mat-icon>event_busy</mat-icon>
+            <p>No hay citas para ese rango de fechas</p>
+          </div>
+        } @else if (sortedRangeAppointments().length > 0) {
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="sortedRangeAppointments()" class="appointments-table">
+
+              <!-- Fecha -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+              </ng-container>
+
+              <!-- Hora -->
+              <ng-container matColumnDef="time">
+                <th mat-header-cell *matHeaderCellDef>Hora</th>
+                <td mat-cell *matCellDef="let row" class="cell-time">
+                  {{ row.startTime }} – {{ row.endTime }}
+                </td>
+              </ng-container>
+
+              <!-- Paciente -->
+              <ng-container matColumnDef="patient">
+                <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                <td mat-cell *matCellDef="let row" class="cell-patient">
+                  {{ getPatientDisplayName(row) }}
+                </td>
+              </ng-container>
+
+              <!-- Estado -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="status-pill status-{{ row.status.toLowerCase() }}">
+                    {{ getStatusLabel(row.status) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Acciones -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let row" class="cell-actions">
+                  <button type="button" mat-icon-button [matMenuTriggerFor]="menuRange" matTooltip="Acciones">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menuRange="matMenu">
+                    @if (row.status === 'PENDING') {
+                      <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Confirmar</span>
+                      </button>
+                    }
+                    @if (row.status === 'CONFIRMED') {
+                      <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
+                        <mat-icon>done_all</mat-icon>
+                        <span>Marcar como completada</span>
+                      </button>
+                      <button type="button" mat-menu-item (click)="markAsNoShow(row.id)">
+                        <mat-icon>event_busy</mat-icon>
+                        <span>Paciente no asistió</span>
+                      </button>
+                    }
+                    @if (canCreateHistoryFromAppointment(row)) {
+                      <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row)">
+                        <mat-icon>description</mat-icon>
+                        <span>Adicionar historia clínica</span>
+                      </button>
+                    }
+                    @if (row.status !== 'CANCELLED' && row.status !== 'COMPLETED') {
+                      <mat-divider></mat-divider>
+                      <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.id)">
+                        <mat-icon>cancel</mat-icon>
+                        <span>Cancelar cita</span>
+                      </button>
+                    }
+                  </mat-menu>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        }
+      </mat-tab>
+
+    </mat-tab-group>
   }
 </div>

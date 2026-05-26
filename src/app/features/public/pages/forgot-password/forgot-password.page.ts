@@ -8,7 +8,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { AuthApi } from '@data/api';
-import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
 
 @Component({
   selector: 'app-forgot-password-page',
@@ -22,8 +21,6 @@ import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms'
     MatInputModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    FormControlErrorComponent,
-    FormLabelComponent,
   ],
   templateUrl: './forgot-password.page.html',
   styleUrl: './forgot-password.page.scss',
@@ -57,20 +54,19 @@ export class ForgotPasswordPageComponent {
       .forgotPassword({ email: this.form.getRawValue().email })
       .subscribe({
         next: (response) => {
+          this.isLoading.set(false);
           this.resultMessage.set(
             response.message ||
-              'Si el email existe, se generó un token de recuperación',
+              'Si el email existe en el sistema, recibirás un enlace de recuperación.',
           );
         },
         error: (error) => {
+          this.isLoading.set(false);
           this.errorMessage.set(
             error?.error?.title ||
               error?.error?.message ||
-              'No fue posible procesar la solicitud.',
+              'No fue posible procesar la solicitud. Intenta nuevamente.',
           );
-        },
-        complete: () => {
-          this.isLoading.set(false);
         },
       });
   }

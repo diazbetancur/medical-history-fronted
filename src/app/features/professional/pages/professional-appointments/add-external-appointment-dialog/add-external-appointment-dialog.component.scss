@@ -1,0 +1,97 @@
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.25rem;
+}
+
+.title-icon {
+  color: var(--mat-sys-primary, #1976d2);
+}
+
+.dialog-content {
+  min-width: min(480px, 90vw);
+  max-width: 560px;
+}
+
+.dialog-subtitle {
+  color: var(--mat-sys-on-surface-variant, #666);
+  font-size: 0.875rem;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--mat-sys-error-container, #fde8e8);
+  color: var(--mat-sys-on-error-container, #b00020);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant, #555);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 16px 0 8px;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.appointment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.row-two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.option-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+mat-dialog-actions {
+  padding: 8px 24px 16px;
+  gap: 8px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  mat-spinner {
+    display: inline-block;
+  }
+}

@@ -1,4 +1,14 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import {
+  MSG_EXAM_CREATED,
+  MSG_EXAM_DELETED,
+  MSG_EXAM_ERROR_CREATE,
+  MSG_EXAM_ERROR_DELETE,
+  MSG_EXAM_ERROR_LOAD,
+  MSG_EXAM_ERROR_SINGLE,
+  MSG_EXAM_ERROR_UPDATE,
+  MSG_EXAM_UPDATED,
+} from '@shared/constants/messages.constants';
 import { ToastService } from '@shared/services';
 import { catchError, finalize, of, tap } from 'rxjs';
 import type {
@@ -87,8 +97,8 @@ export class PatientExamsStore {
           this.cache.set(cacheKey, response);
         }),
         catchError((err) => {
-          this.error.set(err.error?.message || 'Error al cargar los exámenes');
-          this.toastService.error('Error al cargar los exámenes');
+          this.error.set(err.error?.message || MSG_EXAM_ERROR_LOAD);
+          this.toastService.error(MSG_EXAM_ERROR_LOAD);
           return of(null);
         }),
         finalize(() => this.loading.set(false)),
@@ -110,7 +120,7 @@ export class PatientExamsStore {
           this.currentExam.set(exam);
         }),
         catchError((err) => {
-          this.toastService.error('Error al cargar el examen');
+          this.toastService.error(MSG_EXAM_ERROR_SINGLE);
           return of(null);
         }),
         finalize(() => this.loadingDetail.set(false)),
@@ -131,14 +141,14 @@ export class PatientExamsStore {
         .create(request, file)
         .pipe(
           tap((exam) => {
-            this.toastService.success('Examen creado exitosamente');
+            this.toastService.success(MSG_EXAM_CREATED);
             this.clearCache();
             // Reload current page
             this.loadExams(this.currentPage(), this.pageSize());
             resolve(exam);
           }),
           catchError((err) => {
-            const message = err.error?.message || 'Error al crear el examen';
+            const message = err.error?.message || MSG_EXAM_ERROR_CREATE;
             this.toastService.error(message);
             resolve(null);
             return of(null);
@@ -161,7 +171,7 @@ export class PatientExamsStore {
         .update(id, request)
         .pipe(
           tap((exam) => {
-            this.toastService.success('Examen actualizado exitosamente');
+            this.toastService.success(MSG_EXAM_UPDATED);
             this.clearCache();
             // Update current exam if it's the one being viewed
             if (this.currentExam()?.id === id) {
@@ -172,8 +182,7 @@ export class PatientExamsStore {
             resolve(exam);
           }),
           catchError((err) => {
-            const message =
-              err.error?.message || 'Error al actualizar el examen';
+            const message = err.error?.message || MSG_EXAM_ERROR_UPDATE;
             this.toastService.error(message);
             resolve(null);
             return of(null);
@@ -193,14 +202,14 @@ export class PatientExamsStore {
         .delete(id)
         .pipe(
           tap(() => {
-            this.toastService.success('Examen eliminado exitosamente');
+            this.toastService.success(MSG_EXAM_DELETED);
             this.clearCache();
             // Reload current page
             this.loadExams(this.currentPage(), this.pageSize());
             resolve(true);
           }),
           catchError((err) => {
-            const message = err.error?.message || 'Error al eliminar el examen';
+            const message = err.error?.message || MSG_EXAM_ERROR_DELETE;
             this.toastService.error(message);
             resolve(false);
             return of(null);

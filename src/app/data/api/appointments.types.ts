@@ -17,23 +17,6 @@ export type AppointmentStatus =
   | 'no-show'; // User didn't show up
 
 /**
- * Time slot availability
- */
-export interface TimeSlot {
-  /** Start time in UTC (ISO 8601: "2026-02-12T14:00:00Z") */
-  startTime: string;
-
-  /** End time in UTC (ISO 8601: "2026-02-12T15:00:00Z") */
-  endTime: string;
-
-  /** Whether this slot is available for booking */
-  available: boolean;
-
-  /** If not available, reason (optional) */
-  reason?: string;
-}
-
-/**
  * Professional brief info for appointments
  */
 export interface AppointmentProfessional {
@@ -125,6 +108,8 @@ export interface CreateAppointmentResponse {
  */
 export interface CancelAppointmentRequest {
   appointmentId: string;
+  /** Optional reason for cancellation */
+  reason?: string;
 }
 
 /**
@@ -135,28 +120,6 @@ export interface ConfirmAppointmentRequest {
 
   /** Confirmation token from email */
   token: string;
-}
-
-/**
- * Get available slots request
- */
-export interface GetAvailableSlotsRequest {
-  professionalId: string;
-
-  /** Date in ISO format (YYYY-MM-DD) or full ISO 8601 */
-  date: string;
-
-  /** Optional slot duration filter in minutes */
-  durationMinutes?: number;
-}
-
-/**
- * Get available slots response
- */
-export interface GetAvailableSlotsResponse {
-  professionalId: string;
-  date: string;
-  slots: TimeSlot[];
 }
 
 /**

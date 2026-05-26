@@ -1,4 +1,14 @@
 <div class="dashboard-container">
+
+  <!-- Redirecting to profile — prevents content flash during navigation -->
+  @if (redirecting()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Redirigiendo a tu perfil profesional…</p>
+  </div>
+  }
+
+  @if (!redirecting()) {
   <section class="dashboard-hero">
     <img
       src="/images/dashboard.png"
@@ -215,4 +225,6 @@
     }
   </mat-card>
   }
+
+  } <!-- end @if (!redirecting()) -->
 </div>

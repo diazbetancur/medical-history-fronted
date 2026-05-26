@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -7,7 +7,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AppointmentsApi, type Appointment } from '@data/api';
 import { CancelAppointmentDialogComponent } from './cancel-appointment-dialog/cancel-appointment-dialog.component';
 
@@ -40,7 +40,7 @@ import { CancelAppointmentDialogComponent } from './cancel-appointment-dialog/ca
 export class AppointmentDetailPageComponent implements OnInit {
   private readonly appointmentsApi = inject(AppointmentsApi);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly location = inject(Location);
   private readonly dialog = inject(MatDialog);
 
   // State
@@ -53,7 +53,7 @@ export class AppointmentDetailPageComponent implements OnInit {
     if (id) {
       this.loadAppointment(id);
     } else {
-      this.router.navigate([this.getBackRoute()]);
+      this.location.back();
     }
   }
 
@@ -107,17 +107,12 @@ export class AppointmentDetailPageComponent implements OnInit {
   }
 
   /**
-   * Back to list
+   * Back to list — uses browser history so the correct origin
+   * (patient dashboard or professional agenda) is always restored
+   * without hardcoding URL paths.
    */
   goBack(): void {
-    this.router.navigate([this.getBackRoute()]);
-  }
-
-  private getBackRoute(): string {
-    const currentUrl = this.router.url ?? '';
-    return currentUrl.startsWith('/patient/')
-      ? '/patient'
-      : '/dashboard/agenda';
+    this.location.back();
   }
 
   /**

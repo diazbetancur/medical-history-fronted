@@ -32,9 +32,17 @@ const ERROR_MESSAGES: Record<number, string> = {
 };
 
 /**
- * Routes that should redirect to home on 401
+ * Routes that should redirect to home on 401.
+ * /api/auth/me is included so a stale/expired token triggers the
+ * "session expired" redirect instead of silently leaving the user stuck.
  */
-const AUTH_ROUTES = ['/dashboard', '/admin', '/api/professional', '/api/admin'];
+const AUTH_ROUTES = [
+  '/dashboard',
+  '/admin',
+  '/api/professional',
+  '/api/admin',
+  '/api/auth/me',
+];
 
 /**
  * URLs that should have silent error handling (no logs, no enhanced messages)

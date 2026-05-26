@@ -331,3 +331,56 @@ export function hasMultipleContexts(
   const contexts = getContextsByType(authStore, contextType);
   return contexts.length > 1;
 }
+
+/**
+ * Professional Profile Guard
+ *
+ * Bloquea la navegación dentro del área profesional cuando el usuario
+ * aún no ha creado su perfil profesional, redirigiendo siempre a
+ * /professional/profile para que complete el registro.
+ *
+ * Se aplica sobre la ruta PADRE /professional, por lo que protege todos
+ * sus hijos automáticamente.  Se omite automáticamente al navegar hacia
+ * la propia ruta de perfil (/professional/profile o /professional/onboarding)
+ * para evitar un bucle de redirección.
+ *
+ * @example Uso en app.routes.ts
+ * ```typescript
+ * {
+ *   path: 'professional',
+ *   canActivate: [authStoreGuard, contextGuard, professionalProfileGuard],
+ *   ...
+ * }
+ * ```
+ */
+export const professionalProfileGuard: CanActivateFn = (
+  _route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+
+  // ── Rutas exentas del chequeo ─────────────────────────────────────────
+  // El perfil y el onboarding son exactamente el destino de la redirección,
+  // nunca deben ser bloqueados por este guard.
+  const exemptPrefixes = ['/professional/profile', '/professional/onboarding'];
+  if (exemptPrefixes.some((prefix) => state.url.startsWith(prefix))) {
+    return true;
+  }
+
+  // ── Verificar si el perfil ya fue creado ──────────────────────────────
+  const user = authStore.user();
+
+  // Si por alguna razón el usuario no está cargado todavía, dejamos pasar
+  // (authStoreGuard ya garantiza que hay sesión antes de llegar aquí).
+  if (!user) {
+    return true;
+  }
+
+  if (!user.hasProfessionalProfile) {
+    // Redirigir a la configuración del perfil sin tocar el historial de navegación
+    return router.createUrlTree(['/professional/profile']);
+  }
+
+  return true;
+};

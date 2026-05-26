@@ -19,6 +19,15 @@
               <mat-spinner diameter="40"></mat-spinner>
               <p>Cargando profesionales...</p>
             </div>
+            } @else if (loadProfessionalsError()) {
+            <!-- A-02: error state when professionals fail to load -->
+            <div class="error-state">
+              <mat-icon color="warn">cloud_off</mat-icon>
+              <p>No se pudieron cargar los profesionales. Verifica tu conexión.</p>
+              <button type="button" mat-stroked-button (click)="loadProfessionals()">
+                <mat-icon>refresh</mat-icon> Reintentar
+              </button>
+            </div>
             } @else {
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Profesional *</mat-label>
@@ -146,6 +155,18 @@
               <mat-spinner diameter="40"></mat-spinner>
               <p>Cargando horarios disponibles...</p>
             </div>
+            } @else if (loadSlotsError()) {
+            <!-- A-02: error state when slot loading fails -->
+            <div class="error-state">
+              <mat-icon color="warn">cloud_off</mat-icon>
+              <p>No se pudo cargar la disponibilidad. Verifica tu conexión.</p>
+              <div class="step-actions">
+                <button type="button" mat-button matStepperPrevious>Atrás</button>
+                <button type="button" mat-stroked-button (click)="loadAvailableSlots()">
+                  <mat-icon>refresh</mat-icon> Reintentar
+                </button>
+              </div>
+            </div>
             } @else if (availableSlots().length === 0) {
             <div class="empty-slots">
               <mat-icon>event_busy</mat-icon>
@@ -156,8 +177,18 @@
             </div>
             } @else {
             <p class="slots-label">Horario *</p>
+
+            @if (showProfessionalTz()) {
+            <!-- I-11: Show timezone note when patient and professional are in different TZs -->
+            <p class="tz-note">
+              <mat-icon class="tz-icon">public</mat-icon>
+              Horarios en tu zona horaria local. El profesional está en
+              <strong>{{ shortTzName(professionalTimezone()) }}</strong>.
+            </p>
+            }
+
             <div class="slots-grid">
-              @for (slot of availableSlots(); track slot.startTime) {
+              @for (slot of availableSlots(); track slot.startUtc) {
               <button
                 type="button"
                 mat-stroked-button
@@ -166,7 +197,9 @@
                 (click)="slotForm.patchValue({ slot })"
               >
                 <mat-icon>schedule</mat-icon>
-                <span>{{ toLocalTime(slot.startTime) }}</span>
+                <!-- I-11: formatSlotTime shows browser local time; appends professional
+                     local time when the two timezones differ -->
+                <span>{{ formatSlotTime(slot) }}</span>
               </button>
               }
             </div>
@@ -215,8 +248,9 @@
                 <div>
                   <strong>Fecha y Hora</strong>
                   <p>
-                    @if (selectedSlot()) { {{
-                    toLocalTime(selectedSlot()!.startTime) }} }
+                    @if (selectedSlot()) {
+                      {{ formatSlotTime(selectedSlot()!) }}
+                    }
                   </p>
                 </div>
               </div>

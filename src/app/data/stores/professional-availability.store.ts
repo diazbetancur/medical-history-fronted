@@ -12,6 +12,17 @@ import type {
   DaySchedule,
   WeeklyScheduleDto,
 } from '@data/models/professional-schedule.models';
+import {
+  MSG_ABSENCE_CREATED,
+  MSG_ABSENCE_DELETED,
+  MSG_ABSENCE_ERROR_CREATE,
+  MSG_ABSENCE_ERROR_DELETE,
+  MSG_APPOINTMENT_PROFILE_NOT_FOUND,
+  MSG_AVAILABILITY_ERROR_LOAD,
+  MSG_AVAILABILITY_ERROR_SAVE,
+  MSG_AVAILABILITY_NOT_CONFIGURED,
+  MSG_AVAILABILITY_UPDATED,
+} from '@shared/constants/messages.constants';
 import { ToastService } from '@shared/services';
 import { catchError, finalize, of, tap } from 'rxjs';
 
@@ -116,7 +127,7 @@ export class ProfessionalAvailabilityStore {
           this._lastError.set(problemDetails);
           this._locations.set([]);
           this.toastService.error(
-            problemDetails.title || 'Error al cargar sedes',
+            problemDetails.title || MSG_AVAILABILITY_ERROR_LOAD,
           );
           return of(null);
         }),
@@ -153,12 +164,10 @@ export class ProfessionalAvailabilityStore {
 
           // Si no existe horario (404), usar default
           if (problemDetails.status === 404) {
-            this.toastService.info(
-              'No tienes horario configurado. Usa el horario por defecto como base.',
-            );
+            this.toastService.info(MSG_AVAILABILITY_NOT_CONFIGURED);
           } else {
             this.toastService.error(
-              problemDetails.title || 'Error al cargar horario',
+              problemDetails.title || MSG_AVAILABILITY_ERROR_LOAD,
             );
           }
 
@@ -196,13 +205,13 @@ export class ProfessionalAvailabilityStore {
       .pipe(
         tap((schedule) => {
           this._weeklySchedule.set(schedule);
-          this.toastService.success('Horario actualizado exitosamente');
+          this.toastService.success(MSG_AVAILABILITY_UPDATED);
         }),
         catchError((error) => {
           const problemDetails = error.error as ProblemDetails;
           this._lastError.set(problemDetails);
           this.toastService.error(
-            problemDetails.title || 'Error al actualizar horario',
+            problemDetails.title || MSG_AVAILABILITY_ERROR_SAVE,
           );
           return of(null);
         }),
@@ -246,7 +255,7 @@ export class ProfessionalAvailabilityStore {
           this._lastError.set(problemDetails);
           this._absences.set([]);
           this.toastService.error(
-            problemDetails.title || 'Error al cargar ausencias',
+            problemDetails.title || MSG_AVAILABILITY_ERROR_LOAD,
           );
           return of(null);
         }),
@@ -272,13 +281,13 @@ export class ProfessionalAvailabilityStore {
       .pipe(
         tap((absence) => {
           this._absences.update((absences) => [...absences, absence]);
-          this.toastService.success('Ausencia creada exitosamente');
+          this.toastService.success(MSG_ABSENCE_CREATED);
         }),
         catchError((error) => {
           const problemDetails = error.error as ProblemDetails;
           this._lastError.set(problemDetails);
           this.toastService.error(
-            problemDetails.title || 'Error al crear ausencia',
+            problemDetails.title || MSG_ABSENCE_ERROR_CREATE,
           );
           return of(null);
         }),
@@ -305,12 +314,12 @@ export class ProfessionalAvailabilityStore {
           this._absences.update((absences) =>
             absences.filter((a) => a.id !== absenceId),
           );
-          this.toastService.success('Ausencia eliminada exitosamente');
+          this.toastService.success(MSG_ABSENCE_DELETED);
         }),
         catchError((error) => {
           const problemDetails = error.error as ProblemDetails;
           this.toastService.error(
-            problemDetails.title || 'Error al eliminar ausencia',
+            problemDetails.title || MSG_ABSENCE_ERROR_DELETE,
           );
           return of(null);
         }),
@@ -340,7 +349,7 @@ export class ProfessionalAvailabilityStore {
       fromUser ?? fromCurrentContext ?? fromAvailableContexts ?? null;
 
     if (!professionalId) {
-      this.toastService.error('No se encontró perfil profesional');
+      this.toastService.error(MSG_APPOINTMENT_PROFILE_NOT_FOUND);
       return null;
     }
 
