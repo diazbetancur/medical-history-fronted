@@ -3,7 +3,7 @@
 <mat-dialog-content>
   <form [formGroup]="form" class="exam-form">
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Titulo del examen *</mat-label>
+      <mat-label>Título del examen *</mat-label>
       <input
         matInput
         formControlName="title"
@@ -19,9 +19,9 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Categoria</mat-label>
+      <mat-label>Categoría</mat-label>
       <mat-select formControlName="category">
-        <mat-option [value]="''">Sin categoria</mat-option>
+        <mat-option [value]="''">Sin categoría</mat-option>
         @for (category of categories; track category) {
           <mat-option [value]="category">
             {{ categoryLabels[category] }}
@@ -50,7 +50,7 @@
         formControlName="notes"
         rows="4"
         maxlength="1500"
-        placeholder="Observaciones, instrucciones del medico, etc."
+        placeholder="Observaciones, instrucciones del médico, etc."
       ></textarea>
       <mat-hint align="end">
         {{ form.get("notes")?.value?.length || 0 }}/1500
@@ -73,7 +73,7 @@
       }
     </div>
 
-    <p class="help-text">El archivo debe ser PDF/JPG/JPEG/PNG/WEBP y maximo 10MB.</p>
+    <p class="help-text">El archivo debe ser PDF/JPG/JPEG/PNG/WEBP y máximo 10MB.</p>
   </form>
 </mat-dialog-content>
 

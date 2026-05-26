@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>
   <mat-icon>{{ isEditMode ? "edit" : "add_business" }}</mat-icon>
-  {{ isEditMode ? "Editar institucion" : "Nueva institucion" }}
+  {{ isEditMode ? "Editar institución" : "Nueva institución" }}
 </h2>
 
 <mat-dialog-content>
@@ -12,7 +12,7 @@
       <input
         matInput
         formControlName="name"
-        placeholder="Ingresa el nombre de la institucion"
+        placeholder="Ingresa el nombre de la institución"
       />
       <app-form-control-error
         [control]="form.get('name')"
@@ -25,7 +25,7 @@
       <input
         matInput
         formControlName="code"
-        placeholder="Ingresa un codigo unico si aplica"
+        placeholder="Ingresa un código único si aplica"
       />
       <mat-hint>Opcional</mat-hint>
       <app-form-control-error
@@ -39,7 +39,7 @@
         Mantener activa
       </mat-slide-toggle>
       <p class="toggle-hint">
-        Las instituciones inactivas dejan de mostrarse en el catalogo.
+        Las instituciones inactivas dejan de mostrarse en el catálogo.
       </p>
     </div>
   </form>

@@ -3,7 +3,7 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <mat-dialog-content>
     <p class="dialog-description">
-      Agrega informacion adicional a una atencion cerrada.
+      Agrega información adicional a una atención cerrada.
     </p>
 
     @if (error()) {
@@ -13,7 +13,7 @@
     }
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Titulo</mat-label>
+      <mat-label>Título</mat-label>
       <input
         matInput
         formControlName="title"
@@ -45,7 +45,7 @@
       @if (
         form.get("text")?.hasError("maxlength") && form.get("text")?.touched
       ) {
-        <mat-error>El maximo permitido es 20000 caracteres</mat-error>
+        <mat-error>El máximo permitido es 20000 caracteres</mat-error>
       }
     </mat-form-field>
   </mat-dialog-content>

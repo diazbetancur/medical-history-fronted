@@ -46,13 +46,13 @@
 
       <mat-form-field appearance="outline">
         <mat-label>
-          <app-form-label text="Contrasena" [required]="true"></app-form-label>
+          <app-form-label text="Contraseña" [required]="true"></app-form-label>
         </mat-label>
         <input
           matInput
           formControlName="password"
           [type]="showPassword() ? 'text' : 'password'"
-          placeholder="Crea una contrasena segura"
+          placeholder="Crea una contraseña segura"
         />
         <mat-icon matPrefix>lock</mat-icon>
         <button
@@ -60,7 +60,7 @@
           matSuffix
           type="button"
           (click)="togglePassword()"
-          aria-label="Mostrar u ocultar contrasena"
+          aria-label="Mostrar u ocultar contraseña"
         >
           <mat-icon
             >{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon
@@ -71,18 +71,18 @@
           [submitted]="submitted()"
           [messages]="{
             minlength: 'Debes ingresar al menos 8 caracteres',
-            pattern: 'La contrasena debe incluir mayuscula, minuscula, numero y simbolo'
+            pattern: 'La contraseña debe incluir mayúscula, minúscula, número y símbolo'
           }"
         ></app-form-control-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Confirmar contrasena</mat-label>
+        <mat-label>Confirmar contraseña</mat-label>
         <input
           matInput
           formControlName="confirmPassword"
           [type]="showPassword() ? 'text' : 'password'"
-          placeholder="Confirma la contrasena"
+          placeholder="Confirma la contraseña"
         />
         <mat-icon matPrefix>lock_outline</mat-icon>
         <app-form-control-error
@@ -92,7 +92,7 @@
         @if ( form.hasError('passwordMismatch') && (submitted() ||
         form.controls['confirmPassword'].touched ||
         form.controls['confirmPassword'].dirty) ) {
-        <mat-error>Las contrasenas no coinciden</mat-error>
+        <mat-error>Las contraseñas no coinciden</mat-error>
         }
       </mat-form-field>
     </div>
@@ -134,12 +134,12 @@
       </div>
 
       <mat-form-field appearance="outline">
-        <mat-label>Telefono</mat-label>
+        <mat-label>Teléfono</mat-label>
         <input
           matInput
           type="number"
           formControlName="phone"
-          placeholder="Ingresa el telefono si aplica"
+          placeholder="Ingresa el teléfono si aplica"
         />
         <mat-icon matPrefix>phone</mat-icon>
       </mat-form-field>
