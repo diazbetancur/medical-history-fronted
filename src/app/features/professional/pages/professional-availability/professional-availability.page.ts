@@ -63,7 +63,8 @@ import { ConfirmDialogComponent } from '@shared/ui';
   styleUrl: './professional-availability.page.scss',
 })
 export class ProfessionalAvailabilityPage implements OnInit {
-  private static readonly HONDURAS_TIMEZONE = 'America/Tegucigalpa';
+  /** Fallback usado únicamente si el backend no responde */
+  private static readonly FALLBACK_TIMEZONE = 'America/Tegucigalpa';
 
   protected readonly store = inject(ProfessionalAvailabilityStore);
   private readonly authStore = inject(AuthStore);
@@ -77,14 +78,6 @@ export class ProfessionalAvailabilityPage implements OnInit {
   protected readonly absenceTypeNames = ABSENCE_TYPE_NAMES;
   protected readonly slotMinuteOptions = [
     5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240,
-  ];
-  protected readonly timeZoneOptions = [
-    'America/Tegucigalpa',
-    'America/Bogota',
-    'America/Guatemala',
-    'America/Mexico_City',
-    'America/Lima',
-    'UTC',
   ];
 
   protected readonly showAbsenceForm = signal(false);
@@ -159,10 +152,8 @@ export class ProfessionalAvailabilityPage implements OnInit {
         30,
         [Validators.required, Validators.min(5), Validators.max(240)],
       ],
-      timeZone: [
-        ProfessionalAvailabilityPage.HONDURAS_TIMEZONE,
-        Validators.required,
-      ],
+      // Timezone is fixed silently — never exposed to the user.
+      timeZone: [ProfessionalAvailabilityPage.FALLBACK_TIMEZONE],
       isActive: [true],
     });
   }
@@ -183,8 +174,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
 
     this.scheduleForm.patchValue({
       defaultSlotDuration: schedule.defaultSlotDuration,
-      timeZone:
-        schedule.timeZone || ProfessionalAvailabilityPage.HONDURAS_TIMEZONE,
+      timeZone: ProfessionalAvailabilityPage.FALLBACK_TIMEZONE,
       isActive: schedule.isActive,
     });
   }

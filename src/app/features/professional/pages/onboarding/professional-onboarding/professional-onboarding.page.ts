@@ -133,7 +133,12 @@ export class ProfessionalOnboardingPage implements OnInit {
     businessName: ['', [Validators.required, Validators.maxLength(150)]],
     description: ['', [Validators.maxLength(1500)]],
     departmentId: ['', [Validators.required]],
-    countryId: ['', [Validators.required]],
+    // countryId is auto-populated from the geography service (always Honduras).
+    // It is NOT user-facing so it must never block form submission with a
+    // required validator that the user cannot resolve.  The API call itself
+    // validates its presence server-side; here we keep it non-required and
+    // apply a last-resort fallback in saveProfile() before dispatching.
+    countryId: [''],
     cityId: ['', [Validators.required]],
     phone: ['', [Validators.maxLength(20)]],
     whatsApp: ['', [Validators.maxLength(20)]],
@@ -195,6 +200,11 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly currentUser = this.authStore.user;
 
   ngOnInit(): void {
+    // cityId requires a department first; disable it via the FormControl (not
+    // via a template [disabled] binding which is deprecated in reactive forms
+    // and can leave the control in an inconsistent enabled/disabled state).
+    this.profileForm.controls.cityId.disable();
+
     this.loadProfile();
     this.prefillEmailFromUser();
     this.profileForm.controls.departmentId.valueChanges.subscribe(
@@ -203,9 +213,11 @@ export class ProfessionalOnboardingPage implements OnInit {
         this.cities.set([]);
 
         if (!departmentId) {
+          this.profileForm.controls.cityId.disable();
           return;
         }
 
+        this.profileForm.controls.cityId.enable();
         this.loadCitiesByDepartment(departmentId);
       },
     );
@@ -235,6 +247,10 @@ export class ProfessionalOnboardingPage implements OnInit {
           );
 
           if (profile.departmentId) {
+            // Enable cityId now that we have a department — patchValue above
+            // used emitEvent:false so the valueChanges subscription in
+            // ngOnInit never fired and cityId is still disabled.
+            this.profileForm.controls.cityId.enable();
             this.loadCitiesByDepartment(profile.departmentId, profileCity, () =>
               this.loadingCatalogs.set(false),
             );
@@ -643,6 +659,21 @@ export class ProfessionalOnboardingPage implements OnInit {
       return;
     }
 
+    // countryId is auto-populated from geography service. If for any reason
+    // the form value is still empty (e.g., geography re-loaded between renders),
+    // do a last-resort sync from the service before building the payload.
+    if (!this.profileForm.controls.countryId.value) {
+      const countryId = this.geographyMetadataService.getHondurasCountryId();
+      if (countryId) {
+        this.profileForm.patchValue({ countryId }, { emitEvent: false });
+      } else {
+        this.submitError.set(
+          'No se pudo obtener la información geográfica. Recarga la página e intenta de nuevo.',
+        );
+        return;
+      }
+    }
+
     this.isSubmitting.set(true);
     this.submitError.set(null);
 
@@ -701,6 +732,16 @@ export class ProfessionalOnboardingPage implements OnInit {
     const file = target.files?.[0];
     if (!file) return;
 
+    // El perfil debe existir antes de poder subir la foto; el backend
+    // requiere un registro en BD al que asociar la imagen.
+    if (!this.hasExistingProfile()) {
+      this.toast.warning(
+        'Primero guarda los datos básicos del perfil y luego podrás subir la foto.',
+      );
+      target.value = '';
+      return;
+    }
+
     this.isUploadingPhoto.set(true);
     this.professionalApi.uploadProfilePhoto(file).subscribe({
       next: (response) => {
@@ -718,6 +759,8 @@ export class ProfessionalOnboardingPage implements OnInit {
   }
 
   removePhoto(): void {
+    if (!this.hasExistingProfile()) return;
+
     this.isUploadingPhoto.set(true);
     this.professionalApi.deleteProfilePhoto().subscribe({
       next: () => {

@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { AppointmentsApi, type Appointment } from '@data/api';
+import { PAGE_SIZE_CARDS } from '@shared/constants/pagination.constants';
 import {
   RequestAppointmentDialogComponent,
   SelectedProfessionalForBooking,
@@ -86,7 +87,7 @@ export class AppointmentsListPageComponent implements OnInit {
       width: '980px',
       maxWidth: '96vw',
       data: {
-        pageSize: 12,
+        pageSize: PAGE_SIZE_CARDS,
       },
     });
 

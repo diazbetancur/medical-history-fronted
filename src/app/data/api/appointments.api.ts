@@ -1,14 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { retry } from 'rxjs/operators';
 import { ApiClient } from './api-client';
+
+/** Retry config for idempotent read calls: up to 2 retries with 1 s delay. */
+const READ_RETRY = { count: 2, delay: 1000 } as const;
 import type {
   Appointment,
   CancelAppointmentRequest,
   ConfirmAppointmentRequest,
   CreateAppointmentRequest,
   CreateAppointmentResponse,
-  GetAvailableSlotsRequest,
-  GetAvailableSlotsResponse,
   UpcomingAppointmentsResponse,
 } from './appointments.types';
 
@@ -29,40 +31,6 @@ export class AppointmentsApi {
   private readonly api = inject(ApiClient);
 
   /**
-   * Get available time slots for a professional on a specific date
-   *
-   * @param request - Professional ID and date
-   * @returns Observable with available slots (times in UTC)
-   *
-   * @example
-   * ```typescript
-   * this.appointmentsApi.getAvailableSlots({
-   *   professionalId: 'prof-123',
-   *   date: '2026-02-15' // or full ISO: '2026-02-15T00:00:00Z'
-   * }).subscribe({
-   *   next: (response) => {
-   *     // response.slots = [{ startTime: "2026-02-15T14:00:00Z", endTime: "...", available: true }]
-   *   }
-   * });
-   * ```
-   */
-  getAvailableSlots(
-    request: GetAvailableSlotsRequest,
-  ): Observable<GetAvailableSlotsResponse> {
-    const params = {
-      professionalId: request.professionalId,
-      date: request.date,
-      ...(request.durationMinutes
-        ? { durationMinutes: request.durationMinutes }
-        : {}),
-    };
-
-    return this.api.get<GetAvailableSlotsResponse>('/appointments/slots', {
-      params,
-    });
-  }
-
-  /**
    * Create a new appointment
    */
   createAppointment(
@@ -77,7 +45,7 @@ export class AppointmentsApi {
   cancelAppointment(request: CancelAppointmentRequest): Observable<void> {
     return this.api.post<void>(
       `/appointments/${request.appointmentId}/cancel`,
-      null,
+      request.reason ? { reason: request.reason } : null,
     );
   }
 
@@ -97,7 +65,9 @@ export class AppointmentsApi {
    * Get appointment by ID
    */
   getById(id: string): Observable<Appointment> {
-    return this.api.get<Appointment>(`/appointments/${id}`);
+    return this.api
+      .get<Appointment>(`/appointments/${id}`)
+      .pipe(retry(READ_RETRY));
   }
 
   /**
@@ -107,7 +77,9 @@ export class AppointmentsApi {
    * Past appointments are not included.
    */
   getUpcoming(): Observable<UpcomingAppointmentsResponse> {
-    return this.api.get<UpcomingAppointmentsResponse>('/appointments/upcoming');
+    return this.api
+      .get<UpcomingAppointmentsResponse>('/appointments/upcoming')
+      .pipe(retry(READ_RETRY));
   }
 
   /**
@@ -120,9 +92,9 @@ export class AppointmentsApi {
     dateFrom?: string; // YYYY-MM-DD
     dateTo?: string; // YYYY-MM-DD
   }): Observable<UpcomingAppointmentsResponse> {
-    return this.api.get<UpcomingAppointmentsResponse>('/appointments/mine', {
-      params,
-    });
+    return this.api
+      .get<UpcomingAppointmentsResponse>('/appointments/mine', { params })
+      .pipe(retry(READ_RETRY));
   }
 
   /**

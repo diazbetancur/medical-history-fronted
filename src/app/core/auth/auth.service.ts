@@ -282,7 +282,6 @@ export class AuthService {
    * For future fine-grained access control.
    */
   hasPermission(permission: string): boolean {
-    console.log(this._session().permissions);
     return this._session().permissions.includes(permission);
   }
 

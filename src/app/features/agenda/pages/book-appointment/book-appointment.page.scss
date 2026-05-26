@@ -72,6 +72,27 @@
   }
 }
 
+// A-02: error state (API failure)
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  gap: 16px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+}
+
 .slots-label {
   margin: 0 0 12px;
   font-size: 14px;

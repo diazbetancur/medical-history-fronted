@@ -19,9 +19,11 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { Router } from '@angular/router';
 import {
   AppointmentsApi,
+  ProfessionalAvailabilityApi,
   ProfessionalsPublicApi,
-  type TimeSlot,
+  type SlotItemDto,
 } from '@data/api';
+import { PAGE_SIZE_LARGE } from '@shared/constants/pagination.constants';
 import { type PaginatedProfessionalsResponse } from '@data/models';
 
 /**
@@ -36,8 +38,10 @@ import { type PaginatedProfessionalsResponse } from '@data/models';
  *
  * Features:
  * - Loads available professionals
- * - Fetches available slots for selected date
- * - Converts UTC slots to local time for display
+ * - Fetches available slots via ProfessionalAvailabilityApi.getGeneratedSlots
+ * - I-11: Displays slot times in the patient's browser timezone.
+ *         When the professional is in a different timezone, also shows
+ *         the professional's local time so there is no ambiguity.
  * - Creates appointment with UTC time
  */
 
@@ -63,6 +67,7 @@ import { type PaginatedProfessionalsResponse } from '@data/models';
 })
 export class BookAppointmentPageComponent {
   private readonly appointmentsApi = inject(AppointmentsApi);
+  private readonly availabilityApi = inject(ProfessionalAvailabilityApi);
   private readonly professionalsApi = inject(ProfessionalsPublicApi);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
@@ -70,9 +75,33 @@ export class BookAppointmentPageComponent {
   // State
   readonly loading = signal(false);
   readonly loadingSlots = signal(false);
+  readonly loadProfessionalsError = signal(false); // A-02
+  readonly loadSlotsError = signal(false);         // A-02
   readonly professionals = signal<any[]>([]);
-  readonly availableSlots = signal<TimeSlot[]>([]);
+  readonly availableSlots = signal<SlotItemDto[]>([]);
   readonly creating = signal(false);
+
+  /**
+   * I-11: IANA timezone reported by the professional's availability template.
+   * Set each time slots are loaded; empty string if unknown.
+   */
+  readonly professionalTimezone = signal<string>('');
+
+  /**
+   * I-11: Browser (patient) IANA timezone — read once at component creation.
+   * e.g. "America/New_York", "America/Tegucigalpa"
+   */
+  readonly browserTimezone: string =
+    Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  /**
+   * I-11: True when the professional is in a different timezone than the patient.
+   * Used to conditionally render the timezone disambiguation note.
+   */
+  readonly showProfessionalTz = computed(() => {
+    const profTz = this.professionalTimezone();
+    return !!profTz && profTz !== this.browserTimezone;
+  });
 
   // Forms
   readonly professionalForm: FormGroup;
@@ -82,7 +111,7 @@ export class BookAppointmentPageComponent {
 
   // Computed
   readonly selectedDate = computed(() => this.dateForm.value.date);
-  readonly selectedSlot = computed(() => this.slotForm.value.slot);
+  readonly selectedSlot = computed(() => this.slotForm.value.slot as SlotItemDto | null);
 
   // Min date (today)
   readonly minDate = (() => {
@@ -126,24 +155,28 @@ export class BookAppointmentPageComponent {
    */
   loadProfessionals(): void {
     this.loading.set(true);
+    this.loadProfessionalsError.set(false); // A-02: clear previous error
 
-    // Get professionals from public search
-    // In production, you'd have a dedicated endpoint
     this.professionalsApi
-      .searchProfessionals({ page: 1, pageSize: 50 })
+      .searchProfessionals({ page: 1, pageSize: PAGE_SIZE_LARGE })
       .subscribe({
         next: (response: PaginatedProfessionalsResponse) => {
           this.professionals.set(response.items);
           this.loading.set(false);
         },
         error: () => {
+          this.loadProfessionalsError.set(true); // A-02
           this.loading.set(false);
         },
       });
   }
 
   /**
-   * Load available slots for selected professional and date
+   * Load available slots for selected professional and date.
+   *
+   * I-11: Uses ProfessionalAvailabilityApi.getGeneratedSlots which returns
+   * SlotResponseDto with a `timeZone` field and `items` containing both
+   * `startUtc` (for browser-TZ conversion) and `startLocal` (professional's TZ).
    */
   loadAvailableSlots(): void {
     const professionalId = this.professionalForm.value.professionalId;
@@ -152,25 +185,26 @@ export class BookAppointmentPageComponent {
     if (!professionalId || !date) return;
 
     this.loadingSlots.set(true);
+    this.loadSlotsError.set(false); // A-02: clear previous error
     this.availableSlots.set([]);
+    this.professionalTimezone.set('');
     this.slotForm.reset();
 
     // Convert date to ISO string format (YYYY-MM-DD)
     const dateStr = date.toISOString().split('T')[0];
 
-    this.appointmentsApi
-      .getAvailableSlots({
-        professionalId,
-        date: dateStr,
-      })
+    this.availabilityApi
+      .getGeneratedSlots(professionalId, dateStr)
       .subscribe({
         next: (response) => {
-          // Filter only available slots
-          const available = response.slots.filter((slot) => slot.available);
-          this.availableSlots.set(available);
+          // I-11: store professional timezone for display
+          this.professionalTimezone.set(response.timeZone ?? '');
+          // Backend only returns available slots — no need to filter
+          this.availableSlots.set(response.items ?? []);
           this.loadingSlots.set(false);
         },
         error: () => {
+          this.loadSlotsError.set(true); // A-02
           this.loadingSlots.set(false);
         },
       });
@@ -192,7 +226,7 @@ export class BookAppointmentPageComponent {
     this.creating.set(true);
 
     const professionalId = this.professionalForm.value.professionalId;
-    const slot = this.slotForm.value.slot as TimeSlot;
+    const slot = this.slotForm.value.slot as SlotItemDto;
     const observation =
       (this.observationForm.value.observation as string | undefined)?.trim() ||
       undefined;
@@ -200,7 +234,7 @@ export class BookAppointmentPageComponent {
     this.appointmentsApi
       .createAppointment({
         professionalId,
-        startTime: slot.startTime, // Already in UTC
+        startTime: slot.startUtc, // UTC ISO 8601 (I-11: from SlotItemDto.startUtc)
         Observation: observation,
       })
       .subscribe({
@@ -224,14 +258,52 @@ export class BookAppointmentPageComponent {
   }
 
   /**
-   * Convert UTC time to local time string (short format)
+   * I-11: Format a slot's start time for display.
+   *
+   * Primary: patient's browser local time (from startUtc).
+   * Secondary (only when TZs differ): professional's local time appended
+   * as "· HH:mm (City)" so there is no ambiguity about which timezone
+   * the calendar shows.
+   *
+   * Example (patient in New York, doctor in Tegucigalpa):
+   *   "10:00 · 09:00 (Tegucigalpa)"
    */
-  toLocalTime(utcTime: string): string {
-    const date = new Date(utcTime);
-    return date.toLocaleTimeString('es-ES', {
+  formatSlotTime(slot: SlotItemDto): string {
+    const utcDate = new Date(slot.startUtc);
+
+    const browserTime = utcDate.toLocaleTimeString('es-ES', {
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: this.browserTimezone,
     });
+
+    const profTz = this.professionalTimezone();
+    if (profTz && profTz !== this.browserTimezone) {
+      // Prefer startLocal from backend (already in professional's TZ).
+      // It may be "HH:mm" or a full datetime — extract the time part.
+      const localStr = String(slot.startLocal ?? '');
+      const match = /(\d{1,2}:\d{2})/.exec(localStr);
+      const profTime = match
+        ? match[1]
+        : utcDate.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: profTz,
+          });
+
+      return `${browserTime} · ${profTime} (${this.shortTzName(profTz)})`;
+    }
+
+    return browserTime;
+  }
+
+  /**
+   * I-11: Returns a short human-readable label from an IANA timezone string.
+   * e.g. "America/Tegucigalpa" → "Tegucigalpa"
+   *      "America/New_York"    → "New York"
+   */
+  shortTzName(tz: string): string {
+    return (tz.split('/').pop() ?? tz).replaceAll('_', ' ');
   }
 
   /**

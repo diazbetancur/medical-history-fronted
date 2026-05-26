@@ -4,17 +4,14 @@
  * Data Transfer Objects for appointments API
  */
 
-/**
- * Appointment Status
- */
-export type AppointmentStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'CANCELLED'
-  | 'COMPLETED'
-  | 'NO_SHOW';
+// Re-export canonical types and utilities from the shared data models (M-02).
+// `export…from` satisfies lint rule S7763 for the runtime export.
+// The local `import type` below makes AppointmentStatus available to functions
+// defined in this file without creating a duplicate symbol.
+export { normalizeAppointmentStatus } from '@data/models/appointment.models';
+export type { AppointmentStatus, AppointmentStatusCode } from '@data/models/appointment.models';
 
-export type AppointmentStatusCode = number;
+import type { AppointmentStatus } from '@data/models/appointment.models';
 
 export interface AppointmentRawDto {
   id?: string;
@@ -26,7 +23,7 @@ export interface AppointmentRawDto {
   timeSlot?: string;
   startTime?: string;
   endTime?: string;
-  status?: AppointmentStatus | AppointmentStatusCode | string;
+  status?: string | number; // raw value from backend — use normalizeAppointmentStatus() to convert
   statusDisplay?: string;
   notes?: string;
   cancelReason?: string;
@@ -127,44 +124,6 @@ export function getStatusLabel(status: AppointmentStatus): string {
     NO_SHOW: 'No asistió',
   };
   return labels[status];
-}
-
-export function normalizeAppointmentStatus(
-  status: AppointmentStatus | AppointmentStatusCode | string | undefined,
-  statusDisplay?: string,
-): AppointmentStatus {
-  if (typeof status === 'number') {
-    const byCode: Record<number, AppointmentStatus> = {
-      0: 'PENDING',
-      1: 'CONFIRMED',
-      2: 'CANCELLED',
-      3: 'COMPLETED',
-      4: 'NO_SHOW',
-    };
-    return byCode[status] ?? 'PENDING';
-  }
-
-  const normalized = (status ?? statusDisplay ?? '')
-    .toString()
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, '_')
-    .replace('-', '_');
-
-  if (
-    normalized === 'PENDING' ||
-    normalized === 'CONFIRMED' ||
-    normalized === 'CANCELLED' ||
-    normalized === 'COMPLETED' ||
-    normalized === 'NO_SHOW'
-  ) {
-    return normalized;
-  }
-
-  if (normalized === 'CANCELED') return 'CANCELLED';
-  if (normalized === 'NO_SHOWED' || normalized === 'NOSHOW') return 'NO_SHOW';
-
-  return 'PENDING';
 }
 
 /**

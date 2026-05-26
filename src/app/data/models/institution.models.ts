@@ -68,10 +68,11 @@ export interface InstitutionFilters {
 
 /**
  * Paginated Institutions Response
+ * Matches PagedResult<InstitutionDto> from the backend (M-06).
  */
 export interface PaginatedInstitutionsResponse {
   items: InstitutionDto[];
-  total: number;
+  totalCount: number;
   page: number;
   pageSize: number;
   totalPages: number;

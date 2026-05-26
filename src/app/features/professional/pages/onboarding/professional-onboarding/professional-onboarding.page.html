@@ -115,8 +115,8 @@
                 <input
                   matInput
                   formControlName="phone"
-                  type="number"
-                  placeholder="504 8907 7887"
+                  type="tel"
+                  placeholder="+504 8907 7887"
                 />
               </mat-form-field>
 
@@ -125,8 +125,8 @@
                 <input
                   matInput
                   formControlName="whatsApp"
-                  placeholder="Ej. +504 8907 7887"
-                  type="number"
+                  placeholder="+504 8907 7887"
+                  type="tel"
                 />
               </mat-form-field>
             </div>
@@ -150,13 +150,12 @@
 
               <mat-form-field appearance="outline">
                 <mat-label>Ciudad *</mat-label>
-                <mat-select
-                  formControlName="cityId"
-                  [disabled]="
-                    !profileForm.controls.departmentId.value ||
-                    loadingProfileCities()
-                  "
-                >
+                <!-- cityId is enabled/disabled programmatically in ngOnInit based
+                     on departmentId selection; do NOT use [disabled] here because
+                     template bindings on reactive-form controls are deprecated in
+                     Angular 19 and can leave the FormControl in an inconsistent
+                     enabled/invalid state that silently blocks form submission. -->
+                <mat-select formControlName="cityId">
                   @for (city of filteredCities(); track city.id) {
                   <mat-option [value]="city.id">{{ city.name }}</mat-option>
                   }

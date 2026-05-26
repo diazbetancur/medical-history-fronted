@@ -5,12 +5,16 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@core/auth/auth.store';
 import { ProfessionalAppointmentsApi } from '@data/api/professional-appointments.api';
@@ -19,7 +23,14 @@ import type {
   AppointmentStatus,
 } from '@data/models/appointment.models';
 import { ProfessionalAppointmentsStore } from '@data/stores/professional-appointments.store';
-import { ToastService } from '@shared/services';
+import {
+  PAGE_SIZE_CALENDAR_RANGE,
+  ToastService,
+} from '@shared/index';
+import {
+  AddExternalAppointmentDialogComponent,
+  type AddExternalAppointmentDialogData,
+} from './add-external-appointment-dialog/add-external-appointment-dialog.component';
 
 @Component({
   selector: 'app-professional-appointments-page',
@@ -33,10 +44,13 @@ import { ToastService } from '@shared/services';
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTabsModule,
+    MatDividerModule,
     MatMenuModule,
     MatBadgeModule,
     MatFormFieldModule,
     MatInputModule,
+    MatTooltipModule,
+    MatTableModule,
   ],
   templateUrl: './professional-appointments.page.html',
   styleUrl: './professional-appointments.page.scss',
@@ -48,6 +62,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly selectedTabIndex = signal(0);
   protected readonly rangeFrom = signal(this.getDateInputValue(new Date()));
@@ -57,65 +72,44 @@ export class ProfessionalAppointmentsPage implements OnInit {
   protected readonly rangeLoading = signal(false);
   protected readonly hasRangeFilterResult = signal(false);
   protected readonly rangeAppointments = signal<AppointmentDto[]>([]);
-  protected readonly monthLoading = signal(false);
-  protected readonly monthAppointments = signal<AppointmentDto[]>([]);
 
-  protected readonly appointmentsByDate = () => this.store.appointmentsByDate();
-  protected readonly groupedMonthAppointments = computed(() => {
-    const grouped: Record<string, AppointmentDto[]> = {};
+  /**
+   * Alias to the store's monthLoading signal — keeps the template unchanged.
+   */
+  protected readonly monthLoading = this.store.monthLoading;
 
-    for (const appointment of this.monthAppointments()) {
-      if (!grouped[appointment.date]) {
-        grouped[appointment.date] = [];
-      }
+  /**
+   * Alias to the store's sortedMonthAppointments computed — keeps the template unchanged.
+   */
+  protected readonly sortedMonthAppointments = this.store.sortedMonthAppointments;
 
-      grouped[appointment.date].push(appointment);
-    }
+  /** Columns shown in every appointment table */
+  protected readonly displayedColumns: string[] = [
+    'date',
+    'time',
+    'patient',
+    'status',
+    'actions',
+  ];
 
-    return Object.keys(grouped)
-      .sort()
-      .reduce(
-        (acc, date) => {
-          acc[date] = grouped[date].sort((a, b) =>
-            a.startTime.localeCompare(b.startTime),
-          );
-          return acc;
-        },
-        {} as Record<string, AppointmentDto[]>,
-      );
-  });
-  protected readonly groupedMonthEntries = computed(() =>
-    Object.entries(this.groupedMonthAppointments()).map(
-      ([date, appointments]) => ({ date, appointments }),
+  /** "Hoy" — today's appointments sorted by start time (CANCELLED already excluded in store) */
+  protected readonly sortedTodayAppointments = computed(() =>
+    [...this.store.todayAppointments()].sort((a, b) =>
+      a.startTime.localeCompare(b.startTime),
     ),
   );
-  protected readonly groupedRangeAppointments = computed(() => {
-    const grouped: Record<string, AppointmentDto[]> = {};
 
-    for (const appointment of this.rangeAppointments()) {
-      if (!grouped[appointment.date]) {
-        grouped[appointment.date] = [];
-      }
+  /** "Próximos 7 días" — from today onwards, sorted in the store, CANCELLED excluded */
+  protected readonly upcomingAppointments = computed(() =>
+    this.store.upcomingAppointments(),
+  );
 
-      grouped[appointment.date].push(appointment);
-    }
-
-    return Object.keys(grouped)
-      .sort()
-      .reduce(
-        (acc, date) => {
-          acc[date] = grouped[date].sort((a, b) =>
-            a.startTime.localeCompare(b.startTime),
-          );
-          return acc;
-        },
-        {} as Record<string, AppointmentDto[]>,
-      );
-  });
-  protected readonly groupedRangeEntries = computed(() =>
-    Object.entries(this.groupedRangeAppointments()).map(
-      ([date, appointments]) => ({ date, appointments }),
-    ),
+  /** "Por rango" — flat list sorted nearest first */
+  protected readonly sortedRangeAppointments = computed(() =>
+    [...this.rangeAppointments()].sort((a, b) => {
+      const dc = a.date.localeCompare(b.date);
+      return dc !== 0 ? dc : a.startTime.localeCompare(b.startTime);
+    }),
   );
 
   ngOnInit(): void {
@@ -124,29 +118,64 @@ export class ProfessionalAppointmentsPage implements OnInit {
     const requestedTab = this.route.snapshot.queryParamMap.get('tab');
     if (requestedTab === 'month') {
       this.selectedTabIndex.set(2);
-      this.loadMonthAppointments();
+      this.store.loadMonthAppointments();
     }
+  }
+
+  /**
+   * Opens the dialog for adding an external appointment (phone, WhatsApp, etc.).
+   * On success the upcoming list is refreshed so the new appointment appears immediately.
+   */
+  protected openAddExternalDialog(): void {
+    if (!this.authStore.hasPermission('Appointments.Create')) {
+      this.toast.error('No tienes permiso para registrar citas externas');
+      return;
+    }
+
+    const professionalProfileId =
+      this.authStore.user()?.professionalProfileId;
+
+    if (!professionalProfileId) {
+      this.toast.error('No se encontró el perfil profesional');
+      return;
+    }
+
+    const ref = this.dialog.open<
+      AddExternalAppointmentDialogComponent,
+      AddExternalAppointmentDialogData,
+      AppointmentDto | null
+    >(AddExternalAppointmentDialogComponent, {
+      data: { professionalProfileId },
+      width: '600px',
+      maxWidth: '95vw',
+      disableClose: true,
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.toast.success('Cita externa registrada correctamente');
+        this.store.loadUpcomingAppointments();
+      }
+    });
   }
 
   protected onTabChange(index: number): void {
     this.selectedTabIndex.set(index);
 
-    if (
-      index === 2 &&
-      this.monthAppointments().length === 0 &&
-      !this.monthLoading()
-    ) {
-      this.loadMonthAppointments();
+    // Load month data only on first visit to that tab — subsequent refreshes are
+    // handled by _reloadAll() inside the store after each action.
+    if (index === 2 && !this.store.monthLoaded() && !this.monthLoading()) {
+      this.store.loadMonthAppointments();
     }
   }
 
-  protected formatDate(dateStr: string): string {
+  /** Short date for table cells, e.g. "mar., 26 may." */
+  protected formatShortDate(dateStr: string): string {
     const [year, month, day] = dateStr.split('-');
     const date = new Date(+year, +month - 1, +day);
     return date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
+      weekday: 'short',
+      month: 'short',
       day: 'numeric',
     });
   }
@@ -162,19 +191,37 @@ export class ProfessionalAppointmentsPage implements OnInit {
     return labels[status];
   }
 
+  // ── Appointment action methods ────────────────────────────────────────────
+
   protected confirmAppointment(appointmentId: string): void {
+    if (!this.authStore.hasPermission('Appointments.Update')) {
+      this.toast.error('No tienes permiso para confirmar citas');
+      return;
+    }
     this.store.confirmAppointment(appointmentId);
   }
 
   protected cancelAppointment(appointmentId: string): void {
+    if (!this.authStore.hasPermission('Appointments.Cancel')) {
+      this.toast.error('No tienes permiso para cancelar citas');
+      return;
+    }
     this.store.cancelAppointment(appointmentId);
   }
 
   protected completeAppointment(appointmentId: string): void {
+    if (!this.authStore.hasPermission('Appointments.Update')) {
+      this.toast.error('No tienes permiso para completar citas');
+      return;
+    }
     this.store.completeAppointment(appointmentId);
   }
 
   protected markAsNoShow(appointmentId: string): void {
+    if (!this.authStore.hasPermission('Appointments.Update')) {
+      this.toast.error('No tienes permiso para marcar como no asistido');
+      return;
+    }
     this.store.markAsNoShow(appointmentId);
   }
 
@@ -234,7 +281,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
         from,
         to,
         page: 1,
-        pageSize: 100,
+        pageSize: PAGE_SIZE_CALENDAR_RANGE,
       })
       .subscribe({
         next: (response) => {
@@ -250,50 +297,10 @@ export class ProfessionalAppointmentsPage implements OnInit {
       });
   }
 
-  private loadMonthAppointments(): void {
-    const professionalId = this.authStore.user()?.professionalProfileId;
-    if (!professionalId) {
-      this.toast.error('No se encontró perfil profesional');
-      return;
-    }
-
-    const today = new Date();
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-    this.monthLoading.set(true);
-
-    this.appointmentsApi
-      .getAppointments({
-        professionalId,
-        from: this.getDateInputValue(monthStart),
-        to: this.getDateInputValue(monthEnd),
-        page: 1,
-        pageSize: 200,
-      })
-      .subscribe({
-        next: (response) => {
-          this.monthAppointments.set(response.items ?? []);
-          this.monthLoading.set(false);
-        },
-        error: (error: { error?: { title?: string } }) => {
-          this.toast.error(
-            error?.error?.title || 'Error al cargar citas del mes',
-          );
-          this.monthLoading.set(false);
-        },
-      });
-  }
-
   protected getPatientDisplayName(appointment: AppointmentDto): string {
-    if (appointment.patientName?.trim()) {
-      return appointment.patientName;
-    }
-
-    if (appointment.patientId?.trim()) {
+    if (appointment.patientName?.trim()) return appointment.patientName;
+    if (appointment.patientId?.trim())
       return `Paciente #${appointment.patientId.substring(0, 8)}`;
-    }
-
     return 'Paciente';
   }
 

@@ -88,8 +88,16 @@ export class HomePageComponent implements OnInit {
     const queryParams = this.route.snapshot.queryParamMap;
     const authRequired = queryParams.get('authRequired');
     const reason = queryParams.get('reason');
+    const passwordReset = queryParams.get('passwordReset');
 
-    if (reason === 'session_expired') {
+    if (passwordReset === '1') {
+      // Contraseña restablecida exitosamente: mostrar toast y abrir modal de login
+      this.toast.info(
+        '¡Contraseña actualizada! Inicia sesión con tu nueva contraseña.',
+      );
+      // Pequeño delay para que el home termine de renderizar antes de abrir el modal
+      setTimeout(() => this.openAuthModal(false), 350);
+    } else if (reason === 'session_expired') {
       this.toast.info(
         'Tu sesión expiró. Inicia sesión nuevamente desde el botón "Iniciar Sesión".',
       );
@@ -101,12 +109,14 @@ export class HomePageComponent implements OnInit {
       return;
     }
 
+    // Limpiar todos los query params de estado de la URL
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
         authRequired: null,
         reason: null,
         returnUrl: null,
+        passwordReset: null,
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,

@@ -1,11 +1,18 @@
 import { inject, Injectable } from '@angular/core';
-import type {
-  AppointmentDto,
-  AppointmentFilters,
-  PaginatedAppointmentsResponse,
+import {
+  normalizeAppointmentStatus,
+  type AppointmentDto,
+  type AppointmentFilters,
+  type AppointmentType,
+  type CreateExternalAppointmentDto,
+  type ExternalAppointmentSource,
+  type PaginatedAppointmentsResponse,
 } from '@data/models/appointment.models';
-import { catchError, map, Observable } from 'rxjs';
+import { catchError, map, Observable, retry } from 'rxjs';
 import { ApiClient } from './api-client';
+
+/** Retry config for idempotent read calls: up to 2 retries with 1 s delay. */
+const READ_RETRY = { count: 2, delay: 1000 } as const;
 
 /**
  * Professional Appointments API
@@ -19,47 +26,30 @@ export class ProfessionalAppointmentsApi {
   private readonly apiClient = inject(ApiClient);
 
   /**
-   * Listar citas del profesional
+   * Listar citas del profesional.
+   *
+   * I-08: Siempre usa GET /appointments con professionalProfileId como query param.
+   * Los nombres de parámetros coinciden con AppointmentFilterDto en el backend.
    */
   getAppointments(
     filters?: AppointmentFilters,
   ): Observable<PaginatedAppointmentsResponse> {
-    const params: any = {};
-    if (filters?.from) params.from = filters.from;
-    if (filters?.to) params.to = filters.to;
-    if (filters?.status) params.status = filters.status;
-    if (filters?.patientId) params.patientId = filters.patientId;
-    if (filters?.page) params.page = filters.page;
-    if (filters?.pageSize) params.pageSize = filters.pageSize;
+    const params: Record<string, string> = {};
 
-    const professionalId = filters?.professionalId;
-
-    if (!professionalId) {
-      return this.apiClient
-        .get<PaginatedAppointmentsResponse>('/appointments/professional', {
-          params,
-        })
-        .pipe(map((response) => this.mapPaginatedResponse(response)));
-    }
-
-    const pendingParams: any = {
-      startDate: params.from,
-      endDate: params.to,
-      // status: params.status,
-      // page: params.page,
-      pageSize: params.pageSize,
-    };
+    if (filters?.professionalId)
+      params['professionalProfileId'] = filters.professionalId;
+    if (filters?.patientId) params['patientId'] = filters.patientId;
+    if (filters?.status) params['status'] = filters.status;
+    if (filters?.from) params['startDate'] = filters.from;
+    if (filters?.to) params['endDate'] = filters.to;
+    if (filters?.page) params['page'] = String(filters.page);
+    if (filters?.pageSize) params['pageSize'] = String(filters.pageSize);
 
     return this.apiClient
-      .get<any>(`/appointments?professionalProfileId=${professionalId}`, {
-        params: pendingParams,
-      })
+      .get<any>('/appointments', { params })
       .pipe(
+        retry(READ_RETRY),
         map((response) => this.mapPaginatedResponse(response)),
-        catchError((error) => {
-          console.error('Error fetching pending appointments:', error);
-          throw error;
-        }),
       );
   }
 
@@ -73,11 +63,15 @@ export class ProfessionalAppointmentsApi {
     return this.apiClient
       .get<any>(`/professional/${professionalId}/appointments/${appointmentId}`)
       .pipe(
+        retry(READ_RETRY),
         map((response) => this.mapAppointment(response)),
         catchError(() =>
           this.apiClient
             .get<any>(`/professional/appointments/${appointmentId}`)
-            .pipe(map((response) => this.mapAppointment(response))),
+            .pipe(
+              retry(READ_RETRY),
+              map((response) => this.mapAppointment(response)),
+            ),
         ),
       );
   }
@@ -123,6 +117,19 @@ export class ProfessionalAppointmentsApi {
       `/professional/appointments/${appointmentId}/no-show`,
       {},
     );
+  }
+
+  /**
+   * Crear una cita externa (recibida por teléfono, WhatsApp, presencial, etc.)
+   * El paciente no necesita ser un usuario registrado en el sistema.
+   * La cita se crea con estado Confirmado.
+   */
+  createExternalAppointment(
+    dto: CreateExternalAppointmentDto,
+  ): Observable<AppointmentDto> {
+    return this.apiClient
+      .post<any>('/appointments/external', dto)
+      .pipe(map((response) => this.mapAppointment(response)));
   }
 
   private mapPaginatedResponse(response: any): PaginatedAppointmentsResponse {
@@ -177,45 +184,15 @@ export class ProfessionalAppointmentsApi {
       startTime: time.startTime,
       endTime: time.endTime,
       duration: item?.duration ?? item?.durationMinutes ?? 0,
-      status: this.normalizeStatus(item?.status, item?.statusDisplay),
+      status: normalizeAppointmentStatus(item?.status, item?.statusDisplay),
       notes: item?.notes,
       cancellationReason: item?.cancellationReason ?? item?.cancelReason,
       createdAt: item?.createdAt ?? new Date().toISOString(),
       updatedAt: item?.updatedAt ?? item?.createdAt ?? new Date().toISOString(),
+      type: this.normalizeAppointmentType(item?.type),
+      externalSource: this.normalizeExternalSource(item?.externalSource),
+      externalNotes: item?.externalNotes,
     };
-  }
-
-  private normalizeStatus(status: unknown, statusDisplay?: string): any {
-    if (typeof status === 'number') {
-      const byCode: Record<number, string> = {
-        0: 'PENDING',
-        1: 'CONFIRMED',
-        2: 'CANCELLED',
-        3: 'COMPLETED',
-        4: 'NO_SHOW',
-      };
-      return byCode[status] ?? 'PENDING';
-    }
-
-    const normalized = String(status ?? statusDisplay ?? '')
-      .trim()
-      .toUpperCase()
-      .replace(/\s+/g, '_')
-      .replace('-', '_');
-
-    if (
-      normalized === 'PENDING' ||
-      normalized === 'CONFIRMED' ||
-      normalized === 'CANCELLED' ||
-      normalized === 'COMPLETED' ||
-      normalized === 'NO_SHOW'
-    ) {
-      return normalized;
-    }
-
-    if (normalized === 'CANCELED') return 'CANCELLED';
-    if (normalized === 'NOSHOW') return 'NO_SHOW';
-    return 'PENDING';
   }
 
   private extractDate(rawDate: unknown): string {
@@ -251,5 +228,30 @@ export class ProfessionalAppointmentsApi {
       startTime: String(startTime ?? ''),
       endTime: String(endTime ?? ''),
     };
+  }
+
+  private normalizeAppointmentType(type: unknown): AppointmentType {
+    if (type === 1 || String(type).toUpperCase() === 'EXTERNAL') {
+      return 'EXTERNAL';
+    }
+    return 'SYSTEM';
+  }
+
+  private normalizeExternalSource(
+    source: unknown,
+  ): ExternalAppointmentSource | undefined {
+    if (source === null || source === undefined) return undefined;
+    const byCode: Record<number, ExternalAppointmentSource> = {
+      0: 'PHONE',
+      1: 'WHATSAPP',
+      2: 'IN_PERSON',
+      3: 'EMAIL',
+      99: 'OTHER',
+    };
+    if (typeof source === 'number') return byCode[source];
+    if (typeof source !== 'string') return undefined;
+    const upper = source.toUpperCase().replace(/\s/g, '_');
+    if (upper === 'INPERSON') return 'IN_PERSON';
+    return upper as ExternalAppointmentSource;
   }
 }
