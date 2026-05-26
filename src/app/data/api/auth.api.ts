@@ -25,8 +25,11 @@ type UserContextType = CurrentUserDto['defaultContext']['type'];
 export class AuthApi {
   private readonly api = inject(ApiClient);
 
-  private normalizeContextType(type: string): UserContextType {
-    const value = (type || '').toUpperCase();
+  private normalizeContextType(type: string | Record<string, unknown>): UserContextType {
+    // Backend may send defaultContext as a full ContextDto object {type, id, name}
+    // (new API) or as a plain string (legacy API). Handle both formats.
+    const rawType = type && typeof type === 'object' ? (type as any)['type'] : type;
+    const value = String(rawType || '').toUpperCase();
     if (value === 'ADMIN') return 'ADMIN';
     if (value === 'PROFESSIONAL') return 'PROFESSIONAL';
     return 'PATIENT';

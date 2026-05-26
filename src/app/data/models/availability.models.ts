@@ -4,33 +4,42 @@
  * Modelos para disponibilidad y slots de profesionales
  */
 
+// ── Canonical slot types (I-11) ───────────────────────────────────────────────
+
 /**
- * Time Slot DTO - Slot de tiempo disponible
+ * A single available slot returned by `GET /professional/:id/availability/slots`.
+ *
+ * Both local (professional TZ) and UTC times are included so the UI can show
+ * the patient's browser time while also disambiguating when the professional
+ * is in a different timezone (I-11).
  */
-export interface TimeSlotDto {
-  startTime: string; // HH:mm (local)
-  endTime: string; // HH:mm (local)
-  startUtc: string; // ISO UTC
-  endUtc: string; // ISO UTC
-  duration: number; // minutes
-  isAvailable: boolean;
-  professionalId: string;
-  date: string; // ISO date (YYYY-MM-DD)
+export interface SlotItemDto {
+  /** ISO datetime in professional's local timezone (e.g. "2026-05-24T09:00:00") */
+  startLocal: string;
+  /** ISO datetime in professional's local timezone */
+  endLocal: string;
+  /** ISO datetime in UTC (e.g. "2026-05-24T14:00:00Z") — use for booking */
+  startUtc: string;
+  /** ISO datetime in UTC */
+  endUtc: string;
   professionalLocationId: string | null;
   professionalLocationName: string | null;
   professionalLocationAddress: string | null;
 }
 
 /**
- * Availability Slots Response - Slots disponibles para una fecha
+ * Response envelope for `GET /professional/:id/availability/slots`.
  */
-export interface AvailabilitySlotsResponse {
-  date: string; // ISO date (YYYY-MM-DD)
+export interface SlotResponseDto {
+  /** ISO date (YYYY-MM-DD) of the requested day */
+  date: string;
+  /** IANA timezone of the professional (e.g. "America/Tegucigalpa") */
   timeZone: string;
   slotMinutes: number;
   totalSlots: number;
-  slots: TimeSlotDto[];
+  items: SlotItemDto[];
 }
+
 
 /**
  * Professional Public Profile - Perfil público simplificado

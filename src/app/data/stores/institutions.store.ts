@@ -67,7 +67,7 @@ export class InstitutionsStore {
       .pipe(
         tap((response) => {
           this._institutions.set(response.items);
-          this._total.set(response.total);
+          this._total.set(response.totalCount);
         }),
         catchError((error) => {
           const problemDetails = error.error as ProblemDetails;

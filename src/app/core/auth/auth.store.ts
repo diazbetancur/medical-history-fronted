@@ -81,6 +81,15 @@ export class AuthStore {
     () => this._state().user?.contexts ?? [],
   );
 
+  /**
+   * Returns true if the current user has the given permission.
+   * Use for in-component action guards (I-10).
+   * Works with the flat string names seeded in the DB (e.g. "Appointments.Update").
+   */
+  hasPermission(permission: string): boolean {
+    return this.userPermissions().includes(permission);
+  }
+
   private get isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
   }
@@ -285,7 +294,11 @@ export class AuthStore {
       typeof error.error === 'object'
     ) {
       const err = error.error as Partial<ProblemDetails>;
-      if (err.type && err.title && err.status) {
+      // Use `typeof err.status === 'number'` instead of `err.status` to avoid
+      // the falsy-zero bug: status 0 (network error) would fail the truthiness
+      // check and silently fall through to the generic fallback, masking the
+      // real error and preventing clearAuth() from being called on 401.
+      if (err.type && err.title && typeof err.status === 'number') {
         return err as ProblemDetails;
       }
     }
@@ -293,9 +306,9 @@ export class AuthStore {
     // Fallback: generic error
     return {
       type: 'about:blank',
-      title: 'Error inesperado',
-      status: 500,
-      detail: 'Ocurrió un error al cargar la sesión',
+      title: 'Error de conexión',
+      status: 0,
+      detail: 'No se pudo conectar con el servidor. Verifica tu conexión a internet.',
     };
   }
 }

@@ -55,6 +55,7 @@ export class CancelAppointmentDialogComponent {
     this.appointmentsApi
       .cancelAppointment({
         appointmentId: this.data.appointmentId,
+        reason: this.form.value.reason || undefined,
       })
       .subscribe({
         next: () => {

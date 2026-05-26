@@ -5,7 +5,21 @@ import { ProfessionalAppointmentsApi } from '@data/api/professional-appointments
 import type {
   AppointmentDto,
   AppointmentFilters,
+  AppointmentStatus,
 } from '@data/models/appointment.models';
+import {
+  MSG_APPOINTMENT_CANCELLED,
+  MSG_APPOINTMENT_COMPLETED,
+  MSG_APPOINTMENT_CONFIRMED,
+  MSG_APPOINTMENT_ERROR_CANCEL,
+  MSG_APPOINTMENT_ERROR_COMPLETE,
+  MSG_APPOINTMENT_ERROR_CONFIRM,
+  MSG_APPOINTMENT_ERROR_LOAD_LIST,
+  MSG_APPOINTMENT_ERROR_NO_SHOW,
+  MSG_APPOINTMENT_NO_SHOW,
+  MSG_APPOINTMENT_PROFILE_NOT_FOUND,
+} from '@shared/constants/messages.constants';
+import { PAGE_SIZE_MONTH } from '@shared/constants/pagination.constants';
 import { ToastService } from '@shared/services';
 import { catchError, finalize, of, tap } from 'rxjs';
 
@@ -33,6 +47,12 @@ export class ProfessionalAppointmentsStore {
   private readonly _lastError = signal<ProblemDetails | null>(null);
   private readonly _selectedAppointment = signal<AppointmentDto | null>(null);
 
+  // Month tab state
+  private readonly _monthAppointments = signal<AppointmentDto[]>([]);
+  private readonly _monthLoading = signal<boolean>(false);
+  /** Tracks whether the month tab has been loaded at least once (to decide if _reloadAll should refresh it). */
+  private readonly _monthLoaded = signal<boolean>(false);
+
   // Public readonly signals
   readonly appointments = this._appointments.asReadonly();
   readonly filters = this._filters.asReadonly();
@@ -40,6 +60,8 @@ export class ProfessionalAppointmentsStore {
   readonly isLoading = this._isLoading.asReadonly();
   readonly lastError = this._lastError.asReadonly();
   readonly selectedAppointment = this._selectedAppointment.asReadonly();
+  readonly monthLoading = this._monthLoading.asReadonly();
+  readonly monthLoaded = this._monthLoaded.asReadonly();
 
   // Computed signals
   readonly hasAppointments = computed(() => this._appointments().length > 0);
@@ -69,15 +91,19 @@ export class ProfessionalAppointmentsStore {
       );
   });
 
+  /** Hoy — filtramos CANCELLED para que no ensucien la vista de hoy */
   readonly todayAppointments = computed(() => {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    return this._appointments().filter((apt) => apt.date === today);
+    return this._appointments().filter(
+      (apt) => apt.date === today && apt.status !== 'CANCELLED',
+    );
   });
 
+  /** Próximos — desde hoy en adelante, sin CANCELLED, ordenados */
   readonly upcomingAppointments = computed(() => {
     const today = new Date().toISOString().split('T')[0];
     return this._appointments()
-      .filter((apt) => apt.date >= today)
+      .filter((apt) => apt.date >= today && apt.status !== 'CANCELLED')
       .sort((a, b) => {
         if (a.date === b.date) {
           return a.startTime.localeCompare(b.startTime);
@@ -86,13 +112,23 @@ export class ProfessionalAppointmentsStore {
       });
   });
 
+  /** Este mes — sin CANCELLED, ordenado por fecha y hora */
+  readonly sortedMonthAppointments = computed(() =>
+    [...this._monthAppointments()]
+      .filter((apt) => apt.status !== 'CANCELLED')
+      .sort((a, b) => {
+        const dc = a.date.localeCompare(b.date);
+        return dc !== 0 ? dc : a.startTime.localeCompare(b.startTime);
+      }),
+  );
+
   /**
    * Cargar citas del profesional
    */
   loadAppointments(filters?: Partial<AppointmentFilters>): void {
     const professionalId = this.authStore.user()?.professionalProfileId;
     if (!professionalId) {
-      this.toastService.error('No se encontró perfil profesional');
+      this.toastService.error(MSG_APPOINTMENT_PROFILE_NOT_FOUND);
       return;
     }
 
@@ -118,7 +154,7 @@ export class ProfessionalAppointmentsStore {
           this._lastError.set(problemDetails);
           this._appointments.set([]);
           this.toastService.error(
-            problemDetails.title || 'Error al cargar citas',
+            problemDetails.title || MSG_APPOINTMENT_ERROR_LOAD_LIST,
           );
           return of(null);
         }),
@@ -142,6 +178,47 @@ export class ProfessionalAppointmentsStore {
   }
 
   /**
+   * Cargar citas del mes actual
+   */
+  loadMonthAppointments(): void {
+    const professionalId = this.authStore.user()?.professionalProfileId;
+    if (!professionalId) {
+      this.toastService.error(MSG_APPOINTMENT_PROFILE_NOT_FOUND);
+      return;
+    }
+
+    const today = new Date();
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    this._monthLoading.set(true);
+    this._monthLoaded.set(true);
+
+    this.appointmentsApi
+      .getAppointments({
+        professionalId,
+        from: this.toDateString(monthStart),
+        to: this.toDateString(monthEnd),
+        page: 1,
+        pageSize: PAGE_SIZE_MONTH,
+      })
+      .pipe(
+        tap((response) => {
+          this._monthAppointments.set(response.items ?? []);
+        }),
+        catchError((error) => {
+          const problemDetails = error.error as ProblemDetails;
+          this.toastService.error(
+            problemDetails.title || MSG_APPOINTMENT_ERROR_LOAD_LIST,
+          );
+          return of(null);
+        }),
+        finalize(() => this._monthLoading.set(false)),
+      )
+      .subscribe();
+  }
+
+  /**
    * Confirmar cita
    */
   confirmAppointment(appointmentId: string): void {
@@ -152,12 +229,13 @@ export class ProfessionalAppointmentsStore {
       .pipe(
         tap((updatedAppointment) => {
           this.updateAppointmentInList(updatedAppointment);
-          this.toastService.success('Cita confirmada exitosamente');
+          this.toastService.success(MSG_APPOINTMENT_CONFIRMED);
+          this._reloadAll();
         }),
         catchError((error) => {
           const problemDetails = error.error as ProblemDetails;
           this.toastService.error(
-            problemDetails.title || 'Error al confirmar cita',
+            problemDetails.title || MSG_APPOINTMENT_ERROR_CONFIRM,
           );
           return of(null);
         }),
@@ -167,7 +245,9 @@ export class ProfessionalAppointmentsStore {
   }
 
   /**
-   * Cancelar cita
+   * Cancelar cita.
+   * El endpoint devuelve 204 No Content (sin cuerpo), por lo que actualizamos
+   * el estado del appointment en memoria usando el appointmentId conocido.
    */
   cancelAppointment(appointmentId: string, reason?: string): void {
     this._isLoading.set(true);
@@ -175,14 +255,25 @@ export class ProfessionalAppointmentsStore {
     this.appointmentsApi
       .cancelAppointment(appointmentId, reason)
       .pipe(
-        tap((updatedAppointment) => {
-          this.updateAppointmentInList(updatedAppointment);
-          this.toastService.success('Cita cancelada exitosamente');
+        tap(() => {
+          this._appointments.update((list) =>
+            list.map((apt) =>
+              apt.id === appointmentId
+                ? ({
+                    ...apt,
+                    status: 'CANCELLED' as AppointmentStatus,
+                    cancellationReason: reason,
+                  } satisfies AppointmentDto)
+                : apt,
+            ),
+          );
+          this.toastService.success(MSG_APPOINTMENT_CANCELLED);
+          this._reloadAll();
         }),
         catchError((error) => {
           const problemDetails = error.error as ProblemDetails;
           this.toastService.error(
-            problemDetails.title || 'Error al cancelar cita',
+            problemDetails.title || MSG_APPOINTMENT_ERROR_CANCEL,
           );
           return of(null);
         }),
@@ -202,12 +293,13 @@ export class ProfessionalAppointmentsStore {
       .pipe(
         tap((updatedAppointment) => {
           this.updateAppointmentInList(updatedAppointment);
-          this.toastService.success('Cita marcada como completada');
+          this.toastService.success(MSG_APPOINTMENT_COMPLETED);
+          this._reloadAll();
         }),
         catchError((error) => {
           const problemDetails = error.error as ProblemDetails;
           this.toastService.error(
-            problemDetails.title || 'Error al completar cita',
+            problemDetails.title || MSG_APPOINTMENT_ERROR_COMPLETE,
           );
           return of(null);
         }),
@@ -227,12 +319,13 @@ export class ProfessionalAppointmentsStore {
       .pipe(
         tap((updatedAppointment) => {
           this.updateAppointmentInList(updatedAppointment);
-          this.toastService.warning('Paciente marcado como no asistido');
+          this.toastService.warning(MSG_APPOINTMENT_NO_SHOW);
+          this._reloadAll();
         }),
         catchError((error) => {
           const problemDetails = error.error as ProblemDetails;
           this.toastService.error(
-            problemDetails.title || 'Error al actualizar cita',
+            problemDetails.title || MSG_APPOINTMENT_ERROR_NO_SHOW,
           );
           return of(null);
         }),
@@ -257,6 +350,25 @@ export class ProfessionalAppointmentsStore {
         apt.id === updatedAppointment.id ? updatedAppointment : apt,
       ),
     );
+  }
+
+  /**
+   * Recarga de todas las vistas tras una acción (confirm/cancel/complete/no-show).
+   * Usa queueMicrotask para ejecutarse DESPUÉS de que RxJS finalize() baje _isLoading,
+   * evitando un parpadeo donde isLoading=true y las listas ya están vacías.
+   */
+  private _reloadAll(): void {
+    queueMicrotask(() => {
+      this.loadUpcomingAppointments();
+      if (this._monthLoaded()) {
+        this.loadMonthAppointments();
+      }
+    });
+  }
+
+  /** Convierte un Date a string YYYY-MM-DD */
+  private toDateString(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
 
   /**

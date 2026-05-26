@@ -1,5 +1,10 @@
 import { Routes } from '@angular/router';
-import { authStoreGuard, contextGuard, permissionStoreGuard } from '@core/auth';
+import {
+  authStoreGuard,
+  contextGuard,
+  permissionStoreGuard,
+  professionalProfileGuard,
+} from '@core/auth';
 
 /**
  * ============================================================================
@@ -177,11 +182,15 @@ export const routes: Routes = [
 
   // ============================================================================
   // PROFESSIONAL AREA (/professional/*)
-  // Guards: authStoreGuard + contextGuard('PROFESSIONAL')
+  // Guards: authStoreGuard + contextGuard('PROFESSIONAL') + professionalProfileGuard
+  //
+  // professionalProfileGuard redirige a /professional/profile en todos los hijos
+  // hasta que el usuario complete su perfil.  La ruta /professional/profile queda
+  // exenta del chequeo para evitar bucles.
   // ============================================================================
   {
     path: 'professional',
-    canActivate: [authStoreGuard, contextGuard],
+    canActivate: [authStoreGuard, contextGuard, professionalProfileGuard],
     data: {
       requiredContext: 'PROFESSIONAL',
     },

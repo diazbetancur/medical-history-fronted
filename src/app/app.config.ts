@@ -28,6 +28,7 @@ import {
   errorInterceptor,
   jwtInterceptor,
   loadingInterceptor,
+  retryInterceptor,
 } from '@core/http';
 import { GeographyMetadataService } from './public/services';
 import { catchError, of } from 'rxjs';
@@ -40,10 +41,11 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
       withInterceptors([
-        loadingInterceptor, // 1st: Track active API requests globally
+        loadingInterceptor,       // 1st: Track active API requests globally
         correlationIdInterceptor, // 2nd: Add correlation ID to all requests
-        jwtInterceptor, // 3rd: Add JWT token for auth
-        errorInterceptor, // 4th: Handle redirects, fallback toast, and normalize
+        jwtInterceptor,           // 3rd: Add JWT token for auth
+        retryInterceptor,         // 4th: Auto-retry GET/HEAD/OPTIONS on 5xx/network (M-05)
+        errorInterceptor,         // 5th: Handle redirects, fallback toast, and normalize
       ]),
     ),
     provideAnimationsAsync(),

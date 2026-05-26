@@ -85,12 +85,4 @@ export class RootLayoutComponent {
       { allowSignalWrites: true },
     );
   }
-
-  /**
-   * Check if running in production mode
-   */
-  private isProduction(): boolean {
-    // Use Angular's environment detection
-    return typeof ngDevMode === 'undefined' || !ngDevMode;
-  }
 }

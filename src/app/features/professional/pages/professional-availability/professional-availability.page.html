@@ -137,23 +137,6 @@
               }
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Zona horaria *</mat-label>
-              <mat-select formControlName="timeZone">
-                @for (timeZone of timeZoneOptions; track timeZone) {
-                  <mat-option [value]="timeZone">{{ timeZone }}</mat-option>
-                }
-              </mat-select>
-              @if (
-                shouldShowControlError(
-                  scheduleForm.get('timeZone'),
-                  scheduleSubmitted()
-                )
-              ) {
-                <mat-error>Selecciona una zona horaria</mat-error>
-              }
-            </mat-form-field>
-
             <mat-slide-toggle formControlName="isActive">
               Plantilla activa
             </mat-slide-toggle>

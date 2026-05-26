@@ -15,8 +15,18 @@ import type {
   UpdateWeeklyScheduleDto,
   WeeklyScheduleDto,
 } from '@data/models/professional-schedule.models';
-import { map, Observable } from 'rxjs';
+import type {
+  SlotResponseDto,
+} from '@data/models/availability.models';
+import { map, Observable, retry } from 'rxjs';
 import { ApiClient } from './api-client';
+
+// Canonical definitions live in @data/models/availability.models.
+// Re-export so existing imports from this file continue to work.
+export type { SlotItemDto, SlotResponseDto } from '@data/models/availability.models';
+
+/** Retry config for idempotent read calls: up to 2 retries with 1 s delay. */
+const READ_RETRY = { count: 2, delay: 1000 } as const;
 
 interface WeeklyWindowResponseDto {
   id?: string;
@@ -75,24 +85,6 @@ interface UpsertAvailabilityTemplateDto {
     professionalLocationId?: string | null;
     institutionId?: string | null;
   }>;
-}
-
-interface SlotItemDto {
-  startLocal: string;
-  endLocal: string;
-  startUtc: string;
-  endUtc: string;
-  professionalLocationId: string | null;
-  professionalLocationName: string | null;
-  professionalLocationAddress: string | null;
-}
-
-interface SlotResponseDto {
-  date: string;
-  timeZone: string;
-  slotMinutes: number;
-  totalSlots: number;
-  items: SlotItemDto[];
 }
 
 interface AvailabilityExceptionDto {
@@ -281,10 +273,12 @@ export class ProfessionalAvailabilityApi {
     date: string,
     durationMinutes = 30,
   ): Observable<SlotResponseDto> {
-    return this.apiClient.get<SlotResponseDto>(
-      `/professional/${professionalId}/availability/slots`,
-      { params: { date, durationMinutes: String(durationMinutes) } },
-    );
+    return this.apiClient
+      .get<SlotResponseDto>(
+        `/professional/${professionalId}/availability/slots`,
+        { params: { date, durationMinutes: String(durationMinutes) } },
+      )
+      .pipe(retry(READ_RETRY));
   }
 
   private mapTemplateToWeeklySchedule(
@@ -331,71 +325,85 @@ export class ProfessionalAvailabilityApi {
     };
   }
 
+  /**
+   * I-09: Extracts the template DTO from the API response.
+   *
+   * The backend (AvailabilityController.GetTemplate) returns a direct
+   * AvailabilityTemplateDto, so a plain cast is enough. A single extra
+   * level of envelope unwrapping ({data}, {result}, {template}) is kept
+   * for backward-compatibility in case the response shape ever changes.
+   *
+   * The old recursive `findTemplateCandidate` (depth 4) has been removed —
+   * if the response needs 5+ levels of unwrapping something is wrong with
+   * the backend contract and it should be fixed there.
+   */
   private extractTemplate(
     response: AvailabilityTemplateDto | AvailabilityTemplateEnvelopeDto | null,
   ): AvailabilityTemplateDto | null {
-    return this.findTemplateCandidate(response);
-  }
+    if (!response) return null;
 
-  private findTemplateCandidate(
-    source: unknown,
-    depth = 0,
-  ): AvailabilityTemplateDto | null {
-    if (typeof source === 'string') {
-      const parsed = this.tryParseJson(source);
-      if (parsed) {
-        return this.findTemplateCandidate(parsed, depth + 1);
+    const raw = response as LooseRecord;
+
+    // Level 0 — direct AvailabilityTemplateDto (normal case)
+    if (this.isTemplateShape(raw)) {
+      return this.buildTemplateDto(raw);
+    }
+
+    // Level 1 — one-level envelope: { data: ... } | { result: ... } | { template: ... }
+    const unwrapped =
+      raw['data'] ?? raw['result'] ?? raw['template'] ??
+      raw['Data'] ?? raw['Result'] ?? raw['Template'];
+
+    if (unwrapped && typeof unwrapped === 'object') {
+      const inner = unwrapped as LooseRecord;
+      if (this.isTemplateShape(inner)) {
+        return this.buildTemplateDto(inner);
       }
     }
 
-    if (!source || typeof source !== 'object' || depth > 4) {
-      return null;
-    }
-
-    const raw = source as LooseRecord;
-    const weeklyWindows =
-      (raw['weeklyWindows'] as WeeklyWindowResponseDto[] | undefined) ??
-      (raw['WeeklyWindows'] as WeeklyWindowResponseDto[] | undefined);
-    const windows =
-      (raw['windows'] as WeeklyWindowResponseDto[] | undefined) ??
-      (raw['Windows'] as WeeklyWindowResponseDto[] | undefined);
-    const slotMinutes =
-      (raw['slotMinutes'] as number | undefined) ??
-      (raw['SlotMinutes'] as number | undefined);
-
-    if (
-      Array.isArray(weeklyWindows) ||
-      Array.isArray(windows) ||
-      typeof slotMinutes === 'number'
-    ) {
-      return {
-        id:
-          (raw['id'] as string | undefined) ??
-          (raw['Id'] as string | undefined),
-        professionalProfileId:
-          (raw['professionalProfileId'] as string | undefined) ??
-          (raw['ProfessionalProfileId'] as string | undefined),
-        timeZone:
-          (raw['timeZone'] as string | undefined) ??
-          (raw['TimeZone'] as string | undefined),
-        slotMinutes,
-        isActive:
-          (raw['isActive'] as boolean | undefined) ??
-          (raw['IsActive'] as boolean | undefined),
-        dateCreated:
-          (raw['dateCreated'] as string | undefined) ??
-          (raw['DateCreated'] as string | undefined),
-        weeklyWindows,
-        windows,
-      };
-    }
-
-    for (const value of Object.values(raw)) {
-      const found = this.findTemplateCandidate(value, depth + 1);
-      if (found) return found;
-    }
-
     return null;
+  }
+
+  /** Returns true if the object looks like an AvailabilityTemplateDto */
+  private isTemplateShape(raw: LooseRecord): boolean {
+    return (
+      Array.isArray(raw['weeklyWindows']) ||
+      Array.isArray(raw['WeeklyWindows']) ||
+      Array.isArray(raw['windows']) ||
+      Array.isArray(raw['Windows']) ||
+      typeof raw['slotMinutes'] === 'number' ||
+      typeof raw['SlotMinutes'] === 'number'
+    );
+  }
+
+  /** Maps a loose record to a typed AvailabilityTemplateDto */
+  private buildTemplateDto(raw: LooseRecord): AvailabilityTemplateDto {
+    return {
+      id:
+        (raw['id'] as string | undefined) ??
+        (raw['Id'] as string | undefined),
+      professionalProfileId:
+        (raw['professionalProfileId'] as string | undefined) ??
+        (raw['ProfessionalProfileId'] as string | undefined),
+      timeZone:
+        (raw['timeZone'] as string | undefined) ??
+        (raw['TimeZone'] as string | undefined),
+      slotMinutes:
+        (raw['slotMinutes'] as number | undefined) ??
+        (raw['SlotMinutes'] as number | undefined),
+      isActive:
+        (raw['isActive'] as boolean | undefined) ??
+        (raw['IsActive'] as boolean | undefined),
+      dateCreated:
+        (raw['dateCreated'] as string | undefined) ??
+        (raw['DateCreated'] as string | undefined),
+      weeklyWindows:
+        (raw['weeklyWindows'] as WeeklyWindowResponseDto[] | undefined) ??
+        (raw['WeeklyWindows'] as WeeklyWindowResponseDto[] | undefined),
+      windows:
+        (raw['windows'] as WeeklyWindowResponseDto[] | undefined) ??
+        (raw['Windows'] as WeeklyWindowResponseDto[] | undefined),
+    };
   }
 
   private normalizeWeeklyWindows(

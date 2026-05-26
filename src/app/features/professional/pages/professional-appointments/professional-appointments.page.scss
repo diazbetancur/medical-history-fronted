@@ -4,6 +4,7 @@
   margin: 0 auto;
 }
 
+// ─── Header ───────────────────────────────────────────────────────────────────
 .page-header {
   margin-bottom: 24px;
 
@@ -18,12 +19,19 @@
       font-weight: 500;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     button mat-icon {
       margin-right: 8px;
     }
   }
 }
 
+// ─── Loading / Empty states ───────────────────────────────────────────────────
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -37,189 +45,183 @@
   }
 }
 
-.empty-state,
 .empty-tab {
   text-align: center;
   padding: 64px 24px;
 
-  .empty-icon,
   mat-icon {
-    font-size: 64px;
-    width: 64px;
-    height: 64px;
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
     color: var(--color-text-disabled);
     margin: 0 auto 16px;
-  }
-
-  h3 {
-    margin: 0 0 8px 0;
-    font-size: 20px;
-    font-weight: 500;
+    display: block;
   }
 
   p {
     margin: 0;
     color: var(--color-text-secondary);
+    font-size: 0.95rem;
   }
 }
 
-::ng-deep .mat-mdc-tab-labels {
-  .mat-mdc-tab-label {
-    mat-icon {
-      margin-right: 8px;
-    }
-
-    .badge {
-      margin-left: 8px;
-      background: var(--color-error);
-      color: white;
-      border-radius: 10px;
-      padding: 2px 8px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-  }
+// ─── Tab badge ────────────────────────────────────────────────────────────────
+.tab-badge {
+  margin-left: 8px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
 }
 
-.date-group {
-  margin-bottom: 32px;
+::ng-deep .mat-mdc-tab-labels .mat-mdc-tab-label mat-icon {
+  margin-right: 6px;
+}
 
-  .date-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 16px 0;
-    font-size: 18px;
+// ─── Table ────────────────────────────────────────────────────────────────────
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
+}
+
+.appointments-table {
+  width: 100%;
+
+  // Header
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    padding: 0 16px;
+  }
+
+  // Cells
+  .mat-mdc-cell {
+    padding: 0 16px;
+    font-size: 0.9rem;
+    vertical-align: middle;
+  }
+
+  // Row hover
+  .mat-mdc-row {
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
+  }
+
+  // Specific cells
+  .cell-time {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cell-patient {
     font-weight: 500;
-    color: var(--color-text-primary);
+    min-width: 160px;
+  }
 
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    .count {
-      font-size: 14px;
-      color: var(--color-text-tertiary);
-      font-weight: 400;
-    }
+  .cell-actions {
+    width: 56px;
+    text-align: right;
+    padding-right: 8px;
   }
 }
 
+// ─── Status pills ─────────────────────────────────────────────────────────────
+.status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.status-pending {
+    background: #fef3c7;   // amber-100
+    color: #78350f;        // amber-900  → contrast 7.2:1 on #fef3c7
+  }
+
+  &.status-confirmed {
+    background: #dcfce7;   // green-100
+    color: #14532d;        // green-900  → contrast 8.1:1 on #dcfce7
+  }
+
+  &.status-cancelled {
+    background: #fee2e2;   // red-100
+    color: #7f1d1d;        // red-900    → contrast 7.5:1 on #fee2e2
+  }
+
+  &.status-completed {
+    background: #dbeafe;   // blue-100
+    color: #1e3a8a;        // blue-900   → contrast 7.0:1 on #dbeafe
+  }
+
+  &.status-no_show {
+    background: #f3f4f6;   // gray-100
+    color: #374151;        // gray-700   → contrast 7.4:1 on #f3f4f6
+  }
+}
+
+// ─── Menu danger action ───────────────────────────────────────────────────────
+::ng-deep .action-danger {
+  color: var(--color-error, #b71c1c) !important;
+
+  mat-icon {
+    color: inherit;
+  }
+}
+
+// ─── Range filter ─────────────────────────────────────────────────────────────
 .range-filter {
   display: grid;
-  grid-template-columns: repeat(2, minmax(180px, 240px)) auto;
+  grid-template-columns: repeat(2, minmax(160px, 220px)) auto;
   gap: 12px;
   align-items: center;
-  margin: 16px 0 20px;
+  margin: 16px 0 4px;
 
   button mat-icon {
     margin-right: 6px;
   }
 }
 
-.appointments-list {
-  display: grid;
-  gap: 16px;
-}
-
-.appointment-card {
-  .appointment-avatar {
-    background: var(--gradient-primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    mat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-    }
-  }
-
-  mat-card-subtitle {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
-    mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-  }
-
-  .appointment-info {
-    .info-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 8px;
-      color: var(--color-text-primary);
-
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        flex-shrink: 0;
-      }
-
-      &.notes {
-        font-style: italic;
-      }
-    }
-
-    .status-chip {
-      margin-top: 12px;
-
-      mat-chip {
-        &.status-pending {
-          background: var(--color-warning);
-          color: white;
-        }
-
-        &.status-confirmed {
-          background: var(--color-success);
-          color: white;
-        }
-
-        &.status-cancelled {
-          background: var(--color-error);
-          color: white;
-        }
-
-        &.status-completed {
-          background: var(--color-primary);
-          color: white;
-        }
-
-        &.status-no_show {
-          background: var(--color-text-disabled);
-          color: white;
-        }
-      }
-    }
-  }
-}
-
+// ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 768px) {
   .appointments-page {
     padding: 16px;
+  }
+
+  .page-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .header-actions {
+      width: 100%;
+
+      button {
+        flex: 1;
+      }
+    }
   }
 
   .range-filter {
     grid-template-columns: 1fr;
   }
 
-  .page-header .header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-
-    button {
-      width: 100%;
+  // Hide date column on very small screens — it's implied by the tab context
+  .appointments-table {
+    .mat-column-date {
+      display: none;
     }
   }
 }
