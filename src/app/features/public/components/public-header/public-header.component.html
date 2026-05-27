@@ -16,24 +16,37 @@
     <div class="header-actions">
       @if (!isAuthenticated()) {
         <button
+          type="button"
           mat-stroked-button
           class="desktop-only"
           (click)="navigateToProfessional()"
         >
           Soy Médico
         </button>
-        <button mat-flat-button color="primary" (click)="navigateToLogin()">
+        <button type="button" mat-flat-button color="primary" (click)="navigateToLogin()">
           Iniciar Sesión
         </button>
       } @else {
-        <button mat-stroked-button class="desktop-only" (click)="logout()">
-          Cerrar Sesión
+        <!-- Botón de usuario autenticado — desktop -->
+        <button
+          type="button"
+          mat-icon-button
+          class="user-btn desktop-only"
+          [matMenuTriggerFor]="userMenu"
+          title="Mi cuenta"
+          aria-label="Mi cuenta"
+        >
+          <mat-icon>account_circle</mat-icon>
         </button>
       }
+
+      <!-- Botón hamburguesa — mobile siempre visible -->
       <button
+        type="button"
         mat-icon-button
         class="mobile-only"
         [matMenuTriggerFor]="mobileMenu"
+        aria-label="Menú"
       >
         <mat-icon>menu</mat-icon>
       </button>
@@ -41,36 +54,75 @@
   </div>
 </mat-toolbar>
 
+<!-- ═══════════════════════════════════════════════
+     Menú de usuario (desktop, autenticado)
+════════════════════════════════════════════════ -->
+<mat-menu #userMenu="matMenu" class="user-dropdown-menu">
+  <!-- Encabezado informativo (no interactivo) -->
+  <div class="user-menu-header">
+    <p class="user-menu-name">{{ userName() }}</p>
+    <p class="user-menu-email">{{ userEmail() }}</p>
+  </div>
+  <mat-divider />
+
+  <!-- Panel por cada contexto disponible -->
+  @for (ctx of availableContexts(); track ctx.type) {
+    <button type="button" mat-menu-item (click)="navigateToContext(ctx.type)">
+      <mat-icon>{{ getContextIcon(ctx.type) }}</mat-icon>
+      <span>{{ getContextLabel(ctx.type) }}</span>
+    </button>
+  }
+
+  <mat-divider />
+  <button type="button" mat-menu-item class="logout-item" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Cerrar Sesión
+  </button>
+</mat-menu>
+
+<!-- ═══════════════════════════════════════════════
+     Menú hamburguesa (mobile)
+════════════════════════════════════════════════ -->
 <mat-menu #mobileMenu="matMenu">
-  <button mat-menu-item routerLink="/">
+  <button type="button" mat-menu-item routerLink="/">
     <mat-icon>home</mat-icon>
     Inicio
   </button>
-  <button mat-menu-item routerLink="/search">
+  <button type="button" mat-menu-item routerLink="/search">
     <mat-icon>search</mat-icon>
     Buscar Médicos
   </button>
+
   @if (isPatientAuthenticated()) {
-    <button mat-menu-item routerLink="/patient/profile">
+    <button type="button" mat-menu-item routerLink="/patient/profile">
       <mat-icon>person</mat-icon>
       Mi Perfil
     </button>
-    <button mat-menu-item routerLink="/patient/wizard">
+    <button type="button" mat-menu-item routerLink="/patient/wizard">
       <mat-icon>event</mat-icon>
       Nueva Cita
     </button>
   }
+
   @if (!isAuthenticated()) {
-    <button mat-menu-item (click)="navigateToProfessional()">
+    <button type="button" mat-menu-item (click)="navigateToProfessional()">
       <mat-icon>work</mat-icon>
       Soy Médico
     </button>
-    <button mat-menu-item (click)="navigateToLogin()">
+    <button type="button" mat-menu-item (click)="navigateToLogin()">
       <mat-icon>login</mat-icon>
       Iniciar Sesión
     </button>
   } @else {
-    <button mat-menu-item (click)="logout()">
+    <mat-divider />
+    @for (ctx of availableContexts(); track ctx.type) {
+      <button type="button" mat-menu-item (click)="navigateToContext(ctx.type)">
+        <mat-icon>{{ getContextIcon(ctx.type) }}</mat-icon>
+        <span>{{ getContextLabel(ctx.type) }}</span>
+      </button>
+    }
+    <mat-divider />
+    <button type="button" mat-menu-item (click)="logout()">
       <mat-icon>logout</mat-icon>
       Cerrar Sesión
     </button>
