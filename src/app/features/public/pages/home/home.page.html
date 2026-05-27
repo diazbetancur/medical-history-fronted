@@ -155,18 +155,17 @@
     } @else if (specialties().length > 0) {
     <div class="specialties-chips">
       @for (specialty of specialties(); track specialty.id) {
-      <mat-chip
+      <button
+        type="button"
         class="specialty-chip"
         (click)="onSpecialtyClick(specialty)"
-        (keydown.enter)="onSpecialtyClick(specialty)"
-        tabindex="0"
       >
         @if (specialty.icon) {
         <mat-icon>{{ specialty.icon }}</mat-icon>
         } {{ specialty.name }} @if (specialty.professionalCount) {
         <span class="chip-count">({{ specialty.professionalCount }})</span>
         }
-      </mat-chip>
+      </button>
       }
     </div>
     <div class="specialties-actions">

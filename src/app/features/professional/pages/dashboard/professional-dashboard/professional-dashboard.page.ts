@@ -49,6 +49,7 @@ export class ProfessionalDashboardPage {
 
   /** True while we are redirecting — prevents the template from flashing */
   readonly redirecting = signal(false);
+  readonly pendingProfile = signal(false);
 
   readonly appointmentColumns = [
     'time',
@@ -91,10 +92,19 @@ export class ProfessionalDashboardPage {
         this.dashboard.set(this.mapSummaryToDashboard(data));
         this.loading.set(false);
       },
-      error: () => {
-        this.toast.error(
-          'Se presentó una falla consultando datos del dashboard.',
-        );
+      error: (err: { error?: { status?: number }; status?: number }) => {
+        const status = err?.error?.status ?? err?.status;
+        if (status === 404 || status === 400) {
+          this.pendingProfile.set(true);
+          this.toast.info(
+            'Tu perfil profesional está siendo revisado por el equipo.',
+          );
+          this.dashboard.set(this.getEmptyDashboard());
+        } else {
+          this.toast.error(
+            'Se presentó una falla consultando datos del dashboard.',
+          );
+        }
         this.loading.set(false);
       },
     });
@@ -109,6 +119,18 @@ export class ProfessionalDashboardPage {
       activePatientsCount: summary.activePatientsLast6Months,
       pendingEncountersCount: summary.pendingAppointmentsThisMonth,
       monthlyRevenue: summary.approxMonthlyIncome,
+      completedAppointmentsThisMonth: 0,
+      revenueMonth: '',
+    };
+  }
+
+  private getEmptyDashboard(): ProfessionalDashboardResponse {
+    return {
+      appointmentsTodayCount: 0,
+      appointmentsToday: [],
+      activePatientsCount: 0,
+      pendingEncountersCount: 0,
+      monthlyRevenue: 0,
       completedAppointmentsThisMonth: 0,
       revenueMonth: '',
     };

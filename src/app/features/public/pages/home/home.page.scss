@@ -321,9 +321,11 @@
 
   .specialty-chip {
     cursor: pointer;
+    border: none;
+    font-family: inherit;
+    font-size: 1rem;
     padding: 10px 20px;
     height: auto;
-    font-size: 1rem;
     border-radius: 24px;
     background: var(--color-background-alt);
     transition: all 0.2s;
