@@ -126,9 +126,12 @@ export class ProfessionalAvailabilityStore {
           const problemDetails = error.error as ProblemDetails;
           this._lastError.set(problemDetails);
           this._locations.set([]);
-          this.toastService.error(
-            problemDetails.title || MSG_AVAILABILITY_ERROR_LOAD,
-          );
+          // 404 = sin ubicaciones configuradas todavía (profesional nuevo)
+          if ((problemDetails?.status ?? 0) !== 404) {
+            this.toastService.error(
+              problemDetails?.title || MSG_AVAILABILITY_ERROR_LOAD,
+            );
+          }
           return of(null);
         }),
         finalize(() => this._isLoadingLocations.set(false)),
@@ -254,9 +257,12 @@ export class ProfessionalAvailabilityStore {
           const problemDetails = error.error as ProblemDetails;
           this._lastError.set(problemDetails);
           this._absences.set([]);
-          this.toastService.error(
-            problemDetails.title || MSG_AVAILABILITY_ERROR_LOAD,
-          );
+          // 404 = sin ausencias registradas todavía (profesional nuevo)
+          if ((problemDetails?.status ?? 0) !== 404) {
+            this.toastService.error(
+              problemDetails?.title || MSG_AVAILABILITY_ERROR_LOAD,
+            );
+          }
           return of(null);
         }),
         finalize(() => this._isLoadingAbsences.set(false)),

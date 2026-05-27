@@ -34,19 +34,35 @@ export class MenuService {
    * 1. Context must match exactly
    * 2. If requiredPermissions is empty/undefined → always visible
    * 3. If requiredPermissions exists → user must have at least ONE permission (OR logic)
+   * 4. If context is PROFESSIONAL and profile is not yet created → only show profile item
    */
   readonly filteredMenuItems: Signal<MenuItem[]> = computed(() => {
     const currentContext = this.authStore.currentContext();
     const userPermissions = this.authStore.userPermissions();
+    const user = this.authStore.user();
 
     if (!currentContext) {
       return [];
     }
 
-    return this.filterMenuItemsByContextAndPermissions(
+    const items = this.filterMenuItemsByContextAndPermissions(
       currentContext.type,
       userPermissions,
     );
+
+    // Profesional recién registrado sin perfil creado: solo mostrar "Mi Perfil Profesional"
+    // para guiarlo a completarlo antes de acceder a las demás secciones.
+    if (
+      currentContext.type === 'PROFESSIONAL' &&
+      user != null &&
+      !user.hasProfessionalProfile
+    ) {
+      return items.filter(
+        (item) => !item.isDivider && item.route === '/professional/profile',
+      );
+    }
+
+    return items;
   });
 
   /**

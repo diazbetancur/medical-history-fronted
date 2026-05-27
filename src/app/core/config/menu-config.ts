@@ -208,20 +208,6 @@ export const MENU_ITEMS: MenuItem[] = [
       ADMIN_PERMISSIONS.REPORTS_VIEW_ALL,
     ],
   },
-  {
-    isDivider: true,
-    label: '',
-    icon: '',
-    route: '',
-    context: 'ADMIN',
-  },
-  {
-    label: 'Configuración',
-    icon: 'settings',
-    route: '/admin/settings',
-    context: 'ADMIN',
-  },
-
   // ==========================================================================
   // PROFESSIONAL MENU
   // ==========================================================================

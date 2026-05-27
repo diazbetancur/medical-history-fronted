@@ -198,18 +198,6 @@ export const ADMIN_MENU: AdminMenuSection[] = [
         ],
         tooltip: 'Configurar roles y permisos',
       },
-      {
-        id: 'configuration',
-        label: 'Configuración',
-        icon: 'settings',
-        route: '/admin/config',
-        permissionsAny: [
-          PERMISSIONS.CONFIGURATION_VIEW,
-          PERMISSIONS.CONFIGURATION_UPDATE,
-          PERMISSIONS.CONFIGURATION_VIEW_AUDIT_LOG,
-        ],
-        tooltip: 'Configuración del sistema y logs de auditoría',
-      },
     ],
     dividerAfter: true,
   },
