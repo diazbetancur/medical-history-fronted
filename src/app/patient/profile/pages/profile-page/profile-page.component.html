@@ -185,13 +185,15 @@
 
                     <mat-form-field appearance="outline">
                       <mat-label>Tipo de sangre</mat-label>
-                      <input
-                        matInput
+                      <mat-select
                         formControlName="bloodType"
-                        maxlength="5"
-                        placeholder="O+"
                         title="Tipo de sangre"
-                      />
+                      >
+                        <mat-option value="">— Sin especificar —</mat-option>
+                        @for (bt of bloodTypes; track bt) {
+                          <mat-option [value]="bt">{{ bt }}</mat-option>
+                        }
+                      </mat-select>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">

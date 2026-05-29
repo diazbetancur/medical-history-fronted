@@ -105,7 +105,8 @@
             <button
               type="button"
               class="slot-item"
-              (click)="bookSlot(slot)"
+              [class.slot-selected]="pendingSlot()?.id === slot.id"
+              (click)="selectSlot(slot)"
               [disabled]="isBooking()"
             >
               <div class="slot-time">
@@ -124,6 +125,16 @@
             </button>
           }
         </div>
+
+        @if (pendingSlot()) {
+          <div class="pending-summary">
+            <mat-icon>schedule</mat-icon>
+            <span>
+              Horario seleccionado:
+              <strong>{{ pendingSlot()!.startTime }} - {{ pendingSlot()!.endTime }}</strong>
+            </span>
+          </div>
+        }
       }
     }
   }
@@ -144,6 +155,16 @@
   @if (bookingConfirmation()) {
     <button mat-flat-button color="primary" (click)="acceptConfirmation()">
       Aceptar
+    </button>
+  } @else if (pendingSlot()) {
+    <button mat-button (click)="close()" [disabled]="isBooking()">Cancelar</button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="confirmSlot()"
+      [disabled]="isBooking()"
+    >
+      Confirmar cita
     </button>
   } @else {
     <button mat-button (click)="close()">Cerrar</button>
