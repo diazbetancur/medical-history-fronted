@@ -19,6 +19,14 @@
           <span>{{ appointment()!.professionalName }}</span>
         </div>
 
+        @if (appointment()!.specialty) {
+        <mat-divider></mat-divider>
+        <div class="row">
+          <strong>Especialidad:</strong>
+          <span>{{ appointment()!.specialty }}</span>
+        </div>
+        }
+
         <mat-divider></mat-divider>
 
         <div class="row">
@@ -33,9 +41,15 @@
           <span>{{ formatDate(appointment()!.appointmentDate) }}</span>
         </div>
         <div class="row">
-          <strong>Hora:</strong>
+          <strong>Hora inicio:</strong>
           <span>{{ appointment()!.timeSlot || "-" }}</span>
         </div>
+        @if (appointment()!.endTime) {
+        <div class="row">
+          <strong>Hora fin:</strong>
+          <span>{{ appointment()!.endTime }}</span>
+        </div>
+        }
       </mat-card-content>
     </mat-card>
   }

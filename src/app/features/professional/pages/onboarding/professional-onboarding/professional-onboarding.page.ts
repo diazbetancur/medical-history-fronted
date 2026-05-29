@@ -140,8 +140,8 @@ export class ProfessionalOnboardingPage implements OnInit {
     // apply a last-resort fallback in saveProfile() before dispatching.
     countryId: [''],
     cityId: ['', [Validators.required]],
-    phone: ['', [Validators.maxLength(20)]],
-    whatsApp: ['', [Validators.maxLength(20)]],
+    phone: ['', [Validators.maxLength(20), Validators.pattern(/^[+]?[\d\s\-().]{7,20}$/)]],
+    whatsApp: ['', [Validators.maxLength(20), Validators.pattern(/^[+]?[\d\s\-().]{7,20}$/)]],
     email: ['', [Validators.email, Validators.maxLength(100)]],
     address: ['', [Validators.maxLength(300)]],
   });

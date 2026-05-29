@@ -53,6 +53,8 @@ import { PrivacySettingsComponent } from '../../components/privacy/privacy-setti
 })
 export class ProfilePageComponent implements OnInit {
   readonly bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  readonly genderOptions = ['Masculino', 'Femenino', 'Otro', 'Prefiero no especificar'];
+  readonly documentTypeOptions = ['DNI', 'Pasaporte', 'RNP'];
   private readonly patientService = inject(PatientService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
@@ -70,10 +72,10 @@ export class ProfilePageComponent implements OnInit {
       [Validators.required, Validators.email, Validators.maxLength(255)],
     ],
     phone: ['', [Validators.maxLength(20)]],
-    documentType: ['', [Validators.maxLength(10)]],
+    documentType: [''],
     documentNumber: ['', [Validators.maxLength(30)]],
     dateOfBirth: [''],
-    gender: ['', [Validators.maxLength(20)]],
+    gender: [''],
     bloodType: [''],
     countryName: ['', [Validators.maxLength(100)]],
     cityName: ['', [Validators.maxLength(100)]],
@@ -97,6 +99,10 @@ export class ProfilePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSummary();
+  }
+
+  onTabChange(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   loadSummary(): void {

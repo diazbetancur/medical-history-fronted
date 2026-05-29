@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <mat-tab-group class="profile-tabs" animationDuration="300ms">
+  <mat-tab-group class="profile-tabs" animationDuration="300ms" (selectedTabChange)="onTabChange()">
     <!-- Tab: Resumen -->
     <mat-tab label="Resumen">
       <div class="tab-content">
@@ -141,13 +141,15 @@
 
                     <mat-form-field appearance="outline">
                       <mat-label>Tipo de documento</mat-label>
-                      <input
-                        matInput
+                      <mat-select
                         formControlName="documentType"
-                        maxlength="10"
-                        placeholder="DNI"
                         title="Tipo de documento"
-                      />
+                      >
+                        <mat-option value="">— Sin especificar —</mat-option>
+                        @for (dt of documentTypeOptions; track dt) {
+                          <mat-option [value]="dt">{{ dt }}</mat-option>
+                        }
+                      </mat-select>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -174,13 +176,15 @@
 
                     <mat-form-field appearance="outline">
                       <mat-label>Género</mat-label>
-                      <input
-                        matInput
+                      <mat-select
                         formControlName="gender"
-                        maxlength="20"
-                        placeholder="Masculino"
                         title="Género"
-                      />
+                      >
+                        <mat-option value="">— Sin especificar —</mat-option>
+                        @for (g of genderOptions; track g) {
+                          <mat-option [value]="g">{{ g }}</mat-option>
+                        }
+                      </mat-select>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">

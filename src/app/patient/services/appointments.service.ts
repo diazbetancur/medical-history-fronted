@@ -58,6 +58,8 @@ export interface MyAppointmentDetailRawDto {
   status?: number | string;
   statusDisplay?: string;
   reason?: string;
+  specialty?: string;
+  specialtyName?: string;
 }
 
 export interface MyAppointmentDetailDto {
@@ -66,6 +68,8 @@ export interface MyAppointmentDetailDto {
   address: string;
   appointmentDate: string;
   timeSlot: string;
+  endTime: string;
+  specialty: string;
   startUtc: string;
   endUtc: string;
 }
@@ -239,6 +243,8 @@ export class AppointmentsService {
       address: item?.address ?? 'Dirección por confirmar',
       appointmentDate,
       timeSlot: item?.timeSlot ?? fallbackTime,
+      endTime: this.extractTime(item?.endUtc),
+      specialty: item?.specialty ?? item?.specialtyName ?? '',
       startUtc: this.asText(item?.startUtc),
       endUtc: this.asText(item?.endUtc),
     };
