@@ -1,5 +1,16 @@
 <div class="dashboard-container">
-  <h1>Dashboard de Administración</h1>
+  <div class="dashboard-header">
+    <h1>Dashboard de Administración</h1>
+    <button
+      type="button"
+      mat-icon-button
+      (click)="loadSummary()"
+      [disabled]="loading()"
+      matTooltip="Actualizar métricas"
+    >
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
 
   @if (loading()) {
   <div class="loading-state">
@@ -10,7 +21,7 @@
   <mat-card class="error-card">
     <mat-card-content>
       <p>{{ error() }}</p>
-      <button mat-stroked-button (click)="loadSummary()">Reintentar</button>
+      <button type="button" mat-stroked-button (click)="loadSummary()">Reintentar</button>
     </mat-card-content>
   </mat-card>
   } @else {
@@ -45,6 +56,7 @@
     <mat-card>
       <mat-card-header>
         <mat-card-title>Citas Solicitadas Este Mes</mat-card-title>
+        <mat-card-subtitle>Mes en curso (datos acumulados)</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <p class="metric">{{ appointmentsRequestedThisMonth() }}</p>
@@ -52,6 +64,6 @@
     </mat-card>
   </div>
 
-  <p class="generated-at">Actualizado: {{ generatedAtText() }}</p>
+  <p class="generated-at">Última actualización: {{ generatedAtText() }}</p>
   }
 </div>

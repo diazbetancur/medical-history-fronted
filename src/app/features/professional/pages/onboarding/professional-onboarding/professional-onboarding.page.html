@@ -118,6 +118,9 @@
                   type="tel"
                   placeholder="+504 8907 7887"
                 />
+                @if (profileForm.get('phone')?.hasError('pattern')) {
+                  <mat-error>Formato inválido. Ej: +504 8907 7887</mat-error>
+                }
               </mat-form-field>
 
               <mat-form-field appearance="outline">

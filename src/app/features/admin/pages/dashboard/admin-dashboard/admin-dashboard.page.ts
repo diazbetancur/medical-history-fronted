@@ -1,12 +1,15 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AdminApi, getErrorMessage } from '@data/api';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [MatCardModule, MatProgressSpinnerModule],
+  imports: [MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
   templateUrl: './admin-dashboard.page.html',
   styleUrl: './admin-dashboard.page.scss',
 })
