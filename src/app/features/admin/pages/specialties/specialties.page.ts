@@ -136,11 +136,18 @@ export class SpecialtiesPageComponent implements OnInit {
       return;
     }
 
+    const count = specialty.professionalsCount ?? 0;
+    const plural = count === 1 ? '' : 'es';
+    const pluralAdj = count === 1 ? '' : 's';
+    const impactNote = count > 0
+      ? ` Esta especialidad tiene ${count} profesional${plural} asignado${pluralAdj} que perderán esta asignación.`
+      : '';
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '440px',
       data: {
         title: 'Eliminar especialidad',
-        message: `¿Deseas eliminar la especialidad "${specialty.name}"?`,
+        message: `¿Deseas eliminar la especialidad "${specialty.name}"?${impactNote}`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         confirmColor: 'warn',
