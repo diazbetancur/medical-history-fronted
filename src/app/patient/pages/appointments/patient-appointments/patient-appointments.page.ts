@@ -138,7 +138,9 @@ export class PatientAppointmentsPageComponent implements OnInit {
   }
 
   formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
+    // Parse YYYY-MM-DD as local time to avoid UTC-offset shifting the day
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('es-ES', {
       weekday: 'short',
       year: 'numeric',

@@ -86,6 +86,7 @@ export class BookAppointmentDialogComponent {
   readonly selectedDate = signal<Date | null>(null);
   readonly availableSlots = signal<SlotDto[]>([]);
   readonly observation = signal('');
+  readonly pendingSlot = signal<SlotDto | null>(null);
 
   readonly minDate = this.getTodayDate();
 
@@ -102,6 +103,7 @@ export class BookAppointmentDialogComponent {
     const selected = new Date(date);
     selected.setHours(0, 0, 0, 0);
     this.selectedDate.set(selected);
+    this.pendingSlot.set(null);
     this.loadSlots(formatDateOnly(selected));
   }
 
@@ -121,11 +123,17 @@ export class BookAppointmentDialogComponent {
     void this.router.navigate(['/patient/appointments']);
   }
 
-  bookSlot(slot: SlotDto): void {
+  selectSlot(slot: SlotDto): void {
     if (this.isBooking()) return;
+    this.pendingSlot.set(slot);
+    this.bookingError.set(null);
+  }
+
+  confirmSlot(): void {
+    const slot = this.pendingSlot();
+    if (!slot || this.isBooking()) return;
 
     const observation = this.getTrimmedObservation();
-
     const professionalId = this.professionalId();
     const selectedDate = this.selectedDate();
 

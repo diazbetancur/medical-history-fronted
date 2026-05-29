@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { RouterLink } from '@angular/router';
@@ -37,6 +38,7 @@ import { PrivacySettingsComponent } from '../../components/privacy/privacy-setti
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatSnackBarModule,
     MatTabsModule,
     PatientMedicationsPage,
@@ -50,6 +52,7 @@ import { PrivacySettingsComponent } from '../../components/privacy/privacy-setti
   styleUrl: './profile-page.component.scss',
 })
 export class ProfilePageComponent implements OnInit {
+  readonly bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   private readonly patientService = inject(PatientService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
@@ -71,7 +74,7 @@ export class ProfilePageComponent implements OnInit {
     documentNumber: ['', [Validators.maxLength(30)]],
     dateOfBirth: [''],
     gender: ['', [Validators.maxLength(20)]],
-    bloodType: ['', [Validators.maxLength(5)]],
+    bloodType: [''],
     countryName: ['', [Validators.maxLength(100)]],
     cityName: ['', [Validators.maxLength(100)]],
     addressLine1: ['', [Validators.maxLength(300)]],
