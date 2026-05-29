@@ -63,7 +63,12 @@ export class AppointmentDetailDialogComponent implements OnInit {
 
   formatDate(value: string | undefined): string {
     if (!value) return '-';
-    return new Date(value).toLocaleDateString('es-ES', {
+    // Parse YYYY-MM-DD as local time to avoid UTC offset shifting the day
+    const parts = value.split('T')[0].split('-').map(Number);
+    const date = parts.length === 3
+      ? new Date(parts[0], parts[1] - 1, parts[2])
+      : new Date(value);
+    return date.toLocaleDateString('es-ES', {
       weekday: 'short',
       year: 'numeric',
       month: 'short',

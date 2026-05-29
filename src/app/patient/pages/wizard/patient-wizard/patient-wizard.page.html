@@ -142,6 +142,10 @@
                 <mat-chip>+{{ remainingSpecialtiesCount(item) }}</mat-chip>
                 }
               </mat-chip-set>
+              } @else if (item.professionalTitle) {
+              <p class="meta">{{ item.professionalTitle }}</p>
+              } @else {
+              <p class="meta secondary-text">Sin especialidad registrada</p>
               } @if (hasLocation(item)) {
               <p class="meta">{{ locationText(item) }}</p>
               } @if (experienceText(item); as years) {
