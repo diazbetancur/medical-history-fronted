@@ -168,7 +168,7 @@ export class PatientExamsPage implements OnInit {
         }
         const link = document.createElement('a');
         link.href = url;
-        link.download = exam.fileName;
+        link.download = exam.originalFileName;
         link.click();
       },
       error: (error) => {

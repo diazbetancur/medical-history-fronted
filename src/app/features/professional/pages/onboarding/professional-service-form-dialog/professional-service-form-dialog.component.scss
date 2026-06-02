@@ -1,0 +1,25 @@
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-primary, #1976d2);
+
+  mat-icon {
+    color: inherit;
+  }
+}
+
+.dialog-form {
+  display: grid;
+  gap: 12px;
+  min-width: min(92vw, 560px);
+  padding-top: 4px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+mat-dialog-actions {
+  padding-top: 8px;
+}

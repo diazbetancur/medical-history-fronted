@@ -381,48 +381,7 @@
             </button>
           </div>
 
-          @if (showServiceForm()) {
-          <form
-            class="inline-form"
-            [formGroup]="serviceForm"
-            (ngSubmit)="saveService()"
-          >
-            <div class="row-2">
-              <mat-form-field appearance="outline">
-                <mat-label>Nombre *</mat-label>
-                <input
-                  matInput
-                  formControlName="name"
-                  placeholder="Ej. Consulta General"
-                />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Descripción</mat-label>
-                <input
-                  matInput
-                  formControlName="description"
-                  placeholder="Ej. Atención primaria"
-                />
-              </mat-form-field>
-            </div>
-
-            <div class="inline-actions">
-              <button mat-button type="button" (click)="cancelServiceEdit()">
-                Cancelar
-              </button>
-              <button
-                mat-flat-button
-                color="primary"
-                type="submit"
-                [disabled]="sectionBusy()"
-              >
-                {{ editingServiceId() ? 'Actualizar servicio' : 'Guardar
-                servicio' }}
-              </button>
-            </div>
-          </form>
-          } @if (services().length > 0) {
+          @if (services().length > 0) {
           <div class="services-table-wrap">
             <table class="services-table">
               <thead>

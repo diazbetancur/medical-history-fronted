@@ -1,0 +1,43 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>medical_information</mat-icon>
+  <span>{{ data.title }}</span>
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="save()">
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre *</mat-label>
+      <input
+        matInput
+        formControlName="name"
+        placeholder="Ej. Consulta General"
+        autocomplete="off"
+      />
+      @if (form.controls.name.hasError('required')) {
+      <mat-error>El nombre es obligatorio</mat-error>
+      } @if (form.controls.name.hasError('maxlength')) {
+      <mat-error>El nombre no puede exceder 150 caracteres</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción</mat-label>
+      <textarea
+        matInput
+        rows="4"
+        formControlName="description"
+        placeholder="Ej. Atención primaria"
+      ></textarea>
+      @if (form.controls.description.hasError('maxlength')) {
+      <mat-error>La descripción no puede exceder 1000 caracteres</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">
+    {{ data.submitLabel }}
+  </button>
+</mat-dialog-actions>

@@ -57,11 +57,11 @@
         <mat-slide-toggle formControlName="isLockedOut" color="warn">
           Marcar como bloqueada
         </mat-slide-toggle>
+        @if (form.get('isLockedOut')?.value) {
         <span class="toggle-hint">
-          @if (form.get('isLockedOut')?.value) { Estado administrativo. El
-          backend actual no aplica lockout completo por sí solo. } @else { El
-          usuario queda marcado como activo. }
+          El usuario no podrá ingresar a la cuenta mientras esté bloqueado.
         </span>
+        }
       </div>
     </div>
   </form>

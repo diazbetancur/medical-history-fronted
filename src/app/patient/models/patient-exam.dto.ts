@@ -34,7 +34,7 @@ export interface PatientExamDto {
 export interface ExamAttachmentDto {
   id: string;
   examId: string;
-  fileName: string;
+  originalFileName: string;
   fileSize: number; // bytes
   mimeType: string;
   uploadedAt: string; // ISO datetime

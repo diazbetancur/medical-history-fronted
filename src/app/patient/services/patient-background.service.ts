@@ -44,20 +44,9 @@ export class PatientBackgroundService {
         map(
           (response) =>
             ({
-              items: (response?.items ?? []).map((item: any) => ({
-                id: item.id,
-                patientProfileId: '',
-                type: item.type,
-                title: item.typeName ?? item.type,
-                description: item.description,
-                eventDate: item.diagnosedYear
-                  ? `${item.diagnosedYear}-01-01`
-                  : null,
-                isChronic: item.type === 'Chronic',
-                isActive: item.isActive,
-                createdAt: item.dateCreated,
-                updatedAt: item.dateCreated,
-              })),
+              items: (response?.items ?? []).map((item: any) =>
+                this.mapBackground(item),
+              ),
               totalCount: response?.total ?? response?.totalCount ?? 0,
             }) as PatientBackgroundResponseDto,
         ),
@@ -80,31 +69,11 @@ export class PatientBackgroundService {
       .post<any>(this.baseUrl, {
         type: dto.type,
         title: dto.title,
-        description: dto.description || dto.title,
-        diagnosedYear: dto.eventDate
-          ? Number(dto.eventDate.slice(0, 4))
-          : undefined,
-        notes: dto.isChronic ? 'Crónico' : undefined,
+        description: dto.description || null,
+        eventDate: dto.eventDate || null,
+        isChronic: dto.isChronic,
       })
-      .pipe(
-        map(
-          (item) =>
-            ({
-              id: item.id,
-              patientProfileId: '',
-              type: item.type,
-              title: item.typeName ?? item.type,
-              description: item.description,
-              eventDate: item.diagnosedYear
-                ? `${item.diagnosedYear}-01-01`
-                : null,
-              isChronic: item.type === 'Chronic',
-              isActive: item.isActive,
-              createdAt: item.dateCreated,
-              updatedAt: item.dateCreated,
-            }) as BackgroundDto,
-        ),
-      )
+      .pipe(map((item) => this.mapBackground(item)))
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -123,31 +92,12 @@ export class PatientBackgroundService {
     return this.http
       .put<any>(`${this.baseUrl}/${id}`, {
         type: dto.type,
-        description: dto.description || dto.title,
-        diagnosedYear: dto.eventDate
-          ? Number(dto.eventDate.slice(0, 4))
-          : undefined,
-        notes: dto.isChronic ? 'Crónico' : undefined,
+        title: dto.title,
+        description: dto.description || null,
+        eventDate: dto.eventDate || null,
+        isChronic: dto.isChronic ?? false,
       })
-      .pipe(
-        map(
-          (item) =>
-            ({
-              id: item.id,
-              patientProfileId: '',
-              type: item.type,
-              title: item.typeName ?? item.type,
-              description: item.description,
-              eventDate: item.diagnosedYear
-                ? `${item.diagnosedYear}-01-01`
-                : null,
-              isChronic: item.type === 'Chronic',
-              isActive: item.isActive,
-              createdAt: item.dateCreated,
-              updatedAt: item.dateCreated,
-            }) as BackgroundDto,
-        ),
-      )
+      .pipe(map((item) => this.mapBackground(item)))
       .pipe(catchError((error) => this.handleError(error)));
   }
 
@@ -174,5 +124,22 @@ export class PatientBackgroundService {
   private handleError(error: any): Observable<never> {
     const apiError = createApiError(error);
     return throwError(() => apiError);
+  }
+
+  private mapBackground(item: any): BackgroundDto {
+    return {
+      id: item.id,
+      patientProfileId: item.patientProfileId ?? '',
+      type: item.type,
+      title: item.title ?? item.typeName ?? item.type,
+      description: item.description ?? null,
+      eventDate:
+        item.eventDate ??
+        (item.diagnosedYear ? `${item.diagnosedYear}-01-01` : null),
+      isChronic: item.isChronic === true,
+      isActive: item.isActive,
+      createdAt: item.createdAtUtc ?? item.dateCreated,
+      updatedAt: item.updatedAtUtc ?? item.dateUpdated ?? item.dateCreated,
+    };
   }
 }

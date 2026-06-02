@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +28,25 @@ import {
 } from '@data/api';
 import { PAGE_SIZE_LARGE } from '@shared/constants/pagination.constants';
 import { type PaginatedProfessionalsResponse } from '@data/models';
+
+const OBSERVATION_MIN_NON_WHITESPACE = 10;
+const OBSERVATION_MAX_LENGTH = 1000;
+
+function minNonWhitespaceLengthValidator(minLength: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = String(control.value ?? '');
+    const actualLength = value.replace(/\s/g, '').length;
+
+    return actualLength >= minLength
+      ? null
+      : {
+          minNonWhitespaceLength: {
+            requiredLength: minLength,
+            actualLength,
+          },
+        };
+  };
+}
 
 /**
  * Book Appointment Page
@@ -135,7 +157,14 @@ export class BookAppointmentPageComponent {
     });
 
     this.observationForm = this.fb.group({
-      observation: ['', [Validators.maxLength(1000)]],
+      observation: [
+        '',
+        [
+          Validators.required,
+          Validators.maxLength(OBSERVATION_MAX_LENGTH),
+          minNonWhitespaceLengthValidator(OBSERVATION_MIN_NON_WHITESPACE),
+        ],
+      ],
     });
 
     // Load professionals on init

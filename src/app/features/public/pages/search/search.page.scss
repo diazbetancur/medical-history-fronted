@@ -29,6 +29,7 @@
 
 .filters-section {
   margin-bottom: 24px;
+  --search-control-height: 56px;
 
   .filters-card {
     padding: 12px;
@@ -47,27 +48,49 @@
 
   .filter-field {
     width: 100%;
+    margin: 0;
   }
 
   .search-btn {
-    height: 56px;
+    height: var(--search-control-height);
     min-width: 120px;
+    align-self: start;
+    border-radius: 12px;
+    padding: 0 24px;
+    white-space: nowrap;
   }
 
   .compact-field {
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      height: var(--search-control-height);
+      border-radius: 12px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-flex {
+      height: 100%;
+      align-items: center;
+    }
+
     ::ng-deep .mat-mdc-form-field-infix {
-      min-height: 40px;
-      padding-top: 8px;
-      padding-bottom: 8px;
+      min-height: 0;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      display: none;
     }
 
     ::ng-deep input.mat-mdc-input-element,
     ::ng-deep .mat-mdc-select-value,
     ::ng-deep .mat-mdc-select-value-text {
+      line-height: 24px;
       text-align: left;
     }
 
     ::ng-deep .mat-mdc-select-trigger {
+      height: 24px;
+      align-items: center;
       justify-content: flex-start;
     }
 

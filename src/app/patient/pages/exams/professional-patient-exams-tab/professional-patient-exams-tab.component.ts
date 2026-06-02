@@ -160,7 +160,7 @@ export class ProfessionalPatientExamsTabComponent {
           }
           const link = document.createElement('a');
           link.href = url;
-          link.download = exam.fileName;
+          link.download = exam.originalFileName;
           link.click();
         },
         error: (err: ApiError) => {
