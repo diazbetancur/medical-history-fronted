@@ -159,7 +159,7 @@ export class PatientExamsMvpService {
       title: item.title,
       examDate: item.examDate,
       notes: item.notes ?? undefined,
-      fileName: item.fileName ?? item.title,
+      originalFileName: item.originalFileName ?? item.title,
       fileType: contentType === 'application/pdf' ? 'PDF' : 'IMAGE',
       fileSizeBytes: item.fileSizeBytes ?? 0,
       uploadedAtUtc: item.dateCreated ?? item.uploadedAtUtc,

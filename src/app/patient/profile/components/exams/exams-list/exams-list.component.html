@@ -30,7 +30,7 @@
           <div>
             <h3>Error al cargar exámenes</h3>
             <p>{{ store.error() }}</p>
-            @if (store.error()?.includes('PATIENT_PROFILE_NOT_FOUND')) {
+            @if (store.error()?.includes("PATIENT_PROFILE_NOT_FOUND")) {
               <button mat-raised-button color="primary" (click)="goToWizard()">
                 Completar mi Perfil
               </button>
@@ -93,9 +93,7 @@
             }
 
             <div class="exam-footer">
-              <span class="exam-date">
-                Creado: {{ formatDate(exam.createdAt) }}
-              </span>
+              <span class="exam-date"> Ver Examen </span>
               <mat-icon class="arrow-icon">chevron_right</mat-icon>
             </div>
           </mat-card-content>

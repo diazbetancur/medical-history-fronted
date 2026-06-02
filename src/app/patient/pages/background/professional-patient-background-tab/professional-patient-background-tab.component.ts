@@ -121,11 +121,13 @@ export class ProfessionalPatientBackgroundTabComponent {
 
   getTypeLabel(type: string): string {
     const labels: Record<string, string> = {
-      Surgery: 'Cirugía',
-      ChronicDisease: 'Enfermedad Crónica',
-      Trauma: 'Trauma',
-      FamilyHistory: 'Antecedente Familiar',
-      Hospitalization: 'Hospitalización',
+      Chronic: 'Crónico',
+      Surgical: 'Quirúrgico',
+      Traumatic: 'Traumático',
+      Allergic: 'Alérgico',
+      Hereditary: 'Hereditario',
+      Perinatal: 'Perinatal',
+      Pharmacological: 'Farmacológico',
       Other: 'Otro',
     };
     return labels[type] || type;

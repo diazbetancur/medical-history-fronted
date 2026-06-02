@@ -19,7 +19,7 @@ export interface ExamDto {
   title: string;
   examDate: string; // ISO date
   notes?: string;
-  fileName: string;
+  originalFileName: string;
   fileType: ExamFileType;
   fileSizeBytes: number;
   uploadedAtUtc: string;

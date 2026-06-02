@@ -190,7 +190,7 @@ export class PatientExamsService {
         {
           id: exam.id,
           examId: exam.id,
-          fileName: exam.fileName,
+          originalFileName: exam.originalFileName,
           fileSize: exam.fileSizeBytes,
           mimeType: exam.fileType === 'PDF' ? 'application/pdf' : 'image/*',
           uploadedAt: exam.uploadedAtUtc,

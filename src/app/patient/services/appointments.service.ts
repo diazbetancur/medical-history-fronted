@@ -58,8 +58,23 @@ export interface MyAppointmentDetailRawDto {
   status?: number | string;
   statusDisplay?: string;
   reason?: string;
+  observation?: string;
+  consultationReason?: string;
   specialty?: string;
   specialtyName?: string;
+  specialties?: Array<{
+    id?: string;
+    name?: string;
+    specialtyId?: string;
+    specialtyName?: string;
+    isPrimary?: boolean;
+  }>;
+}
+
+export interface MyAppointmentSpecialtyDto {
+  id: string;
+  name: string;
+  isPrimary: boolean;
 }
 
 export interface MyAppointmentDetailDto {
@@ -70,6 +85,8 @@ export interface MyAppointmentDetailDto {
   timeSlot: string;
   endTime: string;
   specialty: string;
+  specialties: MyAppointmentSpecialtyDto[];
+  consultationReason: string;
   startUtc: string;
   endUtc: string;
 }
@@ -220,10 +237,7 @@ export class AppointmentsService {
           '',
         name:
           item?.professional?.name ?? item?.professionalName ?? 'Profesional',
-        specialty:
-          item?.professional?.specialty ??
-          item?.specialtyName ??
-          'Especialidad',
+        specialty: this.extractSpecialty(item),
         photoUrl: item?.professional?.photoUrl,
       },
       createdAt: item?.createdAt ?? new Date().toISOString(),
@@ -236,6 +250,7 @@ export class AppointmentsService {
   ): MyAppointmentDetailDto {
     const appointmentDate = this.extractDate(item?.appointmentDate);
     const fallbackTime = this.extractTime(item?.startUtc);
+    const specialties = this.extractDetailSpecialties(item);
 
     return {
       professionalName: item?.professionalName ?? 'Profesional',
@@ -244,7 +259,14 @@ export class AppointmentsService {
       appointmentDate,
       timeSlot: item?.timeSlot ?? fallbackTime,
       endTime: this.extractTime(item?.endUtc),
-      specialty: item?.specialty ?? item?.specialtyName ?? '',
+      specialty:
+        specialties.map((specialty) => specialty.name).join(', ') ||
+        item?.specialty ||
+        item?.specialtyName ||
+        '',
+      specialties,
+      consultationReason:
+        item?.consultationReason ?? item?.observation ?? item?.reason ?? '',
       startUtc: this.asText(item?.startUtc),
       endUtc: this.asText(item?.endUtc),
     };
@@ -307,6 +329,39 @@ export class AppointmentsService {
       return String(value);
     }
     return '';
+  }
+
+  private extractSpecialty(item: any): string {
+    // Scalar field on professional or top-level
+    const scalar: string =
+      item?.professional?.specialty || item?.specialtyName || '';
+    if (scalar) return scalar;
+
+    // Array on professional (e.g. professional.specialties[])
+    const fromPro = (item?.professional?.specialties as Array<{ name?: string }> | undefined)
+      ?.map((s) => s?.name)
+      .filter(Boolean)
+      .join(', ');
+    if (fromPro) return fromPro;
+
+    // Array on root item (e.g. specialties[])
+    const fromRoot = (item?.specialties as Array<{ name?: string }> | undefined)
+      ?.map((s) => s?.name)
+      .filter(Boolean)
+      .join(', ');
+    return fromRoot ?? '';
+  }
+
+  private extractDetailSpecialties(
+    item: MyAppointmentDetailRawDto,
+  ): MyAppointmentSpecialtyDto[] {
+    return (item?.specialties ?? [])
+      .map((specialty) => ({
+        id: specialty.id ?? specialty.specialtyId ?? specialty.name ?? '',
+        name: specialty.name ?? specialty.specialtyName ?? '',
+        isPrimary: specialty.isPrimary ?? false,
+      }))
+      .filter((specialty) => !!specialty.name.trim());
   }
 
   /**

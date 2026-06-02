@@ -76,17 +76,29 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="observation-input">
-        <mat-label>Motivo de la consulta</mat-label>
+        <mat-label>Motivo de la consulta *</mat-label>
         <textarea
           matInput
           rows="4"
           maxlength="1000"
+          required
           [value]="observation()"
           (input)="onObservationInput($any($event.target).value)"
-          placeholder="Agrega un comentario para el profesional si lo necesitas"
+          (blur)="markObservationTouched()"
+          placeholder="Describe brevemente el motivo de tu consulta"
         ></textarea>
-        <mat-hint align="end">{{ observation().length }}/1000</mat-hint>
+        <mat-hint align="start">
+          Mínimo 10 caracteres que no sean espacios
+        </mat-hint>
+        <mat-hint align="end">
+          {{ observationNonWhitespaceLength() }}/10 · {{ observation().length }}/1000
+        </mat-hint>
       </mat-form-field>
+      @if (showObservationError()) {
+        <div class="field-error">
+          Ingresa al menos 10 caracteres que no sean espacios.
+        </div>
+      }
 
       @if (loadingSlots()) {
         <div class="state-block">
@@ -162,7 +174,7 @@
       mat-flat-button
       color="primary"
       (click)="confirmSlot()"
-      [disabled]="isBooking()"
+      [disabled]="isBooking() || !isObservationValid()"
     >
       Confirmar cita
     </button>

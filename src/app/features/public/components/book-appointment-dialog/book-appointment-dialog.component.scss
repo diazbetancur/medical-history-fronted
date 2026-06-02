@@ -58,6 +58,12 @@
   width: 100%;
 }
 
+.field-error {
+  margin-top: -8px;
+  color: var(--color-danger);
+  font-size: 12px;
+}
+
 .state-block {
   display: flex;
   align-items: center;

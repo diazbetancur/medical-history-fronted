@@ -194,6 +194,11 @@
                 color: var(--color-warning);
               }
 
+              &.non-chronic-chip {
+                background-color: var(--color-success-bg);
+                color: var(--color-success);
+              }
+
               &.date-chip {
                 background-color: var(--color-background-alt);
                 color: var(--color-text-primary);
