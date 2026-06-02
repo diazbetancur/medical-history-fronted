@@ -19,13 +19,35 @@
           <span>{{ appointment()!.professionalName }}</span>
         </div>
 
-        @if (appointment()!.specialty) {
+        @if (appointment()!.specialties.length > 0) {
         <mat-divider></mat-divider>
         <div class="row">
-          <strong>Especialidad:</strong>
+          <strong>Especialidades:</strong>
+          <div class="specialty-list">
+            @for (specialty of appointment()!.specialties; track specialty.id) {
+              <span class="specialty-pill">
+                {{ specialty.name }}
+                @if (specialty.isPrimary) {
+                  <small>Principal</small>
+                }
+              </span>
+            }
+          </div>
+        </div>
+        } @else if (appointment()!.specialty) {
+        <mat-divider></mat-divider>
+        <div class="row">
+          <strong>Especialidades:</strong>
           <span>{{ appointment()!.specialty }}</span>
         </div>
         }
+
+        <mat-divider></mat-divider>
+
+        <div class="row">
+          <strong>Motivo:</strong>
+          <span>{{ appointment()!.consultationReason || "-" }}</span>
+        </div>
 
         <mat-divider></mat-divider>
 

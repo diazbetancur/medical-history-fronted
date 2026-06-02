@@ -38,10 +38,10 @@
               <span class="label">Fecha del Examen:</span>
               <span class="value">{{ formatDate(exam.examDate) }}</span>
             </div>
-            <div class="metadata-item">
+            <!-- <div class="metadata-item">
               <span class="label">Creado:</span>
               <span class="value">{{ formatDate(exam.createdAt) }}</span>
-            </div>
+            </div> -->
             @if (exam.updatedAt !== exam.createdAt) {
               <div class="metadata-item">
                 <span class="label">Última actualización:</span>
@@ -77,7 +77,7 @@
                     {{ getFileIcon(attachment.mimeType) }}
                   </mat-icon>
                   <div matListItemTitle class="attachment-name">
-                    {{ attachment.fileName }}
+                    {{ attachment.originalFileName }}
                   </div>
                   <div matListItemLine class="attachment-meta">
                     {{ formatFileSize(attachment.fileSize) }} •

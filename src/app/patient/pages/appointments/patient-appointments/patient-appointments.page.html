@@ -42,7 +42,9 @@
 
           <div class="appointment-info">
             <h3>{{ apt.professional.name }}</h3>
+            @if (apt.professional.specialty) {
             <p class="specialty">{{ apt.professional.specialty }}</p>
+            }
 
             <div class="appointment-meta">
               <span class="date">
@@ -51,7 +53,7 @@
               </span>
               <span class="time">
                 <mat-icon>schedule</mat-icon>
-                {{ apt.startTime }}
+                {{ apt.startTime }}{{ apt.endTime ? ' - ' + apt.endTime : '' }}
               </span>
             </div>
 

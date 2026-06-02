@@ -314,7 +314,7 @@ export class UsersPageComponent implements OnInit {
   }
 
   getStatusLabel(isLockedOut: boolean): string {
-    return isLockedOut ? 'Bloqueo admin' : 'Activo';
+    return isLockedOut ? 'Bloqueado' : 'Activo';
   }
 
   getStatusIcon(isLockedOut: boolean): string {

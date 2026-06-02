@@ -113,19 +113,24 @@
             <ng-template matStepLabel>Motivo de Consulta</ng-template>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Motivo de la consulta (opcional)</mat-label>
+              <mat-label>Motivo de la consulta *</mat-label>
               <textarea
                 matInput
                 formControlName="observation"
                 rows="4"
-                placeholder="Agrega un comentario para el profesional si lo necesitas"
+                placeholder="Describe brevemente el motivo de tu consulta"
                 maxlength="1000"
+                required
               ></textarea>
               <mat-hint align="end"
                 >{{ observationForm.value.observation?.length || 0
                 }}/1000</mat-hint
               >
-              @if (observationForm.get('observation')?.hasError('maxlength')) {
+              @if (observationForm.get('observation')?.hasError('required')) {
+              <mat-error>El motivo de la consulta es obligatorio</mat-error>
+              } @else if (observationForm.get('observation')?.hasError('minNonWhitespaceLength')) {
+              <mat-error>Ingresa al menos 10 caracteres que no sean espacios</mat-error>
+              } @else if (observationForm.get('observation')?.hasError('maxlength')) {
               <mat-error>Máximo 1000 caracteres</mat-error>
               }
             </mat-form-field>
@@ -259,7 +264,7 @@
                 <mat-icon>description</mat-icon>
                 <div>
                   <strong>Motivo de la consulta</strong>
-                  <p>{{ observationForm.value.observation?.trim() || 'No informado' }}</p>
+                  <p>{{ observationForm.value.observation?.trim() }}</p>
                 </div>
               </div>
             </div>

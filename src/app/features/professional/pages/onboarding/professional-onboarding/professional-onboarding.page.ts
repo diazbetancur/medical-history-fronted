@@ -47,6 +47,11 @@ import {
   ProfessionalLocationFormDialogData,
   ProfessionalLocationFormDialogResult,
 } from '../professional-location-form-dialog/professional-location-form-dialog.component';
+import {
+  ProfessionalServiceFormDialogComponent,
+  ProfessionalServiceFormDialogData,
+  ProfessionalServiceFormDialogResult,
+} from '../professional-service-form-dialog/professional-service-form-dialog.component';
 import { take } from 'rxjs';
 
 @Component({
@@ -97,8 +102,6 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly education = signal<ProfessionalEducationSummary[]>([]);
   readonly locations = signal<ProfessionalLocation[]>([]);
   readonly sectionBusy = signal(false);
-  readonly showServiceForm = signal(false);
-  readonly editingServiceId = signal<string | null>(null);
   readonly sectionsTab = signal(0);
   readonly selectedSpecialtyIds = signal<string[]>([]);
   readonly showSpecialtyProposal = signal(false);
@@ -152,11 +155,6 @@ export class ProfessionalOnboardingPage implements OnInit {
       [Validators.required, Validators.minLength(2), Validators.maxLength(100)],
     ],
     justification: ['', [Validators.maxLength(500)]],
-  });
-
-  readonly serviceForm = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(150)]],
-    description: ['', [Validators.maxLength(1000)]],
   });
 
   readonly selectedSpecialties = computed(() => {
@@ -546,49 +544,55 @@ export class ProfessionalOnboardingPage implements OnInit {
   }
 
   startCreateService(): void {
-    this.editingServiceId.set(null);
-    this.serviceForm.reset({
-      name: '',
-      description: '',
-    });
-    this.showServiceForm.set(true);
+    this.openServiceDialog();
   }
 
   editService(service: Service): void {
-    this.editingServiceId.set(service.id);
-    this.serviceForm.patchValue({
-      name: service.name,
-      description: service.description ?? '',
-    });
-    this.showServiceForm.set(true);
+    this.openServiceDialog(service);
   }
 
-  cancelServiceEdit(): void {
-    this.editingServiceId.set(null);
-    this.serviceForm.reset({
-      name: '',
-      description: '',
+  private openServiceDialog(service?: Service): void {
+    if (this.sectionBusy()) return;
+
+    const dialogRef = this.dialog.open<
+      ProfessionalServiceFormDialogComponent,
+      ProfessionalServiceFormDialogData,
+      ProfessionalServiceFormDialogResult | undefined
+    >(ProfessionalServiceFormDialogComponent, {
+      width: '620px',
+      maxWidth: '94vw',
+      data: {
+        title: service ? 'Editar servicio' : 'Adicionar servicio',
+        submitLabel: service ? 'Actualizar servicio' : 'Guardar servicio',
+        initial: service
+          ? {
+              name: service.name,
+              description: service.description ?? '',
+            }
+          : undefined,
+      },
     });
-    this.showServiceForm.set(false);
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+
+      this.saveServiceResult(result, service?.id ?? null);
+    });
   }
 
-  saveService(): void {
-    if (this.serviceForm.invalid) {
-      this.serviceForm.markAllAsTouched();
-      return;
-    }
-
-    const value = this.serviceForm.getRawValue();
+  private saveServiceResult(
+    result: ProfessionalServiceFormDialogResult,
+    editingId: string | null,
+  ): void {
     const payload = {
-      name: value.name.trim(),
-      description: value.description.trim() || undefined,
+      name: result.name,
+      description: result.description,
       priceFrom: 0,
       priceTo: 0,
       duration: '0',
       sortOrder: 1,
     };
 
-    const editingId = this.editingServiceId();
     this.sectionBusy.set(true);
 
     const request$ = editingId
@@ -596,17 +600,18 @@ export class ProfessionalOnboardingPage implements OnInit {
       : this.professionalApi.createService(payload);
 
     request$.subscribe({
-      next: (service) => {
+      next: (savedService) => {
         if (editingId) {
           this.services.update((current) =>
-            current.map((item) => (item.id === service.id ? service : item)),
+            current.map((item) =>
+              item.id === savedService.id ? savedService : item,
+            ),
           );
         } else {
-          this.services.update((current) => [service, ...current]);
+          this.services.update((current) => [savedService, ...current]);
         }
 
         this.servicesLoaded.set(true);
-        this.cancelServiceEdit();
         this.toast.success(
           editingId ? 'Servicio actualizado' : 'Servicio agregado',
         );

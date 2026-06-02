@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import {
@@ -41,6 +41,8 @@ interface BookingConfirmation {
   endTime: string;
   location: string;
 }
+
+const OBSERVATION_MIN_NON_WHITESPACE = 10;
 
 @Component({
   selector: 'app-book-appointment-dialog',
@@ -86,6 +88,17 @@ export class BookAppointmentDialogComponent {
   readonly selectedDate = signal<Date | null>(null);
   readonly availableSlots = signal<SlotDto[]>([]);
   readonly observation = signal('');
+  readonly observationTouched = signal(false);
+  readonly observationNonWhitespaceLength = computed(() =>
+    this.countNonWhitespace(this.observation()),
+  );
+  readonly isObservationValid = computed(
+    () =>
+      this.observationNonWhitespaceLength() >= OBSERVATION_MIN_NON_WHITESPACE,
+  );
+  readonly showObservationError = computed(
+    () => this.observationTouched() && !this.isObservationValid(),
+  );
   readonly pendingSlot = signal<SlotDto | null>(null);
 
   readonly minDate = this.getTodayDate();
@@ -109,6 +122,11 @@ export class BookAppointmentDialogComponent {
 
   onObservationInput(value: string): void {
     this.observation.set(value);
+    this.bookingError.set(null);
+  }
+
+  markObservationTouched(): void {
+    this.observationTouched.set(true);
   }
 
   close(): void {
@@ -127,6 +145,9 @@ export class BookAppointmentDialogComponent {
     if (this.isBooking()) return;
     this.pendingSlot.set(slot);
     this.bookingError.set(null);
+    if (!this.isObservationValid()) {
+      this.observationTouched.set(true);
+    }
   }
 
   confirmSlot(): void {
@@ -136,6 +157,15 @@ export class BookAppointmentDialogComponent {
     const observation = this.getTrimmedObservation();
     const professionalId = this.professionalId();
     const selectedDate = this.selectedDate();
+
+    this.observationTouched.set(true);
+
+    if (!this.isObservationValid()) {
+      this.bookingError.set(
+        'El motivo de la consulta debe tener al menos 10 caracteres que no sean espacios.',
+      );
+      return;
+    }
 
     if (!professionalId || !selectedDate) {
       this.bookingError.set('No pudimos tomar la cita. Inténtalo de nuevo.');
@@ -243,5 +273,9 @@ export class BookAppointmentDialogComponent {
 
   private getTrimmedObservation(): string {
     return this.observation().trim();
+  }
+
+  private countNonWhitespace(value: string): number {
+    return value.replace(/\s/g, '').length;
   }
 }

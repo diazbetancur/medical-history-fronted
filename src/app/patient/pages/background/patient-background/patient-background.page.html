@@ -88,12 +88,16 @@
             <mat-chip class="type-chip">
               {{ getTypeLabel(background.type) }}
             </mat-chip>
-            @if (background.isChronic) {
-            <mat-chip class="chronic-chip">
-              <mat-icon>autorenew</mat-icon>
-              Crónico
+            <mat-chip
+              class="chronic-chip"
+              [class.non-chronic-chip]="!background.isChronic"
+            >
+              <mat-icon>
+                {{ background.isChronic ? "autorenew" : "check_circle" }}
+              </mat-icon>
+              {{ background.isChronic ? "Crónico" : "No crónico" }}
             </mat-chip>
-            } @if (background.eventDate) {
+            @if (background.eventDate) {
             <mat-chip class="date-chip">
               <mat-icon>event</mat-icon>
               {{ background.eventDate | date: 'dd/MM/yyyy' }}
