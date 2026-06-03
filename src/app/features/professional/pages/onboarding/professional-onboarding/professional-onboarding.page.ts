@@ -54,6 +54,11 @@ import {
 } from '../professional-service-form-dialog/professional-service-form-dialog.component';
 import { take } from 'rxjs';
 
+type LocationWithOptionalGeography = ProfessionalLocation & {
+  departmentName?: string | null;
+  stateRegion?: string | null;
+};
+
 @Component({
   selector: 'app-professional-onboarding',
   standalone: true,
@@ -101,6 +106,13 @@ export class ProfessionalOnboardingPage implements OnInit {
   readonly services = signal<Service[]>([]);
   readonly education = signal<ProfessionalEducationSummary[]>([]);
   readonly locations = signal<ProfessionalLocation[]>([]);
+  readonly sortedLocations = computed(() =>
+    [...this.locations()].sort((left, right) => {
+      if (left.isDefault && !right.isDefault) return -1;
+      if (!left.isDefault && right.isDefault) return 1;
+      return left.name.localeCompare(right.name);
+    }),
+  );
   readonly sectionBusy = signal(false);
   readonly sectionsTab = signal(0);
   readonly selectedSpecialtyIds = signal<string[]>([]);
@@ -994,6 +1006,43 @@ export class ProfessionalOnboardingPage implements OnInit {
     this.openLocationDialog(location);
   }
 
+  getLocationPhone(location: ProfessionalLocation): string {
+    return location.phone?.trim() || 'No disponible';
+  }
+
+  getLocationAddress(location: ProfessionalLocation): string {
+    return location.address?.trim() || 'No disponible';
+  }
+
+  getLocationDepartment(location: ProfessionalLocation): string {
+    const optionalLocation = location as LocationWithOptionalGeography;
+    const directDepartment =
+      optionalLocation.departmentName?.trim() ||
+      optionalLocation.stateRegion?.trim();
+
+    if (directDepartment) return directDepartment;
+
+    const city = this.findLocationCity(location);
+    if (city?.stateRegion?.trim()) return city.stateRegion.trim();
+
+    if (city?.departmentId) {
+      const department = this.departments().find(
+        (item) => item.id === city.departmentId,
+      );
+      if (department?.name) return department.name;
+    }
+
+    return 'No disponible';
+  }
+
+  getLocationCity(location: ProfessionalLocation): string {
+    return (
+      location.cityName?.trim() ||
+      this.findLocationCity(location)?.name?.trim() ||
+      'No disponible'
+    );
+  }
+
   private openLocationDialog(location?: ProfessionalLocation): void {
     const dialogRef = this.dialog.open(
       ProfessionalLocationFormDialogComponent,
@@ -1008,10 +1057,10 @@ export class ProfessionalOnboardingPage implements OnInit {
                 name: location.name,
                 address: location.address ?? '',
                 phone: location.phone ?? '',
-                cityId: location.cityId,
-                cityName: location.cityName,
-                countryId: location.countryId,
-                countryName: location.countryName,
+                cityId: location.cityId ?? '',
+                cityName: location.cityName ?? '',
+                countryId: location.countryId ?? '',
+                countryName: location.countryName ?? '',
               }
             : undefined,
         } satisfies ProfessionalLocationFormDialogData,
@@ -1033,8 +1082,8 @@ export class ProfessionalOnboardingPage implements OnInit {
     const payload = {
       name: value.name,
       address: value.address,
-      countryId: value.countryId,
-      cityId: value.cityId,
+      countryName: value.countryName,
+      cityName: value.cityName,
       phone: value.phone,
     };
 
@@ -1104,6 +1153,22 @@ export class ProfessionalOnboardingPage implements OnInit {
         this.sectionBusy.set(false);
       },
     });
+  }
+
+  private findLocationCity(location: ProfessionalLocation): City | undefined {
+    const cityId = location.cityId?.trim();
+
+    if (cityId) {
+      const cityById = this.cities().find((city) => city.id === cityId);
+      if (cityById) return cityById;
+    }
+
+    const cityName = location.cityName?.trim().toLowerCase();
+    if (!cityName) return undefined;
+
+    return this.cities().find(
+      (city) => city.name.trim().toLowerCase() === cityName,
+    );
   }
 
   private extractError(error: unknown): string {

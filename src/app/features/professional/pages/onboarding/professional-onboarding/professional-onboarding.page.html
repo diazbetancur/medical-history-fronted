@@ -516,47 +516,90 @@
             <span>Cargando sedes...</span>
           </div>
           } @else { @if (locations().length > 0) {
-          <div class="items-grid">
-            @for (location of locations(); track location.id) {
-            <div class="item-card">
-              <div class="item-title-row">
-                <strong>{{ location.name }}</strong>
-                @if (location.isDefault) {
-                <span class="status-chip">Principal</span>
+          <div class="locations-table-wrap">
+            <table class="locations-table">
+              <thead>
+                <tr>
+                  <th>Nombre sede</th>
+                  <th>Teléfono</th>
+                  <th>Dirección</th>
+                  <th>Departamento</th>
+                  <th>Ciudad</th>
+                  <th>Principal</th>
+                  <th class="actions-heading">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (location of sortedLocations(); track location.id) {
+                <tr [class.default-location-row]="location.isDefault">
+                  <td>
+                    <div class="location-name-cell">
+                      <strong>{{ location.name }}</strong>
+                      @if (location.isDefault) {
+                      <span class="status-chip default-chip">Principal</span>
+                      }
+                    </div>
+                  </td>
+                  <td>{{ getLocationPhone(location) }}</td>
+                  <td>{{ getLocationAddress(location) }}</td>
+                  <td>{{ getLocationDepartment(location) }}</td>
+                  <td>{{ getLocationCity(location) }}</td>
+                  <td>
+                    <span
+                      class="default-state"
+                      [class.is-default]="location.isDefault"
+                    >
+                      <mat-icon>
+                        {{
+                          location.isDefault
+                            ? "check_circle"
+                            : "radio_button_unchecked"
+                        }}
+                      </mat-icon>
+                      {{ location.isDefault ? "Sí" : "No" }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="location-actions">
+                      <button
+                        mat-icon-button
+                        color="primary"
+                        type="button"
+                        [disabled]="sectionBusy()"
+                        (click)="openEditLocationDialog(location)"
+                        aria-label="Editar sede"
+                        title="Editar sede"
+                      >
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button
+                        mat-icon-button
+                        color="primary"
+                        type="button"
+                        [disabled]="location.isDefault || sectionBusy()"
+                        (click)="setDefaultLocation(location.id)"
+                        aria-label="Marcar como principal"
+                        title="Marcar como principal"
+                      >
+                        <mat-icon>stars</mat-icon>
+                      </button>
+                      <button
+                        mat-icon-button
+                        color="warn"
+                        type="button"
+                        [disabled]="sectionBusy()"
+                        (click)="deleteLocation(location.id)"
+                        aria-label="Eliminar sede"
+                        title="Eliminar sede"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
                 }
-              </div>
-              <p>{{ location.cityName }}, {{ location.countryName }}</p>
-              @if (location.address) {
-              <p>{{ location.address }}</p>
-              }
-
-              <div class="inline-actions">
-                <button
-                  mat-button
-                  type="button"
-                  (click)="openEditLocationDialog(location)"
-                >
-                  Editar
-                </button>
-                <button
-                  mat-button
-                  type="button"
-                  [disabled]="location.isDefault"
-                  (click)="setDefaultLocation(location.id)"
-                >
-                  Marcar principal
-                </button>
-                <button
-                  mat-button
-                  color="warn"
-                  type="button"
-                  (click)="deleteLocation(location.id)"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </div>
-            }
+              </tbody>
+            </table>
           </div>
           } @else {
           <p class="empty-hint">Aún no has agregado sedes.</p>

@@ -38,6 +38,12 @@
   }
 }
 
+.availability-tabs {
+  .tab-card {
+    margin-top: 16px;
+  }
+}
+
 .working-hours {
   color: var(--color-success);
   font-weight: 500;
@@ -72,7 +78,7 @@
 
 .slot-config {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: minmax(240px, 320px);
   gap: 16px;
   margin-top: 24px;
   align-items: center;
@@ -122,40 +128,178 @@ mat-card-actions {
   }
 }
 
-.absences-list {
+.dialog-form {
+  padding: 0;
+  margin-bottom: 0;
+  background: transparent;
+}
+
+.absence-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  button mat-icon {
+    margin-right: 8px;
+  }
+}
+
+.absence-filter {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(180px, 240px) auto auto;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0;
+  margin-bottom: 20px;
+  border: 0;
+  background: transparent;
+
+  mat-form-field {
+    margin-bottom: 0;
+  }
+
+  button {
+    min-height: 56px;
+  }
+
+  button mat-icon {
+    margin-right: 6px;
+  }
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--color-text-secondary);
+}
+
+.inline-loading {
+  padding: 32px 0;
+}
+
+.exceptions-table-wrap {
   margin-top: 24px;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface, #fff);
+}
 
-  h4 {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    font-weight: 500;
+.exceptions-table {
+  width: 100%;
+  min-width: 1120px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: middle;
   }
 
-  .absence-item {
-    margin-bottom: 12px;
-
-    .absence-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .absence-dates,
-    .absence-reason {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      color: var(--color-text-primary);
-
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-      }
-    }
+  th {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
+
+  td {
+    color: var(--color-text-primary);
+    font-size: 14px;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .expired-exception-row {
+    background: rgba(107, 114, 128, 0.04);
+  }
+
+  .actions-heading,
+  .actions-cell {
+    text-align: right;
+  }
+}
+
+.status-pill,
+.special-schedule,
+.location-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.status-pill {
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-background-alt);
+  color: var(--color-text-secondary);
+
+  &.status-active {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+  }
+
+  &.status-scheduled {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  &.status-expired {
+    background: rgba(107, 114, 128, 0.12);
+    color: var(--color-text-secondary);
+  }
+}
+
+.special-schedule {
+  color: var(--color-text-secondary);
+
+  &.has-special-schedule {
+    color: var(--color-primary);
+  }
+}
+
+.location-cell {
+  color: var(--color-text-primary);
+}
+
+.reason-cell {
+  display: inline-block;
+  max-width: 220px;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .empty-absences {
@@ -172,14 +316,32 @@ mat-card-actions {
   }
 }
 
+mat-dialog-actions {
+  button {
+    mat-icon,
+    mat-spinner {
+      margin-right: 8px;
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .availability-page {
     padding: 16px;
   }
 
+  .absence-toolbar {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
   .time-blocks .time-block,
   .slot-config,
-  .absence-form .form-row {
+  .absence-form .form-row,
+  .absence-filter {
     grid-template-columns: 1fr;
   }
 }

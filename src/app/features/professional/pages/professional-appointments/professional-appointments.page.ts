@@ -146,7 +146,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
       AppointmentDto | null
     >(AddExternalAppointmentDialogComponent, {
       data: { professionalProfileId },
-      width: '600px',
+      width: '720px',
       maxWidth: '95vw',
       disableClose: true,
     });

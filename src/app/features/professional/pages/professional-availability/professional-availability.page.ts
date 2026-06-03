@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  TemplateRef,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -14,7 +22,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatDialog } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,9 +34,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTabsModule } from '@angular/material/tabs';
 import { AuthStore } from '@core/auth';
 import {
   ABSENCE_TYPE_NAMES,
+  type AbsenceDto,
   type AbsenceType,
   type CreateAbsenceDto,
 } from '@data/models/professional-absence.models';
@@ -40,6 +54,8 @@ import { ProfessionalAvailabilityStore } from '@data/stores/professional-availab
 import { ToastService } from '@shared/services/toast.service';
 import { ConfirmDialogComponent } from '@shared/ui';
 
+type AbsenceStatus = 'active' | 'scheduled' | 'expired';
+
 @Component({
   selector: 'app-professional-availability-page',
   standalone: true,
@@ -54,9 +70,11 @@ import { ConfirmDialogComponent } from '@shared/ui';
     MatSlideToggleModule,
     MatExpansionModule,
     MatDatepickerModule,
+    MatDialogModule,
     MatSelectModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+    MatTabsModule,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './professional-availability.page.html',
@@ -80,12 +98,29 @@ export class ProfessionalAvailabilityPage implements OnInit {
     5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240,
   ];
 
-  protected readonly showAbsenceForm = signal(false);
   protected readonly scheduleSubmitted = signal(false);
   protected readonly absenceSubmitted = signal(false);
+  protected readonly absenceSearchActive = signal(false);
+  protected readonly displayedAbsences = computed(() => {
+    const items = this.absenceSearchActive()
+      ? this.store.absences()
+      : this.store.futureAbsences();
+
+    return [...items].sort(
+      (left, right) =>
+        new Date(left.startDateTime).getTime() -
+        new Date(right.startDateTime).getTime(),
+    );
+  });
 
   protected scheduleForm!: FormGroup;
   protected absenceForm!: FormGroup;
+  protected readonly absenceFilterForm = this.fb.group({
+    startDate: [null],
+    endDate: [null],
+  });
+
+  private absenceDialogRef: MatDialogRef<unknown> | null = null;
 
   private readonly loadScheduleEffect = effect(() => {
     const user = this.authStore.user();
@@ -175,7 +210,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
     this.scheduleForm.patchValue({
       defaultSlotDuration: schedule.defaultSlotDuration,
       timeZone: ProfessionalAvailabilityPage.FALLBACK_TIMEZONE,
-      isActive: schedule.isActive,
+      isActive: true,
     });
   }
 
@@ -322,6 +357,7 @@ export class ProfessionalAvailabilityPage implements OnInit {
       return;
     }
 
+    this.scheduleForm.patchValue({ isActive: true }, { emitEvent: false });
     const value = this.scheduleForm.getRawValue();
     const scheduleError = this.validateScheduleDays(
       value.days as DaySchedule[],
@@ -335,23 +371,27 @@ export class ProfessionalAvailabilityPage implements OnInit {
       value.days,
       value.defaultSlotDuration,
       value.timeZone,
-      value.isActive,
+      true,
     );
   }
 
-  protected cancelAbsenceForm(): void {
-    this.showAbsenceForm.set(false);
-    this.absenceSubmitted.set(false);
-    this.absenceForm.reset({
-      type: 'Absent',
-      startDate: null,
-      endDate: null,
-      overrideStartTime: null,
-      overrideEndTime: null,
-      professionalLocationId: null,
-      reason: '',
+  protected openAbsenceDialog(template: TemplateRef<unknown>): void {
+    this.resetAbsenceForm();
+    this.absenceDialogRef = this.dialog.open(template, {
+      width: '760px',
+      maxWidth: '96vw',
+      autoFocus: false,
     });
-    this.updateOverrideValidators('Absent');
+
+    this.absenceDialogRef.afterClosed().subscribe(() => {
+      this.absenceDialogRef = null;
+      this.resetAbsenceForm();
+    });
+  }
+
+  protected cancelAbsenceForm(): void {
+    this.resetAbsenceForm();
+    this.absenceDialogRef?.close();
   }
 
   protected createAbsence(): void {
@@ -402,6 +442,39 @@ export class ProfessionalAvailabilityPage implements OnInit {
 
     this.store.createAbsence(dto);
     this.cancelAbsenceForm();
+  }
+
+  protected searchAbsences(): void {
+    const value = this.absenceFilterForm.getRawValue();
+    const startDate = value.startDate as Date | null;
+    const endDate = value.endDate as Date | null;
+
+    if (!startDate || !endDate) {
+      this.toast.warning('Selecciona fecha de inicio y fecha de fin.');
+      return;
+    }
+
+    if (endDate < startDate) {
+      this.toast.error(
+        'La fecha de fin debe ser posterior a la fecha de inicio.',
+      );
+      return;
+    }
+
+    this.absenceSearchActive.set(true);
+    this.store.loadAbsences({
+      startDateTime: this.toUtcRangeStart(startDate),
+      endDateTime: this.toUtcRangeEnd(endDate),
+    });
+  }
+
+  protected clearAbsenceSearch(): void {
+    this.absenceFilterForm.reset({
+      startDate: null,
+      endDate: null,
+    });
+    this.absenceSearchActive.set(false);
+    this.store.loadFutureAbsences();
   }
 
   protected getAbsenceChipColor(type: AbsenceType): string {
@@ -456,6 +529,56 @@ export class ProfessionalAvailabilityPage implements OnInit {
     });
   }
 
+  protected getAbsenceStatus(absence: AbsenceDto): AbsenceStatus {
+    const now = new Date();
+    const startDate = new Date(absence.startDateTime);
+    const endDate = new Date(absence.endDateTime);
+
+    if (endDate < now) return 'expired';
+    if (startDate > now) return 'scheduled';
+    return 'active';
+  }
+
+  protected getAbsenceStatusLabel(absence: AbsenceDto): string {
+    const status = this.getAbsenceStatus(absence);
+
+    if (status === 'active') return 'Vigente';
+    if (status === 'scheduled') return 'Programada';
+    return 'Finalizada';
+  }
+
+  protected getAbsenceStatusIcon(absence: AbsenceDto): string {
+    const status = this.getAbsenceStatus(absence);
+
+    if (status === 'active') return 'check_circle';
+    if (status === 'scheduled') return 'schedule';
+    return 'history';
+  }
+
+  protected hasSpecialSchedule(absence: AbsenceDto): boolean {
+    return (
+      absence.type === 'Override' &&
+      !!absence.overrideStartTime &&
+      !!absence.overrideEndTime
+    );
+  }
+
+  protected getAbsenceSpecialSchedule(absence: AbsenceDto): string {
+    if (!this.hasSpecialSchedule(absence)) {
+      return 'No aplica';
+    }
+
+    return `${absence.overrideStartTime} - ${absence.overrideEndTime}`;
+  }
+
+  protected getAbsenceLocationLabel(absence: AbsenceDto): string {
+    return absence.professionalLocationName?.trim() || 'Sin sede específica';
+  }
+
+  protected getAbsenceReasonLabel(absence: AbsenceDto): string {
+    return absence.reason?.trim() || 'Sin motivo registrado';
+  }
+
   private validateScheduleDays(days: DaySchedule[]): string | null {
     let hasAnyWorkingWindow = false;
 
@@ -508,6 +631,20 @@ export class ProfessionalAvailabilityPage implements OnInit {
   private timeToMinutes(value: string): number {
     const [hours = '0', minutes = '0'] = (value || '').split(':');
     return Number(hours) * 60 + Number(minutes);
+  }
+
+  private resetAbsenceForm(): void {
+    this.absenceSubmitted.set(false);
+    this.absenceForm.reset({
+      type: 'Absent',
+      startDate: null,
+      endDate: null,
+      overrideStartTime: null,
+      overrideEndTime: null,
+      professionalLocationId: null,
+      reason: '',
+    });
+    this.updateOverrideValidators('Absent');
   }
 
   private toUtcRangeStart(date: Date): string {
