@@ -1,0 +1,31 @@
+<div class="context-dialog">
+  <div class="context-dialog__header">
+    <mat-icon>switch_account</mat-icon>
+    <div>
+      <h2 mat-dialog-title>¿Cómo quieres ingresar?</h2>
+    </div>
+  </div>
+
+  <mat-dialog-content class="context-dialog__content">
+    @for (context of data.contexts; track context.type + "-" + context.id) {
+      <button
+        type="button"
+        class="context-card"
+        [class.context-card--current]="isCurrentContext(context)"
+        (click)="selectContext(context)"
+      >
+        <span class="context-card__icon">
+          <mat-icon>{{ getContextIcon(context.type) }}</mat-icon>
+        </span>
+        <span class="context-card__body">
+          <span class="context-card__title">
+            {{ getContextLabel(context.type) }}
+          </span>
+          <span class="context-card__description">
+            {{ getContextDescription(context.type) }}
+          </span>
+        </span>
+      </button>
+    }
+  </mat-dialog-content>
+</div>
