@@ -41,7 +41,9 @@ export interface ProfessionalLocationFormDialogResult {
   name: string;
   address?: string;
   cityId?: string;
+  cityName?: string;
   countryId?: string;
+  countryName?: string;
   phone?: string;
 }
 
@@ -128,9 +130,14 @@ export class ProfessionalLocationFormDialogComponent implements OnInit {
       name: value.name.trim(),
       address: value.address.trim() || undefined,
       cityId: value.cityId || undefined,
+      cityName: selectedCity?.name || this.data.initial?.cityName || undefined,
       countryId: value.cityId
         ? selectedCity?.countryId || this.data.initial?.countryId || undefined
         : undefined,
+      countryName:
+        selectedCity?.countryName ||
+        this.data.initial?.countryName ||
+        'Honduras',
       phone: value.phone.trim() || undefined,
     } satisfies ProfessionalLocationFormDialogResult);
   }

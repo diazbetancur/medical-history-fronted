@@ -81,9 +81,9 @@ export class ProfessionalAvailabilityStore {
   });
 
   readonly futureAbsences = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
     return this._absences().filter(
-      (absence) => absence.endDateTime.slice(0, 10) >= today,
+      (absence) => new Date(absence.endDateTime) >= now,
     );
   });
 
