@@ -7,7 +7,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '@core/auth';
-import { AuthIntentService } from '../../services/auth-intent.service';
 import {
   AuthModalComponent,
   AuthModalData,
@@ -31,7 +30,6 @@ export class PublicHeaderComponent {
   private readonly router = inject(Router);
   private readonly authStore = inject(AuthStore);
   private readonly dialog = inject(MatDialog);
-  private readonly authIntent = inject(AuthIntentService);
 
   readonly isAuthenticated = this.authStore.isAuthenticated;
   readonly userName = this.authStore.userName;
@@ -84,10 +82,9 @@ export class PublicHeaderComponent {
     }
   }
 
-  openAuthModal(asProfessional: boolean): void {
-    this.authIntent.setAsProfessional(asProfessional);
+  openAuthModal(): void {
     this.dialog.open<AuthModalComponent, AuthModalData>(AuthModalComponent, {
-      data: { asProfessional },
+      data: {},
       width: '440px',
       maxWidth: '100vw',
       panelClass: 'auth-modal-panel',
@@ -96,15 +93,7 @@ export class PublicHeaderComponent {
   }
 
   navigateToLogin(): void {
-    this.openAuthModal(false);
-  }
-
-  navigateToProfessional(): void {
-    if (this.authStore.isAuthenticated()) {
-      this.router.navigate(['/professional']);
-    } else {
-      this.openAuthModal(true);
-    }
+    this.openAuthModal();
   }
 
   logout(): void {

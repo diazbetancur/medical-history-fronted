@@ -22,7 +22,6 @@ import {
 import { ProfessionalCardComponent } from '../../components/professional-card/professional-card.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
-import { AuthIntentService } from '../../services/auth-intent.service';
 
 @Component({
   selector: 'app-home-page',
@@ -49,7 +48,6 @@ export class HomePageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
-  private readonly authIntent = inject(AuthIntentService);
 
   readonly isAuthenticated = this.authStore.isAuthenticated;
   readonly isPatientAuthenticated = computed(() =>
@@ -96,7 +94,7 @@ export class HomePageComponent implements OnInit {
         '¡Contraseña actualizada! Inicia sesión con tu nueva contraseña.',
       );
       // Pequeño delay para que el home termine de renderizar antes de abrir el modal
-      setTimeout(() => this.openAuthModal(false), 350);
+      setTimeout(() => this.openAuthModal(), 350);
     } else if (reason === 'session_expired') {
       this.toast.info(
         'Tu sesión expiró. Inicia sesión nuevamente desde el botón "Iniciar Sesión".',
@@ -157,10 +155,9 @@ export class HomePageComponent implements OnInit {
     this.router.navigate(['/search']);
   }
 
-  openAuthModal(asProfessional = false): void {
-    this.authIntent.setAsProfessional(asProfessional);
+  openAuthModal(): void {
     this.dialog.open<AuthModalComponent, AuthModalData>(AuthModalComponent, {
-      data: { asProfessional },
+      data: {},
       width: '440px',
       maxWidth: '100vw',
       panelClass: 'auth-modal-panel',
@@ -169,7 +166,7 @@ export class HomePageComponent implements OnInit {
   }
 
   navigateToLogin(): void {
-    this.openAuthModal(false);
+    this.openAuthModal();
   }
 
   navigateToProfile(): void {

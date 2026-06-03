@@ -380,6 +380,14 @@ export const routes: Routes = [
         title: 'Cambiar Contraseña - Directory Pro',
       },
       {
+        path: 'activate-professional',
+        loadComponent: () =>
+          import('./patient/pages/activate-professional/patient-activate-professional.page').then(
+            (m) => m.PatientActivateProfessionalPage,
+          ),
+        title: 'Activarme como profesional - Directory Pro',
+      },
+      {
         path: 'medications',
         canActivate: [permissionStoreGuard],
         data: {

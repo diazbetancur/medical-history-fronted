@@ -289,6 +289,12 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PATIENT',
   },
   {
+    label: 'Activarme como profesional',
+    icon: 'medical_services',
+    route: '/patient/activate-professional',
+    context: 'PATIENT',
+  },
+  {
     label: 'Cambiar Contraseña',
     icon: 'lock_reset',
     route: '/patient/change-password',

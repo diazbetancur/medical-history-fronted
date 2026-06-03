@@ -20,7 +20,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthStore, PostLoginNavigationService } from '@core/auth';
 import { CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
@@ -33,11 +33,8 @@ import {
   LoginFormMessages,
   RegisterFormMessages,
 } from '../../pages/auth-form-messages';
-import { AuthIntentService } from '../../services/auth-intent.service';
 
 export interface AuthModalData {
-  /** true cuando se abrió desde "Soy Médico" */
-  asProfessional: boolean;
   /** 0 = Login tab, 1 = Register tab */
   initialTab?: number;
 }
@@ -65,11 +62,11 @@ export class AuthModalComponent implements OnInit {
   private readonly postLoginNavigation = inject(PostLoginNavigationService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
-  private readonly authIntent = inject(AuthIntentService);
-  private readonly router = inject(Router);
   protected readonly dialogRef = inject(MatDialogRef<AuthModalComponent>);
 
-  readonly data: AuthModalData = inject(MAT_DIALOG_DATA);
+  readonly data: AuthModalData = inject(MAT_DIALOG_DATA, {
+    optional: true,
+  }) ?? {};
 
   // ─── Login form ───────────────────────────────────────────────────────────
   readonly loginForm = this.fb.nonNullable.group({
@@ -159,7 +156,7 @@ export class AuthModalComponent implements OnInit {
           this.authStore.loadMe().subscribe({
             next: (user) => {
               if (user) {
-                this.handlePostLogin(user, this.data.asProfessional);
+                this.handlePostLogin(user);
               } else {
                 this.loginError.set('Error al cargar la sesión');
                 this.isLoginLoading.set(false);
@@ -440,118 +437,13 @@ export class AuthModalComponent implements OnInit {
   }
 
   // ─── Post-login ───────────────────────────────────────────────────────────
-  /**
-   * Flujo según contrato API:
-   * 1. asProfessional = false → navigateByContext normal
-   * 2. Rol incluye 'Professional' → /professional
-   * 3. Solo 'Client' → POST become-professional → re-login (nuevo token)
-   *    → loadMe → /professional
-   */
-  private handlePostLogin(user: CurrentUserDto, asProfessional: boolean): void {
-    this.authIntent.clear();
-
-    // ── Flujo normal (paciente) ──────────────────────────────────────────────
-    if (!asProfessional) {
-      const displayName = user.name || user.email || 'usuario';
-      this.toast.success(`¡Bienvenido, ${displayName}!`);
-      this.isLoginLoading.set(false);
-      this.dialogRef.close(true);
-      this.postLoginNavigation.navigateByContext();
-      return;
-    }
-
-    // ── Usuario ya es Professional ───────────────────────────────────────────
-    const isProfessional = user.roles.some(
-      (r) => r.toLowerCase() === 'professional',
-    );
-
-    if (isProfessional) {
-      this.navigateAsProfessional(user);
-      return;
-    }
-
-    // ── Usuario es Client → promover a Professional ──────────────────────────
-    this.authApi
-      .becomeProfessional({ reason: 'Activación desde botón Soy Médico' })
-      .subscribe({
-        next: (result) => {
-          if (!result.success) {
-            this.loginError.set(
-              result.message || 'No fue posible activar el perfil profesional.',
-            );
-            this.isLoginLoading.set(false);
-            return;
-          }
-
-          // Re-login para obtener nuevo token con rol Professional
-          const credentials = this.loginForm.getRawValue();
-          this.authApi
-            .login({
-              email: credentials.email.trim(),
-              password: credentials.password,
-            })
-            .subscribe({
-              next: (loginResponse) => {
-                this.authStore.setToken(
-                  loginResponse.token,
-                  loginResponse.expiresAt,
-                );
-                this.authStore.loadMe().subscribe({
-                  next: (updatedUser) => {
-                    if (!updatedUser) {
-                      this.loginError.set(
-                        'No se pudo cargar la sesión actualizada',
-                      );
-                      this.isLoginLoading.set(false);
-                      return;
-                    }
-                    this.toast.success('¡Cuenta profesional activada!');
-                    this.navigateAsProfessional(updatedUser);
-                  },
-                  error: (err) => {
-                    const problem = this.extractProblemDetails(err);
-                    this.loginError.set(
-                      problem.title || 'Error al cargar la sesión',
-                    );
-                    this.isLoginLoading.set(false);
-                  },
-                });
-              },
-              error: (err) => {
-                // Token refresh failed — still navigate to onboarding
-                this.toast.success(
-                  '¡Cuenta profesional activada! Ingresa nuevamente.',
-                );
-                this.isLoginLoading.set(false);
-                this.dialogRef.close(true);
-              },
-            });
-        },
-        error: (err) => {
-          const problem = this.extractProblemDetails(err);
-          this.loginError.set(
-            problem.title ||
-              'No fue posible activar tu perfil profesional en este momento',
-          );
-          this.isLoginLoading.set(false);
-        },
-      });
-  }
-
-  /**
-   * Entra al panel profesional respetando la prioridad centralizada.
-   */
-  private navigateAsProfessional(user: CurrentUserDto): void {
+  private handlePostLogin(user: CurrentUserDto): void {
     const displayName = user.name || user.email || 'usuario';
 
     this.isLoginLoading.set(false);
     this.dialogRef.close(true);
-
-    this.postLoginNavigation.navigateByContext({
-      preferProfessional: true,
-    });
-
     this.toast.success(`¡Bienvenido, ${displayName}!`);
+    this.postLoginNavigation.navigateAfterLogin();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

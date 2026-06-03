@@ -69,7 +69,6 @@ export const RegisterFormMessages = {
         : 'Revisa el teléfono ingresado',
   } as FormErrorMessageMap,
 
-  asProfessional: {} as FormErrorMessageMap,
 } as const;
 
 /**
@@ -94,7 +93,6 @@ export const LoginFormMessages = {
         : 'Revisa la contraseña ingresada',
   } as FormErrorMessageMap,
 
-  asProfessional: {} as FormErrorMessageMap,
 } as const;
 
 /**
