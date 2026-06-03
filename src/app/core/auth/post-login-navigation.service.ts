@@ -1,7 +1,9 @@
 import { inject, Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ContextDto, CurrentUserDto } from '@core/models';
 import { AuthStore } from './auth.store';
+import { ContextSelectionDialogComponent } from './context-selection-dialog/context-selection-dialog.component';
 
 export interface PostLoginNavigationOptions {
   preferProfessional?: boolean;
@@ -15,7 +17,45 @@ export interface PostLoginTarget {
 @Injectable({ providedIn: 'root' })
 export class PostLoginNavigationService {
   private readonly authStore = inject(AuthStore);
+  private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+
+  navigateAfterLogin(options: PostLoginNavigationOptions = {}): void {
+    const user = this.authStore.user();
+
+    if (!user) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const availableContexts = user.contexts || [];
+
+    if (!options.preferProfessional && availableContexts.length > 1) {
+      this.dialog
+        .open(ContextSelectionDialogComponent, {
+          data: {
+            contexts: availableContexts,
+            currentContext: this.authStore.currentContext(),
+          },
+          disableClose: true,
+          width: '520px',
+          maxWidth: 'calc(100vw - 32px)',
+          panelClass: 'context-selection-dialog-panel',
+        })
+        .afterClosed()
+        .subscribe((context?: ContextDto) => {
+          if (context) {
+            this.navigateTo(context);
+            return;
+          }
+
+          this.navigateByContext(options);
+        });
+      return;
+    }
+
+    this.navigateByContext(options);
+  }
 
   navigateByContext(
     options: PostLoginNavigationOptions = {},

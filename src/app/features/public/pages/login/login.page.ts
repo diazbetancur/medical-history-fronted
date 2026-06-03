@@ -2,7 +2,6 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -30,7 +29,6 @@ import { LoginFormMessages } from '../auth-form-messages';
     RouterLink,
     MatButtonModule,
     MatCardModule,
-    MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
@@ -52,7 +50,6 @@ export class LoginPageComponent implements OnInit {
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
-    asProfessional: [false],
   });
 
   readonly isLoading = signal(false);
@@ -118,7 +115,7 @@ export class LoginPageComponent implements OnInit {
           this.authStore.loadMe().subscribe({
             next: (user) => {
               if (user) {
-                this.handlePostLogin(user, credentials.asProfessional);
+                this.handlePostLogin(user);
               } else {
                 this.errorMessage.set('Error al cargar la sesión');
                 this.isLoading.set(false);
@@ -142,89 +139,17 @@ export class LoginPageComponent implements OnInit {
   constructor() {
     const query = this.route.snapshot.queryParamMap;
     const email = query.get('email');
-    const asProfessional = query.get('professional') === '1';
 
     if (email) {
       this.form.controls.email.setValue(email);
     }
-    if (asProfessional) {
-      this.form.controls.asProfessional.setValue(true);
-    }
   }
 
-  private handlePostLogin(user: CurrentUserDto, asProfessional: boolean): void {
-    if (!asProfessional) {
-      const displayName = user.name || user.email || 'usuario';
-      this.toast.success(`¡Bienvenido, ${displayName}!`);
-      this.isLoading.set(false);
-      this.postLoginNavigation.navigateByContext();
-      return;
-    }
-
-    const hasProfessionalContext = user.contexts.some(
-      (ctx) => ctx.type === 'PROFESSIONAL',
-    );
-
-    if (hasProfessionalContext) {
-      this.switchAndNavigateProfessional(user);
-      return;
-    }
-
-    this.authApi
-      .becomeProfessional({ reason: 'Activación desde login en frontend' })
-      .subscribe({
-        next: (result) => {
-          if (!result.success) {
-            this.errorMessage.set(
-              result.message ||
-                'No fue posible activar el perfil profesional en este momento.',
-            );
-            this.isLoading.set(false);
-            return;
-          }
-
-          this.authStore.loadMe().subscribe({
-            next: (updatedUser) => {
-              if (!updatedUser) {
-                this.errorMessage.set('No se pudo actualizar la sesión');
-                this.isLoading.set(false);
-                return;
-              }
-
-              this.toast.success(
-                result.message || 'Perfil profesional activado correctamente',
-              );
-              this.switchAndNavigateProfessional(updatedUser);
-            },
-            error: (err) => {
-              const problem = this.extractProblemDetails(err);
-              this.errorMessage.set(
-                problem.title || 'No se pudo actualizar la sesión',
-              );
-              this.isLoading.set(false);
-            },
-          });
-        },
-        error: (err) => {
-          const problem = this.extractProblemDetails(err);
-          this.errorMessage.set(
-            problem.title ||
-              'No fue posible activar tu contexto profesional en este momento',
-          );
-          this.isLoading.set(false);
-        },
-      });
-  }
-
-  private switchAndNavigateProfessional(user: CurrentUserDto): void {
+  private handlePostLogin(user: CurrentUserDto): void {
     const displayName = user.name || user.email || 'usuario';
     this.isLoading.set(false);
-
-    this.postLoginNavigation.navigateByContext({
-      preferProfessional: true,
-    });
-
     this.toast.success(`¡Bienvenido, ${displayName}!`);
+    this.postLoginNavigation.navigateAfterLogin();
   }
 
   /**
