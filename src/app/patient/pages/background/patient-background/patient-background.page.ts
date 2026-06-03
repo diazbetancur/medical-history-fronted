@@ -5,8 +5,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import {
@@ -30,8 +32,10 @@ import {
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
+    MatPaginatorModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatTableModule,
     MatDialogModule,
     MatTooltipModule,
   ],
@@ -48,6 +52,17 @@ export class PatientBackgroundPage implements OnInit {
   backgrounds = signal<BackgroundDto[]>([]);
   totalItems = signal(0);
   error = signal<string | null>(null);
+  pageIndex = signal(0);
+  pageSize = signal(10);
+
+  readonly displayedColumns = [
+    'title',
+    'type',
+    'isChronic',
+    'eventDate',
+    'actions',
+  ];
+  readonly pageSizeOptions = [5, 10, 25];
 
   // Computed: Chronic backgrounds first, then sorted by eventDate
   sortedBackgrounds = computed(() => {
@@ -76,6 +91,14 @@ export class PatientBackgroundPage implements OnInit {
     () => this.backgrounds().filter((b) => b.isChronic).length,
   );
 
+  paginatedBackgrounds = computed(() => {
+    const startIndex = this.pageIndex() * this.pageSize();
+    return this.sortedBackgrounds().slice(
+      startIndex,
+      startIndex + this.pageSize(),
+    );
+  });
+
   ngOnInit(): void {
     this.loadBackgrounds();
   }
@@ -88,6 +111,7 @@ export class PatientBackgroundPage implements OnInit {
       next: (response) => {
         this.backgrounds.set(response.items);
         this.totalItems.set(response.totalCount);
+        this.pageIndex.set(0);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -195,6 +219,11 @@ export class PatientBackgroundPage implements OnInit {
 
   retry(): void {
     this.loadBackgrounds();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
   }
 
   getTypeLabel(type: string): string {

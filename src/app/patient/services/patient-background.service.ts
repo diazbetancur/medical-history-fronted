@@ -71,7 +71,7 @@ export class PatientBackgroundService {
         title: dto.title,
         description: dto.description || null,
         eventDate: dto.eventDate || null,
-        isChronic: dto.isChronic,
+        isChronic: dto.isChronic === true,
       })
       .pipe(map((item) => this.mapBackground(item)))
       .pipe(catchError((error) => this.handleError(error)));
@@ -95,7 +95,7 @@ export class PatientBackgroundService {
         title: dto.title,
         description: dto.description || null,
         eventDate: dto.eventDate || null,
-        isChronic: dto.isChronic ?? false,
+        isChronic: dto.isChronic === true,
       })
       .pipe(map((item) => this.mapBackground(item)))
       .pipe(catchError((error) => this.handleError(error)));
