@@ -610,21 +610,24 @@ export interface ProfessionalLocation {
   id: string;
   name: string;
   address: string | null;
-  cityId: string;
-  cityName: string;
-  countryId: string;
-  countryName: string;
+  cityId?: string | null;
+  cityName?: string | null;
+  countryId?: string | null;
+  countryName?: string | null;
   phone: string | null;
   isDefault: boolean;
   isActive: boolean;
   dateCreated: string;
+  formattedAddress?: string | null;
 }
 
 export interface CreateProfessionalLocationPayload {
   name: string;
   address?: string;
   cityId?: string;
+  cityName?: string;
   countryId?: string;
+  countryName?: string;
   phone?: string;
 }
 
@@ -632,7 +635,9 @@ export interface UpdateProfessionalLocationPayload {
   name?: string;
   address?: string;
   cityId?: string;
+  cityName?: string;
   countryId?: string;
+  countryName?: string;
   phone?: string;
 }
 
