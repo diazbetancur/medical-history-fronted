@@ -24,7 +24,7 @@
     </div>
   }
 
-  <form [formGroup]="form" class="appointment-form">
+  <form [formGroup]="form" class="appointment-form" (ngSubmit)="submit()">
     <section class="form-section">
       <div class="section-title">
         <mat-icon aria-hidden="true">person</mat-icon>
@@ -41,6 +41,12 @@
           maxlength="200"
         />
         @if (
+          form.get("patientName")?.hasError("blank") &&
+          form.get("patientName")?.touched
+        ) {
+          <mat-error>El nombre del paciente es requerido</mat-error>
+        }
+        @if (
           form.get("patientName")?.hasError("required") &&
           form.get("patientName")?.touched
         ) {
@@ -48,6 +54,7 @@
         }
         @if (
           form.get("patientName")?.hasError("minlength") &&
+          !form.get("patientName")?.hasError("blank") &&
           form.get("patientName")?.touched
         ) {
           <mat-error>Mínimo 2 caracteres</mat-error>
@@ -218,11 +225,10 @@
     Cancelar
   </button>
   <button
-    type="button"
+    type="submit"
     mat-raised-button
     color="primary"
-    (click)="submit()"
-    [disabled]="submitting()"
+    [disabled]="!canSubmit()"
   >
     @if (submitting()) {
       <mat-spinner diameter="20"></mat-spinner>

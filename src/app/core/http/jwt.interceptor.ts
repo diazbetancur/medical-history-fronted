@@ -1,5 +1,4 @@
 import {
-  HttpErrorResponse,
   HttpHandlerFn,
   HttpInterceptorFn,
   HttpRequest,
@@ -7,7 +6,6 @@ import {
 import { inject } from '@angular/core';
 import { TokenStorage } from '@core/auth';
 import { environment } from '@env';
-import { catchError, throwError } from 'rxjs';
 
 /**
  * Public/anonymous endpoints.
@@ -46,10 +44,7 @@ function requiresAuth(url: string): boolean {
 /**
  * JWT Interceptor - Functional interceptor for Angular 19+
  *
- * Only attaches Bearer token to:
- * - /api/auth/me
- * - /api/professional/*
- * - /api/admin/*
+ * Attaches Bearer token to protected API endpoints.
  *
  * Does NOT attach token to:
  * - /api/auth/login
@@ -74,15 +69,5 @@ export const jwtInterceptor: HttpInterceptorFn = (
     }
   }
 
-  return next(req).pipe(
-    catchError((error: HttpErrorResponse) => {
-      // Handle 401 errors - token might be expired
-      if (error.status === 401 && requiresAuth(req.url)) {
-        // Clear invalid token
-        tokenStorage.clearToken();
-      }
-
-      return throwError(() => error);
-    }),
-  );
+  return next(req);
 };

@@ -88,6 +88,7 @@ export class AddExternalAppointmentDialogComponent {
         '',
         [
           Validators.required,
+          this.notBlankValidator(),
           Validators.minLength(2),
           Validators.maxLength(200),
         ],
@@ -105,6 +106,14 @@ export class AddExternalAppointmentDialogComponent {
     this.form.get('appointmentDate')?.valueChanges.subscribe(() => {
       this.form.get('timeSlot')?.updateValueAndValidity();
     });
+  }
+
+  protected canSubmit(): boolean {
+    return (
+      !this.submitting() &&
+      this.form.valid &&
+      this.hasRequiredFieldsFilled()
+    );
   }
 
   protected submit(): void {
@@ -269,6 +278,25 @@ export class AddExternalAppointmentDialogComponent {
         ? null
         : { pastTimeForToday: true };
     };
+  }
+
+  private notBlankValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = String(control.value ?? '');
+      return value.trim().length > 0 ? null : { blank: true };
+    };
+  }
+
+  private hasRequiredFieldsFilled(): boolean {
+    const value = this.form.value;
+
+    return (
+      String(value.patientName ?? '').trim().length >= 2 &&
+      !!this.normalizeDateOnly(value.appointmentDate) &&
+      !!this.normalizeTimeOnly(value.timeSlot) &&
+      value.externalSource !== null &&
+      value.externalSource !== undefined
+    );
   }
 
   private isTodayDate(dateOnly: string): boolean {
