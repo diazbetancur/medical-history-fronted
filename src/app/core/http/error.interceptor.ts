@@ -6,7 +6,7 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { TokenStorage } from '@core/auth';
+import { AuthStore } from '@core/auth';
 import { ProblemDetails } from '@core/models';
 import { environment } from '@env';
 import { ToastService } from '@shared/services';
@@ -31,17 +31,12 @@ const ERROR_MESSAGES: Record<number, string> = {
   504: 'El servidor tardó demasiado en responder.',
 };
 
-/**
- * Routes that should redirect to home on 401.
- * /api/auth/me is included so a stale/expired token triggers the
- * "session expired" redirect instead of silently leaving the user stuck.
- */
-const AUTH_ROUTES = [
-  '/dashboard',
-  '/admin',
-  '/api/professional',
-  '/api/admin',
-  '/api/auth/me',
+const PUBLIC_OR_ANONYMOUS_PATTERNS = [
+  '/api/public/',
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
 ];
 
 /**
@@ -61,11 +56,15 @@ function isApiRequest(url: string): boolean {
   return url.startsWith(apiBase) || url.includes('/api/');
 }
 
+function isPublicOrAnonymous(url: string): boolean {
+  return PUBLIC_OR_ANONYMOUS_PATTERNS.some((pattern) => url.includes(pattern));
+}
+
 /**
  * Check if error should trigger redirect to home
  */
 function shouldRedirectToLogin(url: string): boolean {
-  return AUTH_ROUTES.some((route) => url.includes(route));
+  return isApiRequest(url) && !isPublicOrAnonymous(url);
 }
 
 /**
@@ -116,7 +115,7 @@ export const errorInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn,
 ) => {
   const router = inject(Router);
-  const tokenStorage = inject(TokenStorage);
+  const authStore = inject(AuthStore);
   const toast = inject(ToastService);
 
   return next(req).pipe(
@@ -135,7 +134,7 @@ export const errorInterceptor: HttpInterceptorFn = (
 
       // Handle 401 Unauthorized
       if (error.status === 401 && shouldRedirectToLogin(req.url)) {
-        tokenStorage.clearToken();
+        authStore.expireSession();
 
         // Only redirect if not already on home
         if (router.url !== '/') {
