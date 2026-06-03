@@ -40,10 +40,16 @@
           placeholder="Ej: Juan Pérez"
           maxlength="200"
         />
-        @if (form.get('patientName')?.hasError('required') && form.get('patientName')?.touched) {
+        @if (
+          form.get("patientName")?.hasError("required") &&
+          form.get("patientName")?.touched
+        ) {
           <mat-error>El nombre del paciente es requerido</mat-error>
         }
-        @if (form.get('patientName')?.hasError('minlength') && form.get('patientName')?.touched) {
+        @if (
+          form.get("patientName")?.hasError("minlength") &&
+          form.get("patientName")?.touched
+        ) {
           <mat-error>Mínimo 2 caracteres</mat-error>
         }
       </mat-form-field>
@@ -58,7 +64,10 @@
             formControlName="patientEmail"
             placeholder="paciente@email.com"
           />
-          @if (form.get('patientEmail')?.hasError('email') && form.get('patientEmail')?.touched) {
+          @if (
+            form.get("patientEmail")?.hasError("email") &&
+            form.get("patientEmail")?.touched
+          ) {
             <mat-error>Email inválido</mat-error>
           }
         </mat-form-field>
@@ -98,7 +107,6 @@
             [for]="appointmentDatePicker"
           ></mat-datepicker-toggle>
           <mat-datepicker #appointmentDatePicker></mat-datepicker>
-          <mat-hint>Desde hoy en adelante</mat-hint>
           <mat-error>{{ getDateErrorMessage() }}</mat-error>
         </mat-form-field>
 
@@ -124,7 +132,6 @@
             #appointmentTimePicker
             [interval]="timepickerInterval"
           ></mat-timepicker>
-          <mat-hint>Fracciones sugeridas cada 10 minutos; puedes ajustar manualmente.</mat-hint>
           <mat-error>{{ getTimeErrorMessage() }}</mat-error>
         </mat-form-field>
       </div>
@@ -157,7 +164,10 @@
               </mat-option>
             }
           </mat-select>
-          @if (form.get('externalSource')?.hasError('required') && form.get('externalSource')?.touched) {
+          @if (
+            form.get("externalSource")?.hasError("required") &&
+            form.get("externalSource")?.touched
+          ) {
             <mat-error>Debes indicar cómo se agendó la cita</mat-error>
           }
         </mat-form-field>
@@ -191,7 +201,7 @@
           maxlength="1000"
         ></textarea>
         <mat-hint align="end">
-          {{ form.get('externalNotes')?.value?.length || 0 }}/1000
+          {{ form.get("externalNotes")?.value?.length || 0 }}/1000
         </mat-hint>
       </mat-form-field>
     </section>
