@@ -218,6 +218,14 @@ export class AuthStore {
   }
 
   /**
+   * Clear session state when the backend rejects the token.
+   * Does not navigate or show logout toast; global interceptors own that UX.
+   */
+  expireSession(): void {
+    this.clearAuth();
+  }
+
+  /**
    * Initialize auth on app load
    * Checks for valid token and loads user
    * Returns Observable<CurrentUserDto | null>
