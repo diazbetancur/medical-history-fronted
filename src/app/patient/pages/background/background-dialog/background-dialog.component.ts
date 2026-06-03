@@ -1,12 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import {
+  MatNativeDateModule,
+  provideNativeDateAdapter,
+} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -33,6 +41,7 @@ export interface BackgroundDialogData {
 @Component({
   selector: 'app-background-dialog',
   standalone: true,
+  providers: [provideNativeDateAdapter()],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -40,6 +49,8 @@ export interface BackgroundDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatSelectModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
@@ -54,6 +65,7 @@ export class BackgroundDialogComponent implements OnInit {
 
   form!: FormGroup;
   isSubmitting = signal(false);
+  readonly maxEventDate = this.getTodayDate();
 
   readonly typeOptions = [
     { value: 'Chronic' as BackgroundType, label: 'Crónico' },
@@ -95,7 +107,10 @@ export class BackgroundDialogComponent implements OnInit {
         background?.description || '',
         [Validators.maxLength(1000)],
       ],
-      eventDate: [this.normalizeDateOnly(background?.eventDate)],
+      eventDate: [
+        this.toDateValue(background?.eventDate),
+        [this.maxDateValidator()],
+      ],
       isChronic: [background?.isChronic || false],
     });
   }
@@ -113,7 +128,7 @@ export class BackgroundDialogComponent implements OnInit {
       title: formValue.title.trim(),
       description: formValue.description?.trim() || null,
       eventDate: this.normalizeDateOnly(formValue.eventDate),
-      isChronic: formValue.isChronic,
+      isChronic: formValue.isChronic === true,
     };
 
     this.dialogRef.close(dto);
@@ -134,6 +149,12 @@ export class BackgroundDialogComponent implements OnInit {
       const maxLength = control.errors['maxlength'].requiredLength;
       return `Máximo ${maxLength} caracteres`;
     }
+    if (control.errors['matDatepickerMax'] || control.errors['futureDate']) {
+      return 'La fecha no puede ser posterior al día actual';
+    }
+    if (control.errors['matDatepickerParse']) {
+      return 'Ingresa una fecha válida';
+    }
 
     return 'Campo inválido';
   }
@@ -150,8 +171,48 @@ export class BackgroundDialogComponent implements OnInit {
       return value.length >= 10 ? value.slice(0, 10) : null;
     }
     if (value instanceof Date && !Number.isNaN(value.getTime())) {
-      return value.toISOString().split('T')[0];
+      return this.formatDateOnly(value);
     }
     return null;
+  }
+
+  private toDateValue(value: unknown): Date | null {
+    const dateOnly = this.normalizeDateOnly(value);
+    if (!dateOnly) return null;
+
+    const [year, month, day] = dateOnly.split('-').map(Number);
+    if (!year || !month || !day) return null;
+
+    return new Date(year, month - 1, day);
+  }
+
+  private maxDateValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return null;
+
+      const date =
+        value instanceof Date ? value : this.toDateValue(String(value));
+
+      if (!date || Number.isNaN(date.getTime())) return null;
+
+      const selectedDate = new Date(date);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      return selectedDate <= this.maxEventDate ? null : { futureDate: true };
+    };
+  }
+
+  private getTodayDate(): Date {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }
+
+  private formatDateOnly(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }
