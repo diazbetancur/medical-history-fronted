@@ -1,4 +1,4 @@
-import { afterNextRender, Component, inject } from '@angular/core';
+import { afterNextRender, Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -84,13 +84,18 @@ export class ProfileRequiredDialogComponent {}
   templateUrl: './professional-layout.component.html',
   styleUrl: './professional-layout.component.scss',
 })
-export class ProfessionalLayoutComponent {
+export class ProfessionalLayoutComponent implements OnInit {
   readonly menuService = inject(MenuService);
 
   private readonly authStore = inject(AuthStore);
   private readonly dialog = inject(MatDialog);
 
   private static readonly WELCOME_SESSION_KEY = 'pro_profile_welcome_shown';
+
+  ngOnInit(): void {
+    const ctx = this.authStore.availableContexts().find((c) => c.type === 'PROFESSIONAL');
+    if (ctx) this.authStore.switchContext(ctx);
+  }
 
   constructor() {
     afterNextRender(() => {

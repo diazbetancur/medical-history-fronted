@@ -58,7 +58,7 @@ export class RegisterPageComponent implements OnInit {
         '',
         [Validators.required, Validators.email, Validators.maxLength(256)],
       ],
-      phoneNumber: ['', [Validators.maxLength(20)]],
+      phoneNumber: ['', [Validators.maxLength(20), this.hondurasPhoneValidator()]],
       password: [
         '',
         [
@@ -170,6 +170,16 @@ export class RegisterPageComponent implements OnInit {
     }
 
     return undefined;
+  }
+
+  /** Validates Honduras mobile numbers: 8/9XXXXXXX, optionally prefixed with (+)504. */
+  private hondurasPhoneValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const raw = control.value;
+      if (!raw || String(raw).trim() === '') return null;
+      const clean = String(raw).replace(/[\s\-()]/g, '');
+      return /^(\+?504)?[89]\d{7}$/.test(clean) ? null : { invalidPhone: true };
+    };
   }
 
   private passwordMatchValidator(): ValidatorFn {

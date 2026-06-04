@@ -30,6 +30,7 @@ export class PatientActivateProfessionalPage {
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly requestSent = signal(false);
 
   readonly professionalContext = computed(() =>
     this.authStore
@@ -57,19 +58,18 @@ export class PatientActivateProfessionalPage {
           if (!result.success) {
             this.errorMessage.set(
               result.message ||
-                'No fue posible activar tu perfil profesional en este momento.',
+                'No fue posible enviar tu solicitud en este momento.',
             );
             this.isLoading.set(false);
             return;
           }
 
+          // Refresh session to pick up any role/context changes from backend
           this.authStore.loadMe().subscribe({
             next: () => {
               this.isLoading.set(false);
-              this.toast.success(
-                result.message || 'Perfil profesional activado correctamente',
-              );
-              this.goToProfessional();
+              // Show result screen; navigation is user-driven from here
+              this.requestSent.set(true);
             },
             error: (error) => {
               const problem = this.extractProblemDetails(error);
@@ -84,7 +84,7 @@ export class PatientActivateProfessionalPage {
           const problem = this.extractProblemDetails(error);
           this.errorMessage.set(
             problem.title ||
-              'No fue posible activar tu perfil profesional en este momento.',
+              'No fue posible enviar tu solicitud en este momento.',
           );
           this.isLoading.set(false);
         },

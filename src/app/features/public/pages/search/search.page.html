@@ -115,7 +115,6 @@
           </p>
           @if (getSpecialtyNames(doctor).length > 0) {
           <div class="specialties-block">
-            <span class="specialties-label">Especialista en</span>
             <mat-chip-set class="specialty-chips" aria-label="Especialidades">
               @for (specialtyName of getVisibleSpecialtyNames(doctor); track
               specialtyName) {

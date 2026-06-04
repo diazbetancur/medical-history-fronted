@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthStore } from '@core/auth';
 
 @Component({
   selector: 'app-public-footer',
@@ -10,4 +11,5 @@ import { RouterLink } from '@angular/router';
 })
 export class PublicFooterComponent {
   readonly currentYear = new Date().getFullYear();
+  readonly authStore = inject(AuthStore);
 }

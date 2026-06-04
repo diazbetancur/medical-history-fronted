@@ -75,8 +75,9 @@
             type="tel"
             formControlName="phoneNumber"
             autocomplete="tel"
-            placeholder="504 8907 7887"
+            placeholder="8800-1234"
           />
+          <mat-hint>Honduras: 8 dígitos comenzando con 8 o 9 (ej. 8800-1234 o +504 8800-1234)</mat-hint>
           <app-form-control-error
             [control]="form.controls.phoneNumber"
             [submitted]="submitted()"
@@ -133,6 +134,11 @@
           <mat-error>Las contraseñas no coinciden</mat-error>
           }
         </mat-form-field>
+
+        <div class="profile-hint">
+          <mat-icon>info</mat-icon>
+          <span>Podrás agregar tu fecha de nacimiento, género y datos de documento desde tu perfil después del registro.</span>
+        </div>
 
         @if (errorMessage()) {
         <div class="error-message">

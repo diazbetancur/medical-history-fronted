@@ -151,6 +151,7 @@
                 <button
                   mat-icon-button
                   matTooltip="Ver detalle"
+                  aria-label="Ver detalle del profesional"
                   (click)="viewProfessional(p)"
                 >
                   <mat-icon>visibility</mat-icon>
@@ -161,6 +162,7 @@
                   mat-icon-button
                   color="primary"
                   [matTooltip]="canVerify() ? 'Verificar profesional' : 'No tienes permisos para verificar'"
+                  [attr.aria-label]="canVerify() ? 'Verificar profesional' : 'Sin permisos para verificar'"
                   (click)="verifyProfessional(p, $event)"
                   [disabled]="store.saving() || !canVerify()"
                 >
@@ -170,18 +172,18 @@
                 <button
                   mat-icon-button
                   [matTooltip]="p.isFeatured ? 'Quitar de destacados' : 'Destacar'"
+                  [attr.aria-label]="p.isFeatured ? 'Quitar de destacados' : 'Destacar profesional'"
                   (click)="toggleFeatured(p, $event)"
                   [disabled]="store.saving()"
                 >
-                  <mat-icon
-                    >{{ p.isFeatured ? 'star' : 'star_border' }}</mat-icon
-                  >
+                  <mat-icon>{{ p.isFeatured ? 'star' : 'star_border' }}</mat-icon>
                 </button>
                 } @if (p.isActive && canUpdate()) {
                 <button
                   mat-icon-button
                   color="warn"
                   matTooltip="Desactivar perfil"
+                  aria-label="Desactivar perfil del profesional"
                   (click)="disableProfessional(p, $event)"
                   [disabled]="store.saving()"
                 >
@@ -192,6 +194,7 @@
                   mat-icon-button
                   color="primary"
                   matTooltip="Reactivar perfil"
+                  aria-label="Reactivar perfil del profesional"
                   (click)="enableProfessional(p, $event)"
                   [disabled]="store.saving()"
                 >

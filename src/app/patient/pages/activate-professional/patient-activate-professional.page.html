@@ -1,70 +1,110 @@
 <section class="activate-professional-page">
   <mat-card class="activate-card">
-    <div class="activate-card__icon">
-      <mat-icon>medical_services</mat-icon>
-    </div>
 
-    <div class="activate-card__content">
-      <p class="eyebrow">Área profesional</p>
-      <h1>
-        @if (hasProfessionalContext()) { Tu perfil profesional ya está activo }
-        @else { Actívate como profesional de salud }
-      </h1>
-      <p class="description">
-        @if (hasProfessionalContext()) { Puedes ingresar a tu área profesional
-        para completar o actualizar tu perfil, disponibilidad y servicios. }
-        @else { Al activar esta opción mantienes tu cuenta de paciente y agregas
-        el perfil de profesional para configurar tu perfil y atención. }
-      </p>
-    </div>
+    @if (requestSent()) {
+      <!-- Post-request state: shown after API call completes -->
+      <div class="activate-card__icon">
+        <mat-icon>{{ hasProfessionalContext() ? 'check_circle' : 'hourglass_top' }}</mat-icon>
+      </div>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <mat-icon>account_circle</mat-icon>
-        <span>Tu cuenta base sigue siendo paciente.</span>
+      <div class="activate-card__content">
+        <p class="eyebrow">Área profesional</p>
+        @if (hasProfessionalContext()) {
+          <h1>¡Tu perfil profesional está listo!</h1>
+          <p class="description">
+            Ya puedes acceder a tu área profesional para configurar tu perfil,
+            disponibilidad y servicios.
+          </p>
+        } @else {
+          <h1>Solicitud enviada</h1>
+          <p class="description">
+            Tu solicitud para activarte como profesional de salud está siendo
+            revisada. Recibirás una notificación cuando sea aprobada.
+          </p>
+        }
       </div>
-      <div class="info-item">
-        <mat-icon>assignment_ind</mat-icon>
-        <span>El perfil profesional se gestiona después de activar.</span>
-      </div>
-      <div class="info-item">
-        <mat-icon>verified_user</mat-icon>
-        <span>La publicación queda sujeta a la revisión configurada.</span>
-      </div>
-    </div>
 
-    @if (errorMessage()) {
-    <div class="error-banner">
-      <mat-icon>error_outline</mat-icon>
-      <span>{{ errorMessage() }}</span>
-    </div>
+      <div class="actions">
+        @if (hasProfessionalContext()) {
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="goToProfessional()"
+          >
+            <mat-icon>arrow_forward</mat-icon>
+            <span>Ir a mi área profesional</span>
+          </button>
+        }
+      </div>
+
+    } @else {
+      <!-- Initial state: activation form -->
+      <div class="activate-card__icon">
+        <mat-icon>medical_services</mat-icon>
+      </div>
+
+      <div class="activate-card__content">
+        <p class="eyebrow">Área profesional</p>
+        <h1>
+          @if (hasProfessionalContext()) { Tu perfil profesional ya está activo }
+          @else { Actívate como profesional de salud }
+        </h1>
+        <p class="description">
+          @if (hasProfessionalContext()) { Puedes ingresar a tu área profesional
+          para completar o actualizar tu perfil, disponibilidad y servicios. }
+          @else { Al activar esta opción mantienes tu cuenta de paciente y agregas
+          el perfil de profesional. Tu solicitud será revisada antes de que tu
+          perfil sea visible públicamente. }
+        </p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <mat-icon>account_circle</mat-icon>
+          <span>Tu cuenta base sigue siendo paciente.</span>
+        </div>
+        <div class="info-item">
+          <mat-icon>assignment_ind</mat-icon>
+          <span>El perfil profesional se gestiona después de activar.</span>
+        </div>
+        <div class="info-item">
+          <mat-icon>verified_user</mat-icon>
+          <span>La publicación queda sujeta a revisión del administrador.</span>
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-banner">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <div class="actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="isLoading()"
+          (click)="activateProfessional()"
+        >
+          @if (isLoading()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>Enviando solicitud...</span>
+          } @else {
+            <ng-container>
+              <mat-icon>
+                {{ hasProfessionalContext() ? 'arrow_forward' : 'add_circle' }}
+              </mat-icon>
+              <span>
+                {{ hasProfessionalContext() ? 'Ir a mi área profesional' : 'Solicitar activación' }}
+              </span>
+            </ng-container>
+          }
+        </button>
+      </div>
     }
 
-    <div class="actions">
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        [disabled]="isLoading()"
-        (click)="activateProfessional()"
-      >
-        @if (isLoading()) {
-        <ng-container>
-          <mat-spinner diameter="20"></mat-spinner>
-          <span>Activando...</span>
-        </ng-container>
-        } @else {
-        <ng-container>
-          <mat-icon>
-            {{ hasProfessionalContext() ? "arrow_forward" : "add_circle" }}
-          </mat-icon>
-          <span>
-            {{ hasProfessionalContext() ? "Ir a mi área profesional" :
-            "Activarme como profesional" }}
-          </span>
-        </ng-container>
-        }
-      </button>
-    </div>
   </mat-card>
 </section>

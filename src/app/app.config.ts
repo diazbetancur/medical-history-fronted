@@ -10,11 +10,12 @@ import {
   provideAppInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
   provideRouter,
   withComponentInputBinding,
-  withViewTransitions,
 } from '@angular/router';
 
 import {
@@ -37,7 +38,26 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { hideRequiredMarker: true } },
+    {
+      provide: MatPaginatorIntl,
+      useFactory: () => {
+        const intl = new MatPaginatorIntl();
+        intl.itemsPerPageLabel = 'Elementos por página:';
+        intl.nextPageLabel = 'Siguiente página';
+        intl.previousPageLabel = 'Página anterior';
+        intl.firstPageLabel = 'Primera página';
+        intl.lastPageLabel = 'Última página';
+        intl.getRangeLabel = (page, size, length) => {
+          if (length === 0) return '0 de 0';
+          const start = page * size + 1;
+          const end = Math.min((page + 1) * size, length);
+          return `${start} – ${end} de ${length}`;
+        };
+        return intl;
+      },
+    },
+    provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(
       withFetch(),
       withInterceptors([
