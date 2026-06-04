@@ -135,6 +135,18 @@
   flex-wrap: wrap;
 }
 
+.photo-pending-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #4b5563;
+  background: #f8fafc;
+
+  mat-icon {
+    color: #2563eb;
+  }
+}
+
 .nested-section {
   padding-top: 8px;
 }

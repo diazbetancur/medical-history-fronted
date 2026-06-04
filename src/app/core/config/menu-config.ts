@@ -269,6 +269,12 @@ export const MENU_ITEMS: MenuItem[] = [
     exactMatch: true,
   },
   {
+    label: 'Buscar Profesionales',
+    icon: 'search',
+    route: '/search',
+    context: 'PATIENT',
+  },
+  {
     label: 'Agendar Cita',
     icon: 'event_available',
     route: '/patient/wizard',
@@ -289,21 +295,15 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PATIENT',
   },
   {
-    label: 'Activarme como profesional',
-    icon: 'medical_services',
-    route: '/patient/activate-professional',
-    context: 'PATIENT',
-  },
-  {
     label: 'Cambiar Contraseña',
     icon: 'lock_reset',
     route: '/patient/change-password',
     context: 'PATIENT',
   },
   {
-    label: 'Buscar Profesionales',
-    icon: 'search',
-    route: '/search',
+    label: 'Activarme como profesional',
+    icon: 'medical_services',
+    route: '/patient/activate-professional',
     context: 'PATIENT',
   },
 ];

@@ -327,97 +327,256 @@
         </div>
       </section>
 
-      <div class="detail-layout">
-        <div class="detail-column detail-column-main">
-          @if (hasContactInfo(pro)) {
-          <section class="detail-card detail-section">
-            <div class="section-heading">
-              <mat-icon>contact_mail</mat-icon>
-              <h4>Información de contacto</h4>
+      <mat-tab-group
+        animationDuration="250ms"
+        [selectedIndex]="detailTabIndex()"
+        (selectedIndexChange)="onDetailTabChange($event, pro.id)"
+      >
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>badge</mat-icon>
+            <span>Información principal</span>
+          </ng-template>
+
+          <div class="detail-layout">
+            <div class="detail-column detail-column-main">
+              @if (hasContactInfo(pro)) {
+              <section class="detail-card detail-section">
+                <div class="section-heading">
+                  <mat-icon>contact_mail</mat-icon>
+                  <h4>Información de contacto</h4>
+                </div>
+
+                <div class="contact-list">
+                  @if (pro.email) {
+                  <div class="contact-row">
+                    <div class="contact-key">
+                      <mat-icon>email</mat-icon>
+                      <span>Email</span>
+                    </div>
+                    <a class="contact-value" [href]="'mailto:' + pro.email"
+                      >{{ pro.email }}</a
+                    >
+                  </div>
+                  } @if (pro.phone) {
+                  <div class="contact-row">
+                    <div class="contact-key">
+                      <mat-icon>phone</mat-icon>
+                      <span>Teléfono</span>
+                    </div>
+                    <span class="contact-value">{{ pro.phone }}</span>
+                  </div>
+                  } @if (pro.whatsApp) {
+                  <div class="contact-row">
+                    <div class="contact-key">
+                      <mat-icon>chat</mat-icon>
+                      <span>WhatsApp</span>
+                    </div>
+                    <span class="contact-value">{{ pro.whatsApp }}</span>
+                  </div>
+                  } @if (pro.address) {
+                  <div class="contact-row">
+                    <div class="contact-key">
+                      <mat-icon>location_on</mat-icon>
+                      <span>Dirección</span>
+                    </div>
+                    <span class="contact-value">{{ pro.address }}</span>
+                  </div>
+                  } @if (pro.website) {
+                  <div class="contact-row">
+                    <div class="contact-key">
+                      <mat-icon>language</mat-icon>
+                      <span>Sitio web</span>
+                    </div>
+                    <a
+                      class="contact-value"
+                      [href]="pro.website"
+                      target="_blank"
+                      rel="noopener"
+                      >{{ pro.website }}</a
+                    >
+                  </div>
+                  }
+                </div>
+              </section>
+              } @if (pro.description) {
+              <section class="detail-card detail-section">
+                <div class="section-heading">
+                  <mat-icon>description</mat-icon>
+                  <h4>Descripción</h4>
+                </div>
+                <p class="description-text">{{ pro.description }}</p>
+              </section>
+              } @else {
+              <section class="detail-card detail-section">
+                <div class="section-heading">
+                  <mat-icon>description</mat-icon>
+                  <h4>Descripción</h4>
+                </div>
+                <p class="description-text">Sin descripción registrada.</p>
+              </section>
+              }
             </div>
 
-            <div class="contact-list">
-              @if (pro.email) {
-              <div class="contact-row">
-                <div class="contact-key">
-                  <mat-icon>email</mat-icon>
-                  <span>Email</span>
+            <div class="detail-column detail-column-side">
+              @if (pro.yearsOfExperience !== null && pro.yearsOfExperience !==
+              undefined) {
+              <section class="detail-card detail-section">
+                <div class="section-heading">
+                  <mat-icon>history_edu</mat-icon>
+                  <h4>Experiencia</h4>
                 </div>
-                <a class="contact-value" [href]="'mailto:' + pro.email"
-                  >{{ pro.email }}</a
-                >
-              </div>
-              } @if (pro.phone) {
-              <div class="contact-row">
-                <div class="contact-key">
-                  <mat-icon>phone</mat-icon>
-                  <span>Teléfono</span>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <mat-icon>workspace_premium</mat-icon>
+                    <div>
+                      <span class="detail-label">Años de experiencia</span>
+                      <span class="detail-value"
+                        >{{ pro.yearsOfExperience }}</span
+                      >
+                    </div>
+                  </div>
                 </div>
-                <span class="contact-value">{{ pro.phone }}</span>
-              </div>
-              } @if (pro.whatsApp) {
-              <div class="contact-row">
-                <div class="contact-key">
-                  <mat-icon>chat</mat-icon>
-                  <span>WhatsApp</span>
+              </section>
+              } @if (pro.adminNotes) {
+              <section class="detail-card detail-section">
+                <div class="section-heading">
+                  <mat-icon>sticky_note_2</mat-icon>
+                  <h4>Notas internas</h4>
                 </div>
-                <span class="contact-value">{{ pro.whatsApp }}</span>
-              </div>
-              } @if (pro.address) {
-              <div class="contact-row">
-                <div class="contact-key">
-                  <mat-icon>location_on</mat-icon>
-                  <span>Dirección</span>
+                <p class="admin-notes">{{ pro.adminNotes }}</p>
+              </section>
+              } @if (pro.dateUpdated) {
+              <section class="detail-card detail-section">
+                <div class="section-heading">
+                  <mat-icon>event</mat-icon>
+                  <h4>Fechas</h4>
                 </div>
-                <span class="contact-value">{{ pro.address }}</span>
+                <div class="detail-grid detail-grid-dates">
+                  <div class="detail-item detail-item-date">
+                    <mat-icon>update</mat-icon>
+                    <div>
+                      <span class="detail-label">Actualizado</span>
+                      <span class="detail-value"
+                        >{{ pro.dateUpdated | date: 'dd/MM/yyyy HH:mm' }}</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </section>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>medical_services</mat-icon>
+            <span>Especialidades</span>
+          </ng-template>
+
+          <section class="detail-card detail-section">
+            <div class="section-heading">
+              <mat-icon>medical_services</mat-icon>
+              <h4>Especialidades</h4>
+            </div>
+
+            @if (pro.specialties?.length) {
+            <mat-chip-set>
+              @for (specialty of pro.specialties ?? []; track
+              specialty.specialtyId) {
+              <mat-chip
+                [class.status-verified]="specialty.isPrimary"
+                [class.status-disabled]="specialty.isActive === false"
+              >
+                @if (specialty.isPrimary) {
+                <mat-icon>workspace_premium</mat-icon>
+                } {{ specialty.specialtyName }} @if (specialty.isActive ===
+                false) { · Inactiva }
+              </mat-chip>
+              }
+            </mat-chip-set>
+            } @else {
+            <p class="description-text">Sin especialidades registradas.</p>
+            }
+          </section>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>design_services</mat-icon>
+            <span>Servicios</span>
+          </ng-template>
+
+          <section class="detail-card detail-section">
+            <div class="section-heading">
+              <mat-icon>design_services</mat-icon>
+              <h4>Servicios</h4>
+            </div>
+
+            @if (pro.services.length) {
+            <div class="detail-grid">
+              @for (service of pro.services; track service.id) {
+              <div class="detail-item">
+                <mat-icon>medical_information</mat-icon>
+                <div>
+                  <span class="detail-label">
+                    {{ service.name }} @if (service.isActive === false) { ·
+                    Inactivo }
+                  </span>
+                  @if (service.description) {
+                  <span class="detail-value">{{ service.description }}</span>
+                  }
+                </div>
               </div>
               }
             </div>
+            } @else {
+            <p class="description-text">Sin servicios registrados.</p>
+            }
           </section>
-          } @if (pro.description) {
-          <section class="detail-card detail-section">
-            <div class="section-heading">
-              <mat-icon>description</mat-icon>
-              <h4>Descripción</h4>
-            </div>
-            <p class="description-text">{{ pro.description }}</p>
-          </section>
-          }
-        </div>
+        </mat-tab>
 
-        <div class="detail-column detail-column-side">
-          @if (pro.adminNotes) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon>school</mat-icon>
+            <span>Formación</span>
+          </ng-template>
+
           <section class="detail-card detail-section">
             <div class="section-heading">
-              <mat-icon>sticky_note_2</mat-icon>
-              <h4>Notas internas</h4>
+              <mat-icon>school</mat-icon>
+              <h4>Formación</h4>
             </div>
-            <p class="admin-notes">{{ pro.adminNotes }}</p>
-          </section>
-          } @if (pro.dateUpdated) {
-          <section class="detail-card detail-section">
-            <div class="section-heading">
-              <mat-icon>event</mat-icon>
-              <h4>Fechas</h4>
-            </div>
-            <div class="detail-grid detail-grid-dates">
-              <div class="detail-item detail-item-date">
-                <mat-icon>update</mat-icon>
+
+            @if (pro.studies?.length) {
+            <div class="detail-grid">
+              @for (study of pro.studies ?? []; track study.id) {
+              <div class="detail-item">
+                <mat-icon>workspace_premium</mat-icon>
                 <div>
-                  <span class="detail-label">Actualizado</span>
+                  <span class="detail-label">{{ study.degreeTitle }}</span>
+                  @if (getEducationMeta(study)) {
                   <span class="detail-value"
-                    >{{ pro.dateUpdated | date: 'dd/MM/yyyy HH:mm' }}</span
+                    >{{ getEducationMeta(study) }}</span
                   >
+                  } @if (study.description) {
+                  <span class="detail-value">{{ study.description }}</span>
+                  }
                 </div>
               </div>
+              }
             </div>
+            } @else {
+            <p class="description-text">Sin formación registrada.</p>
+            }
           </section>
-          }
-        </div>
-      </div>
+        </mat-tab>
+      </mat-tab-group>
     </div>
 
     <div class="drawer-actions">
+      @if (canOpenPublicProfile(pro)) {
       <a
         mat-stroked-button
         [routerLink]="['/pro', pro.slug]"
@@ -427,8 +586,18 @@
         <mat-icon>open_in_new</mat-icon>
         Ver perfil público
       </a>
-
-      @if (pro.isActive && !pro.isVerified) {
+      } @else {
+      <button
+        mat-stroked-button
+        type="button"
+        class="review-mode-button"
+        matTooltip="El perfil público se habilita cuando el profesional sea verificado"
+        disabled
+      >
+        <mat-icon>fact_check</mat-icon>
+        Vista de revisión interna
+      </button>
+      } @if (pro.isActive && !pro.isVerified) {
       <button
         mat-raised-button
         color="primary"
