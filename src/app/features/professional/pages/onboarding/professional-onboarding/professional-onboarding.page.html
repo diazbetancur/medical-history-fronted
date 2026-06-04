@@ -26,6 +26,7 @@
     >
       <mat-tab label="Información principal">
         <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+          @if (hasExistingProfile()) {
           <div class="form-section photo-section">
             <div class="photo-row">
               <div class="photo-preview">
@@ -69,6 +70,7 @@
               </div>
             </div>
           </div>
+          }
 
           <div class="form-section">
             <div class="section-header">
@@ -119,7 +121,7 @@
                   placeholder="+504 8907 7887"
                 />
                 @if (profileForm.get('phone')?.hasError('pattern')) {
-                  <mat-error>Formato inválido. Ej: +504 8907 7887</mat-error>
+                <mat-error>Formato inválido. Ej: +504 8907 7887</mat-error>
                 }
               </mat-form-field>
 
@@ -550,11 +552,8 @@
                       [class.is-default]="location.isDefault"
                     >
                       <mat-icon>
-                        {{
-                          location.isDefault
-                            ? "check_circle"
-                            : "radio_button_unchecked"
-                        }}
+                        {{ location.isDefault ? "check_circle" :
+                        "radio_button_unchecked" }}
                       </mat-icon>
                       {{ location.isDefault ? "Sí" : "No" }}
                     </span>

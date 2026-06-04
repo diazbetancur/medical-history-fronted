@@ -1,12 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
   AdminCatalogsResponse,
   AdminDashboardSummaryResponse,
   AdminProfessionalDetail,
+  AdminProfessionalEducation,
   AdminProfessionalsParams,
   AdminProfessionalsResponse,
+  AdminProfessionalSpecialtiesResponse,
+  AdminProfessionalSpecialty,
   AdminRequestsParams,
   AdminRequestsResponse,
   ApproveProfessionalPayload,
@@ -54,6 +57,40 @@ export class AdminApi {
    */
   getProfessional(id: string): Observable<AdminProfessionalDetail> {
     return this.api.get<AdminProfessionalDetail>(`/admin/professionals/${id}`);
+  }
+
+  /**
+   * GET /api/admin/professionals/{id}/specialties
+   * Get specialties for admin review.
+   */
+  getProfessionalSpecialties(
+    id: string,
+  ): Observable<AdminProfessionalSpecialty[]> {
+    return this.api
+      .get<AdminProfessionalSpecialtiesResponse>(
+        `/admin/professionals/${id}/specialties`,
+      )
+      .pipe(map((response) => response.specialties ?? []));
+  }
+
+  /**
+   * GET /api/admin/professionals/{id}/services
+   * Get services for admin review.
+   */
+  getProfessionalServices(id: string): Observable<Service[]> {
+    return this.api.get<Service[]>(`/admin/professionals/${id}/services`);
+  }
+
+  /**
+   * GET /api/admin/professionals/{id}/education
+   * Get education records for admin review.
+   */
+  getProfessionalEducation(
+    id: string,
+  ): Observable<AdminProfessionalEducation[]> {
+    return this.api.get<AdminProfessionalEducation[]>(
+      `/admin/professionals/${id}/education`,
+    );
   }
 
   /**

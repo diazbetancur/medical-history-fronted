@@ -28,8 +28,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthStore } from '@core/auth';
 import type {
+  AdminProfessionalEducation,
   AdminProfessionalDetail,
   AdminProfessionalListItem,
+  Service,
 } from '@data/api/api-models';
 import type { ProfessionalStatusFilter } from '@data/stores/admin-professionals.store';
 import { AdminProfessionalsStore } from '@data/stores/admin-professionals.store';
@@ -71,6 +73,7 @@ export class ProfessionalsReviewPageComponent implements OnInit {
   // ── UI state ──────────────────────────────────────────────────────────────
   readonly searchValue = signal('');
   readonly activeTabIndex = signal(0);
+  readonly detailTabIndex = signal(0);
   readonly detailDialogTemplate =
     viewChild.required<TemplateRef<unknown>>('detailDialog');
 
@@ -152,6 +155,7 @@ export class ProfessionalsReviewPageComponent implements OnInit {
 
   // ── Detail dialog ─────────────────────────────────────────────────────────
   viewProfessional(p: AdminProfessionalListItem): void {
+    this.detailTabIndex.set(0);
     this.store.selectProfessional(p.id);
 
     if (this.detailDialogRef) {
@@ -175,6 +179,25 @@ export class ProfessionalsReviewPageComponent implements OnInit {
 
   closeDetailDialog(): void {
     this.detailDialogRef?.close();
+  }
+
+  onDetailTabChange(index: number, professionalId: string): void {
+    this.detailTabIndex.set(index);
+
+    switch (index) {
+      case 1:
+        this.store.refreshSelectedProfessionalSpecialties(professionalId);
+        break;
+      case 2:
+        this.store.refreshSelectedProfessionalServices(professionalId);
+        break;
+      case 3:
+        this.store.refreshSelectedProfessionalEducation(professionalId);
+        break;
+      default:
+        this.store.refreshSelectedProfessionalSummary(professionalId);
+        break;
+    }
   }
 
   // ── Moderation actions ────────────────────────────────────────────────────
@@ -285,7 +308,42 @@ export class ProfessionalsReviewPageComponent implements OnInit {
   }
 
   hasContactInfo(p: AdminProfessionalDetail): boolean {
-    return !!(p.email || p.phone || p.whatsApp || p.address);
+    return !!(p.email || p.phone || p.whatsApp || p.address || p.website);
+  }
+
+  canOpenPublicProfile(p: AdminProfessionalDetail): boolean {
+    return p.isActive && p.isVerified && !!p.slug;
+  }
+
+  getServicePrice(service: Service): string {
+    const priceFrom = service.priceFrom;
+    const priceTo = service.priceTo;
+    const hasPriceFrom = priceFrom !== null && priceFrom !== undefined;
+    const hasPriceTo = priceTo !== null && priceTo !== undefined;
+
+    if (hasPriceFrom && hasPriceTo) {
+      return `$${priceFrom.toLocaleString()} - $${priceTo.toLocaleString()}`;
+    }
+
+    if (hasPriceFrom) {
+      return `Desde $${priceFrom.toLocaleString()}`;
+    }
+
+    if (hasPriceTo) {
+      return `Hasta $${priceTo.toLocaleString()}`;
+    }
+
+    return 'Precio no informado';
+  }
+
+  getEducationMeta(study: AdminProfessionalEducation): string {
+    return [
+      study.institutionName,
+      study.institutionCountry,
+      study.graduationYear ? String(study.graduationYear) : undefined,
+    ]
+      .filter((value) => !!value)
+      .join(' · ');
   }
 
   getAvatarInitials(p: AdminProfessionalListItem): string {
