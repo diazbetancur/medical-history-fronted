@@ -96,6 +96,13 @@
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #menuToday="matMenu">
+                    <button type="button" mat-menu-item (click)="openAppointmentDetail(row)">
+                      <mat-icon>visibility</mat-icon>
+                      <span>Ver detalle</span>
+                    </button>
+                    @if (hasMenuActionsAfterDetail(row)) {
+                      <mat-divider></mat-divider>
+                    }
                     @if (row.status === 'PENDING') {
                       <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
                         <mat-icon>check_circle</mat-icon>
@@ -195,6 +202,13 @@
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #menuUpcoming="matMenu">
+                    <button type="button" mat-menu-item (click)="openAppointmentDetail(row)">
+                      <mat-icon>visibility</mat-icon>
+                      <span>Ver detalle</span>
+                    </button>
+                    @if (hasMenuActionsAfterDetail(row)) {
+                      <mat-divider></mat-divider>
+                    }
                     @if (row.status === 'PENDING') {
                       <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
                         <mat-icon>check_circle</mat-icon>
@@ -299,6 +313,13 @@
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #menuMonth="matMenu">
+                    <button type="button" mat-menu-item (click)="openAppointmentDetail(row)">
+                      <mat-icon>visibility</mat-icon>
+                      <span>Ver detalle</span>
+                    </button>
+                    @if (hasMenuActionsAfterDetail(row)) {
+                      <mat-divider></mat-divider>
+                    }
                     @if (row.status === 'PENDING') {
                       <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
                         <mat-icon>check_circle</mat-icon>
@@ -437,6 +458,13 @@
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #menuRange="matMenu">
+                    <button type="button" mat-menu-item (click)="openAppointmentDetail(row)">
+                      <mat-icon>visibility</mat-icon>
+                      <span>Ver detalle</span>
+                    </button>
+                    @if (hasMenuActionsAfterDetail(row)) {
+                      <mat-divider></mat-divider>
+                    }
                     @if (row.status === 'PENDING') {
                       <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
                         <mat-icon>check_circle</mat-icon>

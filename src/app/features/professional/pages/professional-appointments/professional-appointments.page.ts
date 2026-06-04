@@ -31,6 +31,12 @@ import {
   AddExternalAppointmentDialogComponent,
   type AddExternalAppointmentDialogData,
 } from './add-external-appointment-dialog/add-external-appointment-dialog.component';
+import {
+  AppointmentDetailDialogComponent,
+  type AppointmentDetailDialogData,
+} from './appointment-detail-dialog/appointment-detail-dialog.component';
+
+const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 
 @Component({
   selector: 'app-professional-appointments-page',
@@ -231,8 +237,33 @@ export class ProfessionalAppointmentsPage implements OnInit {
     return (
       this.isToday(appointment.date) &&
       appointment.status !== 'CANCELLED' &&
-      !!appointment.patientId
+      !this.isExternalAppointment(appointment) &&
+      this.hasPlatformPatient(appointment)
     );
+  }
+
+  protected openAppointmentDetail(appointment: AppointmentDto): void {
+    const professionalProfileId =
+      this.authStore.user()?.professionalProfileId || appointment.professionalId;
+
+    if (!professionalProfileId) {
+      this.toast.error('No se encontrÃ³ el perfil profesional');
+      return;
+    }
+
+    this.dialog.open<
+      AppointmentDetailDialogComponent,
+      AppointmentDetailDialogData
+    >(AppointmentDetailDialogComponent, {
+      data: {
+        appointmentId: appointment.id,
+        professionalProfileId,
+        initialAppointment: appointment,
+      },
+      width: '820px',
+      maxWidth: '95vw',
+      panelClass: 'appointment-detail-dialog-panel',
+    });
   }
 
   protected openClinicalHistoryFromAppointment(
@@ -249,6 +280,15 @@ export class ProfessionalAppointmentsPage implements OnInit {
         appointmentId: appointment.id,
       },
     });
+  }
+
+  protected hasMenuActionsAfterDetail(appointment: AppointmentDto): boolean {
+    return (
+      appointment.status === 'PENDING' ||
+      appointment.status === 'CONFIRMED' ||
+      this.canCreateHistoryFromAppointment(appointment) ||
+      (appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED')
+    );
   }
 
   protected applyDateRangeFilter(): void {
@@ -304,6 +344,10 @@ export class ProfessionalAppointmentsPage implements OnInit {
     return 'Paciente';
   }
 
+  protected isExternalAppointment(appointment: AppointmentDto): boolean {
+    return appointment.type === 'EXTERNAL';
+  }
+
   private getDateInputValue(date: Date): string {
     return date.toISOString().split('T')[0];
   }
@@ -316,5 +360,12 @@ export class ProfessionalAppointmentsPage implements OnInit {
 
   private isToday(date: string): boolean {
     return date === this.getDateInputValue(new Date());
+  }
+
+  private hasPlatformPatient(appointment: AppointmentDto): boolean {
+    return (
+      !!appointment.patientId?.trim() &&
+      appointment.patientId !== EMPTY_GUID
+    );
   }
 }
