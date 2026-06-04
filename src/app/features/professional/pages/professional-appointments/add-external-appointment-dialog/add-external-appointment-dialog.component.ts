@@ -97,7 +97,10 @@ export class AddExternalAppointmentDialogComponent {
       patientPhone: ['', Validators.maxLength(30)],
       appointmentDate: [null, Validators.required],
       timeSlot: [null, [Validators.required, this.notPastTodayTimeValidator()]],
-      durationMinutes: [30, [Validators.min(15), Validators.max(480)]],
+      durationMinutes: [
+        30,
+        [Validators.required, Validators.min(15), Validators.max(480)],
+      ],
       externalSource: [null, Validators.required],
       reason: ['', Validators.maxLength(500)],
       externalNotes: ['', Validators.maxLength(1000)],
@@ -125,6 +128,9 @@ export class AddExternalAppointmentDialogComponent {
     const value = this.form.value;
     const appointmentDate = this.normalizeDateOnly(value.appointmentDate);
     const timeSlot = this.normalizeTimeOnly(value.timeSlot);
+    const durationMinutes = this.normalizeDurationMinutes(
+      value.durationMinutes,
+    );
 
     if (!appointmentDate || !timeSlot) {
       this.form.markAllAsTouched();
@@ -143,7 +149,7 @@ export class AddExternalAppointmentDialogComponent {
         patientPhone: value.patientPhone?.trim() || undefined,
         appointmentDate,
         timeSlot,
-        durationMinutes: value.durationMinutes ?? 30,
+        durationMinutes,
         externalSource: value.externalSource,
         reason: value.reason?.trim() || undefined,
         externalNotes: value.externalNotes?.trim() || undefined,
@@ -294,9 +300,15 @@ export class AddExternalAppointmentDialogComponent {
       String(value.patientName ?? '').trim().length >= 2 &&
       !!this.normalizeDateOnly(value.appointmentDate) &&
       !!this.normalizeTimeOnly(value.timeSlot) &&
+      this.normalizeDurationMinutes(value.durationMinutes) >= 15 &&
       value.externalSource !== null &&
       value.externalSource !== undefined
     );
+  }
+
+  private normalizeDurationMinutes(value: unknown): number {
+    const durationMinutes = Number(value);
+    return Number.isFinite(durationMinutes) ? durationMinutes : 30;
   }
 
   private isTodayDate(dateOnly: string): boolean {
