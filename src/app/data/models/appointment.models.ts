@@ -55,6 +55,9 @@ export interface AppointmentDto {
   institutionId?: string;
   institutionName?: string;
   date: string; // ISO date (YYYY-MM-DD)
+  timeSlot?: string; // HH:mm or HH:mm-HH:mm from backend
+  startUtc?: string;
+  endUtc?: string;
   startTime: string; // HH:mm
   endTime: string; // HH:mm
   duration: number; // minutes

@@ -157,6 +157,12 @@
             title="Duración en minutos"
           />
           <mat-hint>15 – 480 min</mat-hint>
+          @if (
+            form.get("durationMinutes")?.invalid &&
+            form.get("durationMinutes")?.touched
+          ) {
+            <mat-error>La duración debe estar entre 15 y 480 minutos</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
