@@ -24,7 +24,12 @@
     </div>
   }
 
-  <form [formGroup]="form" class="appointment-form" (ngSubmit)="submit()">
+  <form
+    id="external-appointment-form"
+    [formGroup]="form"
+    class="appointment-form"
+    (ngSubmit)="submit()"
+  >
     <section class="form-section">
       <div class="section-title">
         <mat-icon aria-hidden="true">person</mat-icon>
@@ -42,12 +47,6 @@
         />
         @if (
           form.get("patientName")?.hasError("blank") &&
-          form.get("patientName")?.touched
-        ) {
-          <mat-error>El nombre del paciente es requerido</mat-error>
-        }
-        @if (
-          form.get("patientName")?.hasError("required") &&
           form.get("patientName")?.touched
         ) {
           <mat-error>El nombre del paciente es requerido</mat-error>
@@ -226,6 +225,7 @@
   </button>
   <button
     type="submit"
+    form="external-appointment-form"
     mat-raised-button
     color="primary"
     [disabled]="!canSubmit()"

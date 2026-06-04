@@ -61,7 +61,9 @@ export class ProfessionalAppointmentsApi {
     appointmentId: string,
   ): Observable<AppointmentDto> {
     return this.apiClient
-      .get<any>(`/professional/${professionalId}/appointments/${appointmentId}`)
+      .get<any>(
+        `/appointments/professional/${professionalId}/appointments/${appointmentId}`,
+      )
       .pipe(
         retry(READ_RETRY),
         map((response) => this.mapAppointment(response)),
@@ -170,6 +172,7 @@ export class ProfessionalAppointmentsApi {
     return {
       id: item?.id ?? '',
       patientId: item?.patientId ?? '',
+      patientProfileId: item?.patientProfileId,
       patientName:
         item?.patientName ??
         item?.patient?.fullName ??
@@ -177,18 +180,31 @@ export class ProfessionalAppointmentsApi {
           .filter((value: string | undefined) => !!value)
           .join(' ') ??
         '',
+      patientEmail: item?.patientEmail ?? item?.patient?.email,
+      patientPhone: item?.patientPhone ?? item?.patient?.phone,
       professionalId: item?.professionalId ?? item?.professionalProfileId ?? '',
       professionalName: item?.professionalName ?? '',
       professionalSlug: item?.professionalSlug ?? '',
+      institutionId: item?.institutionId,
+      institutionName: item?.institutionName,
       date,
       startTime: time.startTime,
       endTime: time.endTime,
       duration: item?.duration ?? item?.durationMinutes ?? 0,
       status: normalizeAppointmentStatus(item?.status, item?.statusDisplay),
+      reason: item?.reason,
+      patientNotes: item?.patientNotes,
+      professionalNotes: item?.professionalNotes,
       notes: item?.notes,
+      observation: item?.observation,
       cancellationReason: item?.cancellationReason ?? item?.cancelReason,
-      createdAt: item?.createdAt ?? new Date().toISOString(),
-      updatedAt: item?.updatedAt ?? item?.createdAt ?? new Date().toISOString(),
+      createdAt: item?.createdAt ?? item?.dateCreated ?? new Date().toISOString(),
+      updatedAt:
+        item?.updatedAt ??
+        item?.dateModified ??
+        item?.createdAt ??
+        item?.dateCreated ??
+        new Date().toISOString(),
       type: this.normalizeAppointmentType(item?.type),
       externalSource: this.normalizeExternalSource(item?.externalSource),
       externalNotes: item?.externalNotes,

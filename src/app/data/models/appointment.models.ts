@@ -45,16 +45,25 @@ export const EXTERNAL_SOURCE_LABELS: Record<ExternalAppointmentSource, string> =
 export interface AppointmentDto {
   id: string;
   patientId: string;
+  patientProfileId?: string;
   patientName: string;
+  patientEmail?: string;
+  patientPhone?: string;
   professionalId: string;
   professionalName: string;
   professionalSlug: string;
+  institutionId?: string;
+  institutionName?: string;
   date: string; // ISO date (YYYY-MM-DD)
   startTime: string; // HH:mm
   endTime: string; // HH:mm
   duration: number; // minutes
   status: AppointmentStatus;
+  reason?: string;
+  patientNotes?: string;
+  professionalNotes?: string;
   notes?: string;
+  observation?: string;
   cancellationReason?: string;
   createdAt: string;
   updatedAt: string;

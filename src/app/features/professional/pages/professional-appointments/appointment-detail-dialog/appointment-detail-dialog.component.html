@@ -1,0 +1,212 @@
+<div class="appointment-detail-dialog">
+  <header class="dialog-header">
+    <div class="title-block">
+      <span class="title-icon">
+        <mat-icon>event_note</mat-icon>
+      </span>
+      <div>
+        <h2 mat-dialog-title>Detalle de cita</h2>
+        <p>Información completa registrada para la atención.</p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      mat-icon-button
+      aria-label="Cerrar detalle de cita"
+      (click)="close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <mat-dialog-content>
+    @if (isLoading() && !appointment()) {
+      <div class="loading-state">
+        <mat-spinner diameter="42"></mat-spinner>
+        <p>Cargando detalle...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    @if (appointment(); as detail) {
+      <section class="summary-card">
+        <div>
+          <p class="eyebrow">Paciente</p>
+          <h3>{{ detail.patientName || "Paciente sin nombre" }}</h3>
+          <p class="muted">
+            {{
+              isExternalAppointment(detail)
+                ? "Paciente externo"
+                : "Usuario de la plataforma"
+            }}
+          </p>
+        </div>
+
+        <mat-chip-set aria-label="Tipo y estado de cita">
+          <mat-chip>
+            {{ isExternalAppointment(detail) ? "Externa" : "Plataforma" }}
+          </mat-chip>
+          <mat-chip>{{ getStatusLabel(detail.status) }}</mat-chip>
+        </mat-chip-set>
+      </section>
+
+      <section class="detail-section">
+        <h3>
+          <mat-icon>person</mat-icon>
+          Datos del paciente
+        </h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Nombre</span>
+            <span class="detail-value">{{ detail.patientName || "No disponible" }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Correo</span>
+            <span class="detail-value">{{ detail.patientEmail || "No registrado" }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Teléfono</span>
+            <span class="detail-value">{{ detail.patientPhone || "No registrado" }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">ID paciente plataforma</span>
+            <span class="detail-value">
+              {{
+                isExternalAppointment(detail)
+                  ? "No aplica"
+                  : detail.patientId || "No disponible"
+              }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <section class="detail-section">
+        <h3>
+          <mat-icon>schedule</mat-icon>
+          Información de la cita
+        </h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Fecha</span>
+            <span class="detail-value">{{ formatDate(detail.date) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Hora</span>
+            <span class="detail-value">
+              {{ detail.startTime || "No disponible" }} – {{ detail.endTime || "No disponible" }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Duración</span>
+            <span class="detail-value">{{ detail.duration || 0 }} minutos</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Canal externo</span>
+            <span class="detail-value">
+              {{
+                isExternalAppointment(detail)
+                  ? getExternalSourceLabel(detail.externalSource)
+                  : "No aplica"
+              }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Profesional</span>
+            <span class="detail-value">{{ detail.professionalName || "No disponible" }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Sede / institución</span>
+            <span class="detail-value">{{ detail.institutionName || "No especificada" }}</span>
+          </div>
+        </div>
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <section class="detail-section">
+        <h3>
+          <mat-icon>medical_information</mat-icon>
+          Motivo y notas
+        </h3>
+
+        @if (hasClinicalInfo(detail)) {
+          <div class="notes-list">
+            @if (detail.reason) {
+              <div class="note-item">
+                <span>Motivo de consulta</span>
+                <p>{{ detail.reason }}</p>
+              </div>
+            }
+            @if (detail.patientNotes) {
+              <div class="note-item">
+                <span>Notas del paciente</span>
+                <p>{{ detail.patientNotes }}</p>
+              </div>
+            }
+            @if (detail.professionalNotes) {
+              <div class="note-item">
+                <span>Notas del profesional</span>
+                <p>{{ detail.professionalNotes }}</p>
+              </div>
+            }
+            @if (detail.notes) {
+              <div class="note-item">
+                <span>Notas generales</span>
+                <p>{{ detail.notes }}</p>
+              </div>
+            }
+            @if (detail.observation) {
+              <div class="note-item">
+                <span>Observación</span>
+                <p>{{ detail.observation }}</p>
+              </div>
+            }
+            @if (detail.externalNotes) {
+              <div class="note-item">
+                <span>Notas internas externas</span>
+                <p>{{ detail.externalNotes }}</p>
+              </div>
+            }
+            @if (detail.cancellationReason) {
+              <div class="note-item note-item--danger">
+                <span>Motivo de cancelación</span>
+                <p>{{ detail.cancellationReason }}</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty-notes">No hay motivo o notas registradas.</p>
+        }
+      </section>
+
+      <mat-divider></mat-divider>
+
+      <section class="detail-section detail-section--meta">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Creada</span>
+            <span class="detail-value">{{ formatDateTime(detail.createdAt) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Actualizada</span>
+            <span class="detail-value">{{ formatDateTime(detail.updatedAt) }}</span>
+          </div>
+        </div>
+      </section>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button type="button" mat-flat-button color="primary" (click)="close()">
+      Cerrar
+    </button>
+  </mat-dialog-actions>
+</div>
