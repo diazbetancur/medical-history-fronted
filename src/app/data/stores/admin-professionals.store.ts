@@ -265,8 +265,87 @@ export class AdminProfessionalsStore {
       .subscribe();
   }
 
+  refreshSelectedProfessionalSummary(id?: string): void {
+    const professionalId = id ?? this._state().selectedProfessional?.id;
+    if (!professionalId) return;
+
+    this.adminApi
+      .getProfessional(professionalId)
+      .pipe(
+        tap((detail) => {
+          this.mergeSelectedProfessional(professionalId, detail);
+        }),
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
+  }
+
+  refreshSelectedProfessionalSpecialties(id?: string): void {
+    const professionalId = id ?? this._state().selectedProfessional?.id;
+    if (!professionalId) return;
+
+    this.adminApi
+      .getProfessionalSpecialties(professionalId)
+      .pipe(
+        tap((specialties) => {
+          this.mergeSelectedProfessional(professionalId, { specialties });
+        }),
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
+  }
+
+  refreshSelectedProfessionalServices(id?: string): void {
+    const professionalId = id ?? this._state().selectedProfessional?.id;
+    if (!professionalId) return;
+
+    this.adminApi
+      .getProfessionalServices(professionalId)
+      .pipe(
+        tap((services) => {
+          this.mergeSelectedProfessional(professionalId, { services });
+        }),
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
+  }
+
+  refreshSelectedProfessionalEducation(id?: string): void {
+    const professionalId = id ?? this._state().selectedProfessional?.id;
+    if (!professionalId) return;
+
+    this.adminApi
+      .getProfessionalEducation(professionalId)
+      .pipe(
+        tap((studies) => {
+          this.mergeSelectedProfessional(professionalId, { studies });
+        }),
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
+  }
+
   clearSelectedProfessional(): void {
     this.updateState({ selectedProfessional: null });
+  }
+
+  private mergeSelectedProfessional(
+    professionalId: string,
+    patch: Partial<AdminProfessionalDetail>,
+  ): void {
+    const selectedProfessional = this._state().selectedProfessional;
+    if (selectedProfessional?.id !== professionalId) return;
+
+    this.updateState({
+      selectedProfessional: {
+        ...selectedProfessional,
+        ...patch,
+      },
+    });
   }
 
   // ---------------------------------------------------------------------------

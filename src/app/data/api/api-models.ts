@@ -893,9 +893,53 @@ export interface AdminProfessionalDetail extends AdminProfessionalListItem {
   description?: string;
   whatsApp?: string;
   address?: string;
+  website?: string;
+  yearsOfExperience?: number;
   profileImageUrl?: string;
+  specialties?: AdminProfessionalSpecialty[];
   services: Service[];
+  studies?: AdminProfessionalEducation[];
+  locations?: AdminProfessionalLocation[];
   requestCountsByStatus: Record<RequestStatus, number>;
+}
+
+export interface AdminProfessionalSpecialty {
+  specialtyId: string;
+  specialtyName: string;
+  isPrimary: boolean;
+  isActive: boolean;
+  dateCreated: string;
+}
+
+export interface AdminProfessionalSpecialtiesResponse {
+  professionalProfileId: string;
+  professionalName: string;
+  specialties: AdminProfessionalSpecialty[];
+  totalSpecialties: number;
+}
+
+export interface AdminProfessionalEducation {
+  id: string;
+  type: string;
+  degreeTitle: string;
+  institutionName: string;
+  institutionCountry?: string;
+  startYear?: number;
+  graduationYear?: number;
+  description?: string;
+  sortOrder: number;
+}
+
+export interface AdminProfessionalLocation {
+  id: string;
+  name: string;
+  address?: string;
+  floor?: string;
+  cityName?: string;
+  countryName?: string;
+  phone?: string;
+  isDefault: boolean;
+  isActive: boolean;
 }
 
 export interface ModerateProfilePayload {
