@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { RouterOutlet } from '@angular/router';
+import { AuthStore } from '@core/auth';
 import { MenuService } from '@core/services/menu.service';
 import { LayoutTopbarComponent } from '@shared/ui/layout-topbar/layout-topbar.component';
 import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
@@ -33,6 +34,12 @@ import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.scss',
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
   readonly menuService = inject(MenuService);
+  private readonly authStore = inject(AuthStore);
+
+  ngOnInit(): void {
+    const ctx = this.authStore.availableContexts().find((c) => c.type === 'ADMIN');
+    if (ctx) this.authStore.switchContext(ctx);
+  }
 }

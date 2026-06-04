@@ -1,4 +1,5 @@
-import { inject, Injectable } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HomePageResponse, MetadataResponse, PublicApi } from '@data/api';
 import { catchError, forkJoin, map, Observable, of, tap } from 'rxjs';
 import {
@@ -8,11 +9,14 @@ import {
   PublicHomeStatsDto,
 } from '../models/public-home.dto';
 
+const STATS_MAX_KEY = 'home_stats_max';
+
 @Injectable({
   providedIn: 'root',
 })
 export class PublicHomeService {
   private readonly publicApi = inject(PublicApi);
+  private readonly platformId = inject(PLATFORM_ID);
 
   private homeCache: { data: PublicHomeDataDto; timestamp: number } | null =
     null;
@@ -78,12 +82,37 @@ export class PublicHomeService {
   }
 
   private mapStats(home: HomePageResponse): PublicHomeStatsDto {
-    return {
+    const current: PublicHomeStatsDto = {
       totalDoctors: home.totals.totalProfessionals ?? 0,
       totalPatients: home.totals.totalPatients ?? 0,
       totalAppointments: home.totals.totalAppointments ?? 0,
       averageRating: 0,
     };
+    return this.applyStatsFloor(current);
+  }
+
+  /** Ensures stats never decrease by persisting the historical maximum. */
+  private applyStatsFloor(stats: PublicHomeStatsDto): PublicHomeStatsDto {
+    if (!isPlatformBrowser(this.platformId)) return stats;
+
+    let stored: Partial<PublicHomeStatsDto> = {};
+    try {
+      const raw = localStorage.getItem(STATS_MAX_KEY);
+      if (raw) stored = JSON.parse(raw) as Partial<PublicHomeStatsDto>;
+    } catch { /* ignore */ }
+
+    const result: PublicHomeStatsDto = {
+      totalDoctors: Math.max(stats.totalDoctors, stored.totalDoctors ?? 0),
+      totalPatients: Math.max(stats.totalPatients, stored.totalPatients ?? 0),
+      totalAppointments: Math.max(stats.totalAppointments, stored.totalAppointments ?? 0),
+      averageRating: stats.averageRating,
+    };
+
+    try {
+      localStorage.setItem(STATS_MAX_KEY, JSON.stringify(result));
+    } catch { /* ignore */ }
+
+    return result;
   }
 
   private mapSpecialties(specialties: PublicHomeSpecialtyDto[]): Array<{

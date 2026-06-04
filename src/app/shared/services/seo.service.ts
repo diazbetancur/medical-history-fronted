@@ -14,11 +14,10 @@ export class SeoService {
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
 
-  private readonly defaultTitle =
-    'ProDirectory - Encuentra Profesionales de Confianza';
+  private readonly defaultTitle = 'MediTigo - Tu Directorio Médico de Confianza';
   private readonly defaultDescription =
-    'Conecta con profesionales verificados en tu área. Plomeros, electricistas, abogados y más.';
-  private readonly siteName = 'ProDirectory';
+    'Encuentra médicos verificados cerca de ti. Agenda citas, consulta perfiles y gestiona tu historial médico en MediTigo.';
+  private readonly siteName = 'MediTigo';
   private readonly defaultOgImage = '/icons/og-image.png';
 
   /**

@@ -35,7 +35,7 @@ export const routes: Routes = [
       import('./features/public/pages/home/home.page').then(
         (m) => m.HomePageComponent,
       ),
-    title: 'Inicio - Directory Pro',
+    title: 'Inicio | MediTigo',
   },
   {
     path: 'login',
@@ -43,7 +43,7 @@ export const routes: Routes = [
       import('./features/public/pages/login/login.page').then(
         (m) => m.LoginPageComponent,
       ),
-    title: 'Iniciar Sesión - Directory Pro',
+    title: 'Iniciar Sesión | MediTigo',
   },
   {
     path: 'register',
@@ -51,7 +51,7 @@ export const routes: Routes = [
       import('./features/public/pages/register/register.page').then(
         (m) => m.RegisterPageComponent,
       ),
-    title: 'Registro - Directory Pro',
+    title: 'Registro | MediTigo',
   },
   {
     path: 'forgot-password',
@@ -59,7 +59,7 @@ export const routes: Routes = [
       import('./features/public/pages/forgot-password/forgot-password.page').then(
         (m) => m.ForgotPasswordPageComponent,
       ),
-    title: 'Recuperar Contraseña - Directory Pro',
+    title: 'Recuperar Contraseña | MediTigo',
   },
   {
     path: 'reset-password',
@@ -67,7 +67,7 @@ export const routes: Routes = [
       import('./features/public/pages/reset-password/reset-password.page').then(
         (m) => m.ResetPasswordPageComponent,
       ),
-    title: 'Restablecer Contraseña - Directory Pro',
+    title: 'Restablecer Contraseña | MediTigo',
   },
   {
     path: 'search',
@@ -75,7 +75,7 @@ export const routes: Routes = [
       import('./features/public/pages/search/search.page').then(
         (m) => m.SearchPageComponent,
       ),
-    title: 'Buscar Médicos - Directory Pro',
+    title: 'Buscar Médicos | MediTigo',
   },
   {
     path: 'pro/:slug',
@@ -83,7 +83,7 @@ export const routes: Routes = [
       import('./features/public/pages/profile/profile.page').then(
         (m) => m.ProfilePageComponent,
       ),
-    title: 'Perfil Profesional - Directory Pro',
+    title: 'Perfil Profesional | MediTigo',
   },
   {
     path: 'buscar-medicos',
@@ -112,7 +112,7 @@ export const routes: Routes = [
           import('./features/admin/pages/dashboard/admin-dashboard/admin-dashboard.page').then(
             (m) => m.AdminDashboardPage,
           ),
-        title: 'Dashboard Admin - Directory Pro',
+        title: 'Dashboard Admin | MediTigo',
       },
       {
         path: 'users',
@@ -177,7 +177,7 @@ export const routes: Routes = [
       import('./features/professional/pages/onboarding/professional-onboarding/professional-onboarding.page').then(
         (m) => m.ProfessionalOnboardingPage,
       ),
-    title: 'Configurar Perfil Profesional - Directory Pro',
+    title: 'Configurar Perfil Profesional | MediTigo',
   },
 
   // ============================================================================
@@ -205,7 +205,7 @@ export const routes: Routes = [
           import('./features/professional/pages/dashboard/professional-dashboard/professional-dashboard.page').then(
             (m) => m.ProfessionalDashboardPage,
           ),
-        title: 'Dashboard Profesional - Directory Pro',
+        title: 'Dashboard Profesional | MediTigo',
       },
       {
         path: 'appointments',
@@ -217,7 +217,7 @@ export const routes: Routes = [
           import('./features/professional/pages/professional-appointments/professional-appointments.page').then(
             (m) => m.ProfessionalAppointmentsPage,
           ),
-        title: 'Mis Citas - Directory Pro',
+        title: 'Mis Citas | MediTigo',
       },
       {
         path: 'profile',
@@ -225,7 +225,7 @@ export const routes: Routes = [
           import('./features/professional/pages/onboarding/professional-onboarding/professional-onboarding.page').then(
             (m) => m.ProfessionalOnboardingPage,
           ),
-        title: 'Mi Perfil Profesional - Directory Pro',
+        title: 'Mi Perfil Profesional | MediTigo',
       },
       {
         path: 'availability',
@@ -241,7 +241,7 @@ export const routes: Routes = [
           import('./features/professional/pages/professional-availability/professional-availability.page').then(
             (m) => m.ProfessionalAvailabilityPage,
           ),
-        title: 'Mi Disponibilidad - Directory Pro',
+        title: 'Mi Disponibilidad | MediTigo',
       },
       {
         path: 'patients',
@@ -262,7 +262,7 @@ export const routes: Routes = [
               import('./features/professional/pages/patients/professional-patients-list/professional-patients-list.page').then(
                 (m) => m.ProfessionalPatientsListPage,
               ),
-            title: 'Mis Pacientes - Directory Pro',
+            title: 'Mis Pacientes | MediTigo',
           },
           {
             path: ':id',
@@ -270,7 +270,7 @@ export const routes: Routes = [
               import('./features/professional/pages/patients/professional-patient-detail/professional-patient-detail.page').then(
                 (m) => m.ProfessionalPatientDetailPage,
               ),
-            title: 'Detalle de Paciente - Directory Pro',
+            title: 'Detalle de Paciente | MediTigo',
           },
         ],
       },
@@ -287,7 +287,7 @@ export const routes: Routes = [
           import('./features/professional/pages/professional-requests/professional-requests.page').then(
             (m) => m.ProfessionalRequestsPage,
           ),
-        title: 'Solicitudes - Directory Pro',
+        title: 'Solicitudes | MediTigo',
       },
       {
         path: 'agenda',
@@ -318,7 +318,7 @@ export const routes: Routes = [
           import('./patient/pages/home/patient-home/patient-home.component').then(
             (m) => m.PatientHomeComponent,
           ),
-        title: 'Inicio - Directory Pro',
+        title: 'Inicio | MediTigo',
       },
       {
         path: 'wizard',
@@ -333,7 +333,7 @@ export const routes: Routes = [
           import('./patient/pages/wizard/patient-wizard/patient-wizard.page').then(
             (m) => m.PatientWizardPage,
           ),
-        title: 'Agenda tu Cita - Directory Pro',
+        title: 'Agenda tu Cita | MediTigo',
       },
       {
         path: 'appointments/:id',
@@ -345,7 +345,7 @@ export const routes: Routes = [
           import('./features/agenda/pages/appointment-detail/appointment-detail.page').then(
             (m) => m.AppointmentDetailPageComponent,
           ),
-        title: 'Detalle de Cita - Directory Pro',
+        title: 'Detalle de Cita | MediTigo',
       },
       {
         path: 'appointments',
@@ -357,7 +357,7 @@ export const routes: Routes = [
           import('./patient/pages/appointments/patient-appointments/patient-appointments.page').then(
             (m) => m.PatientAppointmentsPageComponent,
           ),
-        title: 'Mis Citas - Directory Pro',
+        title: 'Mis Citas | MediTigo',
       },
       {
         path: 'profile',
@@ -369,7 +369,7 @@ export const routes: Routes = [
           import('./patient/profile/pages/profile-page/profile-page.component').then(
             (m) => m.ProfilePageComponent,
           ),
-        title: 'Mi Perfil - Directory Pro',
+        title: 'Mi Perfil | MediTigo',
       },
       {
         path: 'change-password',
@@ -377,7 +377,7 @@ export const routes: Routes = [
           import('./patient/pages/change-password/patient-change-password/patient-change-password.page').then(
             (m) => m.PatientChangePasswordPage,
           ),
-        title: 'Cambiar Contraseña - Directory Pro',
+        title: 'Cambiar Contraseña | MediTigo',
       },
       {
         path: 'activate-professional',
@@ -385,7 +385,7 @@ export const routes: Routes = [
           import('./patient/pages/activate-professional/patient-activate-professional.page').then(
             (m) => m.PatientActivateProfessionalPage,
           ),
-        title: 'Activarme como profesional - Directory Pro',
+        title: 'Activarme como profesional | MediTigo',
       },
       {
         path: 'medications',
@@ -400,7 +400,7 @@ export const routes: Routes = [
           import('./patient/pages/medications/patient-medications/patient-medications.page').then(
             (m) => m.PatientMedicationsPage,
           ),
-        title: 'Mis Medicamentos - Directory Pro',
+        title: 'Mis Medicamentos | MediTigo',
       },
       {
         path: 'allergies',
@@ -415,7 +415,7 @@ export const routes: Routes = [
           import('./patient/pages/allergies/patient-allergies/patient-allergies.page').then(
             (m) => m.PatientAllergiesPage,
           ),
-        title: 'Mis Alergias - Directory Pro',
+        title: 'Mis Alergias | MediTigo',
       },
       {
         path: 'background',
@@ -430,7 +430,7 @@ export const routes: Routes = [
           import('./patient/pages/background/patient-background/patient-background.page').then(
             (m) => m.PatientBackgroundPage,
           ),
-        title: 'Mis Antecedentes - Directory Pro',
+        title: 'Mis Antecedentes | MediTigo',
       },
       {
         path: 'exams',
@@ -445,7 +445,7 @@ export const routes: Routes = [
           import('./patient/pages/exams/patient-exams/patient-exams.page').then(
             (m) => m.PatientExamsPage,
           ),
-        title: 'Mis Exámenes - Directory Pro',
+        title: 'Mis Exámenes | MediTigo',
       },
       {
         path: 'history',
@@ -466,20 +466,61 @@ export const routes: Routes = [
   },
 
   // ============================================================================
+  // LEGAL PAGES
+  // ============================================================================
+  {
+    path: 'terms',
+    loadComponent: () =>
+      import('./features/legal/legal-page.component').then(
+        (m) => m.LegalPageComponent,
+      ),
+    title: 'Términos de Servicio | MediTigo',
+    data: { pageTitle: 'Términos de Servicio' },
+  },
+  {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./features/legal/legal-page.component').then(
+        (m) => m.LegalPageComponent,
+      ),
+    title: 'Política de Privacidad | MediTigo',
+    data: { pageTitle: 'Política de Privacidad' },
+  },
+  {
+    path: 'help',
+    loadComponent: () =>
+      import('./features/legal/legal-page.component').then(
+        (m) => m.LegalPageComponent,
+      ),
+    title: 'Ayuda | MediTigo',
+    data: { pageTitle: 'Centro de Ayuda' },
+  },
+
+  // ============================================================================
   // ERROR ROUTES
   // ============================================================================
   {
     path: 'unauthorized',
-    redirectTo: '',
-    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/errors/pages/unauthorized/unauthorized.page').then(
+        (m) => m.UnauthorizedPage,
+      ),
+    title: 'Acceso no autorizado | MediTigo',
   },
   {
     path: 'forbidden',
-    redirectTo: '',
-    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/errors/pages/forbidden/forbidden.page').then(
+        (m) => m.ForbiddenPage,
+      ),
+    title: 'Permiso denegado | MediTigo',
   },
   {
     path: '**',
-    redirectTo: '',
+    loadComponent: () =>
+      import('./features/public/pages/not-found/not-found.page').then(
+        (m) => m.NotFoundPageComponent,
+      ),
+    title: 'Página no encontrada | MediTigo',
   },
 ];

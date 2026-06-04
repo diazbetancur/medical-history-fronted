@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ContextDto, CurrentUserDto } from '@core/models';
@@ -19,6 +19,7 @@ export class PostLoginNavigationService {
   private readonly authStore = inject(AuthStore);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly ngZone = inject(NgZone);
 
   navigateAfterLogin(options: PostLoginNavigationOptions = {}): void {
     const user = this.authStore.user();
@@ -44,12 +45,15 @@ export class PostLoginNavigationService {
         })
         .afterClosed()
         .subscribe((context?: ContextDto) => {
-          if (context) {
-            this.navigateTo(context);
-            return;
-          }
-
-          this.navigateByContext(options);
+          // Wrap in NgZone.run to guarantee change detection fires
+          // when afterClosed() emits outside the Angular zone (DEF-023)
+          this.ngZone.run(() => {
+            if (context) {
+              this.navigateTo(context);
+              return;
+            }
+            this.navigateByContext(options);
+          });
         });
       return;
     }

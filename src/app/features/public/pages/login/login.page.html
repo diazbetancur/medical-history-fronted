@@ -63,7 +63,7 @@
           mat-raised-button
           color="primary"
           type="submit"
-          [disabled]="isLoading()"
+          [disabled]="isLoading() || (submitted() && isFormInvalid())"
           class="full-width"
         >
           @if (isLoading()) {

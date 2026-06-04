@@ -131,7 +131,7 @@
                     [color]="getRoleColor(role)"
                     [highlighted]="!!getRoleColor(role)"
                   >
-                    {{ role }}
+                    {{ getRoleLabel(role) }}
                   </mat-chip>
                   }
                 </div>
@@ -341,7 +341,7 @@
             [color]="getRoleColor(role)"
             [highlighted]="!!getRoleColor(role)"
           >
-            {{ role }}
+            {{ getRoleLabel(role) }}
           </mat-chip>
           }
         </div>
