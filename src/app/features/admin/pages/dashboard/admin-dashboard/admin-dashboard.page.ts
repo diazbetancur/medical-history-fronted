@@ -1,10 +1,12 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AdminApi, getErrorMessage } from '@data/api';
+
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -13,8 +15,9 @@ import { AdminApi, getErrorMessage } from '@data/api';
   templateUrl: './admin-dashboard.page.html',
   styleUrl: './admin-dashboard.page.scss',
 })
-export class AdminDashboardPage implements OnInit {
+export class AdminDashboardPage implements OnInit, OnDestroy {
   private readonly adminApi = inject(AdminApi);
+  private refreshTimer: ReturnType<typeof setInterval> | null = null; // assigned in ngOnInit
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -52,6 +55,11 @@ export class AdminDashboardPage implements OnInit {
 
   ngOnInit(): void {
     this.loadSummary();
+    this.refreshTimer = setInterval(() => this.loadSummary(), REFRESH_INTERVAL_MS);
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshTimer !== null) clearInterval(this.refreshTimer);
   }
 
   loadSummary(): void {

@@ -14,16 +14,22 @@
         <ul class="footer-links">
           <li><a routerLink="/">Inicio</a></li>
           <li><a routerLink="/search">Buscar Médicos</a></li>
-          <li><a routerLink="/login">Iniciar Sesión</a></li>
+          <li>
+            @if (!authStore.isAuthenticated()) {
+              <a routerLink="/login">Iniciar Sesión</a>
+            } @else {
+              <a routerLink="/patient">Mi Cuenta</a>
+            }
+          </li>
         </ul>
       </div>
 
       <div class="footer-col">
         <h4 class="footer-heading">Soporte</h4>
         <ul class="footer-links">
-          <li><a href="#">Ayuda</a></li>
-          <li><a href="#">Términos de Servicio</a></li>
-          <li><a href="#">Política de Privacidad</a></li>
+          <li><a routerLink="/help">Ayuda</a></li>
+          <li><a routerLink="/terms">Términos de Servicio</a></li>
+          <li><a routerLink="/privacy">Política de Privacidad</a></li>
         </ul>
       </div>
 

@@ -229,10 +229,6 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: 'assignment',
     route: '/professional/appointments',
     context: 'PROFESSIONAL',
-    requiredPermissions: [
-      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW,
-      PROFESSIONAL_PERMISSIONS.APPOINTMENTS_VIEW_OWN,
-    ],
   },
   {
     label: 'Disponibilidad',
@@ -250,12 +246,6 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: 'people',
     route: '/professional/patients',
     context: 'PROFESSIONAL',
-    requiredPermissions: [
-      PROFESSIONAL_PERMISSIONS.PATIENTS_HISTORY_VIEW_OWN,
-      PROFESSIONAL_PERMISSIONS.PATIENTS_MEDICATIONS_VIEW_OWN,
-      PROFESSIONAL_PERMISSIONS.PATIENTS_ALLERGIES_VIEW_OWN,
-      PROFESSIONAL_PERMISSIONS.PATIENTS_EXAMS_VIEW_OWN,
-    ],
   },
 
   // ==========================================================================

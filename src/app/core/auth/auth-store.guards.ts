@@ -75,8 +75,8 @@ export const authStoreGuard: CanActivateFn = (
     return true;
   }
 
-  return router.createUrlTree(['/'], {
-    queryParams: { returnUrl: state.url, authRequired: '1' },
+  return router.createUrlTree(['/login'], {
+    queryParams: { returnTo: state.url },
   });
 };
 
@@ -128,8 +128,8 @@ export const contextGuard: CanActivateFn = (
 
   // Verificar autenticación primero
   if (!authStore.isAuthenticated()) {
-    return router.createUrlTree(['/'], {
-      queryParams: { returnUrl: state.url, authRequired: '1' },
+    return router.createUrlTree(['/login'], {
+      queryParams: { returnTo: state.url },
     });
   }
 
@@ -200,8 +200,8 @@ export const permissionStoreGuard: CanActivateFn = (
 
   // Verificar autenticación primero
   if (!authStore.isAuthenticated()) {
-    return router.createUrlTree(['/'], {
-      queryParams: { returnUrl: state.url, authRequired: '1' },
+    return router.createUrlTree(['/login'], {
+      queryParams: { returnTo: state.url },
     });
   }
 

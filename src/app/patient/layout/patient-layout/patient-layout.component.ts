@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { RouterOutlet } from '@angular/router';
+import { AuthStore } from '@core/auth';
 import { MenuService } from '@core/services/menu.service';
 import { LayoutTopbarComponent } from '@shared/ui/layout-topbar/layout-topbar.component';
 import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
@@ -19,6 +20,12 @@ import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
   templateUrl: './patient-layout.component.html',
   styleUrl: './patient-layout.component.scss',
 })
-export class PatientLayoutComponent {
+export class PatientLayoutComponent implements OnInit {
   readonly menuService = inject(MenuService);
+  private readonly authStore = inject(AuthStore);
+
+  ngOnInit(): void {
+    const ctx = this.authStore.availableContexts().find((c) => c.type === 'PATIENT');
+    if (ctx) this.authStore.switchContext(ctx);
+  }
 }

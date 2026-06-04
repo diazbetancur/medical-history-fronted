@@ -7,9 +7,12 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AppointmentsApi, type Appointment } from '@data/api';
 import { CancelAppointmentDialogComponent } from './cancel-appointment-dialog/cancel-appointment-dialog.component';
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Appointment Detail Page
@@ -41,6 +44,7 @@ export class AppointmentDetailPageComponent implements OnInit {
   private readonly appointmentsApi = inject(AppointmentsApi);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
+  private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
 
   // State
@@ -50,11 +54,24 @@ export class AppointmentDetailPageComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadAppointment(id);
-    } else {
+
+    if (!id) {
       this.location.back();
+      return;
     }
+
+    if (id === 'new') {
+      void this.router.navigate(['/patient/wizard']);
+      return;
+    }
+
+    if (!UUID_REGEX.test(id)) {
+      this.error.set('Cita no encontrada.');
+      this.loading.set(false);
+      return;
+    }
+
+    this.loadAppointment(id);
   }
 
   /**

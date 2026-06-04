@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthStore, PostLoginNavigationService } from '@core/auth';
 import { CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
@@ -46,6 +46,7 @@ export class LoginPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -149,7 +150,13 @@ export class LoginPageComponent implements OnInit {
     const displayName = user.name || user.email || 'usuario';
     this.isLoading.set(false);
     this.toast.success(`¡Bienvenido, ${displayName}!`);
-    this.postLoginNavigation.navigateAfterLogin();
+
+    const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
+    if (returnTo?.startsWith('/')) {
+      void this.router.navigateByUrl(returnTo);
+    } else {
+      this.postLoginNavigation.navigateAfterLogin();
+    }
   }
 
   /**

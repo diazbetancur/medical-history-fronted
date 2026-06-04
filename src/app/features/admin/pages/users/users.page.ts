@@ -321,6 +321,16 @@ export class UsersPageComponent implements OnInit {
     return isLockedOut ? 'lock' : 'check_circle';
   }
 
+  getRoleLabel(role: string): string {
+    const labels: Record<string, string> = {
+      SuperAdmin: 'Super Admin',
+      Admin: 'Administrador',
+      Professional: 'Profesional',
+      Client: 'Paciente',
+    };
+    return labels[role] ?? role;
+  }
+
   getRoleColor(role: string): 'primary' | 'accent' | 'warn' | undefined {
     const roleColors: Record<
       string,
@@ -329,7 +339,7 @@ export class UsersPageComponent implements OnInit {
       SuperAdmin: 'warn',
       Admin: 'accent',
       Professional: 'primary',
-      User: undefined,
+      Client: undefined,
     };
     return roleColors[role];
   }
