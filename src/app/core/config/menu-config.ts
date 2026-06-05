@@ -54,6 +54,11 @@ export interface MenuItem {
    * Children items (for nested menus)
    */
   children?: MenuItem[];
+
+  /**
+   * If true, this item appears in the mobile bottom navigation bar
+   */
+  bottomNav?: boolean;
 }
 
 // =============================================================================
@@ -217,18 +222,21 @@ export const MENU_ITEMS: MenuItem[] = [
     route: '/professional',
     context: 'PROFESSIONAL',
     exactMatch: true,
+    bottomNav: true,
   },
   {
-    label: 'Mi Perfil Profesional',
+    label: 'Mi Perfil',
     icon: 'manage_accounts',
     route: '/professional/profile',
     context: 'PROFESSIONAL',
+    bottomNav: true,
   },
   {
     label: 'Mis Citas',
     icon: 'assignment',
     route: '/professional/appointments',
     context: 'PROFESSIONAL',
+    bottomNav: true,
   },
   {
     label: 'Disponibilidad',
@@ -240,12 +248,14 @@ export const MENU_ITEMS: MenuItem[] = [
       PROFESSIONAL_PERMISSIONS.PROFILES_UPDATE,
       PROFESSIONAL_PERMISSIONS.PROFILES_VIEW,
     ],
+    bottomNav: true,
   },
   {
     label: 'Pacientes',
     icon: 'people',
     route: '/professional/patients',
     context: 'PROFESSIONAL',
+    bottomNav: true,
   },
 
   // ==========================================================================
@@ -253,23 +263,26 @@ export const MENU_ITEMS: MenuItem[] = [
   // ==========================================================================
   {
     label: 'Inicio',
-    icon: 'dashboard',
+    icon: 'home',
     route: '/patient',
     context: 'PATIENT',
     exactMatch: true,
+    bottomNav: true,
   },
   {
-    label: 'Buscar Profesionales',
+    label: 'Buscar',
     icon: 'search',
     route: '/search',
     context: 'PATIENT',
+    bottomNav: true,
   },
   {
-    label: 'Agendar Cita',
+    label: 'Agendar',
     icon: 'event_available',
     route: '/patient/wizard',
     context: 'PATIENT',
     requiredPermissions: ['Appointments.Create', 'Appointments.Slots.View'],
+    bottomNav: true,
   },
   {
     label: 'Mis Citas',
@@ -277,12 +290,14 @@ export const MENU_ITEMS: MenuItem[] = [
     route: '/patient/appointments',
     context: 'PATIENT',
     requiredPermissions: ['Appointments.ViewOwn'],
+    bottomNav: true,
   },
   {
-    label: 'Mi Perfil',
+    label: 'Perfil',
     icon: 'person',
     route: '/patient/profile',
     context: 'PATIENT',
+    bottomNav: true,
   },
   {
     label: 'Cambiar Contraseña',
