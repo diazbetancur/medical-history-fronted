@@ -1,3 +1,4 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { isPlatformBrowser } from '@angular/common';
 import {
   Component,
@@ -8,17 +9,20 @@ import {
   signal,
 } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Router } from '@angular/router';
 import { NotificationDto, NotificationsApi, NotificationsPageDto } from '@data/api/notifications.api';
+import { NotificationsModalComponent } from '@shared/ui/notifications-modal/notifications-modal.component';
 import { catchError, of } from 'rxjs';
 
 const POLL_INTERVAL_MS = 60_000;
 const DROPDOWN_SIZE = 3;
+const MOBILE_BREAKPOINT = '(max-width: 768px)';
 
 @Component({
   selector: 'app-notifications-bell',
@@ -36,7 +40,9 @@ const DROPDOWN_SIZE = 3;
 })
 export class NotificationsBellComponent implements OnInit, OnDestroy {
   private readonly api = inject(NotificationsApi);
-  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+  private readonly bottomSheet = inject(MatBottomSheet);
+  private readonly breakpoints = inject(BreakpointObserver);
   private readonly platformId = inject(PLATFORM_ID);
   private pollTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -77,24 +83,32 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Handles both the paginated object and a plain array (backend compatibility). */
-  private extractItems(response: NotificationsPageDto | NotificationDto[] | null): NotificationDto[] {
-    if (!response) return [];
-    if (Array.isArray(response)) return response.slice(0, DROPDOWN_SIZE);
-    return response.items ?? [];
-  }
-
   markRead(notification: NotificationDto, event: Event): void {
     event.stopPropagation();
-    // Mark as read visually without navigating
     this.preview.update((list) =>
       list.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n)),
     );
   }
 
-  goToHistory(event: Event): void {
+  openHistory(event: Event): void {
     event.stopPropagation();
-    void this.router.navigate(['/notifications']);
+    const isMobile = this.breakpoints.isMatched(MOBILE_BREAKPOINT);
+
+    if (isMobile) {
+      this.bottomSheet.open(NotificationsModalComponent, {
+        panelClass: 'notif-bottom-sheet',
+      });
+    } else {
+      this.dialog.open(NotificationsModalComponent, {
+        width: '460px',
+        maxHeight: '80vh',
+        panelClass: 'notif-dialog',
+        autoFocus: false,
+      });
+    }
+
+    // Reset badge once user opens history
+    this.unreadCount.set(0);
   }
 
   formatDate(iso: string): string {
@@ -120,4 +134,10 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
   private readonly onVisibilityChange = (): void => {
     if (!document.hidden) this.fetchCount();
   };
+
+  private extractItems(response: NotificationsPageDto | NotificationDto[] | null): NotificationDto[] {
+    if (!response) return [];
+    if (Array.isArray(response)) return response.slice(0, DROPDOWN_SIZE);
+    return response.items ?? [];
+  }
 }
