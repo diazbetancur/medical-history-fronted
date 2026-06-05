@@ -18,6 +18,9 @@
 // Delegar todo el manejo de caché/actualizaciones al service worker de Angular
 importScripts('/ngsw-worker.js');
 
+const DEFAULT_NOTIFICATION_ICON = '/icons/icon-512x512.png';
+const DEFAULT_NOTIFICATION_BADGE = '/icons/badge-72x72.png';
+
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 
@@ -31,8 +34,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'MediTigo';
   const options = {
     body: data.body || '',
-    icon: data.icon || '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
+    icon: data.icon || DEFAULT_NOTIFICATION_ICON,
+    badge: DEFAULT_NOTIFICATION_BADGE,
     tag: data.tag || 'meditigo-notification',
     data: data,
     requireInteraction: false,
