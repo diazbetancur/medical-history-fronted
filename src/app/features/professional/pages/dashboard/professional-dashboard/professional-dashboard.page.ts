@@ -1,5 +1,6 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { PushOptInBannerComponent } from '@shared/ui/push-opt-in-banner/push-opt-in-banner.component';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -31,6 +32,7 @@ import { filter, take } from 'rxjs';
     MatTableModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    PushOptInBannerComponent,
   ],
   templateUrl: './professional-dashboard.page.html',
   styleUrl: './professional-dashboard.page.scss',
