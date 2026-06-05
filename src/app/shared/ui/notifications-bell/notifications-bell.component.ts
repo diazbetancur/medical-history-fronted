@@ -1,4 +1,4 @@
-import { DatePipe, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import {
   Component,
   inject,
@@ -17,13 +17,13 @@ import { Router } from '@angular/router';
 import { NotificationDto, NotificationsApi } from '@data/api/notifications.api';
 import { catchError, of } from 'rxjs';
 
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 60_000;
+const DROPDOWN_SIZE = 3;
 
 @Component({
   selector: 'app-notifications-bell',
   standalone: true,
   imports: [
-    DatePipe,
     MatBadgeModule,
     MatButtonModule,
     MatIconModule,
@@ -41,15 +41,13 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
   private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly unreadCount = signal(0);
-  readonly notifications = signal<NotificationDto[]>([]);
-  readonly loadingList = signal(false);
+  readonly preview = signal<NotificationDto[]>([]);
+  readonly loadingPreview = signal(false);
 
   ngOnInit(): void {
     this.fetchCount();
     if (isPlatformBrowser(this.platformId)) {
       this.pollTimer = setInterval(() => this.fetchCount(), POLL_INTERVAL_MS);
-
-      // Refresh immediately when the user switches back to this tab
       document.addEventListener('visibilitychange', this.onVisibilityChange);
     }
   }
@@ -61,41 +59,39 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
     }
   }
 
-  private readonly onVisibilityChange = (): void => {
-    if (!document.hidden) this.fetchCount();
-  };
-
-  onBellClick(): void {
-    this.loadingList.set(true);
+  onBellOpen(): void {
+    this.loadingPreview.set(true);
     this.api
-      .getList()
-      .pipe(catchError(() => of([])))
-      .subscribe((list) => {
-        this.notifications.set(list);
-        this.loadingList.set(false);
+      .getPage(1, DROPDOWN_SIZE)
+      .pipe(catchError(() => of({ items: [], total: 0, page: 1, pageSize: DROPDOWN_SIZE })))
+      .subscribe((page) => {
+        this.preview.set(page.items);
+        this.loadingPreview.set(false);
       });
 
-    // Mark as read after a short delay so the user sees the badge change
     if (this.unreadCount() > 0) {
-      setTimeout(() => {
-        this.api
-          .markAllRead()
-          .pipe(catchError(() => of(void 0)))
-          .subscribe(() => this.unreadCount.set(0));
-      }, 800);
+      this.api
+        .markAllRead()
+        .pipe(catchError(() => of(void 0)))
+        .subscribe(() => this.unreadCount.set(0));
     }
   }
 
-  navigate(notification: NotificationDto): void {
-    if (notification.url) {
-      void this.router.navigateByUrl(notification.url);
-    }
+  markRead(notification: NotificationDto, event: Event): void {
+    event.stopPropagation();
+    // Mark as read visually without navigating
+    this.preview.update((list) =>
+      list.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n)),
+    );
+  }
+
+  goToHistory(event: Event): void {
+    event.stopPropagation();
+    void this.router.navigate(['/notifications']);
   }
 
   formatDate(iso: string): string {
-    const date = new Date(iso);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    const diffMs = Date.now() - new Date(iso).getTime();
     const diffMin = Math.floor(diffMs / 60_000);
     const diffH = Math.floor(diffMin / 60);
     const diffD = Math.floor(diffH / 24);
@@ -104,7 +100,7 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
     if (diffMin < 60) return `Hace ${diffMin} min`;
     if (diffH < 24) return `Hace ${diffH}h`;
     if (diffD === 1) return 'Ayer';
-    return date.toLocaleDateString('es-HN', { day: 'numeric', month: 'short' });
+    return new Date(iso).toLocaleDateString('es-HN', { day: 'numeric', month: 'short' });
   }
 
   private fetchCount(): void {
@@ -113,4 +109,8 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
       .pipe(catchError(() => of({ count: 0 })))
       .subscribe(({ count }) => this.unreadCount.set(count));
   }
+
+  private readonly onVisibilityChange = (): void => {
+    if (!document.hidden) this.fetchCount();
+  };
 }

@@ -11,6 +11,13 @@ export interface NotificationDto {
   createdAt: string;
 }
 
+export interface NotificationsPageDto {
+  items: NotificationDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NotificationsApi {
   private readonly api = inject(ApiClient);
@@ -20,12 +27,14 @@ export class NotificationsApi {
     return this.api.get<{ count: number }>('/notifications/count');
   }
 
-  /** Most recent 20 notifications. */
-  getList(): Observable<NotificationDto[]> {
-    return this.api.get<NotificationDto[]>('/notifications');
+  /** Paginated notifications. size=3 for dropdown, size=20 for history page. */
+  getPage(page = 1, size = 20): Observable<NotificationsPageDto> {
+    return this.api.get<NotificationsPageDto>('/notifications', {
+      params: { page, size },
+    });
   }
 
-  /** Marks all as read. Call when the user opens the dropdown. */
+  /** Marks all as read. */
   markAllRead(): Observable<void> {
     return this.api.post<void>('/notifications/read-all', {});
   }

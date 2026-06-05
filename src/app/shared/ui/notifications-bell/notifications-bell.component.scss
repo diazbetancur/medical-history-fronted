@@ -54,19 +54,31 @@
   }
 }
 
-// ── Notification item ───────────────────────────────────────────────────────
+// ── Notification item (now a <button>) ─────────────────────────────────────
 .notif-item {
-  display: flex !important;
-  align-items: flex-start !important;
+  display: flex;
+  align-items: flex-start;
   gap: 10px;
-  height: auto !important;
-  padding: 10px 16px !important;
-  min-height: 0 !important;
-  white-space: normal !important;
-  line-height: 1.4 !important;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: normal;
+  line-height: 1.4;
+
+  &:hover {
+    background: var(--color-background-alt, #f5f5f5);
+  }
 
   &--unread {
     background: var(--color-primary-light, #eff6ff);
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-primary-light, #eff6ff) 80%, #ccc);
+    }
   }
 }
 
@@ -78,7 +90,7 @@
   flex-shrink: 0;
   margin-top: 5px;
 
-  &--visible {
+  &--on {
     background: var(--color-primary, #2563eb);
   }
 }
@@ -109,4 +121,13 @@
   font-size: 0.75rem;
   color: var(--color-text-disabled, #999);
   margin-top: 2px;
+}
+
+// ── Ver todas button ────────────────────────────────────────────────────────
+.notif-see-all {
+  width: 100%;
+  justify-content: center;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  color: var(--color-primary, #2563eb);
 }

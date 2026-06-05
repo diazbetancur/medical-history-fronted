@@ -10,7 +10,7 @@ import { HttpLoadingService } from './http-loading.service';
 
 const LOADING_EXCLUDED_URL_PATTERNS = [
   '/public/search/suggest',
-  '/notifications/count',  // silent background poll — no loading overlay
+  '/notifications',   // silent — count poll + list fetch must not trigger overlay
 ];
 
 function isApiRequest(url: string): boolean {

@@ -466,6 +466,19 @@ export const routes: Routes = [
   },
 
   // ============================================================================
+  // NOTIFICATIONS HISTORY (requires auth)
+  // ============================================================================
+  {
+    path: 'notifications',
+    canActivate: [authStoreGuard],
+    loadComponent: () =>
+      import('./features/notifications/notifications-history.page').then(
+        (m) => m.NotificationsHistoryPage,
+      ),
+    title: 'Notificaciones | MediTigo',
+  },
+
+  // ============================================================================
   // LEGAL PAGES
   // ============================================================================
   {

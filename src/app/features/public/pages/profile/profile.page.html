@@ -51,6 +51,13 @@
             <p class="location-line">
               {{ profile.cityName }}, {{ profile.countryName }}
             </p>
+            @if (profileSpecialties().length > 0) {
+              <div class="badges">
+                @for (specialty of profileSpecialties(); track specialty) {
+                  <mat-chip>{{ specialty }}</mat-chip>
+                }
+              </div>
+            }
           </div>
         </div>
       </mat-card>
@@ -61,14 +68,7 @@
             @if (profile.bio) {
             <h3>Acerca de</h3>
             <p>{{ profile.bio }}</p>
-
-            @if (profileSpecialties().length > 0) {
-            <div class="badges">
-              @for (specialty of profileSpecialties(); track specialty) {
-              <mat-chip>{{ specialty }}</mat-chip>
-              }
-            </div>
-            } } @else {
+            } @else {
             <p>Este profesional aún no ha agregado una descripción pública.</p>
             }
           </div>
@@ -154,13 +154,6 @@
 
     <aside class="booking-sidebar">
       <mat-card class="booking-card">
-        <h3>Tarifa de consulta</h3>
-        @if (estimatedTariff(); as fee) {
-        <p class="fee">Desde ${{ fee }}</p>
-        } @else {
-        <p class="fee pending">Por confirmar</p>
-        }
-
         <button
           mat-flat-button
           color="primary"
