@@ -8,7 +8,10 @@ import { environment } from '@env';
 import { finalize } from 'rxjs';
 import { HttpLoadingService } from './http-loading.service';
 
-const LOADING_EXCLUDED_URL_PATTERNS = ['/public/search/suggest'];
+const LOADING_EXCLUDED_URL_PATTERNS = [
+  '/public/search/suggest',
+  '/notifications',   // silent — count poll + list fetch must not trigger overlay
+];
 
 function isApiRequest(url: string): boolean {
   const apiBase = environment.apiBaseUrl.replace(/\/+$/, '');

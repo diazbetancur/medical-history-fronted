@@ -1,0 +1,60 @@
+<button
+  type="button"
+  mat-icon-button
+  class="bell-btn"
+  [matMenuTriggerFor]="notifMenu"
+  (click)="onBellOpen()"
+  matTooltip="Notificaciones"
+  aria-label="Notificaciones"
+>
+  <mat-icon
+    [matBadge]="unreadCount() > 99 ? '99+' : unreadCount().toString()"
+    [matBadgeHidden]="unreadCount() === 0"
+    matBadgeColor="warn"
+  >notifications</mat-icon>
+</button>
+
+<mat-menu #notifMenu="matMenu" class="notif-menu" xPosition="before">
+  <!-- Header -->
+  <div class="notif-header">
+    <span class="notif-title">Notificaciones</span>
+    @if (unreadCount() > 0) {
+      <span class="notif-badge">{{ unreadCount() }}</span>
+    }
+  </div>
+
+  <mat-divider />
+
+  @if (loadingPreview()) {
+    <div class="notif-loading">
+      <mat-spinner diameter="24" />
+    </div>
+  } @else if (preview().length === 0) {
+    <div class="notif-empty">
+      <mat-icon>notifications_none</mat-icon>
+      <span>Sin notificaciones</span>
+    </div>
+  } @else {
+    @for (n of preview(); track n.id) {
+      <button
+        type="button"
+        class="notif-item"
+        [class.notif-item--unread]="!n.isRead"
+        (click)="markRead(n, $event)"
+      >
+        <span class="notif-item__dot" [class.notif-item__dot--on]="!n.isRead"></span>
+        <span class="notif-item__content">
+          <span class="notif-item__title">{{ n.title }}</span>
+          <span class="notif-item__body">{{ n.body }}</span>
+          <span class="notif-item__time">{{ formatDate(n.createdAt) }}</span>
+        </span>
+      </button>
+    }
+
+    <mat-divider />
+    <button type="button" mat-button class="notif-see-all" (click)="openHistory($event)">
+      Ver todas
+      <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+    </button>
+  }
+</mat-menu>

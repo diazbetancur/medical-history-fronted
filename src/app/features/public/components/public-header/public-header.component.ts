@@ -7,6 +7,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '@core/auth';
+import { NotificationsBellComponent } from '@shared/ui/notifications-bell/notifications-bell.component';
 import {
   AuthModalComponent,
   AuthModalData,
@@ -22,6 +23,7 @@ import {
     MatMenuModule,
     MatDividerModule,
     RouterLink,
+    NotificationsBellComponent,
   ],
   templateUrl: './public-header.component.html',
   styleUrl: './public-header.component.scss',
