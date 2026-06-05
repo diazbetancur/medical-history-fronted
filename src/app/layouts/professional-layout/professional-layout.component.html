@@ -1,6 +1,11 @@
 <mat-sidenav-container class="layout-container">
   <!-- Sidebar -->
-  <mat-sidenav #drawer mode="side" opened class="layout-sidenav">
+  <mat-sidenav
+    #drawer
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile()"
+    class="layout-sidenav"
+  >
     <div class="sidenav-header">
       <mat-icon>work</mat-icon>
       <h2>Área Profesional</h2>
@@ -16,5 +21,7 @@
     <main class="layout-content">
       <router-outlet />
     </main>
+
+    <app-bottom-nav [items]="menuService.filteredMenuItems()" />
   </mat-sidenav-content>
 </mat-sidenav-container>
