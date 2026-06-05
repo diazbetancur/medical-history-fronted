@@ -1,0 +1,57 @@
+<!-- Header -->
+<div class="notif-modal__header">
+  <h2 class="notif-modal__title">Notificaciones</h2>
+  <button type="button" mat-icon-button class="notif-modal__close" (click)="close()" aria-label="Cerrar">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-divider />
+
+<!-- Content -->
+<div class="notif-modal__body">
+
+  @if (loading()) {
+    <div class="notif-modal__state">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (items().length === 0) {
+    <div class="notif-modal__state">
+      <mat-icon class="notif-modal__empty-icon">notifications_none</mat-icon>
+      <p>Sin notificaciones</p>
+    </div>
+  } @else {
+    <ul class="notif-list" role="list">
+      @for (n of items(); track n.id) {
+        <li class="notif-item" [class.notif-item--unread]="!n.isRead" role="listitem">
+          <span class="notif-item__dot" [class.notif-item__dot--on]="!n.isRead" aria-hidden="true"></span>
+          <div class="notif-item__body">
+            <p class="notif-item__title">{{ n.title }}</p>
+            <p class="notif-item__text">{{ n.body }}</p>
+            <span class="notif-item__time">{{ formatDate(n.createdAt) }}</span>
+          </div>
+        </li>
+        <mat-divider />
+      }
+    </ul>
+
+    @if (hasMore()) {
+      <button
+        type="button"
+        mat-button
+        class="notif-modal__load-more"
+        (click)="loadMore()"
+        [disabled]="loadingMore()"
+      >
+        @if (loadingMore()) {
+          <mat-spinner diameter="18" />
+          <span>Cargando...</span>
+        } @else {
+          <mat-icon>expand_more</mat-icon>
+          <span>Cargar más</span>
+        }
+      </button>
+    }
+  }
+
+</div>

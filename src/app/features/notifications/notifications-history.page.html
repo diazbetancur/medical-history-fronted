@@ -1,0 +1,42 @@
+<div class="notif-page">
+  <header class="notif-page__header">
+    <button type="button" mat-icon-button (click)="goBack()" aria-label="Volver">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Notificaciones</h1>
+  </header>
+
+  @if (loading()) {
+    <div class="notif-page__loading">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else if (page().items.length === 0) {
+    <div class="notif-page__empty">
+      <mat-icon>notifications_none</mat-icon>
+      <p>No tienes notificaciones aún.</p>
+    </div>
+  } @else {
+    <div class="notif-list">
+      @for (n of page().items; track n.id) {
+        <div class="notif-row" [class.notif-row--unread]="!n.isRead">
+          <span class="notif-row__dot" [class.notif-row__dot--on]="!n.isRead"></span>
+          <div class="notif-row__body">
+            <p class="notif-row__title">{{ n.title }}</p>
+            <p class="notif-row__text">{{ n.body }}</p>
+            <span class="notif-row__time">{{ formatDate(n.createdAt) }}</span>
+          </div>
+        </div>
+        <mat-divider />
+      }
+    </div>
+
+    <mat-paginator
+      [length]="page().total"
+      [pageSize]="pageSize"
+      [pageIndex]="page().page - 1"
+      [hidePageSize]="true"
+      (page)="onPageChange($event)"
+      aria-label="Página de notificaciones"
+    />
+  }
+</div>
