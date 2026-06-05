@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '@core/auth';
 import { ContextDto } from '@core/models';
+import { NotificationsBellComponent } from '../notifications-bell/notifications-bell.component';
 
 /**
  * Layout Topbar Component
@@ -28,6 +29,7 @@ import { ContextDto } from '@core/models';
     MatMenuModule,
     MatDividerModule,
     MatTooltipModule,
+    NotificationsBellComponent,
   ],
   templateUrl: './layout-topbar.component.html',
   styleUrls: ['./layout-topbar.component.scss'],
@@ -87,7 +89,7 @@ export class LayoutTopbarComponent {
     if (success) {
       const targetPath = this.getContextPath(context.type);
       this.router.navigate([targetPath]).then(() => {
-        window.location.reload();
+        globalThis.location.reload();
       });
     }
   }
