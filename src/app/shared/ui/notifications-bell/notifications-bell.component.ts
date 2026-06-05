@@ -14,7 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
-import { NotificationDto, NotificationsApi } from '@data/api/notifications.api';
+import { NotificationDto, NotificationsApi, NotificationsPageDto } from '@data/api/notifications.api';
 import { catchError, of } from 'rxjs';
 
 const POLL_INTERVAL_MS = 60_000;
@@ -63,9 +63,9 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
     this.loadingPreview.set(true);
     this.api
       .getPage(1, DROPDOWN_SIZE)
-      .pipe(catchError(() => of({ items: [], total: 0, page: 1, pageSize: DROPDOWN_SIZE })))
-      .subscribe((page) => {
-        this.preview.set(page.items);
+      .pipe(catchError(() => of(null)))
+      .subscribe((response) => {
+        this.preview.set(this.extractItems(response));
         this.loadingPreview.set(false);
       });
 
@@ -75,6 +75,13 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
         .pipe(catchError(() => of(void 0)))
         .subscribe(() => this.unreadCount.set(0));
     }
+  }
+
+  /** Handles both the paginated object and a plain array (backend compatibility). */
+  private extractItems(response: NotificationsPageDto | NotificationDto[] | null): NotificationDto[] {
+    if (!response) return [];
+    if (Array.isArray(response)) return response.slice(0, DROPDOWN_SIZE);
+    return response.items ?? [];
   }
 
   markRead(notification: NotificationDto, event: Event): void {
