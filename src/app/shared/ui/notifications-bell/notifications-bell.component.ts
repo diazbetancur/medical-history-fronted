@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
 import { NotificationDto, NotificationsApi } from '@data/api/notifications.api';
 import { catchError, of } from 'rxjs';
 
-const POLL_INTERVAL_MS = 60_000;
+const POLL_INTERVAL_MS = 30_000;
 
 @Component({
   selector: 'app-notifications-bell',
@@ -48,12 +48,22 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
     this.fetchCount();
     if (isPlatformBrowser(this.platformId)) {
       this.pollTimer = setInterval(() => this.fetchCount(), POLL_INTERVAL_MS);
+
+      // Refresh immediately when the user switches back to this tab
+      document.addEventListener('visibilitychange', this.onVisibilityChange);
     }
   }
 
   ngOnDestroy(): void {
     if (this.pollTimer !== null) clearInterval(this.pollTimer);
+    if (isPlatformBrowser(this.platformId)) {
+      document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    }
   }
+
+  private readonly onVisibilityChange = (): void => {
+    if (!document.hidden) this.fetchCount();
+  };
 
   onBellClick(): void {
     this.loadingList.set(true);
