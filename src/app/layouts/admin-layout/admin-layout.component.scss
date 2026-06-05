@@ -40,7 +40,8 @@ app-sidebar {
 
 @media (max-width: 768px) {
   .layout-sidenav {
-    width: 220px;
+    width: 84vw;
+    max-width: 300px;
   }
 
   .layout-content {

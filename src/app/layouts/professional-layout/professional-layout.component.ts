@@ -1,13 +1,24 @@
-import { afterNextRender, Component, inject, OnInit } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  DestroyRef,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { RouterOutlet } from '@angular/router';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { filter, map } from 'rxjs';
 import { AuthStore } from '@core/auth';
 import { MenuService } from '@core/services/menu.service';
 import { LayoutTopbarComponent } from '@shared/ui/layout-topbar/layout-topbar.component';
 import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
+import { BottomNavComponent } from '@shared/ui/bottom-nav/bottom-nav.component';
 
 /**
  * Diálogo informativo para profesionales recién registrados
@@ -55,22 +66,6 @@ import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
 })
 export class ProfileRequiredDialogComponent {}
 
-/**
- * Professional Layout Component
- *
- * Layout principal para el área profesional (/professional/*)
- *
- * Features:
- * - Topbar con usuario, context selector, logout
- * - Sidebar con menú profesional (filtrado según estado del perfil)
- * - RouterOutlet para contenido dinámico
- * - Modal de bienvenida para profesionales sin perfil aún creado
- *
- * Guards aplicados en routes:
- * - authStoreGuard (autenticación)
- * - contextGuard (contexto PROFESSIONAL)
- * - professionalProfileGuard (redirige a /professional/profile si no hay perfil)
- */
 @Component({
   selector: 'app-professional-layout',
   standalone: true,
@@ -80,30 +75,51 @@ export class ProfileRequiredDialogComponent {}
     MatIconModule,
     LayoutTopbarComponent,
     SidebarComponent,
+    BottomNavComponent,
   ],
   templateUrl: './professional-layout.component.html',
   styleUrl: './professional-layout.component.scss',
 })
 export class ProfessionalLayoutComponent implements OnInit {
-  readonly menuService = inject(MenuService);
+  @ViewChild('drawer') private readonly drawer!: MatSidenav;
 
+  readonly menuService = inject(MenuService);
   private readonly authStore = inject(AuthStore);
   private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   private static readonly WELCOME_SESSION_KEY = 'pro_profile_welcome_shown';
 
+  readonly isMobile = toSignal(
+    this.breakpointObserver
+      .observe('(max-width: 768px)')
+      .pipe(map((result) => result.matches)),
+    { initialValue: false },
+  );
+
   ngOnInit(): void {
-    const ctx = this.authStore.availableContexts().find((c) => c.type === 'PROFESSIONAL');
+    const ctx = this.authStore
+      .availableContexts()
+      .find((c) => c.type === 'PROFESSIONAL');
     if (ctx) this.authStore.switchContext(ctx);
   }
 
   constructor() {
     afterNextRender(() => {
+      // Mostrar modal de bienvenida si no tiene perfil
       const user = this.authStore.user();
       if (user && !user.hasProfessionalProfile) {
-        // Mostrar el modal una sola vez por sesión de navegador
-        if (!sessionStorage.getItem(ProfessionalLayoutComponent.WELCOME_SESSION_KEY)) {
-          sessionStorage.setItem(ProfessionalLayoutComponent.WELCOME_SESSION_KEY, '1');
+        if (
+          !sessionStorage.getItem(
+            ProfessionalLayoutComponent.WELCOME_SESSION_KEY,
+          )
+        ) {
+          sessionStorage.setItem(
+            ProfessionalLayoutComponent.WELCOME_SESSION_KEY,
+            '1',
+          );
           this.dialog.open(ProfileRequiredDialogComponent, {
             width: '460px',
             maxWidth: '96vw',
@@ -111,6 +127,18 @@ export class ProfessionalLayoutComponent implements OnInit {
           });
         }
       }
+
+      // Cerrar sidenav al navegar en mobile
+      this.router.events
+        .pipe(
+          filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe(() => {
+          if (this.isMobile()) {
+            this.drawer?.close();
+          }
+        });
     });
   }
 }

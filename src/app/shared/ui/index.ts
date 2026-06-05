@@ -1,6 +1,7 @@
 /**
  * Shared UI Components
  */
+export * from './bottom-nav/bottom-nav.component';
 export * from './confirm-dialog/confirm-dialog.component';
 export * from './contact-dialog/contact-dialog.component';
 export * from './forms';
