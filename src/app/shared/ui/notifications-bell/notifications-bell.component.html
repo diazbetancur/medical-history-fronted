@@ -8,10 +8,9 @@
   aria-label="Notificaciones"
 >
   <mat-icon
-    [matBadge]="unreadCount() > 0 ? (unreadCount() > 99 ? '99+' : unreadCount().toString()) : ''"
+    [matBadge]="unreadCount() > 99 ? '99+' : unreadCount().toString()"
     [matBadgeHidden]="unreadCount() === 0"
     matBadgeColor="warn"
-    matBadgeSize="small"
   >notifications</mat-icon>
 </button>
 
