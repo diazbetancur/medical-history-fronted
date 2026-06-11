@@ -161,7 +161,7 @@
         Cancelar Cita
       </button>
       } @if ( appointment()!.status === 'confirmed' || appointment()!.status ===
-      'pending' ) {
+      'pending' || appointment()!.status === 'rescheduled' ) {
       <button mat-raised-button color="primary" (click)="exportToCalendar()">
         <mat-icon>download</mat-icon>
         Exportar a Calendario

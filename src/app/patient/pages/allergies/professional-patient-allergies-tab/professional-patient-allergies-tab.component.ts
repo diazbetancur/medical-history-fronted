@@ -94,10 +94,7 @@ export class ProfessionalPatientAllergiesTabComponent {
           this.isLoading.set(false);
 
           // Check if no therapeutic relation
-          if (
-            err.status === 403 &&
-            err.code === AllergyErrorCodes.NO_PATIENT_RELATION
-          ) {
+          if (err.code === AllergyErrorCodes.NO_PATIENT_RELATION) {
             this.noRelation.set(true);
             this.allergies.set([]);
             this.totalItems.set(0);

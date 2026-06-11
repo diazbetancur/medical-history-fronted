@@ -126,12 +126,17 @@
     }
 
     mat-chip {
-      &.status-CONFIRMED {
-        background: var(--color-success) !important;
-        color: var(--color-text-inverted);
-      }
+    &.status-CONFIRMED {
+      background: var(--color-success) !important;
+      color: var(--color-text-inverted);
+    }
 
-      &.status-PENDING {
+    &.status-RESCHEDULED {
+      background: var(--color-primary) !important;
+      color: var(--color-text-inverted);
+    }
+
+    &.status-PENDING {
         background: var(--color-warning) !important;
         color: var(--color-text-inverted);
       }

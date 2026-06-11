@@ -1,0 +1,156 @@
+<h2 mat-dialog-title>
+  <span class="dialog-title-content">
+    <mat-icon>person_add</mat-icon>
+    <span>
+      <strong>Paciente externo</strong>
+      <small>Busca por documento o crea el perfil clínico mínimo.</small>
+    </span>
+  </span>
+</h2>
+
+<mat-dialog-content class="external-patient-dialog">
+  <p class="dialog-description">
+    Este flujo no habilita historial previo de otros profesionales. Solo permite
+    registrar una atención manual sobre este paciente.
+  </p>
+
+  <form class="lookup-form" [formGroup]="lookupForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="documentType">
+        @for (type of documentTypeOptions; track type) {
+          <mat-option [value]="type">{{ type }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Número de documento</mat-label>
+      <input matInput formControlName="documentNumber" maxlength="30" />
+    </mat-form-field>
+
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      class="lookup-button"
+      (click)="lookupPatient()"
+      [disabled]="lookupForm.invalid || isLookingUp()"
+    >
+      @if (isLookingUp()) {
+        <mat-spinner diameter="18"></mat-spinner>
+        Buscando...
+      } @else {
+        Buscar
+      }
+    </button>
+  </form>
+
+  @if (lookupError()) {
+    <div class="error-message">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ lookupError() }}</span>
+    </div>
+  }
+
+  @if (lookupResult(); as result) {
+    <mat-divider></mat-divider>
+
+    @if (result.exists) {
+      <div class="lookup-result">
+        <div>
+          <span class="label">Paciente encontrado</span>
+          <strong>{{ result.fullName }}</strong>
+          <small>{{ result.documentType }} {{ result.documentNumber }}</small>
+        </div>
+
+        <div class="result-actions">
+          <span class="privacy-note">
+            @if (result.canViewClinicalHistory) {
+              Puedes ver su historial clínico por la relación vigente.
+            } @else {
+              Solo verás lo que registres hasta que exista una cita por la app
+              o el paciente autorice acceso.
+            }
+          </span>
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="useFoundPatient(result)"
+          >
+            <mat-icon>note_add</mat-icon>
+            Crear atención
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="not-found">
+        <mat-icon>person_add</mat-icon>
+        <div>
+          <strong>No encontramos un perfil con ese documento</strong>
+          <p>
+            Completa los datos mínimos para crear el perfil externo y luego
+            registrar la atención.
+          </p>
+        </div>
+      </div>
+    }
+  }
+
+  @if (lookupResult()?.exists === false) {
+    <form class="external-form" [formGroup]="externalForm">
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Nombre completo</mat-label>
+        <input matInput formControlName="fullName" maxlength="200" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="documentType">
+          @for (type of documentTypeOptions; track type) {
+            <mat-option [value]="type">{{ type }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Número de documento</mat-label>
+        <input matInput formControlName="documentNumber" maxlength="30" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono opcional</mat-label>
+        <input matInput formControlName="phone" maxlength="20" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Correo opcional</mat-label>
+        <input matInput formControlName="email" maxlength="255" />
+      </mat-form-field>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" [mat-dialog-close]="null">
+    Cancelar
+  </button>
+
+  @if (lookupResult()?.exists === false) {
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="createExternalPatient()"
+      [disabled]="externalForm.invalid || isCreatingExternal()"
+    >
+      @if (isCreatingExternal()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        Creando...
+      } @else {
+        Crear paciente y atención
+      }
+    </button>
+  }
+</mat-dialog-actions>

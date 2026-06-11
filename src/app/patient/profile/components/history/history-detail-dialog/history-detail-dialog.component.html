@@ -104,7 +104,9 @@
                           [class.addendum]="note.type === 'Addendum'"
                         >
                           {{
-                            note.type === "Note" ? "Nota Inicial" : "Addendum"
+                            note.type === "Note"
+                              ? "Resumen de la consulta"
+                              : "Addendum"
                           }}
                         </span>
                         <span class="note-date">

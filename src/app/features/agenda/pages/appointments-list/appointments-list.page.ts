@@ -143,6 +143,7 @@ export class AppointmentsListPageComponent implements OnInit {
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' | undefined {
     switch (status) {
       case 'confirmed':
+      case 'rescheduled':
         return 'primary';
       case 'pending':
         return 'accent';
@@ -160,6 +161,7 @@ export class AppointmentsListPageComponent implements OnInit {
     const statusMap: Record<string, string> = {
       pending: 'Pendiente',
       confirmed: 'Confirmada',
+      rescheduled: 'Reprogramada',
       cancelled: 'Cancelada',
       completed: 'Completada',
       'no-show': 'No asistió',

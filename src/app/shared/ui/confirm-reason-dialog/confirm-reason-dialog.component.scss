@@ -1,0 +1,21 @@
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dialog-icon {
+  color: var(--mat-sys-primary);
+}
+
+.dialog-message {
+  margin: 0 0 16px;
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.reason-field {
+  width: 100%;
+  min-width: 380px;
+}

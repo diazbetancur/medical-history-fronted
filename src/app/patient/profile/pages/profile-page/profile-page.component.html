@@ -1,8 +1,8 @@
-<div class="profile-page">
+﻿<div class="profile-page">
   <div class="profile-header">
     <div class="header-content">
       <div>
-        <h1>Mi Perfil</h1>
+        <h1>Mi Perfil Clínico</h1>
         <p class="subtitle">Gestiona tu información médica y resultados</p>
       </div>
 
@@ -17,7 +17,11 @@
     </div>
   </div>
 
-  <mat-tab-group class="profile-tabs" animationDuration="300ms" (selectedTabChange)="onTabChange()">
+  <mat-tab-group
+    class="profile-tabs"
+    animationDuration="300ms"
+    (selectedTabChange)="onTabChange()"
+  >
     <!-- Tab: Resumen -->
     <mat-tab label="Resumen">
       <div class="tab-content">
@@ -112,6 +116,7 @@
                         title="Nombre completo"
                         maxlength="200"
                       />
+                      <app-form-control-error [control]="summaryForm.controls.fullName" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -125,18 +130,20 @@
                         readonly
                       />
                       <mat-hint>Se sincroniza desde tu cuenta</mat-hint>
+                      <app-form-control-error [control]="summaryForm.controls.email" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                       <mat-label>Teléfono</mat-label>
                       <input
                         matInput
-                        type="number"
+                        type="tel"
                         formControlName="phone"
                         maxlength="20"
                         placeholder="Teléfono"
                         title="Teléfono"
                       />
+                      <app-form-control-error [control]="summaryForm.controls.phone" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -150,6 +157,7 @@
                           <mat-option [value]="dt">{{ dt }}</mat-option>
                         }
                       </mat-select>
+                      <app-form-control-error [control]="summaryForm.controls.documentType" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -161,30 +169,37 @@
                         placeholder="1234567890"
                         title="Número de documento"
                       />
+                      <app-form-control-error [control]="summaryForm.controls.documentNumber" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                       <mat-label>Fecha de nacimiento</mat-label>
                       <input
                         matInput
+                        [matDatepicker]="dobPicker"
                         formControlName="dateOfBirth"
-                        type="date"
-                        placeholder="Fecha de nacimiento"
+                        [max]="todayDate"
+                        autocomplete="off"
+                        placeholder="DD/MM/AAAA"
                         title="Fecha de nacimiento"
+                      />
+                      <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
+                      <mat-datepicker #dobPicker />
+                      <app-form-control-error
+                        [control]="summaryForm.controls.dateOfBirth"
+                        [messages]="{ matDatepickerMax: 'La fecha no puede ser posterior a hoy', matDatepickerParse: 'Ingresa una fecha válida' }"
                       />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                       <mat-label>Género</mat-label>
-                      <mat-select
-                        formControlName="gender"
-                        title="Género"
-                      >
+                      <mat-select formControlName="gender" title="Género">
                         <mat-option value="">— Sin especificar —</mat-option>
                         @for (g of genderOptions; track g) {
                           <mat-option [value]="g">{{ g }}</mat-option>
                         }
                       </mat-select>
+                      <app-form-control-error [control]="summaryForm.controls.gender" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -198,6 +213,7 @@
                           <mat-option [value]="bt">{{ bt }}</mat-option>
                         }
                       </mat-select>
+                      <app-form-control-error [control]="summaryForm.controls.bloodType" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -209,6 +225,7 @@
                         placeholder="Honduras"
                         title="País"
                       />
+                      <app-form-control-error [control]="summaryForm.controls.countryName" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -220,6 +237,7 @@
                         placeholder="Tegucigalpa"
                         title="Ciudad"
                       />
+                      <app-form-control-error [control]="summaryForm.controls.cityName" />
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="full-field">
@@ -231,6 +249,7 @@
                         placeholder="Calle fundadores #123, Col. Centro"
                         title="Dirección"
                       />
+                      <app-form-control-error [control]="summaryForm.controls.addressLine1" />
                     </mat-form-field>
                   </div>
 
@@ -261,6 +280,116 @@
               }
             </mat-card-content>
           </mat-card>
+
+          @if (showClaimPanel()) {
+            <mat-card class="claim-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>link</mat-icon>
+                <mat-card-title>Historial clínico previo encontrado</mat-card-title>
+                <mat-card-subtitle>
+                  Revisamos tu documento y encontramos una historia clínica
+                  externa pendiente de vinculación.
+                </mat-card-subtitle>
+              </mat-card-header>
+
+              <mat-card-content>
+                @if (isLoadingClaimCandidate() || isLoadingClaims()) {
+                  <div class="claims-loading">
+                    <mat-spinner diameter="28"></mat-spinner>
+                    <span>Revisando historial previo...</span>
+                  </div>
+                } @else {
+                  @if (claimCandidate(); as candidate) {
+                    <div class="claim-found">
+                      <mat-icon>medical_information</mat-icon>
+                      <div>
+                        <strong>
+                          Tienes un historial clínico previo asociado a este
+                          documento.
+                        </strong>
+                        <p>
+                          Fue creado por un profesional para
+                          {{ candidate.externalFullName }} con
+                          {{ candidate.documentType || "documento" }}
+                          {{ candidate.documentNumber || "" }}. Si reconoces
+                          este historial, puedes solicitar que se vincule a tu
+                          cuenta.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="claim-actions">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="requestClaim()"
+                        [disabled]="isRequestingClaim() || isDecliningClaim()"
+                      >
+                        @if (isRequestingClaim()) {
+                          Enviando...
+                        } @else {
+                          Aceptar vinculación
+                        }
+                      </button>
+                      <button
+                        mat-stroked-button
+                        color="warn"
+                        type="button"
+                        (click)="declineClaimCandidate()"
+                        [disabled]="isRequestingClaim() || isDecliningClaim()"
+                      >
+                        @if (isDecliningClaim()) {
+                          Guardando...
+                        } @else {
+                          No es mi historia
+                        }
+                      </button>
+                    </div>
+                  } @else if (visibleClaimRequests().length > 0) {
+                    <div class="claims-list">
+                      @for (request of visibleClaimRequests(); track request.id) {
+                        <div class="claim-row">
+                          <div>
+                            <strong>{{ request.externalFullName }}</strong>
+                            <span>
+                              {{ request.documentType || "Documento" }}
+                              {{ request.documentNumber || "" }}
+                            </span>
+                            <small>
+                              Solicitada:
+                              {{ request.requestedAtUtc | date: "dd/MM/yyyy" }}
+                            </small>
+                          </div>
+
+                          <div class="claim-row-actions">
+                            <mat-chip>{{
+                              claimStatusLabel(request.status)
+                            }}</mat-chip>
+                            @if (canCancelClaim(request)) {
+                              <button
+                                mat-stroked-button
+                                type="button"
+                                color="warn"
+                                (click)="requestClaimCancellation(request)"
+                                [disabled]="cancellingClaimId() === request.id"
+                              >
+                                @if (cancellingClaimId() === request.id) {
+                                  Enviando...
+                                } @else {
+                                  Solicitar cancelación
+                                }
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              </mat-card-content>
+            </mat-card>
+          }
         }
       </div>
       <div class="tab-content">
@@ -304,10 +433,5 @@
     </mat-tab>
 
     <!-- Tab: Privacidad -->
-    <!-- <mat-tab label="Privacidad">
-      <div class="tab-content">
-        <app-privacy-settings />
-      </div>
-    </mat-tab> -->
   </mat-tab-group>
 </div>

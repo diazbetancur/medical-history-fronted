@@ -3,6 +3,7 @@
  */
 export * from './bottom-nav/bottom-nav.component';
 export * from './confirm-dialog/confirm-dialog.component';
+export * from './confirm-reason-dialog/confirm-reason-dialog.component';
 export * from './contact-dialog/contact-dialog.component';
 export * from './forms';
 export * from './global-loader/global-loader.component';

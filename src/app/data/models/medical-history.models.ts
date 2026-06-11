@@ -97,11 +97,18 @@ export interface PatientListItemDto {
   fullName: string;
   email: string;
   phone?: string;
+  documentType?: string;
+  documentNumber?: string;
+  patientType?: string;
+  isRegisteredPatient?: boolean;
   address?: string;
   street?: string;
   city?: string;
   country?: string;
   shareFullHistoryFlag: boolean;
+  canViewProfileDetails?: boolean;
+  canViewFullHistory?: boolean;
+  canRequestFullHistoryAccess?: boolean;
   lastAppointmentUtc?: string;
   nextAppointmentUtc?: string;
 }
@@ -121,6 +128,11 @@ export interface ProfessionalPatientSummaryDto {
   countryName?: string;
   cityName?: string;
   shareFullHistoryFlag: boolean;
+  patientType?: string;
+  isRegisteredPatient?: boolean;
+  canViewProfileDetails?: boolean;
+  canViewFullHistory?: boolean;
+  canRequestFullHistoryAccess?: boolean;
 }
 
 // =============================================================================

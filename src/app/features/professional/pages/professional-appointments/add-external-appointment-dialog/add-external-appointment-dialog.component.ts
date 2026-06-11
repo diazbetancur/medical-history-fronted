@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -29,6 +29,10 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProfessionalAppointmentsApi } from '@data/api/professional-appointments.api';
 import type { AppointmentDto } from '@data/models/appointment.models';
+import {
+  ProfessionalPatientsService,
+  type ProfessionalPatientLookupResultDto,
+} from '../../../services/professional-patients.service';
 
 export interface AddExternalAppointmentDialogData {
   professionalProfileId: string;
@@ -66,6 +70,7 @@ const EXTERNAL_SOURCES = [
 })
 export class AddExternalAppointmentDialogComponent {
   private readonly api = inject(ProfessionalAppointmentsApi);
+  private readonly patientsService = inject(ProfessionalPatientsService);
   private readonly dialogRef = inject(
     MatDialogRef<AddExternalAppointmentDialogComponent>,
   );
@@ -75,8 +80,29 @@ export class AddExternalAppointmentDialogComponent {
   private readonly fb = inject(FormBuilder);
 
   protected readonly submitting = signal(false);
+  protected readonly isLookingUpPatient = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly lookupMessage = signal<string | null>(null);
+  protected readonly lookupResult =
+    signal<ProfessionalPatientLookupResultDto | null>(null);
+  protected readonly selectedPatientProfileId = signal<string | null>(null);
+  protected readonly canShowAppointmentDetails = computed(
+    () => this.lookupResult() !== null,
+  );
+  protected readonly canEditPatientName = computed(() => {
+    const result = this.lookupResult();
+    return !!result && (!result.exists || this.isUnclaimedLookup(result));
+  });
+  protected readonly canShowContactFields = computed(() => {
+    const result = this.lookupResult();
+    return !!result && !result.exists;
+  });
+  protected readonly isExistingRegisteredPatient = computed(() => {
+    const result = this.lookupResult();
+    return !!result && result.exists && this.isClaimedLookup(result);
+  });
   protected readonly sources = EXTERNAL_SOURCES;
+  protected readonly documentTypeOptions = ['DNI', 'Pasaporte', 'RNP'];
   protected readonly minAppointmentDate = this.getTodayDate();
   protected readonly timepickerInterval = '10m';
 
@@ -95,6 +121,15 @@ export class AddExternalAppointmentDialogComponent {
       ],
       patientEmail: ['', [Validators.email, Validators.maxLength(255)]],
       patientPhone: ['', Validators.maxLength(30)],
+      documentType: ['DNI', Validators.required],
+      documentNumber: [
+        '',
+        [
+          Validators.required,
+          this.notBlankValidator(),
+          Validators.maxLength(30),
+        ],
+      ],
       appointmentDate: [null, Validators.required],
       timeSlot: [null, [Validators.required, this.notPastTodayTimeValidator()]],
       durationMinutes: [
@@ -109,17 +144,31 @@ export class AddExternalAppointmentDialogComponent {
     this.form.get('appointmentDate')?.valueChanges.subscribe(() => {
       this.form.get('timeSlot')?.updateValueAndValidity();
     });
+
+    this.form.get('documentType')?.valueChanges.subscribe(() => {
+      this.clearPatientLookup();
+    });
+    this.form.get('documentNumber')?.valueChanges.subscribe(() => {
+      this.clearPatientLookup();
+    });
   }
 
   protected canSubmit(): boolean {
     return (
       !this.submitting() &&
+      this.lookupResult() !== null &&
       this.form.valid &&
       this.hasRequiredFieldsFilled()
     );
   }
 
   protected submit(): void {
+    const lookupResult = this.lookupResult();
+    if (!lookupResult) {
+      this.errorMessage.set('Primero valida el documento del paciente.');
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -141,12 +190,24 @@ export class AddExternalAppointmentDialogComponent {
     this.submitting.set(true);
     this.errorMessage.set(null);
 
+    const shouldSendContact = !lookupResult.exists;
+    const patientName = this.isClaimedLookup(lookupResult)
+      ? lookupResult.fullName?.trim() || value.patientName.trim()
+      : value.patientName.trim();
+
     this.api
       .createExternalAppointment({
         professionalProfileId: this.data.professionalProfileId,
-        patientName: value.patientName.trim(),
-        patientEmail: value.patientEmail?.trim() || undefined,
-        patientPhone: value.patientPhone?.trim() || undefined,
+        patientProfileId: this.selectedPatientProfileId() ?? undefined,
+        patientName,
+        patientEmail: shouldSendContact
+          ? value.patientEmail?.trim() || undefined
+          : undefined,
+        patientPhone: shouldSendContact
+          ? value.patientPhone?.trim() || undefined
+          : undefined,
+        documentType: value.documentType?.trim() || undefined,
+        documentNumber: value.documentNumber?.trim() || undefined,
         appointmentDate,
         timeSlot,
         durationMinutes,
@@ -165,6 +226,53 @@ export class AddExternalAppointmentDialogComponent {
         }) => {
           this.submitting.set(false);
           this.errorMessage.set(this.getCreateErrorMessage(err));
+        },
+      });
+  }
+
+  protected lookupPatientByDocument(): void {
+    const documentTypeControl = this.form.get('documentType');
+    const documentNumberControl = this.form.get('documentNumber');
+
+    if (documentTypeControl?.invalid || documentNumberControl?.invalid) {
+      documentTypeControl?.markAsTouched();
+      documentNumberControl?.markAsTouched();
+      return;
+    }
+
+    const documentType = String(documentTypeControl?.value ?? '').trim();
+    const documentNumber = String(documentNumberControl?.value ?? '').trim();
+
+    this.isLookingUpPatient.set(true);
+    this.lookupMessage.set(null);
+    this.lookupResult.set(null);
+    this.selectedPatientProfileId.set(null);
+
+    this.patientsService
+      .lookupByDocument({ documentType, documentNumber })
+      .subscribe({
+        next: (result) => {
+          this.isLookingUpPatient.set(false);
+          this.lookupResult.set(result);
+
+          if (result.exists && result.patientProfileId) {
+            this.selectedPatientProfileId.set(result.patientProfileId);
+            if (result.fullName?.trim()) {
+              this.form.patchValue({ patientName: result.fullName });
+            }
+            this.form.patchValue({ patientEmail: '', patientPhone: '' });
+            return;
+          }
+
+          this.lookupMessage.set(
+            'No encontramos ese documento. Al guardar la cita se creará un perfil externo con estos datos.',
+          );
+        },
+        error: (error) => {
+          this.isLookingUpPatient.set(false);
+          this.lookupMessage.set(
+            error?.message || 'No se pudo validar el documento del paciente.',
+          );
         },
       });
   }
@@ -219,6 +327,43 @@ export class AddExternalAppointmentDialogComponent {
     }
 
     return this.getCurrentTimeOnly();
+  }
+
+  protected getPatientLookupLabel(): string {
+    const result = this.lookupResult();
+    if (!result) {
+      return '';
+    }
+
+    if (!result.exists) {
+      return 'Paciente nuevo';
+    }
+
+    return result.canViewClinicalHistory
+      ? 'Paciente existente con historial permitido'
+      : 'Paciente existente con historial privado';
+  }
+
+  protected getPatientLookupDescription(): string {
+    const result = this.lookupResult();
+    if (!result) {
+      return '';
+    }
+
+    if (!result.exists) {
+      return 'No existe en el sistema. Completa los datos mínimos para crear el perfil externo y agendar la cita.';
+    }
+
+    if (this.isClaimedLookup(result)) {
+      return 'Existe como paciente registrado. Por privacidad solo puedes crear la cita; el historial completo requiere aprobación del paciente.';
+    }
+
+    return 'Existe como paciente externo sin cuenta. Puedes ajustar solo el nombre y crear la cita.';
+  }
+
+  protected getPatientNameLabel(): string {
+    const result = this.lookupResult();
+    return result?.exists ? 'Nombre del paciente *' : 'Nombre completo *';
   }
 
   private normalizeDateOnly(value: unknown): string | null {
@@ -297,12 +442,43 @@ export class AddExternalAppointmentDialogComponent {
     const value = this.form.value;
 
     return (
-      String(value.patientName ?? '').trim().length >= 2 &&
+      this.hasRequiredPatientName() &&
+      String(value.documentType ?? '').trim().length > 0 &&
+      String(value.documentNumber ?? '').trim().length > 0 &&
       !!this.normalizeDateOnly(value.appointmentDate) &&
       !!this.normalizeTimeOnly(value.timeSlot) &&
       this.normalizeDurationMinutes(value.durationMinutes) >= 15 &&
       value.externalSource !== null &&
       value.externalSource !== undefined
+    );
+  }
+
+  private clearPatientLookup(): void {
+    this.lookupResult.set(null);
+    this.lookupMessage.set(null);
+    this.selectedPatientProfileId.set(null);
+  }
+
+  private hasRequiredPatientName(): boolean {
+    const result = this.lookupResult();
+    if (result?.exists && this.isClaimedLookup(result)) {
+      return true;
+    }
+
+    return String(this.form.value.patientName ?? '').trim().length >= 2;
+  }
+
+  private isClaimedLookup(result: ProfessionalPatientLookupResultDto): boolean {
+    return String(result.claimStatus ?? '').toLowerCase() === 'claimed';
+  }
+
+  private isUnclaimedLookup(result: ProfessionalPatientLookupResultDto): boolean {
+    const claimStatus = String(result.claimStatus ?? '').toLowerCase();
+    return (
+      result.exists &&
+      (claimStatus === 'unclaimed' ||
+        claimStatus === 'claimpending' ||
+        claimStatus === 'rejected')
     );
   }
 

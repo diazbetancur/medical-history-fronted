@@ -68,6 +68,7 @@ export class AppointmentDetailDialogComponent implements OnInit {
     const labels: Record<AppointmentStatus, string> = {
       PENDING: 'Pendiente',
       CONFIRMED: 'Confirmada',
+      RESCHEDULED: 'Reprogramada',
       CANCELLED: 'Cancelada',
       COMPLETED: 'Completada',
       NO_SHOW: 'No asistió',

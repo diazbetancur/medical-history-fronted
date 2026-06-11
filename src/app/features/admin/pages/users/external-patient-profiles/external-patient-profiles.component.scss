@@ -1,0 +1,206 @@
+.ext-profiles {
+  padding-top: 16px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .search-field {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .results-count {
+    color: var(--mat-app-on-surface-variant);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--mat-app-error-container);
+  color: var(--mat-app-on-error-container);
+  border-radius: 12px;
+  margin-bottom: 24px;
+
+  > mat-icon {
+    color: var(--mat-app-error);
+  }
+
+  > span {
+    flex: 1;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  gap: 16px;
+
+  p {
+    color: var(--mat-app-on-surface-variant);
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--mat-app-outline-variant);
+  margin-bottom: 16px;
+
+  table {
+    width: 100%;
+    min-width: 780px;
+
+    th {
+      background: var(--mat-app-surface-container);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      color: var(--mat-app-on-surface-variant);
+    }
+
+    td {
+      border-bottom: 1px solid var(--mat-app-outline-variant);
+    }
+
+    tr:hover td {
+      background: var(--mat-app-surface-container-low);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+.patient-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .patient-icon {
+    color: var(--mat-app-on-surface-variant);
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .patient-name {
+    font-weight: 500;
+  }
+}
+
+.doc-text {
+  font-size: 14px;
+}
+
+.muted-text {
+  color: var(--mat-app-on-surface-variant);
+  font-size: 14px;
+}
+
+.contact-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .contact-line {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--mat-app-on-surface-variant);
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+// Claim status chips
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-0 {
+  background: var(--mat-app-surface-container-high);
+  color: var(--mat-app-on-surface-variant);
+}
+
+.status-1 {
+  background: var(--mat-app-secondary-container);
+  color: var(--mat-app-on-secondary-container);
+}
+
+.status-3 {
+  background: var(--mat-app-error-container);
+  color: var(--mat-app-on-error-container);
+}
+
+.professional-name {
+  font-size: 14px;
+  color: var(--mat-app-on-surface);
+}
+
+.date-text {
+  font-size: 14px;
+  color: var(--mat-app-on-surface-variant);
+}
+
+mat-paginator {
+  background: transparent;
+  border-top: 1px solid var(--mat-app-outline-variant);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+
+  > mat-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+    color: var(--mat-app-on-surface-variant);
+    opacity: 0.4;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0 0 24px;
+    color: var(--mat-app-on-surface-variant);
+    font-size: 14px;
+    max-width: 320px;
+  }
+}
