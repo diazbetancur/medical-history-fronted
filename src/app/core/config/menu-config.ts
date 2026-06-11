@@ -204,6 +204,17 @@ export const MENU_ITEMS: MenuItem[] = [
     ],
   },
   {
+    label: 'Vinculaciones',
+    icon: 'link',
+    route: '/admin/patient-claims',
+    context: 'ADMIN',
+    requiredPermissions: [
+      ADMIN_PERMISSIONS.PROFILES_VIEW,
+      ADMIN_PERMISSIONS.PROFILES_VERIFY,
+      ADMIN_PERMISSIONS.PROFILES_UPDATE,
+    ],
+  },
+  {
     label: 'Reportes',
     icon: 'assessment',
     route: '/admin/reports',
@@ -257,6 +268,13 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PROFESSIONAL',
     bottomNav: true,
   },
+  {
+    label: 'Reportes',
+    icon: 'bar_chart',
+    route: '/professional/reports',
+    context: 'PROFESSIONAL',
+    bottomNav: false,
+  },
 
   // ==========================================================================
   // PATIENT MENU
@@ -298,6 +316,12 @@ export const MENU_ITEMS: MenuItem[] = [
     route: '/patient/profile',
     context: 'PATIENT',
     bottomNav: true,
+  },
+  {
+    label: 'Solicitudes',
+    icon: 'pending_actions',
+    route: '/patient/access-requests',
+    context: 'PATIENT',
   },
   {
     label: 'Cambiar Contraseña',

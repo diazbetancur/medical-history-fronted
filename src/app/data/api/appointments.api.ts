@@ -88,7 +88,13 @@ export class AppointmentsApi {
    * Uses /appointments/mine endpoint
    */
   getMyAppointments(params?: {
-    status?: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW';
+    status?:
+      | 'PENDING'
+      | 'CONFIRMED'
+      | 'RESCHEDULED'
+      | 'CANCELLED'
+      | 'COMPLETED'
+      | 'NO_SHOW';
     dateFrom?: string; // YYYY-MM-DD
     dateTo?: string; // YYYY-MM-DD
   }): Observable<UpcomingAppointmentsResponse> {

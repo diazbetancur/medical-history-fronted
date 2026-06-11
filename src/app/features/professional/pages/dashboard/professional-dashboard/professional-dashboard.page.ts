@@ -150,6 +150,12 @@ export class ProfessionalDashboardPage {
           icon: 'check_circle',
           css: 'status-confirmed',
         };
+      case 'rescheduled':
+        return {
+          label: 'Reprogramada',
+          icon: 'event_repeat',
+          css: 'status-rescheduled',
+        };
       case 'pending':
         return { label: 'Pendiente', icon: 'schedule', css: 'status-pending' };
       case 'completed':

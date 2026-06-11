@@ -151,6 +151,74 @@
   }
 }
 
+.claim-card {
+  margin-top: 16px;
+  border: 1px solid var(--color-border);
+
+  mat-card-header {
+    margin-bottom: 12px;
+  }
+}
+
+.claims-loading,
+.claim-empty,
+.claim-found,
+.claim-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--color-background-alt);
+}
+
+.claim-empty,
+.claim-found {
+  align-items: flex-start;
+
+  p {
+    margin: 4px 0 0;
+    color: var(--color-text-secondary);
+  }
+}
+
+.claims-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.claim-row {
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  span,
+  small {
+    color: var(--color-text-secondary);
+  }
+}
+
+.claim-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.claim-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
 // Responsive
 @media (max-width: 768px) {
   .profile-header {
@@ -181,7 +249,8 @@
     grid-template-columns: 1fr;
   }
 
-  .summary-card .summary-actions {
+  .summary-card .summary-actions,
+  .claim-actions {
     justify-content: stretch;
 
     a,

@@ -32,6 +32,9 @@ import type { AdminUserListDto } from '@data/api/admin-users.types';
 import { AdminUsersStore } from '@data/stores/admin-users.store';
 import { ToastService } from '@shared/services';
 import { PERMISSIONS } from '../../admin-menu.config';
+import { ExternalPatientProfilesComponent } from './external-patient-profiles/external-patient-profiles.component';
+
+type TabSegment = AdminUsersSegment | 'external-patients';
 
 @Component({
   selector: 'app-users-page',
@@ -52,6 +55,7 @@ import { PERMISSIONS } from '../../admin-menu.config';
     MatTableModule,
     MatTabsModule,
     MatTooltipModule,
+    ExternalPatientProfilesComponent,
   ],
   templateUrl: './users.page.html',
   styleUrl: './users.page.scss',
@@ -71,10 +75,11 @@ export class UsersPageComponent implements OnInit {
   readonly searchValue = signal('');
   readonly drawerOpen = signal(false);
 
-  readonly userTabs: { label: string; segment: AdminUsersSegment }[] = [
+  readonly userTabs: { label: string; segment: TabSegment }[] = [
     { label: 'Administrativos', segment: 'others' },
     { label: 'Profesionales', segment: 'professionals' },
     { label: 'Pacientes', segment: 'patients' },
+    { label: 'Pacientes externos', segment: 'external-patients' },
   ];
 
   // ==========================================================================
@@ -145,8 +150,14 @@ export class UsersPageComponent implements OnInit {
     () => !this.loading() && this.users().length > 0,
   );
 
+  readonly activeSegment = signal<TabSegment>('others');
+
+  readonly isExternalPatientsTab = computed(
+    () => this.activeSegment() === 'external-patients',
+  );
+
   readonly currentTabIndex = computed(() => {
-    const current = this.segment();
+    const current = this.activeSegment();
     const index = this.userTabs.findIndex((tab) => tab.segment === current);
     return index >= 0 ? index : 0;
   });
@@ -204,8 +215,12 @@ export class UsersPageComponent implements OnInit {
     if (!tab) return;
 
     this.searchValue.set('');
-    this.store.setQuery('');
-    this.store.setSegment(tab.segment);
+    this.activeSegment.set(tab.segment);
+
+    if (tab.segment !== 'external-patients') {
+      this.store.setQuery('');
+      this.store.setSegment(tab.segment as AdminUsersSegment);
+    }
   }
 
   // ==========================================================================

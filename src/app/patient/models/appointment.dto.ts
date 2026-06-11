@@ -119,6 +119,7 @@ export function getStatusLabel(status: AppointmentStatus): string {
   const labels: Record<AppointmentStatus, string> = {
     PENDING: 'Pendiente',
     CONFIRMED: 'Confirmada',
+    RESCHEDULED: 'Reprogramada',
     CANCELLED: 'Cancelada',
     COMPLETED: 'Completada',
     NO_SHOW: 'No asistió',
@@ -138,6 +139,7 @@ export function getStatusColor(
   > = {
     PENDING: 'warn',
     CONFIRMED: 'primary',
+    RESCHEDULED: 'primary',
     CANCELLED: undefined,
     COMPLETED: 'accent',
     NO_SHOW: undefined,
@@ -161,6 +163,8 @@ export function isFutureAppointment(appointment: AppointmentDto): boolean {
 export function canCancelAppointment(appointment: AppointmentDto): boolean {
   return (
     isFutureAppointment(appointment) &&
-    (appointment.status === 'PENDING' || appointment.status === 'CONFIRMED')
+    (appointment.status === 'PENDING' ||
+      appointment.status === 'CONFIRMED' ||
+      appointment.status === 'RESCHEDULED')
   );
 }

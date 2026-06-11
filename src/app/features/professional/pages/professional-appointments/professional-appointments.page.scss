@@ -156,6 +156,11 @@
     color: #14532d;        // green-900  → contrast 8.1:1 on #dcfce7
   }
 
+  &.status-rescheduled {
+    background: #ede9fe;   // violet-100
+    color: #4c1d95;        // violet-900
+  }
+
   &.status-cancelled {
     background: #fee2e2;   // red-100
     color: #7f1d1d;        // red-900    → contrast 7.5:1 on #fee2e2

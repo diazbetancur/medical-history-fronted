@@ -1,0 +1,169 @@
+<section class="claims-page">
+  <header class="page-header">
+    <div>
+      <h1>Vinculaciones de pacientes</h1>
+      <p>
+        Revisa solicitudes para asociar historias externas creadas por
+        profesionales con pacientes registrados.
+      </p>
+    </div>
+
+    <button mat-stroked-button type="button" (click)="loadClaims()">
+      <mat-icon>refresh</mat-icon>
+      Actualizar
+    </button>
+  </header>
+
+  <mat-card class="claims-card">
+    <mat-card-header>
+      <mat-card-title>Solicitudes</mat-card-title>
+      <mat-card-subtitle>
+        Por defecto se muestran las pendientes para no mezclar decisiones.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="toolbar">
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select
+            [ngModel]="statusFilter()"
+            (ngModelChange)="statusFilter.set($event)"
+            (selectionChange)="onStatusChange()"
+            title="Filtrar por estado"
+          >
+            @for (option of statusOptions; track option.label) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      @if (isLoading()) {
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+          <span>Cargando solicitudes...</span>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="empty-state error-state">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ errorMessage() }}</p>
+          <button mat-stroked-button type="button" (click)="loadClaims()">
+            Reintentar
+          </button>
+        </div>
+      } @else if (!hasClaims()) {
+        <div class="empty-state">
+          <mat-icon>task_alt</mat-icon>
+          <p>No hay solicitudes para este filtro.</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="claims()" class="claims-table">
+            <ng-container matColumnDef="patient">
+              <th mat-header-cell *matHeaderCellDef>Paciente externo</th>
+              <td mat-cell *matCellDef="let request">
+                <strong>{{ request.externalFullName }}</strong>
+                @if (request.requestNotes) {
+                  <small>{{ request.requestNotes }}</small>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="document">
+              <th mat-header-cell *matHeaderCellDef>Documento</th>
+              <td mat-cell *matCellDef="let request">
+                {{ getDocumentLabel(request) }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let request">
+                <mat-chip>{{ claimStatusLabel(request.status) }}</mat-chip>
+                @if (request.cancellationReason) {
+                  <small class="reason">
+                    Cancelación: {{ request.cancellationReason }}
+                  </small>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="requestedAt">
+              <th mat-header-cell *matHeaderCellDef>Solicitada</th>
+              <td mat-cell *matCellDef="let request">
+                {{ request.requestedAtUtc | date: "dd/MM/yyyy HH:mm" }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="reviewedAt">
+              <th mat-header-cell *matHeaderCellDef>Revisada</th>
+              <td mat-cell *matCellDef="let request">
+                {{
+                  request.reviewedAtUtc
+                    ? (request.reviewedAtUtc | date: "dd/MM/yyyy HH:mm")
+                    : "Pendiente"
+                }}
+                @if (request.reviewReason) {
+                  <small class="reason">{{ request.reviewReason }}</small>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let request">
+                <div class="row-actions">
+                  @if (canApprove(request)) {
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      type="button"
+                      (click)="approveClaim(request)"
+                      [disabled]="isSaving(request)"
+                    >
+                      Aprobar
+                    </button>
+                    <button
+                      mat-stroked-button
+                      color="warn"
+                      type="button"
+                      (click)="rejectClaim(request)"
+                      [disabled]="isSaving(request)"
+                    >
+                      Rechazar
+                    </button>
+                  } @else if (canCompleteCancellation(request)) {
+                    <button
+                      mat-flat-button
+                      color="warn"
+                      type="button"
+                      (click)="completeCancellation(request)"
+                      [disabled]="isSaving(request)"
+                    >
+                      Completar cancelación
+                    </button>
+                  } @else {
+                    <span class="muted">Sin acciones</span>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+
+    <mat-paginator
+      [length]="totalItems()"
+      [pageIndex]="page() - 1"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+    />
+  </mat-card>
+</section>
