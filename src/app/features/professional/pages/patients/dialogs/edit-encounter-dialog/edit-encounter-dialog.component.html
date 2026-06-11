@@ -26,13 +26,13 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nota inicial</mat-label>
+      <mat-label>Resumen de la consulta</mat-label>
       <textarea
         matInput
         formControlName="initialNote"
         rows="8"
         maxlength="20000"
-        placeholder="Actualiza la nota inicial"
+        placeholder="Actualiza el resumen de la consulta"
       ></textarea>
       <mat-hint align="end">
         {{ form.get("initialNote")?.value?.length || 0 }}/20000

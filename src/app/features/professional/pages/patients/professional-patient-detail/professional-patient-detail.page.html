@@ -8,6 +8,19 @@
       <h1>Historia Clínica del Paciente</h1>
       <p class="subtitle">Gestión de atenciones médicas</p>
     </div>
+    @if (canRequestFullHistoryAccess()) {
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      class="request-access-button"
+      (click)="requestFullHistoryAccess()"
+      [disabled]="isRequestingAccess()"
+    >
+      <mat-icon>lock_open</mat-icon>
+      {{ isRequestingAccess() ? 'Enviando...' : 'Solicitar acceso' }}
+    </button>
+    }
   </div>
 
   <!-- Privacy Disclaimer (if applicable) -->
@@ -126,9 +139,29 @@
           <div class="summary-item summary-item--full">
             <mat-icon>visibility</mat-icon>
             <div class="summary-content">
-              <span class="summary-label">Compartir historial completo</span>
+              <span class="summary-label">Historial completo</span>
               <span class="summary-value">
-                {{ patientSummary()?.shareFullHistoryFlag ? 'Sí' : 'No' }}
+                {{ patientSummary()?.canViewFullHistory ? 'Sí' : 'No' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>person_search</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Tipo de paciente</span>
+              <span class="summary-value">
+                {{ patientSummary()?.patientType || 'No disponible' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-item">
+            <mat-icon>badge</mat-icon>
+            <div class="summary-content">
+              <span class="summary-label">Perfil visible</span>
+              <span class="summary-value">
+                {{ patientSummary()?.canViewProfileDetails ? 'Sí' : 'No' }}
               </span>
             </div>
           </div>

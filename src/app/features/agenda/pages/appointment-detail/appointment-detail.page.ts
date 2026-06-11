@@ -151,6 +151,7 @@ export class AppointmentDetailPageComponent implements OnInit {
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' | undefined {
     switch (status) {
       case 'confirmed':
+      case 'rescheduled':
         return 'primary';
       case 'pending':
         return 'accent';
@@ -168,6 +169,7 @@ export class AppointmentDetailPageComponent implements OnInit {
     const statusMap: Record<string, string> = {
       pending: 'Pendiente',
       confirmed: 'Confirmada',
+      rescheduled: 'Reprogramada',
       cancelled: 'Cancelada',
       completed: 'Completada',
       'no-show': 'No asistió',
@@ -181,7 +183,9 @@ export class AppointmentDetailPageComponent implements OnInit {
    */
   canCancel(appointment: Appointment): boolean {
     return (
-      appointment.status === 'pending' || appointment.status === 'confirmed'
+      appointment.status === 'pending' ||
+      appointment.status === 'confirmed' ||
+      appointment.status === 'rescheduled'
     );
   }
 }

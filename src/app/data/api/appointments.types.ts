@@ -12,6 +12,7 @@
 export type AppointmentStatus =
   | 'pending' // Created, awaiting confirmation
   | 'confirmed' // Confirmed by user
+  | 'rescheduled' // Reprogrammed appointment
   | 'cancelled' // Cancelled by user or professional
   | 'completed' // Past appointment
   | 'no-show'; // User didn't show up

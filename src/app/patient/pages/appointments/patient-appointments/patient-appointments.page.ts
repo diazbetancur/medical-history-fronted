@@ -48,7 +48,8 @@ export class PatientAppointmentsPageComponent implements OnInit {
         return (
           appointmentDate > now &&
           (appointment.status === 'PENDING' ||
-            appointment.status === 'CONFIRMED')
+            appointment.status === 'CONFIRMED' ||
+            appointment.status === 'RESCHEDULED')
         );
       })
       .sort(
@@ -153,6 +154,7 @@ export class PatientAppointmentsPageComponent implements OnInit {
     const labels: Record<string, string> = {
       PENDING: 'Pendiente',
       CONFIRMED: 'Confirmada',
+      RESCHEDULED: 'Reprogramada',
       CANCELLED: 'Cancelada',
       COMPLETED: 'Completada',
       NO_SHOW: 'No Asistió',

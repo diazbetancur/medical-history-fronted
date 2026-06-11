@@ -1,0 +1,130 @@
+<div class="access-requests-page">
+  <div class="page-header">
+    <div>
+      <h1>Accesos a mi historia</h1>
+      <p>
+        Profesionales que tienen acceso a tu historia clínica o que pidieron
+        autorización.
+      </p>
+    </div>
+    <div class="header-badges">
+      @if (activeAccessCount() > 0) {
+      <span class="access-badge">{{ activeAccessCount() }} con acceso</span>
+      } @if (pendingCount() > 0) {
+      <span class="pending-badge">{{ pendingCount() }} pendiente(s)</span>
+      }
+    </div>
+  </div>
+
+  <section class="privacy-note">
+    <mat-icon aria-hidden="true">shield</mat-icon>
+    <p>
+      Los médicos con cita creada desde la app pueden consultar tu historia
+      clínica. Puedes revocar ese acceso cuando lo necesites; si lo haces,
+      deberán solicitar autorización nuevamente.
+    </p>
+  </section>
+
+  @if (isLoading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando solicitudes...</p>
+  </div>
+  } @else if (error()) {
+  <mat-card class="state-card">
+    <mat-card-content>
+      <mat-icon color="warn">error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-raised-button color="primary" (click)="loadRequests()">
+        Reintentar
+      </button>
+    </mat-card-content>
+  </mat-card>
+  } @else if (requests().length === 0) {
+  <mat-card class="state-card">
+    <mat-card-content>
+      <mat-icon>mark_email_read</mat-icon>
+      <p>No tienes solicitudes ni accesos activos.</p>
+    </mat-card-content>
+  </mat-card>
+  } @else {
+  <div class="requests-list">
+    @for (request of requests(); track trackAccess($index, request)) {
+    <mat-card
+      class="request-card"
+      [class.pending]="request.status === 'Pending'"
+    >
+      <mat-card-content>
+        <div class="request-main">
+          <div class="request-icon">
+            <mat-icon>{{ getStatusIcon(request.status) }}</mat-icon>
+          </div>
+          <div>
+            <h2>{{ request.professionalName }}</h2>
+            <span class="source-chip">{{ getAccessSourceLabel(request) }}</span>
+            <p class="request-date">
+              @if (request.accessSource === 'Relationship') { Acceso activo por
+              relación médico-paciente. } @else { Solicitado el {{
+              request.requestedAtUtc | date: 'dd/MM/yyyy, h:mm a' }} }
+            </p>
+            @if (request.requestReason) {
+            <p class="request-reason">{{ request.requestReason }}</p>
+            } @if (request.expiresAtUtc && request.status === 'Approved') {
+            <p class="request-expiry">Acceso concedido previamente.</p>
+            }
+          </div>
+        </div>
+
+        <div class="request-side">
+          <span
+            class="status-pill"
+            [class.pending]="request.status === 'Pending'"
+            [class.approved]="request.status === 'Approved'"
+            [class.rejected]="request.status === 'Rejected'"
+            [class.expired]="request.status === 'Expired'"
+            [class.revoked]="request.status === 'Revoked'"
+          >
+            {{ getStatusLabel(request.status) }}
+          </span>
+
+          @if (request.status === 'Pending') {
+          <div class="actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="approve(request)"
+              [disabled]="respondingRequestId() === request.id"
+            >
+              Aceptar
+            </button>
+            <button
+              mat-stroked-button
+              color="warn"
+              type="button"
+              (click)="reject(request)"
+              [disabled]="respondingRequestId() === request.id"
+            >
+              Rechazar
+            </button>
+          </div>
+          } @else if (canRevoke(request)) {
+          <div class="actions">
+            <button
+              mat-stroked-button
+              color="warn"
+              type="button"
+              (click)="revoke(request)"
+              [disabled]="isResponding(request)"
+            >
+              Revocar acceso
+            </button>
+          </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+  }
+</div>

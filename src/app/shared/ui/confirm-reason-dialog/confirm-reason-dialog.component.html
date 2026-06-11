@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>
+  @if (data.icon) {
+    <mat-icon class="dialog-icon">{{ data.icon }}</mat-icon>
+  }
+  {{ data.title }}
+</h2>
+
+<mat-dialog-content>
+  @if (data.message) {
+    <p class="dialog-message">{{ data.message }}</p>
+  }
+
+  <mat-form-field appearance="outline" class="reason-field">
+    <mat-label>{{ data.reasonLabel || 'Motivo' }}</mat-label>
+    <textarea
+      matInput
+      [(ngModel)]="reason"
+      [placeholder]="data.reasonPlaceholder || ''"
+      rows="3"
+      cdkTextareaAutosize
+      cdkAutosizeMinRows="3"
+      cdkAutosizeMaxRows="6"
+    ></textarea>
+    @if (data.reasonRequired) {
+      <mat-hint>Requerido</mat-hint>
+    } @else {
+      <mat-hint>Opcional</mat-hint>
+    }
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">
+    {{ data.cancelText || 'Cancelar' }}
+  </button>
+  <button
+    mat-flat-button
+    type="button"
+    [color]="data.confirmColor || 'primary'"
+    [disabled]="!canConfirm"
+    (click)="confirm()"
+  >
+    {{ data.confirmText || 'Confirmar' }}
+  </button>
+</mat-dialog-actions>

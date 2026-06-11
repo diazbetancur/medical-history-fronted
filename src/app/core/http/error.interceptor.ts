@@ -38,6 +38,7 @@ const PUBLIC_OR_ANONYMOUS_PATTERNS = [
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
 ];
+const LOCAL_FORBIDDEN_PATTERNS = ['/api/professional/patients/'];
 
 /**
  * URLs that should have silent error handling (no logs, no enhanced messages)
@@ -65,6 +66,10 @@ function isPublicOrAnonymous(url: string): boolean {
  */
 function shouldRedirectToLogin(url: string): boolean {
   return isApiRequest(url) && !isPublicOrAnonymous(url);
+}
+
+function shouldHandleForbiddenLocally(url: string): boolean {
+  return LOCAL_FORBIDDEN_PATTERNS.some((pattern) => url.includes(pattern));
 }
 
 /**
@@ -148,7 +153,10 @@ export const errorInterceptor: HttpInterceptorFn = (
         }
       }
       // Handle 403 Forbidden
-      else if (error.status === 403) {
+      else if (
+        error.status === 403 &&
+        !shouldHandleForbiddenLocally(req.url)
+      ) {
         toast.error(problemDetails.title);
         router.navigate(['/forbidden']);
       }

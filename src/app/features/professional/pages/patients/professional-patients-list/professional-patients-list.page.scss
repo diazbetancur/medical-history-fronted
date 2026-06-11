@@ -1,15 +1,20 @@
 .professional-patients-list {
-  padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  padding: 2rem;
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 
   .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
     h1 {
-      margin: 0 0 0.5rem 0;
+      margin: 0 0 0.5rem;
       font-size: 2rem;
       font-weight: 500;
     }
@@ -22,6 +27,24 @@
   }
 }
 
+.patients-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  .search-field {
+    width: min(100%, 420px);
+  }
+
+  .results-count {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -31,14 +54,14 @@
   gap: 1rem;
 
   p {
+    margin: 0;
     color: var(--mat-sys-on-surface-variant);
   }
 }
 
-.error-card,
-.empty-card {
-  text-align: center;
+.feedback-card {
   padding: 2rem;
+  text-align: center;
 
   mat-card-content {
     display: flex;
@@ -47,133 +70,170 @@
     gap: 1rem;
   }
 
-  .error-icon,
-  .empty-icon {
-    font-size: 3rem;
+  .feedback-icon {
     width: 3rem;
     height: 3rem;
     color: var(--mat-sys-on-surface-variant);
+    font-size: 3rem;
   }
 
-  .error-message,
-  .empty-message {
+  .feedback-message {
+    margin: 0;
     font-size: 1.1rem;
     font-weight: 500;
-    margin: 0;
   }
 
-  .empty-subtitle {
+  .feedback-subtitle {
+    margin: 0;
     color: var(--mat-sys-on-surface-variant);
-    margin: 0;
   }
 }
 
-.patients-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+.error-card .feedback-icon {
+  color: var(--mat-sys-error);
 }
 
-.patient-card {
-  cursor: pointer;
-  transition: all 0.2s ease;
+.table-container {
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  background: var(--mat-sys-surface);
+}
+
+.patients-table {
+  width: 100%;
+  min-width: 1100px;
+
+  th {
+    background: var(--mat-sys-surface-container);
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  td {
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: var(--mat-sys-surface-container-low);
+  }
+}
+
+.patient-cell {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 200px;
+}
 
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-4px);
+.patient-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 2.25rem;
+  flex: 0 0 auto;
+}
+
+.patient-name {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--mat-sys-primary);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.patient-name:hover,
+.patient-name:focus-visible {
+  text-decoration: underline;
+}
+
+.doc-cell {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.muted-cell {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8125rem;
+}
+
+.date-cell {
+  font-weight: 500;
+}
+
+.type-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0 0.625rem;
+  border-radius: 999px;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.type-pill.registered {
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+.visibility-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    font-size: 1.125rem;
+  }
+}
+
+.visibility-pill.visible {
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 160px;
+
+  button {
+    white-space: nowrap;
   }
 
-  mat-card-header {
-    margin-bottom: 1rem;
-
-    .patient-avatar {
-      background-color: var(--mat-sys-primary-container);
-      color: var(--mat-sys-on-primary-container);
-    }
-
-    mat-card-title {
-      font-size: 1.125rem;
-      font-weight: 500;
-    }
-
-    mat-card-subtitle {
-      color: var(--mat-sys-on-surface-variant);
-    }
-  }
-
-  mat-card-content {
-    flex: 1;
-  }
-
-  .patient-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
-    .info-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-
-      mat-icon {
-        color: var(--mat-sys-on-surface-variant);
-        font-size: 1.25rem;
-        width: 1.25rem;
-        height: 1.25rem;
-        flex-shrink: 0;
-      }
-
-      .info-text {
-        display: flex;
-        flex-direction: column;
-        gap: 0.125rem;
-
-        .info-label {
-          font-size: 0.75rem;
-          color: var(--mat-sys-on-surface-variant);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .info-value {
-          font-size: 0.875rem;
-          font-weight: 500;
-
-          &.shared {
-            color: var(--mat-sys-primary);
-          }
-
-          &.private {
-            color: var(--mat-sys-on-surface-variant);
-          }
-        }
-      }
-    }
-  }
-
-  mat-card-actions {
-    padding: 0 1rem 1rem 1rem;
-
-    button {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-
-      mat-icon {
-        font-size: 1.25rem;
-        width: 1.25rem;
-        height: 1.25rem;
-      }
-    }
+  mat-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    font-size: 1.125rem;
   }
 }
 
 mat-paginator {
-  background-color: transparent;
   margin-top: 1rem;
+  background-color: transparent;
 }
 
 @media (max-width: 768px) {
@@ -181,7 +241,21 @@ mat-paginator {
     padding: 1rem;
   }
 
-  .patients-grid {
-    grid-template-columns: 1fr;
+  .page-header .header-content,
+  .patients-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-header .header-content button {
+    width: 100%;
+  }
+
+  .patients-toolbar .search-field {
+    width: 100%;
+  }
+
+  .patients-toolbar .results-count {
+    white-space: normal;
   }
 }

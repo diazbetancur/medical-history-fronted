@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -11,7 +14,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { RouterLink } from '@angular/router';
-import { PatientProfileDto } from '@patient/models/patient-profile.dto';
+import { FormControlErrorComponent } from '@shared/ui/forms/form-control-error/form-control-error.component';
+import {
+  PatientProfileClaimCandidateDto,
+  PatientProfileClaimRequestDto,
+  PatientProfileDto,
+} from '@patient/models/patient-profile.dto';
 import { PatientAllergiesPage } from '@patient/pages/allergies/patient-allergies/patient-allergies.page';
 import { PatientBackgroundPage } from '@patient/pages/background/patient-background/patient-background.page';
 import { PatientMedicationsPage } from '@patient/pages/medications/patient-medications/patient-medications.page';
@@ -28,12 +36,16 @@ import { PrivacySettingsComponent } from '../../components/privacy/privacy-setti
 @Component({
   selector: 'app-profile-page',
   standalone: true,
+  providers: [provideNativeDateAdapter()],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
     MatCardModule,
+    MatChipsModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -41,6 +53,7 @@ import { PrivacySettingsComponent } from '../../components/privacy/privacy-setti
     MatSelectModule,
     MatSnackBarModule,
     MatTabsModule,
+    FormControlErrorComponent,
     PatientMedicationsPage,
     PatientAllergiesPage,
     PatientBackgroundPage,
@@ -62,8 +75,16 @@ export class ProfilePageComponent implements OnInit {
   readonly isLoadingSummary = signal(true);
   readonly isSavingSummary = signal(false);
   readonly isEditingSummary = signal(false);
+  readonly isLoadingClaims = signal(false);
+  readonly isLoadingClaimCandidate = signal(false);
+  readonly isRequestingClaim = signal(false);
+  readonly isDecliningClaim = signal(false);
+  readonly cancellingClaimId = signal<string | null>(null);
   readonly summaryError = signal<string | null>(null);
   readonly profile = signal<PatientProfileDto | null>(null);
+  readonly claimCandidate = signal<PatientProfileClaimCandidateDto | null>(null);
+  readonly claimRequests = signal<PatientProfileClaimRequestDto[]>([]);
+  readonly todayDate = new Date();
 
   readonly summaryForm = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.maxLength(200)]],
@@ -74,7 +95,7 @@ export class ProfilePageComponent implements OnInit {
     phone: ['', [Validators.maxLength(20)]],
     documentType: [''],
     documentNumber: ['', [Validators.maxLength(30)]],
-    dateOfBirth: [''],
+    dateOfBirth: new FormControl<Date | null>(null),
     gender: [''],
     bloodType: [''],
     countryName: ['', [Validators.maxLength(100)]],
@@ -97,8 +118,27 @@ export class ProfilePageComponent implements OnInit {
     return parts || 'No disponible';
   });
 
+  readonly visibleClaimRequests = computed(() =>
+    this.claimRequests().filter(
+      (request) =>
+        request.status === 0 ||
+        request.status === 1 ||
+        request.status === 4 ||
+        request.status === 'Pending' ||
+        request.status === 'Approved' ||
+        request.status === 'CancellationRequested',
+    ),
+  );
+
+  readonly showClaimPanel = computed(
+    () =>
+      !!this.claimCandidate() ||
+      this.visibleClaimRequests().length > 0,
+  );
+
   ngOnInit(): void {
     this.loadSummary();
+    this.refreshClaimState();
   }
 
   onTabChange(): void {
@@ -201,6 +241,7 @@ export class ProfilePageComponent implements OnInit {
         this.snackBar.open('Perfil actualizado correctamente', 'OK', {
           duration: 2500,
         });
+        this.refreshClaimState();
       },
       error: (error) => {
         this.isSavingSummary.set(false);
@@ -213,6 +254,157 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
+  loadClaimRequests(): void {
+    this.isLoadingClaims.set(true);
+
+    this.patientService.getMyClaimRequests().subscribe({
+      next: (requests) => {
+        this.claimRequests.set(requests);
+        this.isLoadingClaims.set(false);
+      },
+      error: () => {
+        this.claimRequests.set([]);
+        this.isLoadingClaims.set(false);
+      },
+    });
+  }
+
+  loadClaimCandidate(): void {
+    this.isLoadingClaimCandidate.set(true);
+
+    this.patientService.getCurrentDocumentClaimCandidate().subscribe({
+      next: (candidate) => {
+        this.claimCandidate.set(candidate);
+        this.isLoadingClaimCandidate.set(false);
+      },
+      error: () => {
+        this.claimCandidate.set(null);
+        this.isLoadingClaimCandidate.set(false);
+      },
+    });
+  }
+
+  refreshClaimState(): void {
+    this.loadClaimRequests();
+    this.loadClaimCandidate();
+  }
+
+  requestClaim(): void {
+    if (!this.claimCandidate()) {
+      return;
+    }
+
+    this.isRequestingClaim.set(true);
+
+    this.patientService
+      .requestCurrentDocumentClaim({
+        notes: 'Solicitud desde perfil del paciente',
+      })
+      .subscribe({
+        next: (request) => {
+          this.isRequestingClaim.set(false);
+          this.claimCandidate.set(null);
+          this.claimRequests.update((items) => {
+            const exists = items.some((item) => item.id === request.id);
+            return exists
+              ? items.map((item) => (item.id === request.id ? request : item))
+              : [request, ...items];
+          });
+          this.snackBar.open('Solicitud enviada a revisión', 'OK', {
+            duration: 3000,
+          });
+        },
+        error: (error) => {
+          this.isRequestingClaim.set(false);
+          this.snackBar.open(
+            error?.message ||
+              'No encontramos un historial externo para tu documento',
+            'Cerrar',
+            { duration: 4000 },
+          );
+        },
+      });
+  }
+
+  declineClaimCandidate(): void {
+    if (!this.claimCandidate()) {
+      return;
+    }
+
+    this.isDecliningClaim.set(true);
+
+    this.patientService.declineCurrentDocumentClaim().subscribe({
+      next: () => {
+        this.isDecliningClaim.set(false);
+        this.claimCandidate.set(null);
+        this.snackBar.open('No volveremos a sugerir este historial', 'OK', {
+          duration: 3000,
+        });
+        this.loadClaimRequests();
+      },
+      error: (error) => {
+        this.isDecliningClaim.set(false);
+        this.snackBar.open(
+          error?.message || 'No se pudo guardar tu respuesta',
+          'Cerrar',
+          { duration: 4000 },
+        );
+      },
+    });
+  }
+
+  requestClaimCancellation(request: PatientProfileClaimRequestDto): void {
+    this.cancellingClaimId.set(request.id);
+
+    this.patientService
+      .requestClaimCancellation(request.id, 'Cancelación solicitada por paciente')
+      .subscribe({
+        next: (updated) => {
+          this.cancellingClaimId.set(null);
+          this.claimRequests.update((items) =>
+            items.map((item) => (item.id === updated.id ? updated : item)),
+          );
+          this.snackBar.open('Cancelación enviada a revisión', 'OK', {
+            duration: 3000,
+          });
+        },
+        error: (error) => {
+          this.cancellingClaimId.set(null);
+          this.snackBar.open(
+            error?.message || 'No se pudo solicitar la cancelación',
+            'Cerrar',
+            { duration: 4000 },
+          );
+        },
+      });
+  }
+
+  claimStatusLabel(status: PatientProfileClaimRequestDto['status']): string {
+    switch (status) {
+      case 0:
+      case 'Pending':
+        return 'Pendiente';
+      case 1:
+      case 'Approved':
+        return 'Aprobada';
+      case 2:
+      case 'Rejected':
+        return 'Rechazada';
+      case 3:
+      case 'Cancelled':
+        return 'Cancelada';
+      case 4:
+      case 'CancellationRequested':
+        return 'Cancelación solicitada';
+      default:
+        return 'Sin estado';
+    }
+  }
+
+  canCancelClaim(request: PatientProfileClaimRequestDto): boolean {
+    return request.status === 0 || request.status === 'Pending';
+  }
+
   private patchSummaryForm(profile: PatientProfileDto): void {
     this.summaryForm.patchValue({
       fullName: profile.fullName || '',
@@ -220,13 +412,21 @@ export class ProfilePageComponent implements OnInit {
       phone: profile.phone || '',
       documentType: profile.documentType || '',
       documentNumber: profile.documentNumber || '',
-      dateOfBirth: this.normalizeDateOnly(profile.dateOfBirth) || '',
+      dateOfBirth: this.toDateValue(profile.dateOfBirth),
       gender: profile.gender || '',
       bloodType: profile.bloodType || '',
       countryName: profile.countryName || '',
       cityName: profile.cityName || '',
       addressLine1: profile.addressLine1 || '',
     });
+  }
+
+  private toDateValue(value: unknown): Date | null {
+    const dateOnly = this.normalizeDateOnly(value);
+    if (!dateOnly) return null;
+    const [year, month, day] = dateOnly.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
   }
 
   private normalizeDateOnly(value: unknown): string | null {
