@@ -224,6 +224,18 @@ export const MENU_ITEMS: MenuItem[] = [
       ADMIN_PERMISSIONS.REPORTS_VIEW_ALL,
     ],
   },
+  {
+    label: 'Cartera de Licencias',
+    icon: 'card_membership',
+    route: '/admin/channel-licenses',
+    context: 'ADMIN',
+    requiredPermissions: [
+      'Licenses.ViewPortfolio',
+      'Licenses.Activate',
+      'Licenses.Deactivate',
+      'Licenses.ViewReports',
+    ],
+  },
   // ==========================================================================
   // PROFESSIONAL MENU
   // ==========================================================================
