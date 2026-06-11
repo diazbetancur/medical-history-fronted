@@ -179,6 +179,11 @@
         color: var(--color-text-inverted);
       }
 
+      &.status-RESCHEDULED {
+        background: var(--color-primary) !important;
+        color: var(--color-text-inverted);
+      }
+
       &.status-PENDING {
         background: var(--color-warning) !important;
         color: var(--color-text-inverted);

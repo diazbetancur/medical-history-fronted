@@ -109,7 +109,7 @@
                         <span>Confirmar</span>
                       </button>
                     }
-                    @if (row.status === 'CONFIRMED') {
+                    @if (canMarkAttendance(row)) {
                       <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
                         <mat-icon>done_all</mat-icon>
                         <span>Marcar como completada</span>
@@ -215,7 +215,7 @@
                         <span>Confirmar</span>
                       </button>
                     }
-                    @if (row.status === 'CONFIRMED') {
+                    @if (canMarkAttendance(row)) {
                       <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
                         <mat-icon>done_all</mat-icon>
                         <span>Marcar como completada</span>
@@ -326,7 +326,7 @@
                         <span>Confirmar</span>
                       </button>
                     }
-                    @if (row.status === 'CONFIRMED') {
+                    @if (canMarkAttendance(row)) {
                       <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
                         <mat-icon>done_all</mat-icon>
                         <span>Marcar como completada</span>
@@ -471,7 +471,7 @@
                         <span>Confirmar</span>
                       </button>
                     }
-                    @if (row.status === 'CONFIRMED') {
+                    @if (canMarkAttendance(row)) {
                       <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
                         <mat-icon>done_all</mat-icon>
                         <span>Marcar como completada</span>

@@ -28,6 +28,59 @@ interface CacheEntry<T> {
   timestamp: number;
 }
 
+export interface PatientDocumentLookupDto {
+  documentType: string;
+  documentNumber: string;
+}
+
+export interface CreateExternalPatientProfileDto extends PatientDocumentLookupDto {
+  fullName: string;
+  email?: string | null;
+  phone?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+}
+
+export interface ProfessionalPatientLookupResultDto {
+  exists: boolean;
+  patientProfileId?: string | null;
+  fullName?: string | null;
+  documentType: string;
+  documentNumber: string;
+  claimStatus?: string | null;
+  canCreateManualEncounter: boolean;
+  canViewClinicalHistory: boolean;
+}
+
+export interface ExternalPatientProfileResultDto {
+  patientProfileId: string;
+  fullName: string;
+  documentType: string;
+  documentNumber: string;
+  claimStatus: string;
+}
+
+export interface PatientClinicalAccessRequestDto {
+  id: string;
+  patientProfileId: string;
+  professionalProfileId: string;
+  professionalName: string;
+  appointmentId?: string | null;
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Expired' | 'Revoked' | string;
+  accessSource?: 'Request' | 'Relationship' | string;
+  canRevoke?: boolean;
+  requestedAtUtc: string;
+  respondedAtUtc?: string | null;
+  expiresAtUtc?: string | null;
+  requestReason?: string | null;
+  responseReason?: string | null;
+}
+
+export interface CreatePatientClinicalAccessRequestDto {
+  appointmentId?: string | null;
+  reason?: string | null;
+}
+
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 @Injectable({
@@ -47,6 +100,43 @@ export class ProfessionalPatientsService {
   // Patient List
   // ==========================================================================
 
+  lookupByDocument(
+    dto: PatientDocumentLookupDto,
+  ): Observable<ProfessionalPatientLookupResultDto> {
+    return this.http
+      .post<ProfessionalPatientLookupResultDto>(
+        `${this.baseUrl}/patients/lookup-by-document`,
+        dto,
+      )
+      .pipe(catchError((error) => this.handleError(error)));
+  }
+
+  createExternalPatientProfile(
+    dto: CreateExternalPatientProfileDto,
+  ): Observable<ExternalPatientProfileResultDto> {
+    return this.http
+      .post<ExternalPatientProfileResultDto>(
+        `${this.baseUrl}/patients/external`,
+        dto,
+      )
+      .pipe(
+        catchError((error) => this.handleError(error)),
+        tap(() => this.invalidateAllCaches()),
+      );
+  }
+
+  requestFullHistoryAccess(
+    patientProfileId: string,
+    dto: CreatePatientClinicalAccessRequestDto = {},
+  ): Observable<PatientClinicalAccessRequestDto> {
+    return this.http
+      .post<PatientClinicalAccessRequestDto>(
+        `${this.baseUrl}/patients/${patientProfileId}/access-requests`,
+        dto,
+      )
+      .pipe(catchError((error) => this.handleError(error)));
+  }
+
   /**
    * Get list of patients treated by this professional (paginated)
    * GET /api/professional/patients/mine
@@ -57,8 +147,10 @@ export class ProfessionalPatientsService {
   listMyPatients(
     page: number = 1,
     pageSize: number = 10,
+    search: string = '',
   ): Observable<ProfessionalPatientsListResponseDto> {
-    const cacheKey = `patients_mine_${page}_${pageSize}`;
+    const normalizedSearch = search.trim();
+    const cacheKey = `patients_mine_${page}_${pageSize}_${normalizedSearch.toLowerCase()}`;
     const cached =
       this.getFromCache<ProfessionalPatientsListResponseDto>(cacheKey);
 
@@ -69,9 +161,13 @@ export class ProfessionalPatientsService {
       });
     }
 
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
+
+    if (normalizedSearch) {
+      params = params.set('search', normalizedSearch);
+    }
 
     return this.http
       .get<ProfessionalPatientsListResponseDto>(

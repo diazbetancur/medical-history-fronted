@@ -12,8 +12,9 @@
   <section class="intro-card" aria-label="Información de cita externa">
     <mat-icon aria-hidden="true">info</mat-icon>
     <p>
-      El paciente no necesita cuenta en la plataforma. Solo completa los datos
-      básicos y define una fecha y hora de atención.
+      Primero valida tipo y número de documento. Según el resultado, la app
+      habilita solo los datos permitidos para proteger la privacidad del
+      paciente.
     </p>
   </section>
 
@@ -33,190 +34,291 @@
     <section class="form-section">
       <div class="section-title">
         <mat-icon aria-hidden="true">person</mat-icon>
-        <span>Datos del paciente</span>
+        <span>Validación del paciente</span>
       </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Nombre completo *</mat-label>
-        <mat-icon matIconPrefix class="field-icon">badge</mat-icon>
-        <input
-          matInput
-          formControlName="patientName"
-          placeholder="Ej: Juan Pérez"
-          maxlength="200"
-        />
-        @if (
-          form.get("patientName")?.hasError("blank") &&
-          form.get("patientName")?.touched
-        ) {
-          <mat-error>El nombre del paciente es requerido</mat-error>
-        }
-        @if (
-          form.get("patientName")?.hasError("minlength") &&
-          !form.get("patientName")?.hasError("blank") &&
-          form.get("patientName")?.touched
-        ) {
-          <mat-error>Mínimo 2 caracteres</mat-error>
-        }
-      </mat-form-field>
-
-      <div class="row-two-cols">
+      <div class="document-lookup-row">
         <mat-form-field appearance="outline">
-          <mat-label>Email (opcional)</mat-label>
-          <mat-icon matIconPrefix class="field-icon">alternate_email</mat-icon>
-          <input
-            matInput
-            type="email"
-            formControlName="patientEmail"
-            placeholder="paciente@email.com"
-          />
-          @if (
-            form.get("patientEmail")?.hasError("email") &&
-            form.get("patientEmail")?.touched
-          ) {
-            <mat-error>Email inválido</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Teléfono (opcional)</mat-label>
-          <mat-icon matIconPrefix class="field-icon">phone</mat-icon>
-          <input
-            matInput
-            type="tel"
-            formControlName="patientPhone"
-            placeholder="+57 300 000 0000"
-          />
-        </mat-form-field>
-      </div>
-    </section>
-
-    <section class="form-section highlight-section">
-      <div class="section-title">
-        <mat-icon aria-hidden="true">schedule</mat-icon>
-        <span>Detalles de la cita</span>
-      </div>
-
-      <div class="row-two-cols">
-        <mat-form-field appearance="outline">
-          <mat-label>Fecha *</mat-label>
-          <mat-icon matIconPrefix class="field-icon">calendar_today</mat-icon>
-          <input
-            matInput
-            [matDatepicker]="appointmentDatePicker"
-            formControlName="appointmentDate"
-            [min]="minAppointmentDate"
-            placeholder="Selecciona una fecha"
-          />
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="appointmentDatePicker"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #appointmentDatePicker></mat-datepicker>
-          <mat-error>{{ getDateErrorMessage() }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Hora *</mat-label>
-          <mat-icon matIconPrefix class="field-icon">access_time</mat-icon>
-          <input
-            matInput
-            [matTimepicker]="appointmentTimePicker"
-            [matTimepickerMin]="getMinimumTimeForSelectedDate()"
-            formControlName="timeSlot"
-            placeholder="Selecciona una hora"
-            matTooltip="Puedes seleccionar una hora sugerida o editarla manualmente."
-            matTooltipPosition="above"
-          />
-          <mat-timepicker-toggle
-            matIconSuffix
-            [for]="appointmentTimePicker"
-            matTooltip="Abrir selector de hora"
-            matTooltipPosition="above"
-          ></mat-timepicker-toggle>
-          <mat-timepicker
-            #appointmentTimePicker
-            [interval]="timepickerInterval"
-          ></mat-timepicker>
-          <mat-error>{{ getTimeErrorMessage() }}</mat-error>
-        </mat-form-field>
-      </div>
-
-      <div class="row-two-cols">
-        <mat-form-field appearance="outline">
-          <mat-label>Duración (minutos)</mat-label>
-          <mat-icon matIconPrefix class="field-icon">timer</mat-icon>
-          <input
-            matInput
-            type="number"
-            formControlName="durationMinutes"
-            min="15"
-            max="480"
-            step="15"
-            placeholder="30"
-            title="Duración en minutos"
-          />
-          <mat-hint>15 – 480 min</mat-hint>
-          @if (
-            form.get("durationMinutes")?.invalid &&
-            form.get("durationMinutes")?.touched
-          ) {
-            <mat-error>La duración debe estar entre 15 y 480 minutos</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Canal de origen *</mat-label>
-          <mat-icon matIconPrefix class="field-icon">hub</mat-icon>
-          <mat-select formControlName="externalSource">
-            @for (source of sources; track source.value) {
-              <mat-option [value]="source.value">
-                <mat-icon class="option-icon">{{ source.icon }}</mat-icon>
-                {{ source.label }}
-              </mat-option>
+          <mat-label>Tipo de documento *</mat-label>
+          <mat-icon matIconPrefix class="field-icon">assignment_ind</mat-icon>
+          <mat-select formControlName="documentType">
+            @for (type of documentTypeOptions; track type) {
+              <mat-option [value]="type">{{ type }}</mat-option>
             }
           </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Número de documento *</mat-label>
+          <mat-icon matIconPrefix class="field-icon">pin</mat-icon>
+          <input
+            matInput
+            formControlName="documentNumber"
+            placeholder="Ej: 0801199012345"
+            maxlength="30"
+          />
           @if (
-            form.get("externalSource")?.hasError("required") &&
-            form.get("externalSource")?.touched
+            form.get("documentNumber")?.hasError("blank") &&
+            form.get("documentNumber")?.touched
           ) {
-            <mat-error>Debes indicar cómo se agendó la cita</mat-error>
+            <mat-error>El documento es requerido</mat-error>
           }
         </mat-form-field>
+
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          class="lookup-button"
+          (click)="lookupPatientByDocument()"
+          [disabled]="
+            isLookingUpPatient() ||
+            form.get('documentType')?.invalid ||
+            form.get('documentNumber')?.invalid
+          "
+        >
+          @if (isLookingUpPatient()) {
+            Validando...
+          } @else {
+            Validar paciente
+          }
+        </button>
       </div>
+
+      @if (lookupResult(); as result) {
+        <div class="lookup-state" [class.found]="result.exists">
+          <mat-icon>{{ result.exists ? "check_circle" : "info" }}</mat-icon>
+          <div>
+            <strong>{{ getPatientLookupLabel() }}</strong>
+            @if (result.exists) {
+              <p>
+                {{ result.fullName }} · {{ result.documentType }}
+                {{ result.documentNumber }}
+              </p>
+            }
+            <p>{{ getPatientLookupDescription() }}</p>
+          </div>
+        </div>
+      } @else if (lookupMessage()) {
+        <div class="lookup-state">
+          <mat-icon>info</mat-icon>
+          <p>{{ lookupMessage() }}</p>
+        </div>
+      }
+
+      @if (canEditPatientName()) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ getPatientNameLabel() }}</mat-label>
+          <mat-icon matIconPrefix class="field-icon">badge</mat-icon>
+          <input
+            matInput
+            formControlName="patientName"
+            placeholder="Ej: Juan Pérez"
+            maxlength="200"
+          />
+          @if (
+            form.get("patientName")?.hasError("blank") &&
+            form.get("patientName")?.touched
+          ) {
+            <mat-error>El nombre del paciente es requerido</mat-error>
+          }
+          @if (
+            form.get("patientName")?.hasError("minlength") &&
+            !form.get("patientName")?.hasError("blank") &&
+            form.get("patientName")?.touched
+          ) {
+            <mat-error>Mínimo 2 caracteres</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      @if (canShowContactFields()) {
+        <div class="row-two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Email (opcional)</mat-label>
+            <mat-icon matIconPrefix class="field-icon">alternate_email</mat-icon>
+            <input
+              matInput
+              type="email"
+              formControlName="patientEmail"
+              placeholder="paciente@email.com"
+            />
+            @if (
+              form.get("patientEmail")?.hasError("email") &&
+              form.get("patientEmail")?.touched
+            ) {
+              <mat-error>Email inválido</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono (opcional)</mat-label>
+            <mat-icon matIconPrefix class="field-icon">phone</mat-icon>
+            <input
+              matInput
+              type="tel"
+              formControlName="patientPhone"
+              placeholder="+57 300 000 0000"
+            />
+          </mat-form-field>
+        </div>
+      }
+
+      @if (isExistingRegisteredPatient()) {
+        <div class="privacy-note">
+          <mat-icon aria-hidden="true">lock</mat-icon>
+          <span>
+            No se muestran correo, teléfono ni datos personales del paciente
+            registrado. Para ver su historia completa deberá aceptarte una
+            solicitud desde la app.
+          </span>
+        </div>
+      }
     </section>
 
-    <section class="form-section">
-      <div class="section-title">
-        <mat-icon aria-hidden="true">notes</mat-icon>
-        <span>Información adicional</span>
-      </div>
+    @if (!canShowAppointmentDetails()) {
+      <section class="form-section waiting-section">
+        <mat-icon aria-hidden="true">manage_search</mat-icon>
+        <div>
+          <strong>Valida el documento para continuar</strong>
+          <p>
+            La cita y las notas internas se habilitan después de saber si el
+            paciente existe, está sin reclamar o debe crearse.
+          </p>
+        </div>
+      </section>
+    }
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Motivo de la consulta (opcional)</mat-label>
-        <mat-icon matIconPrefix class="field-icon">medical_services</mat-icon>
-        <input
-          matInput
-          formControlName="reason"
-          placeholder="Ej: Control mensual"
-          maxlength="500"
-        />
-      </mat-form-field>
+    @if (canShowAppointmentDetails()) {
+      <section class="form-section highlight-section">
+        <div class="section-title">
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          <span>Detalles de la cita</span>
+        </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Notas internas (solo visibles para ti)</mat-label>
-        <textarea
-          matInput
-          formControlName="externalNotes"
-          rows="3"
-          placeholder="Ej: Paciente llamó para reagendar cita del mes pasado"
-          maxlength="1000"
-        ></textarea>
-        <mat-hint align="end">
-          {{ form.get("externalNotes")?.value?.length || 0 }}/1000
-        </mat-hint>
-      </mat-form-field>
-    </section>
+        <div class="row-two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha *</mat-label>
+            <mat-icon matIconPrefix class="field-icon">calendar_today</mat-icon>
+            <input
+              matInput
+              [matDatepicker]="appointmentDatePicker"
+              formControlName="appointmentDate"
+              [min]="minAppointmentDate"
+              placeholder="Selecciona una fecha"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="appointmentDatePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #appointmentDatePicker></mat-datepicker>
+            <mat-error>{{ getDateErrorMessage() }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Hora *</mat-label>
+            <mat-icon matIconPrefix class="field-icon">access_time</mat-icon>
+            <input
+              matInput
+              [matTimepicker]="appointmentTimePicker"
+              [matTimepickerMin]="getMinimumTimeForSelectedDate()"
+              formControlName="timeSlot"
+              placeholder="Selecciona una hora"
+              matTooltip="Puedes seleccionar una hora sugerida o editarla manualmente."
+              matTooltipPosition="above"
+            />
+            <mat-timepicker-toggle
+              matIconSuffix
+              [for]="appointmentTimePicker"
+              matTooltip="Abrir selector de hora"
+              matTooltipPosition="above"
+            ></mat-timepicker-toggle>
+            <mat-timepicker
+              #appointmentTimePicker
+              [interval]="timepickerInterval"
+            ></mat-timepicker>
+            <mat-error>{{ getTimeErrorMessage() }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="row-two-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Duración (minutos)</mat-label>
+            <mat-icon matIconPrefix class="field-icon">timer</mat-icon>
+            <input
+              matInput
+              type="number"
+              formControlName="durationMinutes"
+              min="15"
+              max="480"
+              step="15"
+              placeholder="30"
+              title="Duración en minutos"
+            />
+            <mat-hint>15 – 480 min</mat-hint>
+            @if (
+              form.get("durationMinutes")?.invalid &&
+              form.get("durationMinutes")?.touched
+            ) {
+              <mat-error>La duración debe estar entre 15 y 480 minutos</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Canal de origen *</mat-label>
+            <mat-icon matIconPrefix class="field-icon">hub</mat-icon>
+            <mat-select formControlName="externalSource">
+              @for (source of sources; track source.value) {
+                <mat-option [value]="source.value">
+                  <mat-icon class="option-icon">{{ source.icon }}</mat-icon>
+                  {{ source.label }}
+                </mat-option>
+              }
+            </mat-select>
+            @if (
+              form.get("externalSource")?.hasError("required") &&
+              form.get("externalSource")?.touched
+            ) {
+              <mat-error>Debes indicar cómo se agendó la cita</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </section>
+    }
+
+    @if (canShowAppointmentDetails()) {
+      <section class="form-section">
+        <div class="section-title">
+          <mat-icon aria-hidden="true">notes</mat-icon>
+          <span>Información adicional</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Motivo de la consulta (opcional)</mat-label>
+          <mat-icon matIconPrefix class="field-icon">medical_services</mat-icon>
+          <input
+            matInput
+            formControlName="reason"
+            placeholder="Ej: Control mensual"
+            maxlength="500"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notas internas (solo visibles para ti)</mat-label>
+          <textarea
+            matInput
+            formControlName="externalNotes"
+            rows="3"
+            placeholder="Ej: Paciente llamó para reagendar cita del mes pasado"
+            maxlength="1000"
+          ></textarea>
+          <mat-hint align="end">
+            {{ form.get("externalNotes")?.value?.length || 0 }}/1000
+          </mat-hint>
+        </mat-form-field>
+      </section>
+    }
   </form>
 </mat-dialog-content>
 

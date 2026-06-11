@@ -84,6 +84,7 @@ export class ProfessionalPatientDetailPage implements OnInit {
   readonly currentPage = signal(0); // 0-based for MatPaginator
   readonly pageSize = signal(10);
   readonly error = signal<string | null>(null);
+  readonly isRequestingAccess = signal(false);
 
   // Privacy filtering from service
   readonly showPrivacyDisclaimer = computed(() =>
@@ -112,6 +113,11 @@ export class ProfessionalPatientDetailPage implements OnInit {
     }
 
     return summary.documentType || summary.documentNumber || 'No disponible';
+  });
+
+  readonly canRequestFullHistoryAccess = computed(() => {
+    const summary = this.patientSummary();
+    return !!summary && summary.canRequestFullHistoryAccess === true;
   });
 
   constructor() {
@@ -209,6 +215,34 @@ export class ProfessionalPatientDetailPage implements OnInit {
    */
   createEncounter(): void {
     this.openCreateEncounterDialog();
+  }
+
+  requestFullHistoryAccess(): void {
+    const patientId = this.patientProfileId();
+    if (!patientId || this.isRequestingAccess()) {
+      return;
+    }
+
+    this.isRequestingAccess.set(true);
+    this.patientsService
+      .requestFullHistoryAccess(patientId)
+      .pipe(finalize(() => this.isRequestingAccess.set(false)))
+      .subscribe({
+        next: () => {
+          this.snackBar.open(
+            'Solicitud enviada al paciente para aprobar acceso',
+            'OK',
+            { duration: 3500 },
+          );
+        },
+        error: (error) => {
+          this.snackBar.open(
+            error.message || 'No se pudo enviar la solicitud',
+            'Cerrar',
+            { duration: 5000 },
+          );
+        },
+      });
   }
 
   private openCreateEncounterDialog(appointmentId?: string): void {
@@ -380,7 +414,7 @@ export class ProfessionalPatientDetailPage implements OnInit {
    * Check if user can add addendum
    */
   canAddAddendum(encounter: ProfessionalEncounterListItemDto): boolean {
-    return encounter.status === 'Closed';
+    return encounter.status === 'Closed' && encounter.isOwnEncounter;
   }
 
   /**

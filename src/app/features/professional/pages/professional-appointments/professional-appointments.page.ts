@@ -190,6 +190,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
     const labels: Record<AppointmentStatus, string> = {
       PENDING: 'Pendiente',
       CONFIRMED: 'Confirmada',
+      RESCHEDULED: 'Reprogramada',
       CANCELLED: 'Cancelada',
       COMPLETED: 'Completada',
       NO_SHOW: 'No asistió',
@@ -229,6 +230,13 @@ export class ProfessionalAppointmentsPage implements OnInit {
       return;
     }
     this.store.markAsNoShow(appointmentId);
+  }
+
+  protected canMarkAttendance(appointment: AppointmentDto): boolean {
+    return (
+      appointment.status === 'CONFIRMED' ||
+      appointment.status === 'RESCHEDULED'
+    );
   }
 
   protected canCreateHistoryFromAppointment(
@@ -286,6 +294,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
     return (
       appointment.status === 'PENDING' ||
       appointment.status === 'CONFIRMED' ||
+      appointment.status === 'RESCHEDULED' ||
       this.canCreateHistoryFromAppointment(appointment) ||
       (appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED')
     );

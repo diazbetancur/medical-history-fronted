@@ -10,6 +10,7 @@
 export type AppointmentStatus =
   | 'PENDING'
   | 'CONFIRMED'
+  | 'RESCHEDULED'
   | 'CANCELLED'
   | 'COMPLETED'
   | 'NO_SHOW';
@@ -82,6 +83,7 @@ export interface AppointmentDto {
  * DTO for creating an external appointment (received via phone, WhatsApp, etc.)
  */
 export interface CreateExternalAppointmentDto {
+  patientProfileId?: string;
   /** Patient full name (free text — no system account required) */
   patientName: string;
   /** Patient email (optional) */
@@ -89,6 +91,8 @@ export interface CreateExternalAppointmentDto {
   /** Patient phone (optional) */
   patientPhone?: string;
   /** Professional who owns the appointment */
+  documentType?: string;
+  documentNumber?: string;
   professionalProfileId: string;
   /** Optional institution */
   institutionId?: string;
@@ -144,7 +148,7 @@ export interface AppointmentFilters {
  * Numeric status codes returned by the backend when serialising the enum as an integer.
  * Using this type prevents magic numbers from spreading across the codebase (M-02).
  */
-export type AppointmentStatusCode = 0 | 1 | 2 | 3 | 4;
+export type AppointmentStatusCode = 0 | 1 | 2 | 3 | 4 | 5;
 
 /** Map of backend integer codes → canonical string status (M-02). */
 export const APPOINTMENT_STATUS_BY_CODE: Record<AppointmentStatusCode, AppointmentStatus> = {
@@ -153,6 +157,7 @@ export const APPOINTMENT_STATUS_BY_CODE: Record<AppointmentStatusCode, Appointme
   2: 'CANCELLED',
   3: 'COMPLETED',
   4: 'NO_SHOW',
+  5: 'RESCHEDULED',
 };
 
 /**
@@ -181,10 +186,14 @@ export function normalizeAppointmentStatus(
   switch (normalized) {
     case 'PENDING':
     case 'CONFIRMED':
+    case 'RESCHEDULED':
     case 'CANCELLED':
     case 'COMPLETED':
     case 'NO_SHOW':
       return normalized;
+    case 'REPROGRAMADA':
+    case 'REPROGRAMADO':
+      return 'RESCHEDULED';
     case 'CANCELED':
       return 'CANCELLED';
     case 'NO_SHOWED':

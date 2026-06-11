@@ -46,7 +46,9 @@ export class PatientHomeComponent implements OnInit {
         const aptDate = new Date(`${apt.date}T${apt.startTime}`);
         return (
           aptDate > now &&
-          (apt.status === 'PENDING' || apt.status === 'CONFIRMED')
+          (apt.status === 'PENDING' ||
+            apt.status === 'CONFIRMED' ||
+            apt.status === 'RESCHEDULED')
         );
       })
       .sort(
@@ -140,6 +142,7 @@ export class PatientHomeComponent implements OnInit {
     const labels: Record<string, string> = {
       PENDING: 'Pendiente',
       CONFIRMED: 'Confirmada',
+      RESCHEDULED: 'Reprogramada',
       CANCELLED: 'Cancelada',
       COMPLETED: 'Completada',
       NO_SHOW: 'No Asistió',

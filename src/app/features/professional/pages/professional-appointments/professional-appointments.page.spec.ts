@@ -287,6 +287,7 @@ describe('ProfessionalAppointmentsPage', () => {
     const cases: Array<[string, string]> = [
       ['PENDING', 'Pendiente'],
       ['CONFIRMED', 'Confirmada'],
+      ['RESCHEDULED', 'Reprogramada'],
       ['CANCELLED', 'Cancelada'],
       ['COMPLETED', 'Completada'],
       ['NO_SHOW', 'No asistió'],
@@ -297,6 +298,25 @@ describe('ProfessionalAppointmentsPage', () => {
         const { page } = buildPage();
         expect((page as any).getStatusLabel(status as any)).toBe(expected);
       });
+    });
+  });
+
+  describe('canMarkAttendance', () => {
+    it('allows confirmed and rescheduled appointments', () => {
+      const { page } = buildPage();
+      expect(
+        (page as any).canMarkAttendance({ status: 'CONFIRMED' } as any),
+      ).toBeTrue();
+      expect(
+        (page as any).canMarkAttendance({ status: 'RESCHEDULED' } as any),
+      ).toBeTrue();
+    });
+
+    it('rejects statuses outside attendance flow', () => {
+      const { page } = buildPage();
+      expect(
+        (page as any).canMarkAttendance({ status: 'PENDING' } as any),
+      ).toBeFalse();
     });
   });
 });

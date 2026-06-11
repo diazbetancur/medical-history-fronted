@@ -157,8 +157,24 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/pages/professionals-review/professionals-review.page').then(
             (m) => m.ProfessionalsReviewPageComponent,
-          ),
+        ),
         title: 'Solicitudes de Activación - Admin',
+      },
+      {
+        path: 'patient-claims',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: [
+            'Profiles.View',
+            'Profiles.Verify',
+            'Profiles.Update',
+          ],
+        },
+        loadComponent: () =>
+          import('./features/admin/pages/patient-profile-claims/patient-profile-claims.page').then(
+            (m) => m.PatientProfileClaimsPage,
+          ),
+        title: 'Vinculaciones de Pacientes - Admin',
       },
     ],
   },
@@ -290,6 +306,14 @@ export const routes: Routes = [
         title: 'Solicitudes | MediTigo',
       },
       {
+        path: 'reports',
+        loadComponent: () =>
+          import('./features/professional/pages/professional-reports/professional-reports.page').then(
+            (m) => m.ProfessionalReportsPage,
+          ),
+        title: 'Reportes | MediTigo',
+      },
+      {
         path: 'agenda',
         redirectTo: 'appointments',
         pathMatch: 'full',
@@ -370,6 +394,14 @@ export const routes: Routes = [
             (m) => m.ProfilePageComponent,
           ),
         title: 'Mi Perfil | MediTigo',
+      },
+      {
+        path: 'access-requests',
+        loadComponent: () =>
+          import('./patient/pages/access-requests/patient-access-requests.page').then(
+            (m) => m.PatientAccessRequestsPage,
+          ),
+        title: 'Solicitudes de acceso | MediTigo',
       },
       {
         path: 'change-password',

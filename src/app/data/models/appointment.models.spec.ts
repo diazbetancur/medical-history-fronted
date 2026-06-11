@@ -36,6 +36,10 @@ describe('normalizeAppointmentStatus', () => {
     expect(normalizeAppointmentStatus('NO_SHOW')).toBe('NO_SHOW');
   });
 
+  it('returns RESCHEDULED unchanged', () => {
+    expect(normalizeAppointmentStatus('RESCHEDULED')).toBe('RESCHEDULED');
+  });
+
   // ── Case normalisation ───────────────────────────────────────────────────
 
   it('normalises lowercase "pending" to PENDING', () => {
@@ -72,6 +76,10 @@ describe('normalizeAppointmentStatus', () => {
     expect(normalizeAppointmentStatus(4)).toBe('NO_SHOW');
   });
 
+  it('maps code 5 to RESCHEDULED', () => {
+    expect(normalizeAppointmentStatus(5)).toBe('RESCHEDULED');
+  });
+
   // ── Known string aliases ─────────────────────────────────────────────────
 
   it('maps American "CANCELED" to CANCELLED', () => {
@@ -86,6 +94,10 @@ describe('normalizeAppointmentStatus', () => {
     expect(normalizeAppointmentStatus('NOSHOW')).toBe('NO_SHOW');
   });
 
+  it('maps "REPROGRAMADA" to RESCHEDULED', () => {
+    expect(normalizeAppointmentStatus('REPROGRAMADA')).toBe('RESCHEDULED');
+  });
+
   // ── Whitespace / separator normalisation ────────────────────────────────
 
   it('maps "no show" (space-separated) to NO_SHOW', () => {
@@ -94,6 +106,10 @@ describe('normalizeAppointmentStatus', () => {
 
   it('maps "no-show" (hyphen-separated) to NO_SHOW', () => {
     expect(normalizeAppointmentStatus('no-show')).toBe('NO_SHOW');
+  });
+
+  it('maps "rescheduled" to RESCHEDULED', () => {
+    expect(normalizeAppointmentStatus('rescheduled')).toBe('RESCHEDULED');
   });
 
   // ── statusDisplay fallback ───────────────────────────────────────────────

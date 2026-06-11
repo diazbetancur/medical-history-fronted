@@ -29,6 +29,49 @@ export interface PatientProfileDto {
   dateCreated: string;
 }
 
+export type PatientProfileClaimStatus =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 'Pending'
+  | 'Approved'
+  | 'Rejected'
+  | 'Cancelled'
+  | 'CancellationRequested';
+
+export interface PatientProfileClaimRequestDto {
+  id: string;
+  patientProfileId: string;
+  requestedByUserId: string;
+  externalFullName: string;
+  documentType?: string | null;
+  documentNumber?: string | null;
+  status: PatientProfileClaimStatus;
+  statusName?: string;
+  requestedAtUtc: string;
+  cancellationRequestedAtUtc?: string | null;
+  cancellationReason?: string | null;
+  reviewedAtUtc?: string | null;
+  reviewedByUserId?: string | null;
+  reviewedByProfessionalProfileId?: string | null;
+  reviewReason?: string | null;
+  requestNotes?: string | null;
+}
+
+export interface PatientProfileClaimCandidateDto {
+  patientProfileId: string;
+  externalFullName: string;
+  documentType?: string | null;
+  documentNumber?: string | null;
+  createdAtUtc: string;
+}
+
+export interface PatientProfileClaimCreatePayload {
+  notes?: string | null;
+}
+
 /**
  * Address
  */

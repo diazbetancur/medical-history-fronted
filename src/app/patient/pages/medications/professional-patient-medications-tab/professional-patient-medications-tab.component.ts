@@ -98,10 +98,7 @@ export class ProfessionalPatientMedicationsTabComponent {
           this.isLoading.set(false);
 
           // Check if no therapeutic relation
-          if (
-            err.status === 403 &&
-            err.code === MedicationErrorCodes.NO_PATIENT_RELATION
-          ) {
+          if (err.code === MedicationErrorCodes.NO_PATIENT_RELATION) {
             this.noRelation.set(true);
             this.medications.set([]);
             this.totalItems.set(0);

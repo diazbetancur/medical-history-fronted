@@ -114,6 +114,79 @@ export interface PaginatedResponse<T> {
 }
 
 // =============================================================================
+// Patient Profile Claim Models
+// =============================================================================
+
+export type PatientProfileClaimStatus =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 'Pending'
+  | 'Approved'
+  | 'Rejected'
+  | 'Cancelled'
+  | 'CancellationRequested';
+
+export interface PatientProfileClaimRequestDto {
+  id: string;
+  patientProfileId: string;
+  requestedByUserId: string;
+  externalFullName: string;
+  documentType?: string | null;
+  documentNumber?: string | null;
+  status: PatientProfileClaimStatus;
+  statusName?: string;
+  requestedAtUtc: string;
+  cancellationRequestedAtUtc?: string | null;
+  cancellationReason?: string | null;
+  reviewedAtUtc?: string | null;
+  reviewedByUserId?: string | null;
+  reviewedByProfessionalProfileId?: string | null;
+  reviewReason?: string | null;
+  requestNotes?: string | null;
+}
+
+export interface PatientProfileClaimQueryParams {
+  page?: number;
+  pageSize?: number;
+  status?: PatientProfileClaimStatus | null;
+}
+
+export interface PatientProfileClaimActionPayload {
+  reason?: string | null;
+}
+
+export interface PatientProfileClaimCreatePayload {
+  notes?: string | null;
+}
+
+// =============================================================================
+// External Patient Profile Models
+// =============================================================================
+
+export interface ExternalPatientProfileListDto {
+  id: string;
+  fullName: string;
+  documentType?: string | null;
+  documentNumber?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  claimStatus: number;
+  claimStatusLabel: string;
+  createdByProfessionalProfileId?: string | null;
+  createdByProfessionalName?: string | null;
+  dateCreated: string;
+}
+
+export interface ExternalPatientProfileQueryParams {
+  page?: number;
+  pageSize?: number;
+  q?: string;
+}
+
+// =============================================================================
 // SEO Models
 // =============================================================================
 
@@ -1070,6 +1143,44 @@ export function hasFieldErrors(
     Object.keys(error.errors).length > 0
   );
 }
+
+// =============================================================================
+// Professional Reports Models
+// =============================================================================
+
+export interface AppointmentReportSummaryDto {
+  from: string;
+  to: string;
+  maxRangeDays: number;
+  attendedCount: number;
+  cancelledCount: number;
+  confirmedCount: number;
+  noShowCount: number;
+}
+
+export interface AppointmentReportDetailItemDto {
+  appointmentId: string;
+  patientProfileId: string | null;
+  patientName: string;
+  documentType: string | null;
+  documentNumber: string | null;
+  gender: string | null;
+  appointmentDate: string;
+  timeSlot: string;
+  status: string;
+}
+
+export interface AppointmentReportDetailResult {
+  items: AppointmentReportDetailItemDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export type ReportType = 'attended' | 'cancelled' | 'confirmed' | 'noShow';
+
+// =============================================================================
 
 /**
  * Extract first error message from ProblemDetails or simple error

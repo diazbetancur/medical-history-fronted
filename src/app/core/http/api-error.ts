@@ -39,6 +39,8 @@ export interface ProblemDetails {
   status: number;
   detail?: string;
   instance?: string;
+  code?: string;
+  errorCode?: string;
   correlationId?: string;
   traceId?: string;
   errors?: Record<string, string[]>;
@@ -96,8 +98,8 @@ export function createApiError(
 
     return {
       status: problem.status ?? httpError.status ?? 500,
-      code: problem.type ?? 'INTERNAL_SERVER_ERROR',
-      message: problem.title ?? problem.detail ?? 'Error desconocido',
+      code: problem.code ?? problem.errorCode ?? problem.type ?? 'INTERNAL_SERVER_ERROR',
+      message: problem.detail ?? problem.title ?? 'Error desconocido',
       traceId: problem.correlationId ?? problem.traceId ?? traceId,
       errors: problem.errors,
       details: problem,

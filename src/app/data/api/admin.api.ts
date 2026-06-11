@@ -13,11 +13,17 @@ import {
   AdminRequestsParams,
   AdminRequestsResponse,
   ApproveProfessionalPayload,
+  ExternalPatientProfileListDto,
+  ExternalPatientProfileQueryParams,
   ModerateProfilePayload,
   ModerateProfileResponse,
   ModerateRequestPayload,
   ModerateRequestResponse,
   ModerateServicePayload,
+  PaginatedResponse,
+  PatientProfileClaimActionPayload,
+  PatientProfileClaimQueryParams,
+  PatientProfileClaimRequestDto,
   ProfessionalActivationResponse,
   RejectProfessionalPayload,
   Service,
@@ -181,6 +187,96 @@ export class AdminApi {
       `/admin/requests/${id}`,
       payload,
     );
+  }
+
+  // ===========================================================================
+  // Patient profile claim requests
+  // ===========================================================================
+
+  getPatientProfileClaims(
+    params: PatientProfileClaimQueryParams = {},
+  ): Observable<PaginatedResponse<PatientProfileClaimRequestDto>> {
+    const searchParams = new URLSearchParams();
+
+    if (params.page && params.page > 1) {
+      searchParams.set('page', String(params.page));
+    }
+    if (params.pageSize && params.pageSize !== 20) {
+      searchParams.set('pageSize', String(params.pageSize));
+    }
+    if (params.status !== undefined && params.status !== null) {
+      searchParams.set('status', String(params.status));
+    }
+
+    const queryString = searchParams.toString();
+    const endpoint = queryString
+      ? '/admin/patient-profile-claims?' + queryString
+      : '/admin/patient-profile-claims';
+
+    return this.api.get<PaginatedResponse<PatientProfileClaimRequestDto>>(
+      endpoint,
+    );
+  }
+
+  approvePatientProfileClaim(
+    claimRequestId: string,
+    payload: PatientProfileClaimActionPayload = {},
+  ): Observable<PatientProfileClaimRequestDto> {
+    return this.api.post<PatientProfileClaimRequestDto>(
+      `/admin/patient-profile-claims/${claimRequestId}/approve`,
+      payload,
+    );
+  }
+
+  rejectPatientProfileClaim(
+    claimRequestId: string,
+    payload: PatientProfileClaimActionPayload = {},
+  ): Observable<PatientProfileClaimRequestDto> {
+    return this.api.post<PatientProfileClaimRequestDto>(
+      `/admin/patient-profile-claims/${claimRequestId}/reject`,
+      payload,
+    );
+  }
+
+  completePatientProfileClaimCancellation(
+    claimRequestId: string,
+    payload: PatientProfileClaimActionPayload = {},
+  ): Observable<PatientProfileClaimRequestDto> {
+    return this.api.post<PatientProfileClaimRequestDto>(
+      `/admin/patient-profile-claims/${claimRequestId}/complete-cancellation`,
+      payload,
+    );
+  }
+
+  // ===========================================================================
+  // External patient profiles (unclaimed)
+  // ===========================================================================
+
+  deleteExternalPatientProfile(id: string): Observable<void> {
+    return this.api.delete<void>(`/admin/external-patient-profiles/${id}`);
+  }
+
+  getExternalPatientProfiles(
+    params: ExternalPatientProfileQueryParams = {},
+  ): Observable<PaginatedResponse<ExternalPatientProfileListDto>> {
+    const searchParams = new URLSearchParams();
+
+    if (params.page && params.page > 1) {
+      searchParams.set('page', String(params.page));
+    }
+    if (params.pageSize && params.pageSize !== 20) {
+      searchParams.set('pageSize', String(params.pageSize));
+    }
+    if (params.q?.trim()) {
+      searchParams.set('q', params.q.trim());
+    }
+
+    const queryString = searchParams.toString();
+    const endpoint = queryString
+      ? '/admin/external-patient-profiles?' + queryString
+      : '/admin/external-patient-profiles';
+
+    return this.api.get<PaginatedResponse<ExternalPatientProfileListDto>>(endpoint);
   }
 
   // ===========================================================================
