@@ -98,6 +98,12 @@ export const PERMISSIONS = {
   CONFIGURATION_VIEW: 'Configuration.View',
   CONFIGURATION_UPDATE: 'Configuration.Update',
   CONFIGURATION_VIEW_AUDIT_LOG: 'Configuration.ViewAuditLog',
+
+  // Channel Licenses
+  LICENSES_VIEW_PORTFOLIO: 'Licenses.ViewPortfolio',
+  LICENSES_ACTIVATE: 'Licenses.Activate',
+  LICENSES_DEACTIVATE: 'Licenses.Deactivate',
+  LICENSES_VIEW_REPORTS: 'Licenses.ViewReports',
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -151,6 +157,25 @@ export const ADMIN_MENU: AdminMenuSection[] = [
           PERMISSIONS.PROFILES_UPDATE,
         ],
         tooltip: 'Profesionales pendientes de activación de cuenta',
+      },
+    ],
+    dividerAfter: true,
+  },
+  {
+    title: 'Canal',
+    items: [
+      {
+        id: 'channel-licenses',
+        label: 'Cartera de Licencias',
+        icon: 'card_membership',
+        route: '/admin/channel-licenses',
+        permissionsAny: [
+          PERMISSIONS.LICENSES_VIEW_PORTFOLIO,
+          PERMISSIONS.LICENSES_ACTIVATE,
+          PERMISSIONS.LICENSES_DEACTIVATE,
+          PERMISSIONS.LICENSES_VIEW_REPORTS,
+        ],
+        tooltip: 'Gestionar licencias de profesionales del canal',
       },
     ],
     dividerAfter: true,

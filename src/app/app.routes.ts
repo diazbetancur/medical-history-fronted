@@ -176,6 +176,18 @@ export const routes: Routes = [
           ),
         title: 'Vinculaciones de Pacientes - Admin',
       },
+      {
+        path: 'channel-licenses',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Licenses.ViewPortfolio'],
+        },
+        loadComponent: () =>
+          import('./features/admin/pages/channel-licenses/channel-licenses.page').then(
+            (m) => m.ChannelLicensesPage,
+          ),
+        title: 'Cartera de Licencias - Admin',
+      },
     ],
   },
 
