@@ -166,7 +166,7 @@ export const ADMIN_MENU: AdminMenuSection[] = [
     items: [
       {
         id: 'channel-licenses',
-        label: 'Cartera de Licencias',
+        label: 'Licencias',
         icon: 'card_membership',
         route: '/admin/channel-licenses',
         permissionsAny: [
