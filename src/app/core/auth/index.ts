@@ -28,6 +28,7 @@ export {
   isCurrentContext,
   permissionStoreGuard,
   professionalProfileGuard,
+  professionalStatusGuard,
 } from './auth-store.guards';
 export type {
   ContextRouteData,
