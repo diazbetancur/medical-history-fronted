@@ -4,11 +4,12 @@ import {
   contextGuard,
   permissionStoreGuard,
   professionalProfileGuard,
+  professionalStatusGuard,
 } from '@core/auth';
 
 /**
  * ============================================================================
- * Directory Pro - Routing MVP
+ * MediTigo - Routing MVP
  * ============================================================================
  *
  * Estructura de 3 áreas separadas:
@@ -157,7 +158,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/pages/professionals-review/professionals-review.page').then(
             (m) => m.ProfessionalsReviewPageComponent,
-        ),
+          ),
         title: 'Solicitudes de Activación - Admin',
       },
       {
@@ -186,7 +187,19 @@ export const routes: Routes = [
           import('./features/admin/pages/channel-licenses/channel-licenses.page').then(
             (m) => m.ChannelLicensesPage,
           ),
-        title: 'Cartera de Licencias - Admin',
+        title: 'Licencias - Admin',
+      },
+      {
+        path: 'reports',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Licenses.ViewReports', 'Reports.ViewAll'],
+        },
+        loadComponent: () =>
+          import('./features/admin/pages/reports/admin-reports.page').then(
+            (m) => m.AdminReportsPage,
+          ),
+        title: 'Reportes - Admin',
       },
     ],
   },
@@ -211,14 +224,16 @@ export const routes: Routes = [
   // ============================================================================
   // PROFESSIONAL AREA (/professional/*)
   // Guards: authStoreGuard + contextGuard('PROFESSIONAL') + professionalProfileGuard
+  //         + professionalStatusGuard
   //
   // professionalProfileGuard redirige a /professional/profile en todos los hijos
   // hasta que el usuario complete su perfil.  La ruta /professional/profile queda
   // exenta del chequeo para evitar bucles.
+  // professionalStatusGuard redirige a /professional/suspended si el admin desactivó el perfil.
   // ============================================================================
   {
     path: 'professional',
-    canActivate: [authStoreGuard, contextGuard, professionalProfileGuard],
+    canActivate: [authStoreGuard, contextGuard, professionalProfileGuard, professionalStatusGuard],
     data: {
       requiredContext: 'PROFESSIONAL',
     },
@@ -329,6 +344,14 @@ export const routes: Routes = [
         path: 'agenda',
         redirectTo: 'appointments',
         pathMatch: 'full',
+      },
+      {
+        path: 'suspended',
+        loadComponent: () =>
+          import('./features/professional/pages/suspended/professional-suspended.page').then(
+            (m) => m.ProfessionalSuspendedPage,
+          ),
+        title: 'Cuenta Desactivada | MediTigo',
       },
     ],
   },
@@ -528,29 +551,26 @@ export const routes: Routes = [
   {
     path: 'terms',
     loadComponent: () =>
-      import('./features/legal/legal-page.component').then(
-        (m) => m.LegalPageComponent,
+      import('./features/legal/pages/terms/terms.page').then(
+        (m) => m.TermsPage,
       ),
     title: 'Términos de Servicio | MediTigo',
-    data: { pageTitle: 'Términos de Servicio' },
   },
   {
     path: 'privacy',
     loadComponent: () =>
-      import('./features/legal/legal-page.component').then(
-        (m) => m.LegalPageComponent,
+      import('./features/legal/pages/privacy/privacy.page').then(
+        (m) => m.PrivacyPage,
       ),
     title: 'Política de Privacidad | MediTigo',
-    data: { pageTitle: 'Política de Privacidad' },
   },
   {
     path: 'help',
     loadComponent: () =>
-      import('./features/legal/legal-page.component').then(
-        (m) => m.LegalPageComponent,
+      import('./features/legal/pages/help/help.page').then(
+        (m) => m.HelpPage,
       ),
     title: 'Ayuda | MediTigo',
-    data: { pageTitle: 'Centro de Ayuda' },
   },
 
   // ============================================================================
