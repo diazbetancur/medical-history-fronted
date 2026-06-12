@@ -152,7 +152,8 @@ export class LoginPageComponent implements OnInit {
     this.toast.success(`¡Bienvenido, ${displayName}!`);
 
     const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
-    if (returnTo?.startsWith('/')) {
+    const accessiblePaths = this.postLoginNavigation.getAvailableContextPaths();
+    if (returnTo?.startsWith('/') && accessiblePaths.some((p) => returnTo.startsWith(p))) {
       void this.router.navigateByUrl(returnTo);
     } else {
       this.postLoginNavigation.navigateAfterLogin();

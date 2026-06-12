@@ -15,24 +15,11 @@ import { TokenStorage } from './token-storage.service';
 
 const CURRENT_CONTEXT_KEY = 'auth_current_context';
 
-/**
- * Auth Store State
- * Manages authentication state with signals
- */
 export interface AuthState {
-  /** JWT token */
   token: string | null;
-
-  /** Current authenticated user */
   user: CurrentUserDto | null;
-
-  /** Currently active context */
   currentContext: ContextDto | null;
-
-  /** Loading state (for async operations) */
   isLoading: boolean;
-
-  /** Last error (ProblemDetails format) */
   lastError: ProblemDetails | null;
 }
 
@@ -46,8 +33,8 @@ const INITIAL_STATE: AuthState = {
 
 /**
  * Authentication Store (Signal-based)
- * Manages user session, token, and context switching
- * SSR-safe: localStorage operations only in browser
+ * Manages user session and context switching.
+ * Auth token lives in an httpOnly cookie — JS never reads it directly.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
@@ -57,10 +44,8 @@ export class AuthStore {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly toast = inject(ToastService);
 
-  // Private writable signal
   private readonly _state = signal<AuthState>(INITIAL_STATE);
 
-  // Public read-only signals
   readonly state = this._state.asReadonly();
   readonly token = computed(() => this._state().token);
   readonly user = computed(() => this._state().user);
@@ -68,24 +53,14 @@ export class AuthStore {
   readonly isLoading = computed(() => this._state().isLoading);
   readonly lastError = computed(() => this._state().lastError);
 
-  // Derived signals
   readonly isAuthenticated = computed(() => !!this._state().user);
   readonly userId = computed(() => this._state().user?.id ?? null);
   readonly userName = computed(() => this._state().user?.name ?? null);
   readonly userEmail = computed(() => this._state().user?.email ?? null);
   readonly userRoles = computed(() => this._state().user?.roles ?? []);
-  readonly userPermissions = computed(
-    () => this._state().user?.permissions ?? [],
-  );
-  readonly availableContexts = computed(
-    () => this._state().user?.contexts ?? [],
-  );
+  readonly userPermissions = computed(() => this._state().user?.permissions ?? []);
+  readonly availableContexts = computed(() => this._state().user?.contexts ?? []);
 
-  /**
-   * Returns true if the current user has the given permission.
-   * Use for in-component action guards (I-10).
-   * Works with the flat string names seeded in the DB (e.g. "Appointments.Update").
-   */
   hasPermission(permission: string): boolean {
     return this.userPermissions().includes(permission);
   }
@@ -95,68 +70,43 @@ export class AuthStore {
   }
 
   /**
-   * Set JWT token and persist to localStorage
+   * No-op: token is managed as an httpOnly cookie by the backend.
+   * Kept for call-site compatibility.
    */
-  setToken(token: string, expiresAt: string): void {
-    this._state.update((state) => ({ ...state, token }));
-    this.tokenStorage.setToken(token, expiresAt);
+  setToken(_token: string, _expiresAt: string): void {
+    // Token is managed as an httpOnly cookie by the backend — nothing to do here
   }
 
   /**
-   * Load current user from /api/auth/me
-   * Sets user and currentContext (from defaultContext or persisted)
-   * Returns Observable<CurrentUserDto | null>
+   * Load current user from /api/auth/me.
+   * The httpOnly cookie is sent automatically by the browser.
    */
   loadMe(): Observable<CurrentUserDto | null> {
-    // Clear previous error
-    this._state.update((state) => ({
-      ...state,
-      isLoading: true,
-      lastError: null,
-    }));
+    this._state.update((state) => ({ ...state, isLoading: true, lastError: null }));
 
     return this.authApi.me().pipe(
       tap((user) => {
-        // Determine current context: persisted if valid, otherwise defaultContext
         const persistedContext = this.getPersistedContext();
         const isValid = user.contexts.some(
-          (ctx) =>
-            ctx.type === persistedContext?.type &&
-            ctx.id === persistedContext?.id,
+          (ctx) => ctx.type === persistedContext?.type && ctx.id === persistedContext?.id,
         );
         const currentContext = isValid ? persistedContext : user.defaultContext;
 
-        // Persist the chosen context
         this.persistContext(currentContext);
 
-        // Update state
         this._state.update((state) => ({
           ...state,
           user,
           currentContext,
           isLoading: false,
-          token: this.tokenStorage.getToken(), // Sync token from storage
+          token: null, // token is in httpOnly cookie — not readable from JS
         }));
-
-        // this.debugLog(
-        //   '[AuthStore] User loaded:',
-        //   user.email,
-        //   'Context:',
-        //   currentContext?.name,
-        // );
       }),
       catchError((error) => {
         const problem = this.extractProblemDetails(error);
 
-        this._state.update((state) => ({
-          ...state,
-          isLoading: false,
-          lastError: problem,
-        }));
+        this._state.update((state) => ({ ...state, isLoading: false, lastError: problem }));
 
-        // this.debugLog('[AuthStore] Load user failed:', problem.title);
-
-        // If 401, clear token
         if (problem.status === 401) {
           this.clearAuth();
         }
@@ -166,133 +116,85 @@ export class AuthStore {
     );
   }
 
-  /**
-   * Switch to a different context (must be in user.contexts)
-   * Persists the choice to localStorage
-   */
   switchContext(context: ContextDto): boolean {
     const user = this._state().user;
-    if (!user) {
-      // this.debugLog('[AuthStore] Cannot switch context: no user');
-      return false;
-    }
+    if (!user) return false;
 
-    // Validate context exists in user.contexts
     const isValid = user.contexts.some(
       (ctx) => ctx.type === context.type && ctx.id === context.id,
     );
 
-    if (!isValid) {
-      // this.debugLog('[AuthStore] Cannot switch: invalid context', context);
-      return false;
-    }
+    if (!isValid) return false;
 
-    // Update state
     this._state.update((state) => ({ ...state, currentContext: context }));
-
-    // Persist to localStorage
     this.persistContext(context);
-
-    // this.debugLog('[AuthStore] Context switched to:', context.name);
     return true;
   }
 
   /**
-   * Logout: clear token, user, context, and redirect to home
+   * Logout: clear local state immediately, then ask backend to clear the cookie.
    */
   logout(): void {
     this.clearAuth();
+    this.authApi.logout().subscribe();
     this.toast.info(
       'Sesión cerrada. Para continuar, inicia sesión desde el botón "Iniciar Sesión" en el inicio.',
     );
     this.router.navigate(['/']);
-    // this.debugLog('[AuthStore] User logged out');
   }
 
-  /**
-   * Clears any previous auth/session residue before starting a new login flow.
-   * Useful when switching users in the same browser session.
-   */
   resetForLogin(): void {
     this.clearAuth();
   }
 
-  /**
-   * Clear session state when the backend rejects the token.
-   * Does not navigate or show logout toast; global interceptors own that UX.
-   */
   expireSession(): void {
     this.clearAuth();
   }
 
   /**
-   * Initialize auth on app load
-   * Checks for valid token and loads user
-   * Returns Observable<CurrentUserDto | null>
+   * Initialize auth on app load.
+   * Always calls /me — the httpOnly cookie is present if the user was logged in.
+   * A missing or expired cookie results in a 401, which clears state gracefully.
    */
   initialize(): Observable<CurrentUserDto | null> {
-    if (!this.isBrowser || !this.tokenStorage.hasValidToken()) {
-      // this.debugLog('[AuthStore] No valid token, skipping initialization');
-      return of(null);
-    }
-
-    // this.debugLog('[AuthStore] Initializing with stored token');
+    if (!this.isBrowser) return of(null);
     return this.loadMe();
   }
 
-  /**
-   * Clear all auth data (token, user, context)
-   */
   private clearAuth(): void {
     this.tokenStorage.clearToken();
     this.clearPersistedContext();
     this._state.set(INITIAL_STATE);
   }
 
-  /**
-   * Persist currentContext to localStorage
-   */
   private persistContext(context: ContextDto | null): void {
     if (!this.isBrowser || !context) return;
-
     try {
       localStorage.setItem(CURRENT_CONTEXT_KEY, JSON.stringify(context));
-    } catch (e) {
-      // this.debugLog('[AuthStore] Failed to persist context:', e);
+    } catch {
+      // localStorage unavailable (e.g. private mode quota exceeded) — not critical
     }
   }
 
-  /**
-   * Get persisted context from localStorage
-   */
   private getPersistedContext(): ContextDto | null {
     if (!this.isBrowser) return null;
-
     try {
       const stored = localStorage.getItem(CURRENT_CONTEXT_KEY);
       return stored ? (JSON.parse(stored) as ContextDto) : null;
-    } catch (e) {
-      // this.debugLog('[AuthStore] Failed to parse persisted context:', e);
+    } catch {
       return null;
     }
   }
 
-  /**
-   * Clear persisted context from localStorage
-   */
   private clearPersistedContext(): void {
     if (!this.isBrowser) return;
-
     try {
       localStorage.removeItem(CURRENT_CONTEXT_KEY);
-    } catch (e) {
-      // this.debugLog('[AuthStore] Failed to clear context:', e);
+    } catch {
+      // ignore
     }
   }
 
-  /**
-   * Extract ProblemDetails from HTTP error response
-   */
   private extractProblemDetails(error: unknown): ProblemDetails {
     if (
       error &&
@@ -302,16 +204,11 @@ export class AuthStore {
       typeof error.error === 'object'
     ) {
       const err = error.error as Partial<ProblemDetails>;
-      // Use `typeof err.status === 'number'` instead of `err.status` to avoid
-      // the falsy-zero bug: status 0 (network error) would fail the truthiness
-      // check and silently fall through to the generic fallback, masking the
-      // real error and preventing clearAuth() from being called on 401.
       if (err.type && err.title && typeof err.status === 'number') {
         return err as ProblemDetails;
       }
     }
 
-    // Fallback: generic error
     return {
       type: 'about:blank',
       title: 'Error de conexión',

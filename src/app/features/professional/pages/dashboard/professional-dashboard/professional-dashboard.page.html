@@ -61,26 +61,6 @@
       </mat-card-actions>
     </mat-card>
 
-    <!-- Pacientes activos -->
-    <mat-card class="metric-card">
-      <mat-card-content>
-        <div class="metric-icon patients">
-          <mat-icon>group</mat-icon>
-        </div>
-        <div class="metric-info">
-          <span class="metric-value"
-            >{{ dashboard()?.activePatientsCount ?? '–' }}</span
-          >
-          <span class="metric-label">Pacientes activos</span>
-        </div>
-      </mat-card-content>
-      <mat-card-actions>
-        <a mat-button routerLink="/professional/patients">
-          Ver pacientes <mat-icon iconPositionEnd>arrow_forward</mat-icon>
-        </a>
-      </mat-card-actions>
-    </mat-card>
-
     <!-- Encuentros pendientes -->
     <mat-card class="metric-card">
       <mat-card-content>

@@ -243,11 +243,16 @@ export class ProfessionalAppointmentsApi {
       }
 
       if (/^\d{1,2}:\d{2}$/.test(slot)) {
+        const effectiveDuration =
+          durationMinutes > 0
+            ? durationMinutes
+            : this.deriveDurationMinutes(startUtc, endUtc);
         return {
           startTime: slot,
           endTime:
             this.extractTime(endTime) ??
-            this.addMinutesToTime(slot, durationMinutes) ??
+            this.addMinutesToTime(slot, effectiveDuration) ??
+            this.extractTimeFromDate(endUtc) ??
             slot,
         };
       }
@@ -313,6 +318,14 @@ export class ProfessionalAppointmentsApi {
       2,
       '0',
     )}`;
+  }
+
+  private deriveDurationMinutes(startUtc: unknown, endUtc: unknown): number {
+    if (!startUtc || !endUtc) return 0;
+    const start = new Date(String(startUtc));
+    const end = new Date(String(endUtc));
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+    return Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
   }
 
   private toNumber(value: unknown, fallback: number): number {

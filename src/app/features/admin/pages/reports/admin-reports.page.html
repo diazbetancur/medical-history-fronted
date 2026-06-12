@@ -1,0 +1,171 @@
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Reportes del Canal</h1>
+      <p class="page-subtitle">
+        @if (overview()) {
+          Canal: <strong>{{ channelLabel() }}</strong>
+        } @else {
+          Métricas de licencias y actividad de citas
+        }
+      </p>
+    </div>
+
+    <button mat-stroked-button color="primary" (click)="exportCsv()" [disabled]="loading()">
+      <mat-icon>download</mat-icon>
+      Exportar licencias CSV
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Desde</mat-label>
+          <input matInput type="date" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Hasta</mat-label>
+          <input matInput type="date" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" (click)="load()" [disabled]="loading()">
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="40" />
+      <p>Cargando métricas...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+      <button mat-button (click)="load()">Reintentar</button>
+    </div>
+  }
+
+  <!-- Overview -->
+  @if (overview(); as data) {
+
+    <!-- License KPIs -->
+    <div class="section-label">Cartera de Licencias</div>
+    <div class="kpi-grid">
+      <mat-card class="kpi-card total">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.licenses.totalInPortfolio }}</div>
+          <div class="kpi-label">En cartera</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card active">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.licenses.active }}</div>
+          <div class="kpi-label">Activas</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card inactive">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.licenses.inactive }}</div>
+          <div class="kpi-label">Inactivas</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card standard">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.licenses.standard }}</div>
+          <div class="kpi-label">Plan Standard</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card growth">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.licenses.growth }}</div>
+          <div class="kpi-label">Plan Growth</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Period KPIs -->
+    <div class="section-label">Movimientos en el período</div>
+    <div class="kpi-grid kpi-grid--small">
+      <mat-card class="kpi-card activations">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.licenses.newActivations }}</div>
+          <div class="kpi-label">Nuevas activaciones</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card deactivations">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.licenses.newDeactivations }}</div>
+          <div class="kpi-label">Desactivaciones</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Appointment KPIs -->
+    <div class="section-label">Actividad de Citas</div>
+    <div class="kpi-grid">
+      <mat-card class="kpi-card total">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.appointments.total }}</div>
+          <div class="kpi-label">Total citas</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card completed">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.appointments.completed }}</div>
+          <div class="kpi-label">Atendidas</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card confirmed">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.appointments.confirmed }}</div>
+          <div class="kpi-label">Confirmadas</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card cancelled">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.appointments.cancelled }}</div>
+          <div class="kpi-label">Canceladas</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card noshow">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.appointments.noShow }}</div>
+          <div class="kpi-label">No presentados</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="kpi-grid kpi-grid--small">
+      <mat-card class="kpi-card professionals">
+        <mat-card-content>
+          <div class="kpi-value">{{ data.appointments.uniqueProfessionals }}</div>
+          <div class="kpi-label">Profesionales con actividad</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  }
+
+</div>

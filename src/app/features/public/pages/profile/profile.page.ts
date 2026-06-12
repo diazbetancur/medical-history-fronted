@@ -181,7 +181,7 @@ export class ProfilePageComponent {
   }
 
   private setProfileSeo(profile: PublicProfessionalDetailResponse): void {
-    this.seoService.setTitle(`${profile.displayName} | MediTigo`);
+    this.seoService.setTitle(profile.displayName);
     this.seoService.setJsonLd({
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',

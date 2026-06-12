@@ -1,119 +1,41 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-const TOKEN_KEY = 'auth_token';
-const TOKEN_EXPIRY_KEY = 'auth_token_expiry';
+const CONTEXT_KEY = 'auth_current_context';
 
 /**
- * Debug log helper (removed for production)
- */
-function debugLog(_message: string, ..._args: unknown[]): void {
-  // Debug logging removed
-}
-
-/**
- * SSR-safe token storage service.
- * Only accesses localStorage in the browser.
- * Returns null values during SSR to avoid hydration mismatches.
+ * Token storage stub — auth token is now managed as an httpOnly cookie by the
+ * backend. This service is kept only to avoid breaking callers that have not
+ * yet been migrated, but all token read/write operations are no-ops.
+ *
+ * The only localStorage item still owned here is `auth_current_context`,
+ * which is a non-sensitive UI preference (which area is active).
  */
 @Injectable({ providedIn: 'root' })
 export class TokenStorage {
-  private readonly platformId = inject(PLATFORM_ID);
-
-  private get isBrowser(): boolean {
-    return isPlatformBrowser(this.platformId);
+  setToken(_token: string, _expiresAt: string): void {
+    // No-op: token lives in httpOnly cookie set by the backend
   }
 
-  /**
-   * Store JWT token and its expiry date
-   */
-  setToken(token: string, expiresAt: string): void {
-    if (!this.isBrowser) return;
-
-    try {
-      localStorage.setItem(TOKEN_KEY, token);
-      localStorage.setItem(TOKEN_EXPIRY_KEY, expiresAt);
-    } catch (e) {
-      debugLog('[TokenStorage] Failed to save token:', e);
-    }
-  }
-
-  /**
-   * Get stored JWT token
-   * Returns null if not in browser, not found, or expired
-   */
   getToken(): string | null {
-    if (!this.isBrowser) return null;
-
-    try {
-      const token = localStorage.getItem(TOKEN_KEY);
-      if (!token) return null;
-
-      // Check expiry
-      if (this.isTokenExpired()) {
-        this.clearToken();
-        return null;
-      }
-
-      return token;
-    } catch (e) {
-      debugLog('[TokenStorage] Failed to read token:', e);
-      return null;
-    }
+    return null; // httpOnly cookie is not readable from JS
   }
 
-  /**
-   * Check if token exists and is valid (not expired)
-   */
   hasValidToken(): boolean {
-    return this.getToken() !== null;
+    return false; // AuthStore.initialize() no longer uses this check
   }
 
-  /**
-   * Check if token is expired
-   */
   isTokenExpired(): boolean {
-    if (!this.isBrowser) return true;
-
-    try {
-      const expiresAt = localStorage.getItem(TOKEN_EXPIRY_KEY);
-      if (!expiresAt) return true;
-
-      const expiryDate = new Date(expiresAt);
-      const now = new Date();
-
-      // Add small buffer (30 seconds) to avoid edge cases
-      return expiryDate.getTime() - 30000 < now.getTime();
-    } catch (e) {
-      return true;
-    }
+    return true;
   }
 
-  /**
-   * Get token expiry date
-   */
   getTokenExpiry(): Date | null {
-    if (!this.isBrowser) return null;
-
-    try {
-      const expiresAt = localStorage.getItem(TOKEN_EXPIRY_KEY);
-      return expiresAt ? new Date(expiresAt) : null;
-    } catch {
-      return null;
-    }
+    return null;
   }
 
-  /**
-   * Clear stored token and expiry
-   */
   clearToken(): void {
-    if (!this.isBrowser) return;
-
-    try {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(TOKEN_EXPIRY_KEY);
-    } catch (e) {
-      debugLog('[TokenStorage] Failed to clear token:', e);
-    }
+    // No-op: cookie is cleared via POST /api/auth/logout
   }
 }
+
+// Re-export the context key so AuthStore can use it directly
+export { CONTEXT_KEY };

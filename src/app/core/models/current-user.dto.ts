@@ -51,4 +51,7 @@ export interface CurrentUserDto {
 
   /** True when the user already has a created professional profile */
   hasProfessionalProfile: boolean;
+
+  /** True when the professional profile exists AND is active (not deactivated by admin) */
+  isProfessionalActive?: boolean;
 }

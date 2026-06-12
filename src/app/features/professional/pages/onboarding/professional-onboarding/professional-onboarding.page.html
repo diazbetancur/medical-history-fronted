@@ -26,52 +26,6 @@
     >
       <mat-tab label="Información principal">
         <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
-          @if (hasExistingProfile()) {
-          <div class="form-section photo-section">
-            <div class="photo-row">
-              <div class="photo-preview">
-                @if (profileImageUrl()) {
-                <img [src]="profileImageUrl()!" alt="Foto de perfil" />
-                } @else {
-                <mat-icon>person</mat-icon>
-                }
-              </div>
-
-              <div class="photo-actions">
-                <input
-                  #photoInput
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  (change)="onPhotoSelected($event)"
-                  hidden
-                />
-
-                <button
-                  mat-stroked-button
-                  color="primary"
-                  type="button"
-                  [disabled]="isUploadingPhoto()"
-                  (click)="photoInput.click()"
-                >
-                  <mat-icon>upload</mat-icon>
-                  Subir foto
-                </button>
-
-                <button
-                  mat-button
-                  color="warn"
-                  type="button"
-                  [disabled]="isUploadingPhoto() || !profileImageUrl()"
-                  (click)="removePhoto()"
-                >
-                  <mat-icon>delete</mat-icon>
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          </div>
-          }
-
           <div class="form-section">
             <div class="section-header">
               <mat-icon>person</mat-icon>
@@ -212,6 +166,52 @@
             <div class="error-banner">
               <mat-icon>error_outline</mat-icon>
               <span>{{ submitError() }}</span>
+            </div>
+            }
+
+            @if (hasExistingProfile()) {
+            <div class="form-section photo-section">
+              <div class="photo-row">
+                <div class="photo-preview">
+                  @if (profileImageUrl()) {
+                  <img [src]="profileImageUrl()!" alt="Foto de perfil" />
+                  } @else {
+                  <mat-icon>person</mat-icon>
+                  }
+                </div>
+
+                <div class="photo-actions">
+                  <input
+                    #photoInput
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    (change)="onPhotoSelected($event)"
+                    hidden
+                  />
+
+                  <button
+                    mat-stroked-button
+                    color="primary"
+                    type="button"
+                    [disabled]="isUploadingPhoto()"
+                    (click)="photoInput.click()"
+                  >
+                    <mat-icon>upload</mat-icon>
+                    Subir foto
+                  </button>
+
+                  <button
+                    mat-button
+                    color="warn"
+                    type="button"
+                    [disabled]="isUploadingPhoto() || !profileImageUrl()"
+                    (click)="removePhoto()"
+                  >
+                    <mat-icon>delete</mat-icon>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
             </div>
             }
 
