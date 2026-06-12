@@ -34,6 +34,7 @@ const ERROR_MESSAGES: Record<number, string> = {
 const PUBLIC_OR_ANONYMOUS_PATTERNS = [
   '/api/public/',
   '/api/auth/login',
+  '/api/auth/logout',
   '/api/auth/register',
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
