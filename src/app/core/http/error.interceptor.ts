@@ -146,7 +146,7 @@ export const errorInterceptor: HttpInterceptorFn = (
         if (router.url !== '/') {
           router.navigate(['/'], {
             queryParams: {
-              returnUrl: router.url,
+              returnTo: router.url,
               reason: 'session_expired',
               authRequired: '1',
             },

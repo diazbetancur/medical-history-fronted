@@ -20,7 +20,7 @@
 
   <span class="spacer"></span>
 
-  @if (authService.isAuthenticated()) {
+  @if (authStore.isAuthenticated()) {
   <a mat-button routerLink="/dashboard">
     <mat-icon>dashboard</mat-icon>
     Dashboard

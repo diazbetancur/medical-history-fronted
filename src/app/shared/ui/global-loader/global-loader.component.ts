@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { HttpLoadingService } from '@core/http';
+import { AuthStore } from '@core/auth';
 
 @Component({
   selector: 'app-global-loader',
@@ -11,5 +11,5 @@ import { HttpLoadingService } from '@core/http';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlobalLoaderComponent {
-  protected readonly isLoading = inject(HttpLoadingService).isLoading;
+  protected readonly isLoading = inject(AuthStore).isLoading;
 }

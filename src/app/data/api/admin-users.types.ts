@@ -111,12 +111,10 @@ export interface CreateUserDto {
 export interface UpdateUserDto {
   userName?: string;
   email?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
   isLockedOut?: boolean;
-  profile?: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-  };
 }
 
 /**
@@ -140,14 +138,12 @@ export interface AdminUserListDto {
   id: string;
   userName: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   roles: string[];
   isLockedOut: boolean;
   createdAt: string;
   lastLogin?: string | null;
-  profile?: {
-    firstName?: string;
-    lastName?: string;
-  };
 }
 
 /**
@@ -159,18 +155,15 @@ export interface AdminUserDetailDto {
   userName: string;
   email: string;
   emailConfirmed: boolean;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
   roles: string[];
   permissions: string[];
   isLockedOut: boolean;
   lockoutEnd?: string | null;
   createdAt: string;
   lastLogin?: string | null;
-  profile?: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    avatarUrl?: string;
-  };
   metadata?: {
     loginCount?: number;
     lastPasswordChange?: string;

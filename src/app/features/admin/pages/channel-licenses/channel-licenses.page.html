@@ -3,9 +3,9 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Licencias</h1>
-      <p class="page-subtitle" *ngIf="store.summary() as s">
-        Canal: <strong>{{ s.channel }}</strong>
-      </p>
+      @if (store.summary(); as s) {
+        <p class="page-subtitle">Canal: <strong>{{ s.channel }}</strong></p>
+      }
     </div>
     <button
       mat-stroked-button

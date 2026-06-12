@@ -66,6 +66,8 @@ import { PublicHeaderComponent } from '../../components/public-header/public-hea
   styleUrl: './search.page.scss',
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
+  readonly currentYear = new Date().getFullYear();
+
   private readonly publicApi = inject(PublicApi);
   private readonly catalogService = inject(PublicCatalogService);
   private readonly professionalsService = inject(PublicProfessionalsService);
@@ -236,7 +238,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
             city: cityId ?? null,
             q: q ?? null,
           });
-          this.seoService.setTitle('Buscar Médicos | MediTigo');
+          this.seoService.setTitle('Buscar Médicos');
         }),
         catchError((error) => {
           this.error.set(

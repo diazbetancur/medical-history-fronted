@@ -45,11 +45,10 @@
       >
         @if (loadingMore()) {
           <mat-spinner diameter="18" />
-          <span>Cargando...</span>
         } @else {
           <mat-icon>expand_more</mat-icon>
-          <span>Cargar más</span>
         }
+        <span>{{ loadingMore() ? 'Cargando...' : 'Cargar más' }}</span>
       </button>
     }
   }
