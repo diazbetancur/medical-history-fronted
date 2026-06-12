@@ -93,26 +93,26 @@ export class ProfessionalPatientDetailPage implements OnInit {
 
   readonly patientAddress = computed(() => {
     const summary = this.patientSummary();
-    if (!summary) return 'No disponible';
+    if (!summary) return 'Pendiente por diligenciar';
 
     const parts = [summary.cityName, summary.countryName]
       .filter((value): value is string => !!value?.trim())
       .map((value) => value.trim());
 
-    return parts.length ? parts.join(', ') : 'No disponible';
+    return parts.length ? parts.join(', ') : 'Pendiente por diligenciar';
   });
 
   readonly patientDocument = computed(() => {
     const summary = this.patientSummary();
     if (!summary?.documentType && !summary?.documentNumber) {
-      return 'No disponible';
+      return 'Pendiente por diligenciar';
     }
 
     if (summary.documentType && summary.documentNumber) {
       return `${summary.documentType} ${summary.documentNumber}`;
     }
 
-    return summary.documentType || summary.documentNumber || 'No disponible';
+    return summary.documentType || summary.documentNumber || 'Pendiente por diligenciar';
   });
 
   readonly canRequestFullHistoryAccess = computed(() => {

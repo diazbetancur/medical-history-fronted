@@ -40,6 +40,9 @@ export class MenuService {
     const currentContext = this.authStore.currentContext();
     const userPermissions = this.authStore.userPermissions();
     const user = this.authStore.user();
+    const isSuperAdmin = this.authStore
+      .userRoles()
+      .some((role) => role.toUpperCase() === 'SUPERADMIN');
 
     if (!currentContext) {
       return [];
@@ -48,6 +51,7 @@ export class MenuService {
     const items = this.filterMenuItemsByContextAndPermissions(
       currentContext.type,
       userPermissions,
+      isSuperAdmin,
     );
 
     // Profesional recién registrado sin perfil creado: solo mostrar "Mi Perfil Profesional"
@@ -75,6 +79,7 @@ export class MenuService {
   private filterMenuItemsByContextAndPermissions(
     context: ContextType,
     permissions: string[],
+    bypassPermissions = false,
   ): MenuItem[] {
     return this.allMenuItems.filter((item) => {
       // 1. Context must match
@@ -87,12 +92,17 @@ export class MenuService {
         return true;
       }
 
-      // 3. Items without required permissions are always visible
+      // 3. SuperAdmin sees all items for their context
+      if (bypassPermissions) {
+        return true;
+      }
+
+      // 4. Items without required permissions are always visible
       if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
         return true;
       }
 
-      // 4. User must have at least ONE of the required permissions (OR logic)
+      // 5. User must have at least ONE of the required permissions (OR logic)
       return item.requiredPermissions.some((requiredPerm) =>
         permissions.includes(requiredPerm),
       );

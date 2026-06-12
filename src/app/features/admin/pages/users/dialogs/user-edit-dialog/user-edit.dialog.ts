@@ -73,13 +73,12 @@ export class UserEditDialogComponent implements OnInit {
 
   private initializeForm(): void {
     const user = this.data.user;
-    const profile = 'profile' in user ? user.profile : undefined;
 
     const initialValues = {
-      firstName: profile?.firstName || '',
-      lastName: profile?.lastName || '',
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
       email: user.email || '',
-      phone: (profile as { phone?: string })?.phone || '',
+      phone: ('phoneNumber' in user ? (user as { phoneNumber?: string }).phoneNumber : '') || '',
       isLockedOut: user.isLockedOut || false,
     };
 
@@ -117,18 +116,14 @@ export class UserEditDialogComponent implements OnInit {
       dto.isLockedOut = formValue.isLockedOut;
     }
 
-    // Profile changes
-    const hasProfileChanges =
-      formValue.firstName !== this.originalValues['firstName'] ||
-      formValue.lastName !== this.originalValues['lastName'] ||
-      formValue.phone !== this.originalValues['phone'];
-
-    if (hasProfileChanges) {
-      dto.profile = {
-        firstName: formValue.firstName || undefined,
-        lastName: formValue.lastName || undefined,
-        phone: formValue.phone || undefined,
-      };
+    if (formValue.firstName !== this.originalValues['firstName']) {
+      dto.firstName = formValue.firstName || undefined;
+    }
+    if (formValue.lastName !== this.originalValues['lastName']) {
+      dto.lastName = formValue.lastName || undefined;
+    }
+    if (formValue.phone !== this.originalValues['phone']) {
+      dto.phoneNumber = formValue.phone || undefined;
     }
 
     this.store.updateUser(this.data.user.id, dto);

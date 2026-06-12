@@ -156,16 +156,6 @@ export const MENU_ITEMS: MenuItem[] = [
     exactMatch: true,
   },
   {
-    label: 'Instituciones',
-    icon: 'business',
-    route: '/admin/institutions',
-    context: 'ADMIN',
-    requiredPermissions: [
-      ADMIN_PERMISSIONS.CATALOG_MANAGE_INSTITUTIONS,
-      ADMIN_PERMISSIONS.CATALOG_VIEW_INSTITUTIONS,
-    ],
-  },
-  {
     label: 'Especialidades',
     icon: 'local_hospital',
     route: '/admin/specialties',
@@ -222,6 +212,19 @@ export const MENU_ITEMS: MenuItem[] = [
     requiredPermissions: [
       ADMIN_PERMISSIONS.REPORTS_VIEW,
       ADMIN_PERMISSIONS.REPORTS_VIEW_ALL,
+      'Licenses.ViewReports',
+    ],
+  },
+  {
+    label: 'Licencias',
+    icon: 'card_membership',
+    route: '/admin/channel-licenses',
+    context: 'ADMIN',
+    requiredPermissions: [
+      'Licenses.ViewPortfolio',
+      'Licenses.Activate',
+      'Licenses.Deactivate',
+      'Licenses.ViewReports',
     ],
   },
   // ==========================================================================

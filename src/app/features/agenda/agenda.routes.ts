@@ -24,7 +24,7 @@ export const agendaRoutes: Routes = [
           import('./pages/appointments-list/appointments-list.page').then(
             (m) => m.AppointmentsListPageComponent,
           ),
-        title: 'Mis Citas - ProDirectory',
+        title: 'Mis Citas | MediTigo',
       },
       {
         path: 'book',
@@ -32,7 +32,7 @@ export const agendaRoutes: Routes = [
           import('./pages/book-appointment/book-appointment.page').then(
             (m) => m.BookAppointmentPageComponent,
           ),
-        title: 'Agendar Cita - ProDirectory',
+        title: 'Agendar Cita | MediTigo',
       },
       {
         path: 'confirm',
@@ -40,7 +40,7 @@ export const agendaRoutes: Routes = [
           import('./pages/confirm-appointment/confirm-appointment.page').then(
             (m) => m.ConfirmAppointmentPageComponent,
           ),
-        title: 'Confirmar Cita - ProDirectory',
+        title: 'Confirmar Cita | MediTigo',
       },
       {
         path: ':id',
@@ -48,7 +48,7 @@ export const agendaRoutes: Routes = [
           import('./pages/appointment-detail/appointment-detail.page').then(
             (m) => m.AppointmentDetailPageComponent,
           ),
-        title: 'Detalle de Cita - ProDirectory',
+        title: 'Detalle de Cita | MediTigo',
       },
     ],
   },
