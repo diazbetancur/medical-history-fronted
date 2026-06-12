@@ -648,16 +648,12 @@ export class ProfessionalAvailabilityPage implements OnInit {
   }
 
   private toUtcRangeStart(date: Date): string {
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}T00:00:00Z`;
+    const midnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return midnight.toISOString();
   }
 
   private toUtcRangeEnd(date: Date): string {
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}T23:59:59Z`;
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+    return endOfDay.toISOString();
   }
 }

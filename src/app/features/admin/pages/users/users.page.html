@@ -107,12 +107,14 @@
                 <div class="user-cell">
                   <mat-icon class="user-icon">account_circle</mat-icon>
                   <div class="user-info">
-                    <span class="user-name">{{ user.userName }}</span>
-                    @if (user.profile?.firstName || user.profile?.lastName) {
-                    <span class="user-fullname">
-                      {{ user.profile?.firstName }} {{ user.profile?.lastName }}
+                    <span class="user-name">
+                      @if (user.firstName || user.lastName) {
+                        {{ user.firstName }} {{ user.lastName }}
+                      } @else {
+                        {{ user.userName }}
+                      }
                     </span>
-                    }
+                    <span class="user-fullname">{{ user.email }}</span>
                   </div>
                 </div>
               </td>
@@ -306,17 +308,15 @@
       <div class="detail-section">
         <h4>Información</h4>
         <div class="detail-grid">
-          @if (user.profile?.firstName || user.profile?.lastName) {
+          @if (user.firstName || user.lastName) {
           <div class="detail-item">
             <span class="label">Nombre completo</span>
-            <span class="value"
-              >{{ user.profile?.firstName }} {{ user.profile?.lastName }}</span
-            >
+            <span class="value">{{ user.firstName }} {{ user.lastName }}</span>
           </div>
-          } @if (user.profile?.phone) {
+          } @if (user.phoneNumber) {
           <div class="detail-item">
             <span class="label">Teléfono</span>
-            <span class="value">{{ user.profile?.phone }}</span>
+            <span class="value">{{ user.phoneNumber }}</span>
           </div>
           }
           <div class="detail-item">

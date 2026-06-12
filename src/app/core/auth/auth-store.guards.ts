@@ -205,6 +205,11 @@ export const permissionStoreGuard: CanActivateFn = (
     });
   }
 
+  // SuperAdmin bypasses all permission guards (has all permissions by design)
+  if (authStore.userRoles().some((role) => role.toUpperCase() === 'SUPERADMIN')) {
+    return true;
+  }
+
   // Leer permissions de route data
   const data = route.data as PermissionRouteData;
   const requiredPermissions = data.requiredPermissions;
@@ -380,6 +385,37 @@ export const professionalProfileGuard: CanActivateFn = (
   if (!user.hasProfessionalProfile) {
     // Redirigir a la configuración del perfil sin tocar el historial de navegación
     return router.createUrlTree(['/professional/profile']);
+  }
+
+  return true;
+};
+
+/**
+ * Professional Status Guard
+ *
+ * Bloquea el acceso a rutas del área profesional cuando el perfil ha sido
+ * desactivado por un administrador, redirigiendo a /professional/suspended.
+ *
+ * Se aplica DESPUÉS de professionalProfileGuard (el perfil ya existe).
+ * La ruta /professional/suspended queda exenta para evitar bucles.
+ */
+export const professionalStatusGuard: CanActivateFn = (
+  _route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+
+  if (state.url.startsWith('/professional/suspended')) {
+    return true;
+  }
+
+  const user = authStore.user();
+  if (!user) return true;
+
+  // Si el perfil existe pero está desactivado, bloquear acceso
+  if (user.hasProfessionalProfile && user.isProfessionalActive === false) {
+    return router.createUrlTree(['/professional/suspended']);
   }
 
   return true;

@@ -17,7 +17,7 @@ export const publicRoutes: Routes = [
       import('./pages/offline/offline.page').then(
         (m) => m.OfflinePageComponent,
       ),
-    title: 'Sin Conexión - ProDirectory',
+    title: 'Sin Conexión | MediTigo',
   },
   {
     path: '',
@@ -27,7 +27,7 @@ export const publicRoutes: Routes = [
         path: '',
         loadComponent: () =>
           import('./pages/home/home.page').then((m) => m.HomePageComponent),
-        title: 'ProDirectory - Encuentra Profesionales de Confianza',
+        title: 'MediTigo - Encuentra Profesionales de Confianza',
       },
       {
         path: 'search',
@@ -35,7 +35,7 @@ export const publicRoutes: Routes = [
           import('./pages/search/search.page').then(
             (m) => m.SearchPageComponent,
           ),
-        title: 'Buscar Profesionales - ProDirectory',
+        title: 'Buscar Profesionales | MediTigo',
       },
       {
         path: 'pro/:slug',
@@ -43,7 +43,7 @@ export const publicRoutes: Routes = [
           import('./pages/profile/profile.page').then(
             (m) => m.ProfilePageComponent,
           ),
-        title: 'Perfil Profesional - ProDirectory',
+        title: 'Perfil Profesional | MediTigo',
       },
     ],
   },

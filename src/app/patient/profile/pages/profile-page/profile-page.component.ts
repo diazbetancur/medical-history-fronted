@@ -105,17 +105,17 @@ export class ProfilePageComponent implements OnInit {
 
   readonly fullName = computed(() => {
     const profile = this.profile();
-    if (!profile) return 'No disponible';
-    return profile.fullName?.trim() || 'No disponible';
+    if (!profile) return 'Pendiente por diligenciar';
+    return profile.fullName?.trim() || 'Pendiente por diligenciar';
   });
 
   readonly completeAddress = computed(() => {
     const profile = this.profile();
-    if (!profile) return 'No disponible';
+    if (!profile) return 'Pendiente por diligenciar';
     const parts = [profile.addressLine1, profile.cityName, profile.countryName]
       .filter(Boolean)
       .join(', ');
-    return parts || 'No disponible';
+    return parts || 'Pendiente por diligenciar';
   });
 
   readonly visibleClaimRequests = computed(() =>

@@ -34,6 +34,7 @@ const ERROR_MESSAGES: Record<number, string> = {
 const PUBLIC_OR_ANONYMOUS_PATTERNS = [
   '/api/public/',
   '/api/auth/login',
+  '/api/auth/logout',
   '/api/auth/register',
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
@@ -145,7 +146,7 @@ export const errorInterceptor: HttpInterceptorFn = (
         if (router.url !== '/') {
           router.navigate(['/'], {
             queryParams: {
-              returnUrl: router.url,
+              returnTo: router.url,
               reason: 'session_expired',
               authRequired: '1',
             },

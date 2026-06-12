@@ -297,6 +297,14 @@ export class AuthApi {
   }
 
   /**
+   * POST /api/auth/logout
+   * Clears the httpOnly auth cookie on the server side
+   */
+  logout(): Observable<void> {
+    return this.api.post<void>('/auth/logout', {});
+  }
+
+  /**
    * POST /api/auth/become-professional
    * Grants Professional role to an authenticated client user
    */
