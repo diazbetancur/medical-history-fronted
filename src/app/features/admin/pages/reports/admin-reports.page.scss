@@ -1,0 +1,139 @@
+.page-container {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  .page-subtitle {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+// ── Filters ──────────────────────────────────────────────────────────────────
+
+.filters-card {
+  margin-bottom: 24px;
+
+  mat-card-content {
+    padding: 16px !important;
+  }
+}
+
+.filters-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.date-field {
+  min-width: 160px;
+}
+
+// ── Loading / Error ───────────────────────────────────────────────────────────
+
+.loading-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 0.875rem;
+
+  mat-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+}
+
+// ── Section labels ────────────────────────────────────────────────────────────
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 24px 0 12px;
+}
+
+// ── KPI grid ─────────────────────────────────────────────────────────────────
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 8px;
+
+  &--small {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.kpi-card {
+  text-align: center;
+
+  mat-card-content {
+    padding: 20px 12px !important;
+  }
+
+  .kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .kpi-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &.total      .kpi-value { color: var(--mat-sys-primary); }
+  &.active     .kpi-value { color: #2e7d32; }
+  &.inactive   .kpi-value { color: #c62828; }
+  &.standard   .kpi-value { color: #1565c0; }
+  &.growth     .kpi-value { color: #6a1b9a; }
+  &.activations   .kpi-value { color: #2e7d32; }
+  &.deactivations .kpi-value { color: #e65100; }
+  &.completed  .kpi-value { color: #2e7d32; }
+  &.confirmed  .kpi-value { color: #1565c0; }
+  &.cancelled  .kpi-value { color: #c62828; }
+  &.noshow     .kpi-value { color: #e65100; }
+  &.professionals .kpi-value { color: var(--mat-sys-primary); }
+}
