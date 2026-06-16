@@ -225,6 +225,7 @@ export class AuthApi {
         (!!raw?.professionalProfileId &&
           raw.professionalProfileId !== '' &&
           raw.professionalProfileId !== null),
+      csrfToken: raw?.csrfToken ?? '',
     };
   }
 

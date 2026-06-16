@@ -38,6 +38,10 @@ const PUBLIC_OR_ANONYMOUS_PATTERNS = [
   '/api/auth/register',
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
+  // /me is probed on every app start to detect an existing session. A 401 here
+  // just means "not logged in" — AuthStore.loadMe() clears state gracefully — so
+  // it must NOT trigger the "session expired" redirect/notice.
+  '/api/auth/me',
 ];
 const LOCAL_FORBIDDEN_PATTERNS = ['/api/professional/patients/'];
 
