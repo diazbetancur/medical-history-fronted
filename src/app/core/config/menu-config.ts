@@ -334,6 +334,13 @@ export const MENU_ITEMS: MenuItem[] = [
     requiredPermissions: ['FamilyGroup.View'],
   },
   {
+    label: 'Invitaciones',
+    icon: 'mail',
+    route: '/patient/family-requests',
+    context: 'PATIENT',
+    requiredPermissions: ['FamilyGroup.View'],
+  },
+  {
     label: 'Cambiar Contraseña',
     icon: 'lock_reset',
     route: '/patient/change-password',

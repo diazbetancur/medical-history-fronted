@@ -1,0 +1,90 @@
+<div class="family-requests-page">
+  <div class="page-header">
+    <div>
+      <h1>Invitaciones</h1>
+      <p>Invitaciones para unirte a un grupo familiar.</p>
+    </div>
+    @if (requests().length > 0) {
+    <div class="header-badges">
+      <span class="pending-badge">{{ requests().length }} pendiente(s)</span>
+    </div>
+    }
+  </div>
+
+  <section class="privacy-note">
+    <mat-icon aria-hidden="true">shield</mat-icon>
+    <p>
+      Al aceptar una vinculación, autorizas que los administradores activos de
+      ese grupo familiar puedan consultar y gestionar tu información dentro del
+      portal.
+    </p>
+  </section>
+
+  @if (isLoading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando invitaciones...</p>
+  </div>
+  } @else if (error()) {
+  <mat-card class="state-card">
+    <mat-card-content>
+      <mat-icon color="warn">error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-raised-button color="primary" (click)="loadRequests()">
+        Reintentar
+      </button>
+    </mat-card-content>
+  </mat-card>
+  } @else if (requests().length === 0) {
+  <mat-card class="state-card">
+    <mat-card-content>
+      <mat-icon>mark_email_read</mat-icon>
+      <p>No tienes invitaciones pendientes.</p>
+    </mat-card-content>
+  </mat-card>
+  } @else {
+  <div class="requests-list">
+    @for (request of requests(); track trackRequest($index, request)) {
+    <mat-card class="request-card pending">
+      <mat-card-content>
+        <div class="request-main">
+          <div class="request-icon">
+            <mat-icon>group_add</mat-icon>
+          </div>
+          <div>
+            <h2>{{ request.familyGroupName }}</h2>
+            <span class="source-chip">Invitación a grupo familiar</span>
+            <p class="request-date">
+              Invitado el {{ request.requestedAtUtc | date: 'dd/MM/yyyy, h:mm a' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="request-side">
+          <div class="actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="accept(request)"
+              [disabled]="isResponding(request)"
+            >
+              Aceptar
+            </button>
+            <button
+              mat-stroked-button
+              color="warn"
+              type="button"
+              (click)="reject(request)"
+              [disabled]="isResponding(request)"
+            >
+              Rechazar
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+  }
+</div>

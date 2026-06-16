@@ -475,6 +475,16 @@ export const routes: Routes = [
         title: 'Grupo Familiar | MediTigo',
       },
       {
+        path: 'family-requests',
+        canActivate: [permissionStoreGuard],
+        data: { requiredPermissions: ['FamilyGroup.View'] },
+        loadComponent: () =>
+          import('./patient/pages/family-group/family-requests.page').then(
+            (m) => m.FamilyRequestsPage,
+          ),
+        title: 'Invitaciones de grupo | MediTigo',
+      },
+      {
         path: 'managed/:patientProfileId',
         canActivate: [permissionStoreGuard],
         data: { requiredPermissions: ['FamilyGroup.View'] },
