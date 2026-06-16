@@ -1,0 +1,136 @@
+<section class="managed">
+  <div class="managed__header">
+    <mat-icon>switch_account</mat-icon>
+    <h1>{{ acting.acting()?.fullName || 'Paciente gestionado' }}</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="managed__loading"><mat-spinner diameter="40" /></div>
+  } @else {
+    <mat-tab-group>
+      <!-- Historia -->
+      <mat-tab label="Historia">
+        @if (history().length === 0) {
+          <p class="managed__empty">No hay encuentros registrados.</p>
+        } @else {
+          <div class="managed__list">
+            @for (e of history(); track e.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-title">
+                  {{ e.professionalName || 'Profesional' }}
+                </div>
+                <div class="managed__item-meta">
+                  {{ e.encounterDateUtc | date: 'mediumDate' }}
+                  @if (e.status) { · {{ e.status }} }
+                </div>
+                @if (e.summary) { <p class="managed__item-desc">{{ e.summary }}</p> }
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Exámenes -->
+      <mat-tab label="Exámenes">
+        @if (exams().length === 0) {
+          <p class="managed__empty">No hay exámenes registrados.</p>
+        } @else {
+          <div class="managed__list">
+            @for (x of exams(); track x.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-title">{{ x.title }}</div>
+                <div class="managed__item-meta">
+                  {{ x.examDate | date: 'mediumDate' }}
+                  @if (x.originalFileName) { · {{ x.originalFileName }} }
+                </div>
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Medicamentos -->
+      <mat-tab label="Medicamentos">
+        @if (medications().length === 0) {
+          <p class="managed__empty">No hay medicamentos registrados.</p>
+        } @else {
+          <div class="managed__list">
+            @for (m of medications(); track m.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-title">{{ m.name }}</div>
+                <div class="managed__item-meta">
+                  @if (m.dose) { {{ m.dose }} }
+                  @if (m.frequency) { · {{ m.frequency }} }
+                  @if (m.status) { · {{ m.status }} }
+                </div>
+                @if (m.notes) { <p class="managed__item-desc">{{ m.notes }}</p> }
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Alergias -->
+      <mat-tab label="Alergias">
+        @if (allergies().length === 0) {
+          <p class="managed__empty">No hay alergias registradas.</p>
+        } @else {
+          <div class="managed__list">
+            @for (a of allergies(); track a.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-title">{{ a.allergen }}</div>
+                <div class="managed__item-meta">
+                  @if (a.severity !== undefined && a.severity !== null) { Severidad: {{ a.severity }} }
+                  @if (a.status !== undefined && a.status !== null) { · {{ a.status }} }
+                </div>
+                @if (a.reaction) { <p class="managed__item-desc">{{ a.reaction }}</p> }
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Antecedentes -->
+      <mat-tab label="Antecedentes">
+        @if (background().length === 0) {
+          <p class="managed__empty">No hay antecedentes registrados.</p>
+        } @else {
+          <div class="managed__list">
+            @for (b of background(); track b.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-title">{{ b.title }}</div>
+                <div class="managed__item-meta">
+                  @if (b.type) { {{ b.type }} }
+                  @if (b.eventDate) { · {{ b.eventDate | date: 'mediumDate' }} }
+                </div>
+                @if (b.description) { <p class="managed__item-desc">{{ b.description }}</p> }
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Citas -->
+      <mat-tab label="Citas">
+        @if (appointments().length === 0) {
+          <p class="managed__empty">No hay citas registradas.</p>
+        } @else {
+          <div class="managed__list">
+            @for (c of appointments(); track c.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-title">
+                  {{ c.professionalName || 'Profesional' }}
+                </div>
+                <div class="managed__item-meta">
+                  {{ c.startUtc | date: 'medium' }}
+                  @if (c.statusDisplay) { · {{ c.statusDisplay }} }
+                </div>
+                @if (c.reason) { <p class="managed__item-desc">{{ c.reason }}</p> }
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+    </mat-tab-group>
+  }
+</section>

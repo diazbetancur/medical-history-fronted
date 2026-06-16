@@ -25,7 +25,20 @@
                   }
                 </span>
               </div>
-              <!-- Acciones (promover/bajar/sacar/gestionar) se habilitan en Fase 1b/2 con tooltips -->
+              @if (d.iAmAdmin && !isCurrentUser(m)) {
+                <div class="fg-member__actions">
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="primary"
+                    matTooltip="Gestionar"
+                    (click)="manage(m)"
+                  >
+                    <mat-icon>switch_account</mat-icon>
+                  </button>
+                </div>
+              }
+              <!-- Otras acciones (promover/bajar/sacar) se habilitan en Fase 2 -->
             </mat-card>
           }
         </div>
