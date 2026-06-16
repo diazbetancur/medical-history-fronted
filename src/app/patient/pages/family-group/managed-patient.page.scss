@@ -26,8 +26,30 @@
     padding: 1rem 0;
   }
 
+  &__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 0 0;
+  }
+
   &__item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
     padding: 0.75rem 1rem;
+  }
+
+  &__item-body {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 0 0 auto;
   }
 
   &__item-title {

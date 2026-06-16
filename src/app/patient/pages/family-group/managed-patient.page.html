@@ -51,19 +51,34 @@
 
       <!-- Medicamentos -->
       <mat-tab label="Medicamentos">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="addMedication()">
+            <mat-icon>add</mat-icon> Agregar
+          </button>
+        </div>
         @if (medications().length === 0) {
           <p class="managed__empty">No hay medicamentos registrados.</p>
         } @else {
           <div class="managed__list">
             @for (m of medications(); track m.id) {
               <mat-card class="managed__item">
-                <div class="managed__item-title">{{ m.name }}</div>
-                <div class="managed__item-meta">
-                  @if (m.dose) { {{ m.dose }} }
-                  @if (m.frequency) { · {{ m.frequency }} }
-                  @if (m.status) { · {{ m.status }} }
+                <div class="managed__item-body">
+                  <div class="managed__item-title">{{ m.name }}</div>
+                  <div class="managed__item-meta">
+                    @if (m.dose) { {{ m.dose }} }
+                    @if (m.frequency) { · {{ m.frequency }} }
+                    @if (m.status) { · {{ m.status }} }
+                  </div>
+                  @if (m.notes) { <p class="managed__item-desc">{{ m.notes }}</p> }
                 </div>
-                @if (m.notes) { <p class="managed__item-desc">{{ m.notes }}</p> }
+                <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Editar" (click)="editMedication(m)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteMedication(m)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
               </mat-card>
             }
           </div>
@@ -72,18 +87,33 @@
 
       <!-- Alergias -->
       <mat-tab label="Alergias">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="addAllergy()">
+            <mat-icon>add</mat-icon> Agregar
+          </button>
+        </div>
         @if (allergies().length === 0) {
           <p class="managed__empty">No hay alergias registradas.</p>
         } @else {
           <div class="managed__list">
             @for (a of allergies(); track a.id) {
               <mat-card class="managed__item">
-                <div class="managed__item-title">{{ a.allergen }}</div>
-                <div class="managed__item-meta">
-                  @if (a.severity !== undefined && a.severity !== null) { Severidad: {{ a.severity }} }
-                  @if (a.status !== undefined && a.status !== null) { · {{ a.status }} }
+                <div class="managed__item-body">
+                  <div class="managed__item-title">{{ a.allergen }}</div>
+                  <div class="managed__item-meta">
+                    @if (a.severity !== undefined && a.severity !== null) { Severidad: {{ a.severity }} }
+                    @if (a.status !== undefined && a.status !== null) { · {{ a.status }} }
+                  </div>
+                  @if (a.reaction) { <p class="managed__item-desc">{{ a.reaction }}</p> }
                 </div>
-                @if (a.reaction) { <p class="managed__item-desc">{{ a.reaction }}</p> }
+                <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Editar" (click)="editAllergy(a)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteAllergy(a)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
               </mat-card>
             }
           </div>
@@ -92,18 +122,33 @@
 
       <!-- Antecedentes -->
       <mat-tab label="Antecedentes">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="addBackground()">
+            <mat-icon>add</mat-icon> Agregar
+          </button>
+        </div>
         @if (background().length === 0) {
           <p class="managed__empty">No hay antecedentes registrados.</p>
         } @else {
           <div class="managed__list">
             @for (b of background(); track b.id) {
               <mat-card class="managed__item">
-                <div class="managed__item-title">{{ b.title }}</div>
-                <div class="managed__item-meta">
-                  @if (b.type) { {{ b.type }} }
-                  @if (b.eventDate) { · {{ b.eventDate | date: 'mediumDate' }} }
+                <div class="managed__item-body">
+                  <div class="managed__item-title">{{ b.title }}</div>
+                  <div class="managed__item-meta">
+                    @if (b.type) { {{ b.type }} }
+                    @if (b.eventDate) { · {{ b.eventDate | date: 'mediumDate' }} }
+                  </div>
+                  @if (b.description) { <p class="managed__item-desc">{{ b.description }}</p> }
                 </div>
-                @if (b.description) { <p class="managed__item-desc">{{ b.description }}</p> }
+                <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Editar" (click)="editBackground(b)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteBackground(b)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
               </mat-card>
             }
           </div>
@@ -118,14 +163,23 @@
           <div class="managed__list">
             @for (c of appointments(); track c.id) {
               <mat-card class="managed__item">
-                <div class="managed__item-title">
-                  {{ c.professionalName || 'Profesional' }}
+                <div class="managed__item-body">
+                  <div class="managed__item-title">
+                    {{ c.professionalName || 'Profesional' }}
+                  </div>
+                  <div class="managed__item-meta">
+                    {{ c.startUtc | date: 'medium' }}
+                    @if (c.statusDisplay) { · {{ c.statusDisplay }} }
+                  </div>
+                  @if (c.reason) { <p class="managed__item-desc">{{ c.reason }}</p> }
                 </div>
-                <div class="managed__item-meta">
-                  {{ c.startUtc | date: 'medium' }}
-                  @if (c.statusDisplay) { · {{ c.statusDisplay }} }
-                </div>
-                @if (c.reason) { <p class="managed__item-desc">{{ c.reason }}</p> }
+                @if (isFutureAppointment(c)) {
+                  <div class="managed__item-actions">
+                    <button type="button" mat-stroked-button color="warn" (click)="cancelAppointment(c)">
+                      Cancelar
+                    </button>
+                  </div>
+                }
               </mat-card>
             }
           </div>
