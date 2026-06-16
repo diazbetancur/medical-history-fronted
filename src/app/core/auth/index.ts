@@ -50,6 +50,7 @@ export {
 // Services
 export { AuthService } from './auth.service';
 export { AuthStore } from './auth.store';
+export { CsrfTokenStore } from './csrf-token.store';
 export type { AuthState } from './auth.store';
 export { PostLoginNavigationService } from './post-login-navigation.service';
 export { TokenStorage } from './token-storage.service';

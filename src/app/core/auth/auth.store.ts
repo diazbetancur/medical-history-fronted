@@ -11,6 +11,7 @@ import { ContextDto, CurrentUserDto, ProblemDetails } from '@core/models';
 import { AuthApi } from '@data/api';
 import { ToastService } from '@shared/services/toast.service';
 import { catchError, Observable, of, tap } from 'rxjs';
+import { CsrfTokenStore } from './csrf-token.store';
 import { TokenStorage } from './token-storage.service';
 
 const CURRENT_CONTEXT_KEY = 'auth_current_context';
@@ -40,6 +41,7 @@ const INITIAL_STATE: AuthState = {
 export class AuthStore {
   private readonly authApi = inject(AuthApi);
   private readonly tokenStorage = inject(TokenStorage);
+  private readonly csrf = inject(CsrfTokenStore);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly toast = inject(ToastService);
@@ -86,6 +88,10 @@ export class AuthStore {
 
     return this.authApi.me().pipe(
       tap((user) => {
+        // Restore the anti-CSRF token for this session (issued in the JWT and
+        // echoed back in the /me body) so mutating requests can carry the header.
+        this.csrf.set(user.csrfToken ?? null);
+
         const persistedContext = this.getPersistedContext();
         const isValid = user.contexts.some(
           (ctx) => ctx.type === persistedContext?.type && ctx.id === persistedContext?.id,
@@ -163,6 +169,7 @@ export class AuthStore {
 
   private clearAuth(): void {
     this.tokenStorage.clearToken();
+    this.csrf.clear();
     this.clearPersistedContext();
     this._state.set(INITIAL_STATE);
   }
