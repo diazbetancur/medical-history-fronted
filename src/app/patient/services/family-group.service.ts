@@ -184,6 +184,22 @@ export class FamilyGroupService {
       .pipe(catchError((e) => this.handle(e)));
   }
 
+  bookAppointment(
+    patientProfileId: string,
+    dto: {
+      professionalProfileId: string;
+      appointmentDate: string;
+      timeSlot: string;
+      observation?: string;
+      reason?: string;
+      notes?: string;
+    },
+  ): Observable<unknown> {
+    return this.http
+      .post(this.patientUrl(patientProfileId, 'appointments'), dto)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
   uploadExam(
     patientProfileId: string,
     data: { title: string; examDate: string; notes?: string; file: File },
