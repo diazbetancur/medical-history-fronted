@@ -169,6 +169,11 @@
 
       <!-- Citas -->
       <mat-tab label="Citas">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="bookAppointment()">
+            <mat-icon>event</mat-icon> Agendar cita
+          </button>
+        </div>
         @if (appointments().length === 0) {
           <p class="managed__empty">No hay citas registradas.</p>
         } @else {

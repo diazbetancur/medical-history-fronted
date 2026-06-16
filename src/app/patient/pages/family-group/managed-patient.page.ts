@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '@shared/services';
 import { ConfirmDialogComponent } from '@shared/ui';
 import { ActingPatientStore } from '../../services/acting-patient.store';
@@ -42,6 +42,7 @@ import { MedicationFormDialogComponent } from './dialogs/medication-form-dialog.
 })
 export class ManagedPatientPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly familyGroup = inject(FamilyGroupService);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
@@ -269,6 +270,14 @@ export class ManagedPatientPage implements OnInit {
   }
 
   // --- Citas ---
+
+  bookAppointment(): void {
+    // El ActingPatientStore ya está seteado (entramos vía el selector "Gestionar"),
+    // por lo que el flujo de agendamiento descubre al profesional y
+    // BookAppointmentDialogComponent detecta el contexto "actuando como"
+    // para reservar la cita del paciente gestionado.
+    void this.router.navigate(['/patient/wizard']);
+  }
 
   isFutureAppointment(appt: any): boolean {
     const start = appt?.startUtc ? new Date(appt.startUtc).getTime() : NaN;
