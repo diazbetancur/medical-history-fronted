@@ -38,3 +38,11 @@ export interface AddMemberByDocumentRequest {
   documentNumber: string;
   fullName?: string;
 }
+
+export interface ManageablePatient {
+  patientProfileId: string;
+  fullName: string;
+  familyGroupId: string;
+  familyGroupName: string;
+  linkType: FamilyLinkType;
+}

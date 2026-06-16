@@ -9,6 +9,7 @@ import {
   CreateFamilyGroupRequest,
   FamilyGroupDetail,
   FamilyGroupSummary,
+  ManageablePatient,
 } from './family-group.models';
 
 @Injectable({ providedIn: 'root' })
@@ -37,6 +38,25 @@ export class FamilyGroupService {
   addMember(groupId: string, payload: AddMemberByDocumentRequest): Observable<AddMemberResult> {
     return this.http
       .post<AddMemberResult>(`${this.baseUrl}/${groupId}/members`, payload)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  getManageablePatients(): Observable<ManageablePatient[]> {
+    return this.http
+      .get<ManageablePatient[]>(`${this.baseUrl}/manageable-patients`)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  getPatientArea<T>(
+    patientProfileId: string,
+    area: string,
+    page = 1,
+    pageSize = 10,
+  ): Observable<T> {
+    return this.http
+      .get<T>(
+        `${this.baseUrl}/patients/${patientProfileId}/${area}?page=${page}&pageSize=${pageSize}`,
+      )
       .pipe(catchError((e) => this.handle(e)));
   }
 
