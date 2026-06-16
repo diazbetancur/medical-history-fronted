@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@core/auth';
 import { ToastService } from '@shared/services';
+import { ConfirmDialogComponent } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { AddDependentDialogComponent } from './dialogs/add-dependent-dialog.component';
 import { ActingPatientStore } from '../../services/acting-patient.store';
@@ -102,5 +103,77 @@ export class FamilyGroupDetailPage implements OnInit {
         error: (e) => this.toast.error(e.message || 'No se pudo agregar el miembro'),
       });
     });
+  }
+
+  promote(m: FamilyGroupMember): void {
+    this.service.promoteMember(this.groupId, m.memberId).subscribe({
+      next: () => {
+        this.toast.success('Miembro promovido a administrador');
+        this.load();
+      },
+      error: (e) => this.toast.error(e.message || 'No se pudo promover'),
+    });
+  }
+
+  demote(m: FamilyGroupMember): void {
+    this.service.demoteMember(this.groupId, m.memberId).subscribe({
+      next: () => {
+        this.toast.success('Administrador bajado a miembro');
+        this.load();
+      },
+      error: (e) => this.toast.error(e.message || 'No se pudo bajar'),
+    });
+  }
+
+  remove(m: FamilyGroupMember): void {
+    this.confirm(
+      'Sacar del grupo',
+      `¿Sacar a ${m.fullName} del grupo? Perderá el acceso.`,
+      'Sacar',
+      'person_remove',
+    ).subscribe((ok) => {
+      if (!ok) return;
+      this.service.removeMember(this.groupId, m.memberId).subscribe({
+        next: () => {
+          this.toast.success('Miembro retirado del grupo');
+          this.load();
+        },
+        error: (e) => this.toast.error(e.message || 'No se pudo sacar al miembro'),
+      });
+    });
+  }
+
+  leave(): void {
+    this.confirm(
+      'Salir del grupo',
+      'Si eres el último administrador, el grupo se eliminará. ¿Continuar?',
+      'Salir',
+      'logout',
+    ).subscribe((ok) => {
+      if (!ok) return;
+      this.service.leaveGroup(this.groupId).subscribe({
+        next: (res) => {
+          this.toast.success(res.groupDeleted ? 'Grupo eliminado' : 'Saliste del grupo');
+          this.router.navigate(['/patient/family-group']);
+        },
+        error: (e) => this.toast.error(e.message || 'No se pudo salir del grupo'),
+      });
+    });
+  }
+
+  private confirm(title: string, message: string, confirmText = 'Eliminar', icon = 'delete_forever') {
+    return this.dialog
+      .open(ConfirmDialogComponent, {
+        width: '420px',
+        data: {
+          title,
+          message,
+          confirmText,
+          cancelText: 'Cancelar',
+          confirmColor: 'warn',
+          icon,
+        },
+      })
+      .afterClosed();
   }
 }

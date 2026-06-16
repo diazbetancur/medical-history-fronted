@@ -1,6 +1,11 @@
 @if (detail(); as d) {
   <section class="fg-detail">
-    <h1>{{ d.name }}</h1>
+    <div class="fg-detail__header">
+      <h1>{{ d.name }}</h1>
+      <button type="button" mat-stroked-button color="warn" (click)="leave()">
+        <mat-icon>logout</mat-icon> Salir del grupo
+      </button>
+    </div>
 
     <mat-tab-group>
       <mat-tab label="Miembros">
@@ -36,9 +41,40 @@
                   >
                     <mat-icon>switch_account</mat-icon>
                   </button>
+                  @if (m.adminRole === 'None' && m.hasAccount) {
+                    <button
+                      type="button"
+                      mat-icon-button
+                      color="primary"
+                      matTooltip="Hacer administrador"
+                      (click)="promote(m)"
+                    >
+                      <mat-icon>shield_person</mat-icon>
+                    </button>
+                  }
+                  @if (m.adminRole === 'Additional') {
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matTooltip="Bajar a miembro"
+                      (click)="demote(m)"
+                    >
+                      <mat-icon>remove_moderator</mat-icon>
+                    </button>
+                  }
+                  @if (m.adminRole !== 'Principal') {
+                    <button
+                      type="button"
+                      mat-icon-button
+                      color="warn"
+                      matTooltip="Sacar del grupo"
+                      (click)="remove(m)"
+                    >
+                      <mat-icon>person_remove</mat-icon>
+                    </button>
+                  }
                 </div>
               }
-              <!-- Otras acciones (promover/bajar/sacar) se habilitan en Fase 2 -->
             </mat-card>
           }
         </div>
