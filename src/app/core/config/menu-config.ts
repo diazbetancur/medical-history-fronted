@@ -327,6 +327,13 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PATIENT',
   },
   {
+    label: 'Grupo Familiar',
+    icon: 'family_restroom',
+    route: '/patient/family-group',
+    context: 'PATIENT',
+    requiredPermissions: ['FamilyGroup.View'],
+  },
+  {
     label: 'Cambiar Contraseña',
     icon: 'lock_reset',
     route: '/patient/change-password',

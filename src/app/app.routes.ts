@@ -455,6 +455,26 @@ export const routes: Routes = [
         title: 'Activarme como profesional | MediTigo',
       },
       {
+        path: 'family-group',
+        canActivate: [permissionStoreGuard],
+        data: { requiredPermissions: ['FamilyGroup.View'] },
+        loadComponent: () =>
+          import('./patient/pages/family-group/family-group-list.page').then(
+            (m) => m.FamilyGroupListPage,
+          ),
+        title: 'Grupo Familiar | MediTigo',
+      },
+      {
+        path: 'family-group/:id',
+        canActivate: [permissionStoreGuard],
+        data: { requiredPermissions: ['FamilyGroup.View'] },
+        loadComponent: () =>
+          import('./patient/pages/family-group/family-group-detail.page').then(
+            (m) => m.FamilyGroupDetailPage,
+          ),
+        title: 'Grupo Familiar | MediTigo',
+      },
+      {
         path: 'medications',
         canActivate: [permissionStoreGuard],
         data: {
