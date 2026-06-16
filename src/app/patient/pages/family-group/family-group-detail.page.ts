@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -19,12 +20,14 @@ import {
   AddMemberByDocumentRequest,
   FamilyGroupDetail,
   FamilyGroupMember,
+  FamilyGroupPendingRequest,
 } from '../../services/family-group.models';
 
 @Component({
   selector: 'app-family-group-detail',
   standalone: true,
   imports: [
+    DatePipe,
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
@@ -47,6 +50,7 @@ export class FamilyGroupDetailPage implements OnInit {
 
   readonly isLoading = signal(true);
   readonly detail = signal<FamilyGroupDetail | null>(null);
+  readonly pendingRequests = signal<FamilyGroupPendingRequest[]>([]);
 
   private groupId = '';
 
@@ -61,9 +65,41 @@ export class FamilyGroupDetailPage implements OnInit {
       .getDetail(this.groupId)
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
-        next: (d) => this.detail.set(d),
+        next: (d) => {
+          this.detail.set(d);
+          if (d.iAmAdmin) {
+            this.loadPendingRequests();
+          } else {
+            this.pendingRequests.set([]);
+          }
+        },
         error: (e) => this.toast.error(e.message || 'No se pudo cargar el grupo'),
       });
+  }
+
+  private loadPendingRequests(): void {
+    this.service.getGroupRequests(this.groupId).subscribe({
+      next: (reqs) => this.pendingRequests.set(reqs),
+      error: () => this.pendingRequests.set([]),
+    });
+  }
+
+  cancelRequest(r: FamilyGroupPendingRequest): void {
+    this.confirm(
+      'Cancelar solicitud',
+      `¿Cancelar la solicitud de vinculación de ${r.patientFullName}?`,
+      'Cancelar solicitud',
+      'cancel',
+    ).subscribe((ok) => {
+      if (!ok) return;
+      this.service.cancelRequest(this.groupId, r.id).subscribe({
+        next: () => {
+          this.toast.success('Solicitud cancelada');
+          this.load();
+        },
+        error: (e) => this.toast.error(e.message || 'No se pudo cancelar la solicitud'),
+      });
+    });
   }
 
   /**

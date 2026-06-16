@@ -81,7 +81,34 @@
       </mat-tab>
 
       <mat-tab label="Solicitudes pendientes">
-        <p class="fg-empty-tab">No hay solicitudes pendientes.</p>
+        @if (pendingRequests().length) {
+          <div class="fg-members">
+            @for (r of pendingRequests(); track r.id) {
+              <mat-card class="fg-member">
+                <div class="fg-member__info">
+                  <span class="fg-member__name">{{ r.patientFullName }}</span>
+                  <span class="fg-member__chips">
+                    <span class="chip">Pendiente</span>
+                    <span class="fg-member__date">{{ r.requestedAtUtc | date: 'short' }}</span>
+                  </span>
+                </div>
+                <div class="fg-member__actions">
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="warn"
+                    matTooltip="Cancelar solicitud"
+                    (click)="cancelRequest(r)"
+                  >
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </div>
+              </mat-card>
+            }
+          </div>
+        } @else {
+          <p class="fg-empty-tab">No hay solicitudes pendientes.</p>
+        }
       </mat-tab>
     </mat-tab-group>
   </section>
