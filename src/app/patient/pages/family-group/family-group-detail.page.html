@@ -1,0 +1,41 @@
+@if (detail(); as d) {
+  <section class="fg-detail">
+    <h1>{{ d.name }}</h1>
+
+    <mat-tab-group>
+      <mat-tab label="Miembros">
+        @if (d.iAmAdmin) {
+          <div class="fg-detail__actions">
+            <button mat-flat-button color="primary" (click)="openAddMember()">
+              <mat-icon>person_add</mat-icon> Agregar miembro
+            </button>
+          </div>
+        }
+        <div class="fg-members">
+          @for (m of d.members; track m.memberId) {
+            <mat-card class="fg-member">
+              <div class="fg-member__info">
+                <span class="fg-member__name">{{ m.fullName }}</span>
+                <span class="fg-member__chips">
+                  <span class="chip">{{ m.linkType === 'Dependent' ? 'Dependiente' : 'Registrado' }}</span>
+                  @if (m.adminRole !== 'None') {
+                    <span class="chip chip--admin">
+                      {{ m.adminRole === 'Principal' ? 'Principal' : 'Admin' }}
+                    </span>
+                  }
+                </span>
+              </div>
+              <!-- Acciones (promover/bajar/sacar/gestionar) se habilitan en Fase 1b/2 con tooltips -->
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Solicitudes pendientes">
+        <p class="fg-empty-tab">No hay solicitudes pendientes.</p>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+} @else if (isLoading()) {
+  <div class="fg-detail__loading"><mat-spinner diameter="40" /></div>
+}
