@@ -19,6 +19,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -40,6 +41,7 @@ export interface ExamUploadDialogResult {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    MatTooltipModule,
   ],
   templateUrl: './exam-upload-dialog.component.html',
 })
