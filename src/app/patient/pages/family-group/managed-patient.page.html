@@ -32,16 +32,28 @@
 
       <!-- Exámenes -->
       <mat-tab label="Exámenes">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="uploadExam()">
+            <mat-icon>upload_file</mat-icon> Subir examen
+          </button>
+        </div>
         @if (exams().length === 0) {
           <p class="managed__empty">No hay exámenes registrados.</p>
         } @else {
           <div class="managed__list">
             @for (x of exams(); track x.id) {
               <mat-card class="managed__item">
-                <div class="managed__item-title">{{ x.title }}</div>
-                <div class="managed__item-meta">
-                  {{ x.examDate | date: 'mediumDate' }}
-                  @if (x.originalFileName) { · {{ x.originalFileName }} }
+                <div class="managed__item-body">
+                  <div class="managed__item-title">{{ x.title }}</div>
+                  <div class="managed__item-meta">
+                    {{ x.examDate | date: 'mediumDate' }}
+                    @if (x.originalFileName) { · {{ x.originalFileName }} }
+                  </div>
+                </div>
+                <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteExam(x)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
                 </div>
               </mat-card>
             }

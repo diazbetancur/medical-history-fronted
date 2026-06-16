@@ -19,6 +19,10 @@ import {
 } from '../../services/family-group.models';
 import { AllergyFormDialogComponent } from './dialogs/allergy-form-dialog.component';
 import { BackgroundFormDialogComponent } from './dialogs/background-form-dialog.component';
+import {
+  ExamUploadDialogComponent,
+  ExamUploadDialogResult,
+} from './dialogs/exam-upload-dialog.component';
 import { MedicationFormDialogComponent } from './dialogs/medication-form-dialog.component';
 
 @Component({
@@ -90,6 +94,37 @@ export class ManagedPatientPage implements OnInit {
           done?.();
         },
       });
+  }
+
+  // --- Exámenes ---
+
+  uploadExam(): void {
+    this.dialog
+      .open(ExamUploadDialogComponent, { width: '520px' })
+      .afterClosed()
+      .subscribe((data: ExamUploadDialogResult | null | undefined) => {
+        if (!data) return;
+        this.familyGroup.uploadExam(this.id, data).subscribe({
+          next: () => {
+            this.toast.success('Examen subido');
+            this.loadArea('exams', this.exams);
+          },
+          error: (e) => this.toast.error(e?.message || 'No se pudo subir el examen'),
+        });
+      });
+  }
+
+  deleteExam(item: any): void {
+    this.confirm('Eliminar examen', `¿Eliminar "${item.title}"?`).subscribe((ok) => {
+      if (!ok) return;
+      this.familyGroup.deleteExam(this.id, item.id).subscribe({
+        next: () => {
+          this.toast.success('Examen eliminado');
+          this.loadArea('exams', this.exams);
+        },
+        error: (e) => this.toast.error(e?.message || 'No se pudo eliminar el examen'),
+      });
+    });
   }
 
   // --- Medicamentos ---
