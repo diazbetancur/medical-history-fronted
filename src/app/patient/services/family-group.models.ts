@@ -46,3 +46,33 @@ export interface ManageablePatient {
   familyGroupName: string;
   linkType: FamilyLinkType;
 }
+
+export interface MedicationInput {
+  name: string;
+  dose?: string;
+  frequency?: string;
+  prescribedBy?: string;
+  startDate?: string;
+  endDate?: string;
+  isOngoing?: boolean;
+  notes?: string;
+  status?: string;
+}
+
+export interface AllergyInput {
+  allergen: string;
+  reaction?: string;
+  severity?: string;
+  status?: string;
+  notes?: string;
+  onsetDate?: string;
+}
+
+export interface BackgroundInput {
+  type: string;
+  title: string;
+  description?: string;
+  eventDate?: string;
+  isChronic?: boolean;
+  isActive?: boolean;
+}
