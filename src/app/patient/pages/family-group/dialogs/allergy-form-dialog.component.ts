@@ -8,6 +8,7 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { AllergyInput } from '../../../services/family-group.models';
 
 @Component({
@@ -19,6 +20,7 @@ import { AllergyInput } from '../../../services/family-group.models';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
   ],
   templateUrl: './allergy-form-dialog.component.html',
 })
@@ -31,14 +33,25 @@ export class AllergyFormDialogComponent {
 
   readonly isEdit = !!this.data;
 
+  readonly severityOptions = [
+    { value: 'Mild', label: 'Leve' },
+    { value: 'Moderate', label: 'Moderada' },
+    { value: 'Severe', label: 'Severa' },
+  ];
+
+  readonly statusOptions = [
+    { value: 'Active', label: 'Activa' },
+    { value: 'Resolved', label: 'Resuelta' },
+  ];
+
   readonly form = this.fb.nonNullable.group({
     allergen: [
       this.data?.allergen ?? '',
       [Validators.required, Validators.maxLength(200)],
     ],
     reaction: [this.data?.reaction ?? '', [Validators.maxLength(500)]],
-    severity: [this.data?.severity ?? '', [Validators.maxLength(120)]],
-    status: [this.data?.status ?? '', [Validators.maxLength(120)]],
+    severity: [this.data?.severity ?? 'Mild', [Validators.required]],
+    status: [this.data?.status ?? 'Active', [Validators.required]],
     notes: [this.data?.notes ?? '', [Validators.maxLength(1000)]],
     onsetDate: [this.data?.onsetDate ?? ''],
   });

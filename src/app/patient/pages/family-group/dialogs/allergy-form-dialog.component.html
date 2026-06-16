@@ -16,12 +16,26 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Severidad</mat-label>
-      <input matInput formControlName="severity" maxlength="120" placeholder="Ej. Leve / Moderada / Severa" />
+      <mat-select formControlName="severity">
+        @for (option of severityOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.severity.hasError('required') && form.controls.severity.touched) {
+        <mat-error>La severidad es obligatoria</mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Estado</mat-label>
-      <input matInput formControlName="status" maxlength="120" placeholder="Ej. Activa" />
+      <mat-select formControlName="status">
+        @for (option of statusOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.status.hasError('required') && form.controls.status.touched) {
+        <mat-error>El estado es obligatorio</mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
