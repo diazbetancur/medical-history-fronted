@@ -184,6 +184,26 @@ export class FamilyGroupService {
       .pipe(catchError((e) => this.handle(e)));
   }
 
+  uploadExam(
+    patientProfileId: string,
+    data: { title: string; examDate: string; notes?: string; file: File },
+  ): Observable<unknown> {
+    const form = new FormData();
+    form.append('title', data.title);
+    form.append('examDate', data.examDate);
+    if (data.notes) form.append('notes', data.notes);
+    form.append('file', data.file, data.file.name);
+    return this.http
+      .post(this.patientUrl(patientProfileId, 'exams'), form)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  deleteExam(patientProfileId: string, examId: string): Observable<unknown> {
+    return this.http
+      .delete(`${this.patientUrl(patientProfileId, 'exams')}/${examId}`)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
   private handle(error: unknown): Observable<never> {
     return throwError(() => createApiError(error));
   }
