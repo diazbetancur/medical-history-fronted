@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar medicamento' : 'Agregar medicamento' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" maxlength="200" placeholder="Ej. Ibuprofeno" />
+      @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+        <mat-error>El nombre es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Dosis</mat-label>
+      <input matInput formControlName="dose" maxlength="120" placeholder="Ej. 400 mg" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Frecuencia</mat-label>
+      <input matInput formControlName="frequency" maxlength="120" placeholder="Ej. Cada 8 horas" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Prescrito por</mat-label>
+      <input matInput formControlName="prescribedBy" maxlength="200" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fecha de inicio</mat-label>
+      <input matInput type="date" formControlName="startDate" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fecha de fin</mat-label>
+      <input matInput type="date" formControlName="endDate" />
+    </mat-form-field>
+
+    <mat-checkbox formControlName="isOngoing">En curso</mat-checkbox>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas</mat-label>
+      <textarea matInput formControlName="notes" rows="3" maxlength="1000"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="submit()">
+    {{ isEdit ? 'Guardar' : 'Agregar' }}
+  </button>
+</mat-dialog-actions>

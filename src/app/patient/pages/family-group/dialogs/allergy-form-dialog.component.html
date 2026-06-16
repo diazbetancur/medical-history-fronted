@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar alergia' : 'Agregar alergia' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Alérgeno</mat-label>
+      <input matInput formControlName="allergen" maxlength="200" placeholder="Ej. Penicilina" />
+      @if (form.controls.allergen.hasError('required') && form.controls.allergen.touched) {
+        <mat-error>El alérgeno es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reacción</mat-label>
+      <input matInput formControlName="reaction" maxlength="500" placeholder="Ej. Urticaria" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Severidad</mat-label>
+      <input matInput formControlName="severity" maxlength="120" placeholder="Ej. Leve / Moderada / Severa" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Estado</mat-label>
+      <input matInput formControlName="status" maxlength="120" placeholder="Ej. Activa" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fecha de inicio</mat-label>
+      <input matInput type="date" formControlName="onsetDate" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notas</mat-label>
+      <textarea matInput formControlName="notes" rows="3" maxlength="1000"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="submit()">
+    {{ isEdit ? 'Guardar' : 'Agregar' }}
+  </button>
+</mat-dialog-actions>
