@@ -29,6 +29,10 @@ export interface AddMemberResult {
   member: FamilyGroupMember | null;
 }
 
+export interface LeaveGroupResult {
+  groupDeleted: boolean;
+}
+
 export interface CreateFamilyGroupRequest {
   name: string;
 }

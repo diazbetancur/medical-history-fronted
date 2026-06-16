@@ -11,6 +11,7 @@ import {
   CreateFamilyGroupRequest,
   FamilyGroupDetail,
   FamilyGroupSummary,
+  LeaveGroupResult,
   ManageablePatient,
   MedicationInput,
 } from './family-group.models';
@@ -41,6 +42,30 @@ export class FamilyGroupService {
   addMember(groupId: string, payload: AddMemberByDocumentRequest): Observable<AddMemberResult> {
     return this.http
       .post<AddMemberResult>(`${this.baseUrl}/${groupId}/members`, payload)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  promoteMember(groupId: string, memberId: string): Observable<unknown> {
+    return this.http
+      .post(`${this.baseUrl}/${groupId}/members/${memberId}/promote`, {})
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  demoteMember(groupId: string, memberId: string): Observable<unknown> {
+    return this.http
+      .post(`${this.baseUrl}/${groupId}/members/${memberId}/demote`, {})
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  removeMember(groupId: string, memberId: string): Observable<unknown> {
+    return this.http
+      .delete(`${this.baseUrl}/${groupId}/members/${memberId}`)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  leaveGroup(groupId: string): Observable<LeaveGroupResult> {
+    return this.http
+      .post<LeaveGroupResult>(`${this.baseUrl}/${groupId}/leave`, {})
       .pipe(catchError((e) => this.handle(e)));
   }
 
