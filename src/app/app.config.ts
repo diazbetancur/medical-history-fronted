@@ -26,6 +26,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { AuthStore } from '@core/auth';
 import {
   correlationIdInterceptor,
+  csrfInterceptor,
   errorInterceptor,
   jwtInterceptor,
   loadingInterceptor,
@@ -63,9 +64,10 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         loadingInterceptor,       // 1st: Track active API requests globally
         correlationIdInterceptor, // 2nd: Add correlation ID to all requests
-        jwtInterceptor,           // 3rd: Add JWT token for auth
-        retryInterceptor,         // 4th: Auto-retry GET/HEAD/OPTIONS on 5xx/network (M-05)
-        errorInterceptor,         // 5th: Handle redirects, fallback toast, and normalize
+        jwtInterceptor,           // 3rd: Send the httpOnly auth cookie (withCredentials)
+        csrfInterceptor,          // 4th: Echo X-XSRF-TOKEN on unsafe requests
+        retryInterceptor,         // 5th: Auto-retry GET/HEAD/OPTIONS on 5xx/network (M-05)
+        errorInterceptor,         // 6th: Handle redirects, fallback toast, and normalize
       ]),
     ),
     provideAnimationsAsync(),

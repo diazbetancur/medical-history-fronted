@@ -54,4 +54,10 @@ export interface CurrentUserDto {
 
   /** True when the professional profile exists AND is active (not deactivated by admin) */
   isProfessionalActive?: boolean;
+
+  /**
+   * Per-session anti-CSRF token (from the JWT's `csrf` claim). Kept in memory by
+   * CsrfTokenStore and echoed back in the X-XSRF-TOKEN header on unsafe requests.
+   */
+  csrfToken?: string;
 }

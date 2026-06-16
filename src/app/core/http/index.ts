@@ -1,5 +1,6 @@
 // Core HTTP Module - Public exports
 export { correlationIdInterceptor } from './correlation-id.interceptor';
+export { csrfInterceptor } from './csrf.interceptor';
 export { errorInterceptor } from './error.interceptor';
 export { HttpLoadingService } from './http-loading.service';
 export { jwtInterceptor } from './jwt.interceptor';
