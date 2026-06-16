@@ -1,5 +1,21 @@
 export type FamilyAdminRole = 'None' | 'Principal' | 'Additional';
 export type FamilyLinkType = 'Dependent' | 'Registered';
+export type FamilyJoinStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Cancelled';
+
+export interface FamilyJoinRequest {
+  id: string;
+  familyGroupId: string;
+  familyGroupName: string;
+  status: FamilyJoinStatus;
+  requestedAtUtc: string;
+}
+
+export interface FamilyGroupPendingRequest {
+  id: string;
+  patientFullName: string;
+  status: FamilyJoinStatus;
+  requestedAtUtc: string;
+}
 
 export interface FamilyGroupSummary {
   id: string;

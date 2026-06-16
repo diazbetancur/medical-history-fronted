@@ -10,7 +10,9 @@ import {
   BackgroundInput,
   CreateFamilyGroupRequest,
   FamilyGroupDetail,
+  FamilyGroupPendingRequest,
   FamilyGroupSummary,
+  FamilyJoinRequest,
   LeaveGroupResult,
   ManageablePatient,
   MedicationInput,
@@ -66,6 +68,36 @@ export class FamilyGroupService {
   leaveGroup(groupId: string): Observable<LeaveGroupResult> {
     return this.http
       .post<LeaveGroupResult>(`${this.baseUrl}/${groupId}/leave`, {})
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  getIncomingRequests(): Observable<FamilyJoinRequest[]> {
+    return this.http
+      .get<FamilyJoinRequest[]>(`${this.baseUrl}/requests/incoming`)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  acceptRequest(requestId: string): Observable<unknown> {
+    return this.http
+      .post(`${this.baseUrl}/requests/${requestId}/accept`, {})
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  rejectRequest(requestId: string): Observable<unknown> {
+    return this.http
+      .post(`${this.baseUrl}/requests/${requestId}/reject`, {})
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  getGroupRequests(groupId: string): Observable<FamilyGroupPendingRequest[]> {
+    return this.http
+      .get<FamilyGroupPendingRequest[]>(`${this.baseUrl}/${groupId}/requests`)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  cancelRequest(groupId: string, requestId: string): Observable<unknown> {
+    return this.http
+      .delete(`${this.baseUrl}/${groupId}/requests/${requestId}`)
       .pipe(catchError((e) => this.handle(e)));
   }
 
