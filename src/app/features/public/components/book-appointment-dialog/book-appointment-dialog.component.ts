@@ -151,7 +151,10 @@ export class BookAppointmentDialogComponent {
       success: true,
       confirmation: this.bookingConfirmation(),
     });
-    if (!this.actingPatientId()) {
+    const actingId = this.actingPatientId();
+    if (actingId) {
+      void this.router.navigate(['/patient/managed', actingId]);
+    } else {
       void this.router.navigate(['/patient/appointments']);
     }
   }
