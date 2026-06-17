@@ -29,13 +29,15 @@
 .btn--outline { background: transparent; border: 1.5px solid #072036; color: #072036; }
 .slide--dark .btn--outline { border-color: #cfe6fb; color: #eaf3fb; }
 
-.slide-media { flex: 1.15; position: relative; display: flex; align-items: flex-end; justify-content: flex-end; min-width: 0; align-self: stretch; }
-.slide-inner--reverse .slide-media { justify-content: flex-start; }
+.slide-media { flex: 1.5; position: relative; display: flex; align-items: flex-end; justify-content: flex-end; min-width: 0; align-self: stretch; padding-left: 64px; }
+/* Slide invertido (imagen a la izquierda): el aire va a la derecha. */
+.slide-inner--reverse .slide-media { justify-content: flex-start; padding-left: 0; padding-right: 64px; }
 /* La imagen (recorte transparente) se ancla al borde inferior y al borde
-   exterior del slide, y sube casi hasta el top, para que no se vea cortada. */
+   exterior del slide, sube casi hasta el top y es más alta/ancha, para que
+   no se vea cortada. */
 .slide-img {
   width: auto; max-width: 100%;
-  height: calc(100% + 64px);            /* cancela el padding inferior del .slide-inner */
+  height: calc(100% + 104px);           /* más alta; el margin negativo cancela el padding inferior */
   object-fit: contain; object-position: bottom right;
   margin-bottom: -64px; margin-right: -56px; /* toca el borde inferior y el lateral del slide */
   position: relative; z-index: 2; animation: slideImgIn .9s ease both;
@@ -52,7 +54,7 @@
 @media (max-width: 780px) {
   .home-swiper { height: auto; min-height: 600px; }
   .slide-inner { flex-direction: column; text-align: center; padding: 96px 22px 0; }
-  .slide-media { align-items: center; justify-content: center; align-self: auto; }
+  .slide-media { align-items: center; justify-content: center; align-self: auto; padding: 0; }
   .slide-img { height: 260px; object-position: bottom center; margin: 0; }
   .slide-text h1 { font-size: 23px; }
   .orbit { display: none; }
