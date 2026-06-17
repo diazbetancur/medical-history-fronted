@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import type { CreateUserDto } from '@data/api/admin-users.types';
 import { AdminUsersStore } from '@data/stores/admin-users.store';
 import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms';
+import { RoleLabelPipe } from '@shared/pipes/role-label.pipe';
 
 @Component({
   selector: 'app-user-create-dialog',
@@ -32,6 +33,7 @@ import { FormControlErrorComponent, FormLabelComponent } from '@shared/ui/forms'
     MatProgressSpinnerModule,
     FormLabelComponent,
     FormControlErrorComponent,
+    RoleLabelPipe,
   ],
   templateUrl: './user-create.dialog.html',
   styleUrl: './user-create.dialog.scss',

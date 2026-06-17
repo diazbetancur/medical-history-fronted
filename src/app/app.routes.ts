@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import {
   authStoreGuard,
   contextGuard,
+  guestGuard,
   permissionStoreGuard,
   professionalProfileGuard,
   professionalStatusGuard,
@@ -40,6 +41,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [guestGuard],
     loadComponent: () =>
       import('./features/public/pages/login/login.page').then(
         (m) => m.LoginPageComponent,
@@ -48,6 +50,7 @@ export const routes: Routes = [
   },
   {
     path: 'register',
+    canActivate: [guestGuard],
     loadComponent: () =>
       import('./features/public/pages/register/register.page').then(
         (m) => m.RegisterPageComponent,
@@ -56,6 +59,7 @@ export const routes: Routes = [
   },
   {
     path: 'forgot-password',
+    canActivate: [guestGuard],
     loadComponent: () =>
       import('./features/public/pages/forgot-password/forgot-password.page').then(
         (m) => m.ForgotPasswordPageComponent,
