@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, Input, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
@@ -29,6 +29,8 @@ import {
   styleUrl: './public-header.component.scss',
 })
 export class PublicHeaderComponent {
+  @Input() floating = false;
+
   private readonly router = inject(Router);
   private readonly authStore = inject(AuthStore);
   private readonly dialog = inject(MatDialog);
