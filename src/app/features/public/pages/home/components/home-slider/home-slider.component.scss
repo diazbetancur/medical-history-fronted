@@ -1,0 +1,47 @@
+:host { display: block; }
+.home-swiper {
+  display: block; width: 100%; height: 540px;
+  --swiper-navigation-color: #072036;
+  --swiper-pagination-color: #0a6ebd;
+  --swiper-navigation-size: 26px;
+}
+.slide { position: relative; width: 100%; height: 100%; color: #072036; overflow: hidden; }
+.slide--dark { color: #eaf3fb; }
+
+.dna { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.dna span { position: absolute; font-size: 48px; opacity: .10; animation: dnaBob 6.5s ease-in-out infinite; color: #0a6ebd; }
+.slide--dark .dna span { color: #1f6aa0; }
+@keyframes dnaBob { 0%,100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-18px) rotate(8deg); } }
+
+.slide-inner { position: absolute; inset: 0; display: flex; align-items: center; gap: 28px; padding: 104px 56px 64px; }
+.slide-text { flex: 1; min-width: 0; }
+.eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 5px 12px; border-radius: 20px; margin-bottom: 14px; background: rgba(10,110,189,.10); color: #0a6ebd; }
+.slide--dark .eyebrow { background: rgba(255,255,255,.12); color: #bfe0ff; }
+.slide-text h1 { font-size: 31px; line-height: 1.14; margin: 0 0 14px; font-weight: 800; max-width: 540px; }
+.slide-text p { font-size: 16px; line-height: 1.5; margin: 0 0 24px; max-width: 460px; opacity: .9; }
+.slide-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { border-radius: 26px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; border: 0; }
+.btn--primary { background: #0a6ebd; color: #fff; box-shadow: 0 8px 20px rgba(10,110,189,.35); }
+.btn--outline { background: transparent; border: 1.5px solid #072036; color: #072036; }
+.slide--dark .btn--outline { border-color: #cfe6fb; color: #eaf3fb; }
+
+.slide-media { flex: 1.15; position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; }
+.slide-img { width: 100%; max-width: 540px; height: 400px; object-fit: cover; border-radius: 22px; box-shadow: 0 18px 44px rgba(0,0,0,.28); position: relative; z-index: 2; animation: slideImgIn .9s ease both; }
+@keyframes slideImgIn { from { opacity: 0; transform: translateX(46px) scale(.95); } to { opacity: 1; transform: none; } }
+.halo { position: absolute; width: 460px; height: 460px; border-radius: 50%; background: radial-gradient(circle, rgba(10,110,189,.16), transparent 70%); z-index: 1; }
+.orbit { position: absolute; width: 540px; height: 540px; z-index: 0; }
+.orbit span { position: absolute; left: 50%; top: 50%; font-size: 26px; opacity: .55; animation: orbit 20s linear infinite;
+  transform: rotate(var(--a)) translateX(255px) rotate(calc(-1 * var(--a))); }
+@keyframes orbit { from { transform: rotate(var(--a)) translateX(255px) rotate(calc(-1 * var(--a))); }
+  to { transform: rotate(calc(var(--a) + 360deg)) translateX(255px) rotate(calc(-1 * var(--a) - 360deg)); } }
+
+@media (max-width: 780px) {
+  .home-swiper { height: auto; min-height: 600px; }
+  .slide-inner { flex-direction: column; text-align: center; padding: 96px 22px 70px; }
+  .slide-img { height: 240px; }
+  .slide-text h1 { font-size: 23px; }
+  .orbit { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dna span, .orbit span, .slide-img { animation: none !important; }
+}

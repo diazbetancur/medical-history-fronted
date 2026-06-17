@@ -1,0 +1,44 @@
+<swiper-container
+  class="home-swiper"
+  navigation="true"
+  pagination="true"
+  pagination-clickable="true"
+  autoplay-delay="5000"
+  autoplay-pause-on-mouse-enter="true"
+  effect="fade"
+  loop="true"
+>
+  @for (s of slides; track s.title) {
+    <swiper-slide>
+      <div class="slide" [class.slide--dark]="s.dark"
+           [style.background]="'linear-gradient(135deg,' + s.bg1 + ',' + s.bg2 + ')'">
+        <div class="dna" aria-hidden="true">
+          @for (n of [0,1,2,3,4,5,6,7,8,9]; track n) {
+            <span [style.left.%]="(n*11+4)%96" [style.top.%]="(n*23+6)%82"
+                  [style.animation-delay.s]="n*0.55">🧬</span>
+          }
+        </div>
+        <div class="slide-inner">
+          <div class="slide-text">
+            <span class="eyebrow">Plataforma médica</span>
+            <h1>{{ s.title }}</h1>
+            <p>{{ s.sub }}</p>
+            <div class="slide-btns">
+              <button type="button" class="btn btn--primary" (click)="login.emit()">Iniciar sesión</button>
+              <button type="button" class="btn btn--outline" (click)="register.emit()">Crear cuenta</button>
+            </div>
+          </div>
+          <div class="slide-media">
+            <div class="orbit" aria-hidden="true">
+              @for (ic of healthIcons; track ic; let i = $index) {
+                <span [style.--a]="(i*45) + 'deg'">{{ ic }}</span>
+              }
+            </div>
+            <div class="halo" aria-hidden="true"></div>
+            <img class="slide-img" [src]="s.img" [alt]="s.title" loading="eager" />
+          </div>
+        </div>
+      </div>
+    </swiper-slide>
+  }
+</swiper-container>
