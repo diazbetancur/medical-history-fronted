@@ -1,6 +1,11 @@
 :host {
   display: block;
   background: var(--color-background);
+
+  // Azul de marca del área pública (mismo del slider/home).
+  --color-primary: #0a6ebd;
+  --color-primary-dark: #064f87;
+  --gradient-primary: linear-gradient(135deg, #0a6ebd 0%, #064f87 100%);
 }
 
 .search-container {
@@ -55,7 +60,7 @@
     height: var(--search-control-height);
     min-width: 120px;
     align-self: start;
-    border-radius: 12px;
+    border-radius: 26px;
     padding: 0 24px;
     white-space: nowrap;
   }

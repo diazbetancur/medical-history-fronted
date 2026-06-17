@@ -54,9 +54,8 @@
         </mat-form-field>
 
         <button
-          mat-flat-button
-          color="primary"
-          class="search-btn"
+          type="button"
+          class="search-btn pill-btn pill-btn--primary"
           (click)="onSearchClick()"
         >
           Buscar
@@ -75,7 +74,9 @@
     <mat-icon>error_outline</mat-icon>
     <h2>Error en la búsqueda</h2>
     <p>{{ errorMessage }}</p>
-    <button mat-stroked-button (click)="reload()">Reintentar</button>
+    <button type="button" class="pill-btn pill-btn--outline" (click)="reload()">
+      Reintentar
+    </button>
   </div>
   } @if (!loading() && !error()) {
   <section class="results-section">
@@ -131,15 +132,15 @@
 
         <div class="doctor-actions">
           <button
-            mat-stroked-button
-            color="primary"
+            type="button"
+            class="pill-btn pill-btn--outline"
             (click)="goToProfile(doctor.id)"
           >
             Ver perfil
           </button>
           <button
-            mat-flat-button
-            color="primary"
+            type="button"
+            class="pill-btn pill-btn--primary"
             (click)="bookAppointment(doctor)"
           >
             Agendar cita
