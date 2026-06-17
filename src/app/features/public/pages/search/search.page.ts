@@ -43,12 +43,14 @@ import { PublicCatalogService } from '../../../../public/services/public-catalog
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
 import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
+import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
 
 @Component({
   selector: 'app-search-page',
   standalone: true,
   imports: [
     PublicHeaderComponent,
+    PublicFooterComponent,
     RouterLink,
     ReactiveFormsModule,
     MatAutocompleteModule,

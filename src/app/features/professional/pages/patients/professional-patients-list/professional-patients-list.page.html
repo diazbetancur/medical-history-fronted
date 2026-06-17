@@ -3,7 +3,7 @@
     <div class="header-content">
       <div>
         <h1>Mis Pacientes</h1>
-        <p class="subtitle">Pacientes ordenados por su ultima cita</p>
+        <p class="subtitle">Pacientes ordenados por su última cita</p>
       </div>
 
       <button
@@ -34,8 +34,8 @@
         type="button"
         matSuffix
         mat-icon-button
-        aria-label="Limpiar busqueda"
-        matTooltip="Limpiar busqueda"
+        aria-label="Limpiar búsqueda"
+        matTooltip="Limpiar búsqueda"
         (click)="clearSearch()"
       >
         <mat-icon>close</mat-icon>
@@ -74,20 +74,20 @@
         {{
           hasActiveSearch()
             ? 'No encontramos pacientes con ese nombre o DNI'
-            : 'Aun no tienes pacientes registrados'
+            : 'Aún no tienes pacientes registrados'
         }}
       </p>
       <p class="feedback-subtitle">
         {{
           hasActiveSearch()
-            ? 'Prueba con otro nombre o numero de documento.'
-            : 'Los pacientes apareceran aqui cuando registres atenciones medicas.'
+            ? 'Prueba con otro nombre o número de documento.'
+            : 'Los pacientes aparecerán aquí cuando registres atenciones médicas.'
         }}
       </p>
       @if (hasActiveSearch()) {
       <button mat-stroked-button type="button" (click)="clearSearch()">
         <mat-icon>close</mat-icon>
-        Limpiar busqueda
+        Limpiar búsqueda
       </button>
       }
     </mat-card-content>

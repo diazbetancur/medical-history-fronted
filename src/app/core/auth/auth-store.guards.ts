@@ -81,6 +81,43 @@ export const authStoreGuard: CanActivateFn = (
 };
 
 /**
+ * Guest Guard (usando AuthStore)
+ *
+ * Bloquea rutas públicas de autenticación (login, registro, recuperación de
+ * contraseña) cuando ya existe sesión activa, redirigiendo al área del usuario
+ * según su contexto/rol. Evita que un usuario logueado vea esas pantallas y
+ * pueda intentar crear una segunda cuenta (BUG-086).
+ *
+ * @example
+ * ```typescript
+ * { path: 'register', canActivate: [guestGuard], loadComponent: ... }
+ * ```
+ */
+export const guestGuard: CanActivateFn = () => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+
+  if (!authStore.isAuthenticated()) {
+    return true;
+  }
+
+  const roles = new Set(
+    authStore.userRoles().map((role) => role.toUpperCase()),
+  );
+  const contexts = authStore.availableContexts();
+  const isAdmin =
+    contexts.some((ctx) => ctx.type === 'ADMIN') ||
+    roles.has('ADMIN') ||
+    roles.has('SUPERADMIN');
+  const isProfessional =
+    contexts.some((ctx) => ctx.type === 'PROFESSIONAL') ||
+    roles.has('PROFESSIONAL');
+
+  const path = isAdmin ? '/admin' : isProfessional ? '/professional' : '/patient';
+  return router.createUrlTree([path]);
+};
+
+/**
  * Context Guard
  *
  * Protege rutas verificando que el usuario tenga un contexto específico

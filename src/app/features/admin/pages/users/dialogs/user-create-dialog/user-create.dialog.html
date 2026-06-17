@@ -158,7 +158,7 @@
         <mat-label>Roles iniciales</mat-label>
         <mat-select formControlName="roles" multiple>
           @for (role of availableRoles(); track role) {
-          <mat-option [value]="role">{{ role }}</mat-option>
+          <mat-option [value]="role">{{ role | roleLabel }}</mat-option>
           }
         </mat-select>
         <mat-icon matPrefix>shield</mat-icon>

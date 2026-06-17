@@ -14,6 +14,7 @@ import type {
   UpdateUserRolesDto,
 } from '@data/api/admin-users.types';
 import { AdminUsersStore } from '@data/stores/admin-users.store';
+import { RoleLabelPipe } from '@shared/pipes/role-label.pipe';
 
 export interface UserRolesDialogData {
   user: AdminUserListDto;
@@ -35,6 +36,7 @@ interface RoleItem {
     MatCheckboxModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    RoleLabelPipe,
   ],
   templateUrl: './user-roles.dialog.html',
   styleUrl: './user-roles.dialog.scss',
