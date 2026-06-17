@@ -3,6 +3,7 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   EventEmitter,
   Output,
+  afterNextRender,
 } from '@angular/core';
 
 interface HomeSlide {
@@ -26,6 +27,14 @@ interface HomeSlide {
 export class HomeSliderComponent {
   @Output() login = new EventEmitter<void>();
   @Output() register = new EventEmitter<void>();
+
+  constructor() {
+    // Registra los web components de Swiper solo en el navegador y de forma
+    // diferida (import dinámico → chunk lazy fuera del bundle inicial).
+    afterNextRender(() => {
+      import('swiper/element/bundle').then(({ register }) => register());
+    });
+  }
 
   readonly healthIcons = ['💙', '🩺', '💊', '🧪', '🏥', '➕', '🦷', '🫀'];
 
