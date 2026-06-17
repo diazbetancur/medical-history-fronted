@@ -32,6 +32,7 @@ import {
 import { SpecialtyDto } from '../../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
+import { ActingPatientStore } from '../../../services/acting-patient.store';
 import { PatientProfileDto } from '../../../models/patient-profile.dto';
 import { SlotDto } from '../../../models/slot.dto';
 import {
@@ -122,6 +123,10 @@ export class PatientWizardPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly actingStore = inject(ActingPatientStore);
+
+  readonly isActing = this.actingStore.isActing;
+  readonly acting = this.actingStore.acting;
 
   readonly searchControl = new FormControl<string>('');
   readonly specialtyControl = new FormControl<string | null>(null);
@@ -228,6 +233,12 @@ export class PatientWizardPage implements OnInit {
 
   goBackHome(): void {
     this.router.navigate(['/patient']);
+  }
+
+  backToManagedPatient(): void {
+    const patient = this.acting();
+    if (!patient) return;
+    this.router.navigate(['/patient/managed', patient.patientProfileId]);
   }
 
   onSearchClick(): void {

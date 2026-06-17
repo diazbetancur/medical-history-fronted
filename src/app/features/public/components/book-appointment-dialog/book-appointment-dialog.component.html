@@ -1,4 +1,10 @@
-<h2 mat-dialog-title>Agendar cita</h2>
+<h2 mat-dialog-title>
+  @if (actingPatientName()) {
+    Agendar cita para {{ actingPatientName() }}
+  } @else {
+    Agendar cita
+  }
+</h2>
 
 <mat-dialog-content class="dialog-content">
   @if (bookingConfirmation()) {

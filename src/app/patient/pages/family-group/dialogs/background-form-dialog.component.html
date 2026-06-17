@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar antecedente' : 'Agregar antecedente' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Tipo</mat-label>
+      <input matInput formControlName="type" maxlength="120" placeholder="Ej. Patológico, Familiar, Quirúrgico" />
+      @if (form.controls.type.hasError('required') && form.controls.type.touched) {
+        <mat-error>El tipo es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Título</mat-label>
+      <input matInput formControlName="title" maxlength="200" />
+      @if (form.controls.title.hasError('required') && form.controls.title.touched) {
+        <mat-error>El título es obligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="3" maxlength="1000"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fecha del evento</mat-label>
+      <input matInput type="date" formControlName="eventDate" />
+    </mat-form-field>
+
+    <mat-checkbox formControlName="isChronic">Crónico</mat-checkbox>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="submit()">
+    {{ isEdit ? 'Guardar' : 'Agregar' }}
+  </button>
+</mat-dialog-actions>

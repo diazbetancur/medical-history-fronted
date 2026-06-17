@@ -1,0 +1,207 @@
+<section class="managed">
+  <div class="managed__header">
+    <mat-icon>switch_account</mat-icon>
+    <h1>{{ acting.acting()?.fullName || 'Paciente gestionado' }}</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="managed__loading"><mat-spinner diameter="40" /></div>
+  } @else {
+    <mat-tab-group>
+      <!-- Historia -->
+      <mat-tab label="Historia">
+        @if (history().length === 0) {
+          <p class="managed__empty">No hay encuentros registrados.</p>
+        } @else {
+          <div class="managed__list">
+            @for (e of history(); track e.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-title">
+                  {{ e.professionalName || 'Profesional' }}
+                </div>
+                <div class="managed__item-meta">
+                  {{ e.encounterDateUtc | date: 'mediumDate' }}
+                  @if (e.status) { · {{ e.status }} }
+                </div>
+                @if (e.summary) { <p class="managed__item-desc">{{ e.summary }}</p> }
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Exámenes -->
+      <mat-tab label="Exámenes">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="uploadExam()">
+            <mat-icon>upload_file</mat-icon> Subir examen
+          </button>
+        </div>
+        @if (exams().length === 0) {
+          <p class="managed__empty">No hay exámenes registrados.</p>
+        } @else {
+          <div class="managed__list">
+            @for (x of exams(); track x.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-body">
+                  <div class="managed__item-title">{{ x.title }}</div>
+                  <div class="managed__item-meta">
+                    {{ x.examDate | date: 'mediumDate' }}
+                    @if (x.originalFileName) { · {{ x.originalFileName }} }
+                  </div>
+                </div>
+                <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteExam(x)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Medicamentos -->
+      <mat-tab label="Medicamentos">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="addMedication()">
+            <mat-icon>add</mat-icon> Agregar
+          </button>
+        </div>
+        @if (medications().length === 0) {
+          <p class="managed__empty">No hay medicamentos registrados.</p>
+        } @else {
+          <div class="managed__list">
+            @for (m of medications(); track m.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-body">
+                  <div class="managed__item-title">{{ m.name }}</div>
+                  <div class="managed__item-meta">
+                    @if (m.dose) { {{ m.dose }} }
+                    @if (m.frequency) { · {{ m.frequency }} }
+                    @if (m.status) { · {{ m.status }} }
+                  </div>
+                  @if (m.notes) { <p class="managed__item-desc">{{ m.notes }}</p> }
+                </div>
+                <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Editar" (click)="editMedication(m)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteMedication(m)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Alergias -->
+      <mat-tab label="Alergias">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="addAllergy()">
+            <mat-icon>add</mat-icon> Agregar
+          </button>
+        </div>
+        @if (allergies().length === 0) {
+          <p class="managed__empty">No hay alergias registradas.</p>
+        } @else {
+          <div class="managed__list">
+            @for (a of allergies(); track a.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-body">
+                  <div class="managed__item-title">{{ a.allergen }}</div>
+                  <div class="managed__item-meta">
+                    @if (a.severity !== undefined && a.severity !== null) { Severidad: {{ a.severity }} }
+                    @if (a.status !== undefined && a.status !== null) { · {{ a.status }} }
+                  </div>
+                  @if (a.reaction) { <p class="managed__item-desc">{{ a.reaction }}</p> }
+                </div>
+                <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Editar" (click)="editAllergy(a)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteAllergy(a)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Antecedentes -->
+      <mat-tab label="Antecedentes">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="addBackground()">
+            <mat-icon>add</mat-icon> Agregar
+          </button>
+        </div>
+        @if (background().length === 0) {
+          <p class="managed__empty">No hay antecedentes registrados.</p>
+        } @else {
+          <div class="managed__list">
+            @for (b of background(); track b.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-body">
+                  <div class="managed__item-title">{{ b.title }}</div>
+                  <div class="managed__item-meta">
+                    @if (b.type) { {{ b.type }} }
+                    @if (b.eventDate) { · {{ b.eventDate | date: 'mediumDate' }} }
+                  </div>
+                  @if (b.description) { <p class="managed__item-desc">{{ b.description }}</p> }
+                </div>
+                <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Editar" (click)="editBackground(b)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteBackground(b)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <!-- Citas -->
+      <mat-tab label="Citas">
+        <div class="managed__toolbar">
+          <button type="button" mat-stroked-button color="primary" (click)="bookAppointment()">
+            <mat-icon>event</mat-icon> Agendar cita
+          </button>
+        </div>
+        @if (appointments().length === 0) {
+          <p class="managed__empty">No hay citas registradas.</p>
+        } @else {
+          <div class="managed__list">
+            @for (c of appointments(); track c.id) {
+              <mat-card class="managed__item">
+                <div class="managed__item-body">
+                  <div class="managed__item-title">
+                    {{ c.professionalName || 'Profesional' }}
+                  </div>
+                  <div class="managed__item-meta">
+                    {{ c.startUtc | date: 'medium' }}
+                    @if (c.statusDisplay) { · {{ c.statusDisplay }} }
+                  </div>
+                  @if (c.reason) { <p class="managed__item-desc">{{ c.reason }}</p> }
+                </div>
+                @if (isFutureAppointment(c)) {
+                  <div class="managed__item-actions">
+                    <button type="button" mat-stroked-button color="warn" (click)="cancelAppointment(c)">
+                      Cancelar
+                    </button>
+                  </div>
+                }
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+    </mat-tab-group>
+  }
+</section>
