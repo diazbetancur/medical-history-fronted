@@ -29,8 +29,18 @@
 .btn--outline { background: transparent; border: 1.5px solid #072036; color: #072036; }
 .slide--dark .btn--outline { border-color: #cfe6fb; color: #eaf3fb; }
 
-.slide-media { flex: 1.15; position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; }
-.slide-img { width: 100%; max-width: 600px; height: 460px; object-fit: contain; position: relative; z-index: 2; animation: slideImgIn .9s ease both; }
+.slide-media { flex: 1.15; position: relative; display: flex; align-items: flex-end; justify-content: flex-end; min-width: 0; align-self: stretch; }
+.slide-inner--reverse .slide-media { justify-content: flex-start; }
+/* La imagen (recorte transparente) se ancla al borde inferior y al borde
+   exterior del slide, y sube casi hasta el top, para que no se vea cortada. */
+.slide-img {
+  width: auto; max-width: 100%;
+  height: calc(100% + 64px);            /* cancela el padding inferior del .slide-inner */
+  object-fit: contain; object-position: bottom right;
+  margin-bottom: -64px; margin-right: -56px; /* toca el borde inferior y el lateral del slide */
+  position: relative; z-index: 2; animation: slideImgIn .9s ease both;
+}
+.slide-inner--reverse .slide-img { object-position: bottom left; margin-right: 0; margin-left: -56px; }
 @keyframes slideImgIn { from { opacity: 0; transform: translateX(46px) scale(.95); } to { opacity: 1; transform: none; } }
 .halo { position: absolute; width: 460px; height: 460px; border-radius: 50%; background: radial-gradient(circle, rgba(10,110,189,.16), transparent 70%); z-index: 1; }
 .orbit { position: absolute; width: 540px; height: 540px; z-index: 0; }
@@ -41,8 +51,9 @@
 
 @media (max-width: 780px) {
   .home-swiper { height: auto; min-height: 600px; }
-  .slide-inner { flex-direction: column; text-align: center; padding: 96px 22px 70px; }
-  .slide-img { height: 240px; }
+  .slide-inner { flex-direction: column; text-align: center; padding: 96px 22px 0; }
+  .slide-media { align-items: center; justify-content: center; align-self: auto; }
+  .slide-img { height: 260px; object-position: bottom center; margin: 0; }
   .slide-text h1 { font-size: 23px; }
   .orbit { display: none; }
 }
