@@ -1,0 +1,6 @@
+.fg-list { padding: 1rem; max-width: 900px; margin: 0 auto; }
+.fg-list__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.fg-list__loading { display: flex; justify-content: center; padding: 2rem; }
+.fg-empty { text-align: center; padding: 2rem; }
+.fg-cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.fg-card { cursor: pointer; padding: 1rem; }

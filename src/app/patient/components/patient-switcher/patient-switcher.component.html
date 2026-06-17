@@ -1,0 +1,30 @@
+@if (patients().length > 0 || acting()) {
+  <div class="switcher" [class.switcher--acting]="acting()">
+    <button mat-stroked-button [matMenuTriggerFor]="menu">
+      <mat-icon>switch_account</mat-icon>
+      {{ acting() ? acting()!.fullName : 'Mi perfil' }}
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="selectOwn()">
+        <mat-icon>person</mat-icon> Mi perfil
+        @if (!acting()) { <mat-icon>check</mat-icon> }
+      </button>
+      @for (p of patients(); track p.patientProfileId) {
+        <button mat-menu-item (click)="select(p)">
+          <mat-icon>account_circle</mat-icon> {{ p.fullName }}
+          <span class="switcher__group">({{ p.familyGroupName }})</span>
+          @if (acting()?.patientProfileId === p.patientProfileId) { <mat-icon>check</mat-icon> }
+        </button>
+      }
+    </mat-menu>
+
+    @if (acting()) {
+      <span class="switcher__banner">
+        <mat-icon>info</mat-icon>
+        Estás gestionando a <strong>{{ acting()!.fullName }}</strong>
+        <button mat-button color="primary" (click)="selectOwn()">Volver a mi perfil</button>
+      </span>
+    }
+  </div>
+}

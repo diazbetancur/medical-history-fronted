@@ -17,6 +17,7 @@ import { MenuService } from '@core/services/menu.service';
 import { LayoutTopbarComponent } from '@shared/ui/layout-topbar/layout-topbar.component';
 import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
 import { BottomNavComponent } from '@shared/ui/bottom-nav/bottom-nav.component';
+import { PatientSwitcherComponent } from '../../components/patient-switcher/patient-switcher.component';
 
 @Component({
   selector: 'app-patient-layout',
@@ -28,6 +29,7 @@ import { BottomNavComponent } from '@shared/ui/bottom-nav/bottom-nav.component';
     LayoutTopbarComponent,
     SidebarComponent,
     BottomNavComponent,
+    PatientSwitcherComponent,
   ],
   templateUrl: './patient-layout.component.html',
   styleUrl: './patient-layout.component.scss',
