@@ -25,6 +25,8 @@ import { PublicApi } from '@data/api';
 import { CreateAppointmentDto } from '@patient/models/appointment.dto';
 import { isSlotInPast, SlotDto } from '@patient/models/slot.dto';
 import { AppointmentsService } from '@patient/services/appointments.service';
+import { ActingPatientStore } from '@patient/services/acting-patient.store';
+import { FamilyGroupService } from '@patient/services/family-group.service';
 import { SlotsService } from '@patient/services/slots.service';
 
 export interface BookAppointmentDialogData {
@@ -33,6 +35,8 @@ export interface BookAppointmentDialogData {
   name?: string;
   imageUrl?: string;
   specialties?: string[];
+  patientProfileId?: string;
+  patientName?: string;
 }
 
 interface BookingConfirmation {
@@ -66,11 +70,20 @@ export class BookAppointmentDialogComponent {
   private readonly publicApi = inject(PublicApi);
   private readonly slotsService = inject(SlotsService);
   private readonly appointmentsService = inject(AppointmentsService);
+  private readonly familyGroup = inject(FamilyGroupService);
+  private readonly actingStore = inject(ActingPatientStore);
   private readonly dialogRef = inject(
     MatDialogRef<BookAppointmentDialogComponent>,
   );
   private readonly router = inject(Router);
   readonly data = inject<BookAppointmentDialogData>(MAT_DIALOG_DATA);
+
+  private readonly actingPatientId = computed(
+    () => this.data?.patientProfileId ?? this.actingStore.acting()?.patientProfileId ?? null,
+  );
+  readonly actingPatientName = computed(
+    () => this.data?.patientName ?? this.actingStore.acting()?.fullName ?? null,
+  );
 
   readonly loadingProfile = signal(false);
   readonly loadingSlots = signal(false);
@@ -138,7 +151,12 @@ export class BookAppointmentDialogComponent {
       success: true,
       confirmation: this.bookingConfirmation(),
     });
-    void this.router.navigate(['/patient/appointments']);
+    const actingId = this.actingPatientId();
+    if (actingId) {
+      void this.router.navigate(['/patient/managed', actingId]);
+    } else {
+      void this.router.navigate(['/patient/appointments']);
+    }
   }
 
   selectSlot(slot: SlotDto): void {
@@ -175,16 +193,26 @@ export class BookAppointmentDialogComponent {
     this.isBooking.set(true);
     this.bookingError.set(null);
 
-    const dto: CreateAppointmentDto = {
-      professionalProfileId: professionalId,
-      date: formatDateOnly(selectedDate),
-      slotId: slot.id,
-      appointmentDate: formatDateOnly(selectedDate),
-      timeSlot: `${slot.startTime}`,
-      observation,
-    };
+    const appointmentDate = formatDateOnly(selectedDate);
+    const actingId = this.actingPatientId();
 
-    this.appointmentsService.createAppointment(dto).subscribe({
+    const request$ = actingId
+      ? this.familyGroup.bookAppointment(actingId, {
+          professionalProfileId: professionalId,
+          appointmentDate,
+          timeSlot: `${slot.startTime}`,
+          observation,
+        })
+      : this.appointmentsService.createAppointment({
+          professionalProfileId: professionalId,
+          date: appointmentDate,
+          slotId: slot.id,
+          appointmentDate,
+          timeSlot: `${slot.startTime}`,
+          observation,
+        } satisfies CreateAppointmentDto);
+
+    request$.subscribe({
       next: () => {
         const dateLabel = selectedDate.toLocaleDateString('es-HN', {
           weekday: 'long',

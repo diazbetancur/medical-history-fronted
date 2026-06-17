@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>Agregar miembro</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="add-dep-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de documento</mat-label>
+      <mat-select formControlName="documentType">
+        @for (t of documentTypes; track t) {
+          <mat-option [value]="t">{{ t }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Número de documento</mat-label>
+      <input matInput formControlName="documentNumber" maxlength="30" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre completo</mat-label>
+      <input matInput formControlName="fullName" maxlength="200" />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="submit()">Agregar</button>
+</mat-dialog-actions>

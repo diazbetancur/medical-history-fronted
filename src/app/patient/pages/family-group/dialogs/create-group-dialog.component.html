@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>Crear grupo familiar</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre del grupo</mat-label>
+      <input matInput formControlName="name" maxlength="120" placeholder="Ej. Familia Pérez" />
+      @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+        <mat-error>El nombre es obligatorio</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="submit()">Crear</button>
+</mat-dialog-actions>

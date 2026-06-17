@@ -1,4 +1,17 @@
 <div class="wizard-container">
+  @if (isActing() && acting(); as actingPatient) {
+  <div class="acting-banner">
+    <div class="acting-banner__text">
+      <mat-icon>supervisor_account</mat-icon>
+      <span>Estás agendando para <strong>{{ actingPatient.fullName }}</strong></span>
+    </div>
+    <button type="button" mat-stroked-button (click)="backToManagedPatient()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver al paciente
+    </button>
+  </div>
+  }
+
   <mat-card class="header-card">
     <mat-card-content>
       <div class="title-row">
