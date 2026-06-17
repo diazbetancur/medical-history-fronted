@@ -126,3 +126,23 @@
     padding: 0 16px;
   }
 }
+
+.public-header--floating {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92%, 1180px);
+  border-radius: 32px;
+  box-shadow: 0 12px 30px rgba(4, 28, 51, 0.18);
+  background: #fff;
+  z-index: 20;
+}
+
+@media (max-width: 768px) {
+  .public-header--floating {
+    top: 8px;
+    width: 96%;
+    border-radius: 24px;
+  }
+}

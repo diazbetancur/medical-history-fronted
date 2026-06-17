@@ -15,7 +15,7 @@
     <mat-icon>error_outline</mat-icon>
     <h2>No se pudo cargar el perfil</h2>
     <p>{{ error }}</p>
-    <button mat-raised-button color="primary" (click)="reload()">
+    <button type="button" class="pill-btn pill-btn--primary" (click)="reload()">
       <mat-icon>refresh</mat-icon>
       Reintentar
     </button>
@@ -25,7 +25,7 @@
   <!-- Profile Content -->
   @if (store.profile(); as profile) {
   <div class="top-actions">
-    <button mat-stroked-button (click)="goToSearch()">
+    <button type="button" class="pill-btn pill-btn--outline" (click)="goToSearch()">
       <mat-icon>arrow_back</mat-icon>
       Volver a la búsqueda
     </button>
@@ -155,9 +155,8 @@
     <aside class="booking-sidebar">
       <mat-card class="booking-card">
         <button
-          mat-flat-button
-          color="primary"
-          class="book-btn"
+          type="button"
+          class="book-btn pill-btn pill-btn--primary"
           (click)="bookAppointment()"
         >
           Agendar cita

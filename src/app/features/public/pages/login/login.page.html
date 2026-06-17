@@ -60,11 +60,9 @@
 
         <!-- Submit Button -->
         <button
-          mat-raised-button
-          color="primary"
           type="submit"
           [disabled]="isLoading() || (submitted() && isFormInvalid())"
-          class="full-width"
+          class="full-width pill-btn pill-btn--primary"
         >
           @if (isLoading()) {
           <mat-spinner diameter="20"></mat-spinner>

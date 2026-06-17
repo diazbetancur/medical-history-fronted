@@ -1,3 +1,11 @@
+:host {
+  // Azul de marca del área pública (mismo del slider/home). El modal vive en un
+  // overlay fuera del layout, por eso se fija aquí también.
+  --color-primary: #0a6ebd;
+  --color-primary-dark: #064f87;
+  --gradient-primary: linear-gradient(135deg, #0a6ebd 0%, #064f87 100%);
+}
+
 // ─── Header ──────────────────────────────────────────────────────────────────
 .modal-header {
   display: flex;
