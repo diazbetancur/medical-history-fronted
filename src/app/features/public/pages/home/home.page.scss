@@ -105,145 +105,50 @@
   color: var(--color-text-secondary);
 }
 
-.hero {
+.home-hero {
   position: relative;
-  padding: 116px 24px 72px;
-  background: var(--gradient-primary);
+  // El header flotante se posiciona absoluto dentro de este wrapper.
+}
 
-  text-align: center;
-  overflow: hidden;
-
-  @media (max-width: 768px) {
-    padding: 76px 16px 48px;
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-      radial-gradient(
-        circle at 20% 50%,
-        rgba(255, 255, 255, 0.08) 0%,
-        transparent 50%
-      ),
-      radial-gradient(
-        circle at 80% 80%,
-        rgba(255, 255, 255, 0.06) 0%,
-        transparent 50%
-      );
-    pointer-events: none;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .hero-title {
-    font-size: 3.5rem;
-    font-weight: 800;
-    margin: 0 0 24px 0;
-    color: var(--color-text-inverted);
-    line-height: 1.2;
-
-    @media (max-width: 768px) {
-      font-size: 2rem;
-    }
-  }
-
-  .hero-subtitle {
-    font-size: 1.25rem;
-    margin: 0 0 40px 0;
-    color: rgba(255, 255, 255, 0.95);
-    line-height: 1.6;
-
-    @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .hero-cta,
-  .hero-secondary {
-    padding: 0 32px;
-    height: 48px;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 24px;
-  }
-
-  .hero-secondary {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--color-text-inverted);
-    border-color: rgba(255, 255, 255, 0.4);
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-  }
-
-  .stats-overlay {
-    position: relative;
-    margin: 32px auto 0;
-    width: 100%;
-    max-width: 1200px;
-    z-index: 1;
-
-    @media (max-width: 768px) {
-      margin-top: 24px;
-    }
-  }
+.stats-section {
+  padding: 40px 0 8px;
 
   .stats-grid {
     display: grid;
+    gap: 18px;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-
-    @media (max-width: 768px) {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
+    max-width: 1000px;
+    margin: -60px auto 0;
+    position: relative;
+    z-index: 5;
   }
 
   .stat-card {
     background: white;
-    padding: 24px;
     text-align: center;
-    border-radius: 12px;
+    padding: 22px 16px;
+    border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
 
-    @media (max-width: 768px) {
-      padding: 16px;
-    }
+  .stat-number {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--color-primary);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
 
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 8px;
-      line-height: 1;
+  .stat-label {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+  }
 
-      @media (max-width: 768px) {
-        font-size: 1.75rem;
-      }
-    }
-
-    .stat-label {
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-      font-weight: 500;
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      margin-top: 16px;
     }
   }
 }
