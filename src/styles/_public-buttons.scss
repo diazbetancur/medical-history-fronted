@@ -1,0 +1,90 @@
+// ============================================================================
+// Botones "pill" del área pública
+// ----------------------------------------------------------------------------
+// Mismo lenguaje visual que los botones del slider del home (#0a6ebd, forma
+// redondeada, sombra azul, micro-lift en hover). Clases opt-in: solo aplican
+// donde se usan, así no afectan el área privada de la app.
+// ============================================================================
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 26px;
+  padding: 12px 26px;
+  min-height: 46px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+
+  mat-icon,
+  .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// Primario: relleno azul (sobre fondos claros)
+.pill-btn--primary {
+  background: #0a6ebd;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(10, 110, 189, 0.35);
+
+  &:hover:not(:disabled):not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(10, 110, 189, 0.45);
+  }
+}
+
+// Outline: borde azul (sobre fondos claros)
+.pill-btn--outline {
+  background: transparent;
+  border-color: #0a6ebd;
+  color: #0a6ebd;
+
+  &:hover:not(:disabled):not([disabled]) {
+    background: rgba(10, 110, 189, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+// Relleno blanco: sobre fondos oscuros o de color (CTA, toolbar)
+.pill-btn--light {
+  background: #ffffff;
+  color: #0a6ebd;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+
+  &:hover:not(:disabled):not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+  }
+}
+
+// Contorno claro: sobre fondos oscuros o de color
+.pill-btn--ghost-light {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.75);
+  color: #ffffff;
+
+  &:hover:not(:disabled):not([disabled]) {
+    background: rgba(255, 255, 255, 0.24);
+    transform: translateY(-2px);
+  }
+}

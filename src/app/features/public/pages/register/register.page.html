@@ -148,11 +148,9 @@
         }
 
         <button
-          mat-raised-button
-          color="primary"
           type="submit"
           [disabled]="isLoading() || form.invalid"
-          class="full-width"
+          class="full-width pill-btn pill-btn--primary"
         >
           @if (isLoading()) {
           <mat-spinner diameter="20"></mat-spinner>

@@ -115,7 +115,7 @@
       <p>Cargando especialidades...</p>
     </div>
     } @else if (specialties().length > 0) {
-    <div class="specialties-chips">
+    <div class="specialties-chips" data-aos="fade-up">
       @for (specialty of specialties(); track specialty.id) {
       <button
         type="button"
@@ -131,7 +131,11 @@
       }
     </div>
     <div class="specialties-actions">
-      <button mat-stroked-button (click)="navigateToSearch()">
+      <button
+        type="button"
+        class="pill-btn pill-btn--outline"
+        (click)="navigateToSearch()"
+      >
         Ver Todas las Especialidades
         <mat-icon>arrow_forward</mat-icon>
       </button>
@@ -142,7 +146,11 @@
       <p class="empty-text">
         No hay especialidades disponibles en este momento
       </p>
-      <button mat-stroked-button (click)="navigateToSearch()">
+      <button
+        type="button"
+        class="pill-btn pill-btn--outline"
+        (click)="navigateToSearch()"
+      >
         Explorar Médicos
       </button>
     </div>
@@ -164,7 +172,7 @@
       <p>Cargando médicos destacados...</p>
     </div>
     } @else if (professionals().length > 0) {
-    <div class="doctors-grid">
+    <div class="doctors-grid" data-aos="fade-up">
       @for (professional of professionals(); track professional.id) {
       <app-professional-card
         [professional]="professional"
@@ -172,7 +180,11 @@
       }
     </div>
     <div class="doctors-actions">
-      <button mat-flat-button color="primary" (click)="navigateToSearch()">
+      <button
+        type="button"
+        class="pill-btn pill-btn--primary"
+        (click)="navigateToSearch()"
+      >
         Ver Todos los Médicos
         <mat-icon>arrow_forward</mat-icon>
       </button>
@@ -183,7 +195,11 @@
       <p class="empty-text">
         No hay médicos destacados disponibles en este momento
       </p>
-      <button mat-flat-button color="primary" (click)="navigateToSearch()">
+      <button
+        type="button"
+        class="pill-btn pill-btn--primary"
+        (click)="navigateToSearch()"
+      >
         Buscar Médicos
       </button>
     </div>
@@ -201,32 +217,31 @@
     </p>
     <div class="cta-actions">
       <button
-        mat-flat-button
-        color="primary"
-        class="cta-main"
+        type="button"
+        class="pill-btn pill-btn--light"
         (click)="navigateToSearch()"
       >
         Buscar Médico Ahora
       </button>
       @if (isPatientAuthenticated()) {
       <button
-        mat-stroked-button
-        class="cta-secondary"
+        type="button"
+        class="pill-btn pill-btn--ghost-light"
         (click)="navigateToProfile()"
       >
         Mi Perfil
       </button>
       <button
-        mat-stroked-button
-        class="cta-secondary"
+        type="button"
+        class="pill-btn pill-btn--ghost-light"
         (click)="navigateToNewAppointment()"
       >
         Nueva Cita
       </button>
       } @else {
       <button
-        mat-stroked-button
-        class="cta-secondary"
+        type="button"
+        class="pill-btn pill-btn--ghost-light"
         (click)="navigateToLogin()"
       >
         Registrarme

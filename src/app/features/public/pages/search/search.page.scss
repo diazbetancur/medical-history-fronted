@@ -1,6 +1,11 @@
 :host {
   display: block;
   background: var(--color-background);
+
+  // Azul de marca del área pública (mismo del slider/home).
+  --color-primary: #0a6ebd;
+  --color-primary-dark: #064f87;
+  --gradient-primary: linear-gradient(135deg, #0a6ebd 0%, #064f87 100%);
 }
 
 .search-container {
@@ -55,7 +60,7 @@
     height: var(--search-control-height);
     min-width: 120px;
     align-self: start;
-    border-radius: 12px;
+    border-radius: 26px;
     padding: 0 24px;
     white-space: nowrap;
   }
@@ -160,11 +165,19 @@
   grid-template-columns: 96px 1fr auto;
   align-items: center;
   gap: 14px;
-  padding: 14px;
-  border: 1px solid var(--color-border);
+  padding: 18px;
+  border: 1px solid rgba(10, 110, 189, 0.1);
   background: var(--color-surface);
-  border-radius: 12px;
-  box-shadow: var(--shadow-1);
+  border-radius: 16px;
+  box-shadow: 0 6px 22px rgba(10, 110, 189, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    border-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba(10, 110, 189, 0.22);
+    box-shadow: 0 14px 34px rgba(10, 110, 189, 0.16);
+  }
 
   .doctor-photo {
     width: 96px;

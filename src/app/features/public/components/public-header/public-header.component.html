@@ -15,7 +15,11 @@
 
     <div class="header-actions">
       @if (!isAuthenticated()) {
-        <button type="button" mat-flat-button color="primary" (click)="navigateToLogin()">
+        <button
+          type="button"
+          class="pill-btn pill-btn--primary"
+          (click)="navigateToLogin()"
+        >
           Iniciar Sesión
         </button>
       } @else {

@@ -17,9 +17,8 @@
   </div>
   <mat-card-actions>
     <button
-      mat-flat-button
-      color="primary"
-      class="book-button"
+      type="button"
+      class="book-button pill-btn pill-btn--primary"
       [disabled]="!professional.isAvailable"
       (click)="onBookAppointment()"
     >

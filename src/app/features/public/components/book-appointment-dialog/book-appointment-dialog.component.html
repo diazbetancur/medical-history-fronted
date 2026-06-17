@@ -171,17 +171,25 @@
 
 <mat-dialog-actions align="end">
   @if (bookingConfirmation()) {
-    <button mat-flat-button color="primary" type="button" (click)="acceptConfirmation()">
+    <button
+      type="button"
+      class="pill-btn pill-btn--primary"
+      (click)="acceptConfirmation()"
+    >
       Aceptar
     </button>
   } @else {
-    <button mat-button type="button" (click)="close()" [disabled]="isBooking()">
+    <button
+      type="button"
+      class="pill-btn pill-btn--outline"
+      (click)="close()"
+      [disabled]="isBooking()"
+    >
       {{ pendingSlot() ? 'Cancelar' : 'Cerrar' }}
     </button>
     <button
-      mat-flat-button
-      color="primary"
       type="button"
+      class="pill-btn pill-btn--primary"
       (click)="confirmSlot()"
       [disabled]="isBooking() || !pendingSlot() || !isObservationValid()"
     >
