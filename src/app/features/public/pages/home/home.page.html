@@ -1,5 +1,3 @@
-<app-public-header></app-public-header>
-
 <!-- Initial Loading State (only show on first load) -->
 @if (isInitialLoading) {
 <div class="loading-container">
@@ -11,64 +9,32 @@
 <!-- Main Content -->
 @if (!isInitialLoading) {
 
-<!-- Hero Section with Stats -->
-<section class="hero">
-  <div class="hero-content">
-    <h1 class="hero-title">Tu Salud, Nuestra Prioridad</h1>
-    <p class="hero-subtitle">
-      Conecta con los mejores profesionales médicos. Agenda citas fácilmente y
-      recibe atención de calidad.
-    </p>
-    <div class="hero-actions">
-      <button
-        mat-flat-button
-        color="primary"
-        class="hero-cta"
-        (click)="navigateToSearch()"
-      >
-        <mat-icon>search</mat-icon>
-        Buscar Médico
-      </button>
-      @if (isPatientAuthenticated()) {
-      <button
-        mat-stroked-button
-        class="hero-secondary"
-        (click)="navigateToNewAppointment()"
-      >
-        Nueva Cita
-      </button>
-      } @else {
-      <button
-        mat-stroked-button
-        class="hero-secondary"
-        (click)="navigateToLogin()"
-      >
-        Iniciar Sesión
-      </button>
-      }
-    </div>
-  </div>
+<!-- Hero (slider + floating header) -->
+<div class="home-hero">
+  <app-public-header [floating]="true"></app-public-header>
+  <app-home-slider
+    (login)="openAuthModal()"
+    (register)="openAuthModal()"
+  ></app-home-slider>
+</div>
 
-  <!-- Stats Cards Overlay -->
-  <div class="stats-overlay">
+<!-- Stats (swipe-up secuencial al scroll) -->
+<section class="stats-section">
+  <div class="container">
     <div class="stats-grid">
       @if (stats(); as statsData) {
-      <mat-card class="stat-card">
+      <mat-card class="stat-card" data-aos="fade-up" data-aos-delay="0">
         <div class="stat-number">{{ statsData.totalDoctors }}+</div>
         <div class="stat-label">Médicos Registrados</div>
       </mat-card>
-      <mat-card class="stat-card">
+      <mat-card class="stat-card" data-aos="fade-up" data-aos-delay="120">
         <div class="stat-number">{{ statsData.totalPatients }}+</div>
         <div class="stat-label">Pacientes Atendidos</div>
       </mat-card>
-      <mat-card class="stat-card">
+      <mat-card class="stat-card" data-aos="fade-up" data-aos-delay="240">
         <div class="stat-number">{{ statsData.totalAppointments }}+</div>
         <div class="stat-label">Citas Completadas</div>
       </mat-card>
-      <!-- <mat-card class="stat-card" style="display: none">
-        <div class="stat-number">{{ statsData.averageRating.toFixed(1) }}</div>
-        <div class="stat-label">Calificación Promedio</div>
-      </mat-card> -->
       } @else {
       <mat-card class="stat-card">
         <div class="stat-number">-</div>
@@ -81,10 +47,6 @@
       <mat-card class="stat-card">
         <div class="stat-number">-</div>
         <div class="stat-label">Citas Completadas</div>
-      </mat-card>
-      <mat-card class="stat-card">
-        <div class="stat-number">-</div>
-        <div class="stat-label">Calificación Promedio</div>
       </mat-card>
       }
     </div>
@@ -94,9 +56,9 @@
 <!-- Features Section -->
 <section class="features">
   <div class="container">
-    <h2 class="section-title">¿Por Qué Elegirnos?</h2>
+    <h2 class="section-title">¿Por qué elegirnos?</h2>
     <div class="features-grid">
-      <div class="feature-item">
+      <div class="feature-item" data-aos="fade-up" data-aos-delay="0">
         <div class="feature-icon">
           <mat-icon class="large-icon">verified_user</mat-icon>
         </div>
@@ -107,7 +69,7 @@
         </p>
       </div>
 
-      <div class="feature-item">
+      <div class="feature-item" data-aos="fade-up" data-aos-delay="120">
         <div class="feature-icon">
           <mat-icon class="large-icon">event_available</mat-icon>
         </div>
@@ -117,7 +79,7 @@
         </p>
       </div>
 
-      <div class="feature-item">
+      <div class="feature-item" data-aos="fade-up" data-aos-delay="240">
         <div class="feature-icon">
           <mat-icon class="large-icon">favorite</mat-icon>
         </div>
@@ -127,7 +89,7 @@
         </p>
       </div>
 
-      <div class="feature-item">
+      <div class="feature-item" data-aos="fade-up" data-aos-delay="360">
         <div class="feature-icon">
           <mat-icon class="large-icon">schedule</mat-icon>
         </div>

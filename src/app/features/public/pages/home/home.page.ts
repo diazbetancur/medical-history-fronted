@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -22,6 +29,8 @@ import {
 import { ProfessionalCardComponent } from '../../components/professional-card/professional-card.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
+import { HomeSliderComponent } from './components/home-slider/home-slider.component';
+import AOS from 'aos';
 
 @Component({
   selector: 'app-home-page',
@@ -36,11 +45,12 @@ import { PublicHeaderComponent } from '../../components/public-header/public-hea
     PublicHeaderComponent,
     PublicFooterComponent,
     ProfessionalCardComponent,
+    HomeSliderComponent,
   ],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
 })
-export class HomePageComponent implements OnInit {
+export class HomePageComponent implements OnInit, AfterViewInit {
   private readonly homeService = inject(PublicHomeService);
   private readonly seoService = inject(SeoService);
   private readonly router = inject(Router);
@@ -80,6 +90,10 @@ export class HomePageComponent implements OnInit {
     });
 
     this.loadHomeData();
+  }
+
+  ngAfterViewInit(): void {
+    AOS.init({ once: true, duration: 600, easing: 'ease-out', offset: 80 });
   }
 
   private showAuthRedirectMessageIfNeeded(): void {
