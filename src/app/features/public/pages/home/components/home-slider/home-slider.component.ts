@@ -12,6 +12,7 @@ interface HomeSlide {
   title: string;
   sub: string;
   img: string;
+  reverse?: boolean;
 }
 
 @Component({
@@ -52,6 +53,7 @@ export class HomeSliderComponent {
       title: 'Nunca vuelvas a perder tu historial médico',
       sub: 'Centraliza toda tu información de salud y la de tu familia en un expediente digital seguro y accesible para futuras consultas.',
       img: 'images/home/slide-3.png',
+      reverse: true,
     },
   ];
 }
