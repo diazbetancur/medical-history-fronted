@@ -169,9 +169,9 @@ export class HomePageComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/search']);
   }
 
-  openAuthModal(): void {
+  openAuthModal(initialTab = 0): void {
     this.dialog.open<AuthModalComponent, AuthModalData>(AuthModalComponent, {
-      data: {},
+      data: { initialTab },
       width: '440px',
       maxWidth: '100vw',
       panelClass: 'auth-modal-panel',
