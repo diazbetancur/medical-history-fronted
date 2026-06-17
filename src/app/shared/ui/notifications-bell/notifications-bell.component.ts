@@ -20,7 +20,10 @@ import { NotificationDto, NotificationsApi, NotificationsPageDto } from '@data/a
 import { NotificationsModalComponent } from '@shared/ui/notifications-modal/notifications-modal.component';
 import { catchError, of } from 'rxjs';
 
-const POLL_INTERVAL_MS = 60_000;
+const POLL_INTERVAL_MS = 90_000;
+// No re-consultar el conteo si el último fetch fue hace menos de esto (evita
+// ráfagas al alternar pestañas — TD-01).
+const MIN_REFETCH_GAP_MS = 30_000;
 const DROPDOWN_SIZE = 3;
 const MOBILE_BREAKPOINT = '(max-width: 768px)';
 
@@ -45,6 +48,7 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
   private readonly breakpoints = inject(BreakpointObserver);
   private readonly platformId = inject(PLATFORM_ID);
   private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private lastFetchAt = 0;
 
   readonly unreadCount = signal(0);
   readonly preview = signal<NotificationDto[]>([]);
@@ -125,6 +129,7 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
   }
 
   private fetchCount(): void {
+    this.lastFetchAt = Date.now();
     this.api
       .getCount()
       .pipe(catchError(() => of({ count: 0 })))
@@ -132,7 +137,10 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
   }
 
   private readonly onVisibilityChange = (): void => {
-    if (!document.hidden) this.fetchCount();
+    // Al volver el foco, refrescar solo si pasó el gap mínimo (debounce TD-01).
+    if (!document.hidden && Date.now() - this.lastFetchAt >= MIN_REFETCH_GAP_MS) {
+      this.fetchCount();
+    }
   };
 
   private extractItems(response: NotificationsPageDto | NotificationDto[] | null): NotificationDto[] {
