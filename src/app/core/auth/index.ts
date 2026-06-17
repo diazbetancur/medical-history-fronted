@@ -19,6 +19,7 @@ export type { PermissionRouteData } from './rbac.guards';
 export {
   authStoreGuard,
   contextGuard,
+  guestGuard,
   getContextsByType,
   hasAllPermissions as hasAllPermissionsStore,
   hasAnyPermission as hasAnyPermissionStore,

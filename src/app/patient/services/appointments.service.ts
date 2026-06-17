@@ -211,8 +211,8 @@ export class AppointmentsService {
     const date = this.extractDate(item?.appointmentDate ?? item?.date);
     const time = this.extractTimeRange(
       item?.timeSlot,
-      item?.startTime,
-      item?.endTime,
+      item?.startTime ?? this.extractTime(item?.startUtc),
+      item?.endTime ?? this.extractTime(item?.endUtc),
     );
 
     return {

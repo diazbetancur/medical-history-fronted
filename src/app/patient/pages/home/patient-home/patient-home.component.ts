@@ -129,7 +129,11 @@ export class PatientHomeComponent implements OnInit {
   }
 
   formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
+    // Una fecha 'YYYY-MM-DD' se interpreta como UTC; al pasar a hora local
+    // (UTC-6) retrocede un día. Forzamos interpretación local (NUEVO-10b).
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
+      ? new Date(`${dateStr}T00:00:00`)
+      : new Date(dateStr);
     return date.toLocaleDateString('es-ES', {
       weekday: 'short',
       year: 'numeric',
