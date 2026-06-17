@@ -9,6 +9,7 @@
 @use "styles/design-tokens" as tokens;
 @use "styles/material-theme";
 @use "styles/utilities";
+@use "styles/public-buttons";
 
 // AOS (animaciones al scroll) — debe ir tras los @use por requisito de Sass
 @import 'aos/dist/aos.css';

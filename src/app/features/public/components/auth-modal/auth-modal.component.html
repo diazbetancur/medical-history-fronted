@@ -91,11 +91,9 @@
 
           <div class="form-actions">
             <button
-              mat-flat-button
-              color="primary"
               type="submit"
               [disabled]="isLoginLoading()"
-              class="full-width submit-btn"
+              class="full-width submit-btn pill-btn pill-btn--primary"
             >
               @if (isLoginLoading()) {
                 <mat-spinner diameter="20"></mat-spinner>
@@ -318,11 +316,9 @@
 
           <div class="form-actions">
             <button
-              mat-flat-button
-              color="primary"
               type="submit"
               [disabled]="isRegisterLoading()"
-              class="full-width submit-btn"
+              class="full-width submit-btn pill-btn pill-btn--primary"
             >
               @if (isRegisterLoading()) {
                 <mat-spinner diameter="15"></mat-spinner>
