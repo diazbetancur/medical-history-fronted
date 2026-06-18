@@ -29,12 +29,13 @@
 .btn--outline { background: transparent; border: 1.5px solid #072036; color: #072036; }
 .slide--dark .btn--outline { border-color: #cfe6fb; color: #eaf3fb; }
 
-.slide-media { flex: 0 1 480px; position: relative; display: flex; align-items: flex-end; justify-content: center; min-width: 0; align-self: stretch; }
-/* La imagen (recorte) se apoya en el borde inferior y queda junto al texto:
-   el conjunto texto + imagen va centrado, con aire parejo a ambos extremos. */
+.slide-media { flex: 0 0 auto; position: relative; display: flex; align-items: flex-end; justify-content: center; min-width: 0; align-self: stretch; }
+/* La imagen (recorte) manda por ALTO (casi todo el alto del slide) y se apoya
+   en el borde inferior; el conjunto texto + imagen va centrado, con aire parejo
+   a ambos extremos. width:auto evita que se achique al centrar. */
 .slide-img {
-  width: 100%; max-width: 100%;
-  height: calc(100% + 104px);           /* el margin negativo inferior la apoya en el borde de abajo */
+  width: auto; max-width: 46vw;
+  height: calc(100% + 104px);           /* casi del alto del slide; el margin negativo la apoya abajo */
   object-fit: contain; object-position: bottom center;
   margin-bottom: -64px;
   position: relative; z-index: 2; animation: slideImgIn .9s ease both;
@@ -50,9 +51,9 @@
 @media (max-width: 960px) {
   .home-swiper { height: 620px; }
   .slide-inner { flex-direction: column; justify-content: flex-start; text-align: center; gap: 20px; padding: 92px 22px 32px; }
-  .slide-text { flex: 0 0 auto; max-width: 100%; }
+  .slide-text { flex: 0 0 auto; width: 100%; max-width: 100%; }
   .slide-media { align-items: center; justify-content: center; align-self: auto; padding: 0; }
-  .slide-img { height: 240px; object-position: bottom center; margin: 0; }
+  .slide-img { height: 240px; max-width: 80%; object-position: bottom center; margin: 0; }
   .slide-text h1 { font-size: 23px; }
   .orbit { display: none; }
 }
