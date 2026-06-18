@@ -7,11 +7,18 @@ import { Router } from '@angular/router';
 import { AuthService, AuthStore } from '@core/auth';
 import { PublicHomeProfessionalCardDto } from '../../../../public/models/public-home.dto';
 import { BookAppointmentDialogComponent } from '../book-appointment-dialog/book-appointment-dialog.component';
+import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
 
 @Component({
   selector: 'app-professional-card',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatDialogModule],
+  imports: [
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
+    DoctorNamePipe,
+  ],
   templateUrl: './professional-card.component.html',
   styleUrl: './professional-card.component.scss',
 })

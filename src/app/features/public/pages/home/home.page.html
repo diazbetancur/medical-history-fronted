@@ -158,7 +158,8 @@
   </div>
 </section>
 
-<!-- Featured Doctors Section -->
+<!-- Featured Doctors Section — se oculta si no hay médicos (BUG-087) -->
+@if (loadingProfessionals() || professionals().length > 0) {
 <section class="featured-doctors">
   <div class="container">
     <h2 class="section-title">Médicos Destacados</h2>
@@ -189,23 +190,10 @@
         <mat-icon>arrow_forward</mat-icon>
       </button>
     </div>
-    } @else {
-    <div class="empty-state">
-      <mat-icon class="empty-icon">person_search</mat-icon>
-      <p class="empty-text">
-        No hay médicos destacados disponibles en este momento
-      </p>
-      <button
-        type="button"
-        class="pill-btn pill-btn--primary"
-        (click)="navigateToSearch()"
-      >
-        Buscar Médicos
-      </button>
-    </div>
     }
   </div>
 </section>
+}
 
 <!-- CTA Section -->
 <section class="cta-section">

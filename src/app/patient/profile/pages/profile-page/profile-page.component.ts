@@ -68,6 +68,8 @@ export class ProfilePageComponent implements OnInit {
   readonly bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   readonly genderOptions = ['Masculino', 'Femenino', 'Otro', 'Prefiero no especificar'];
   readonly documentTypeOptions = ['DNI', 'Pasaporte', 'RNP'];
+  // El sistema opera solo en Honduras (geografía/ciudades de Honduras).
+  readonly countryOptions = ['Honduras'];
   private readonly patientService = inject(PatientService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
@@ -98,7 +100,7 @@ export class ProfilePageComponent implements OnInit {
     dateOfBirth: new FormControl<Date | null>(null),
     gender: [''],
     bloodType: [''],
-    countryName: ['', [Validators.maxLength(100)]],
+    countryName: ['Honduras', [Validators.maxLength(100)]],
     cityName: ['', [Validators.maxLength(100)]],
     addressLine1: ['', [Validators.maxLength(300)]],
   });
@@ -415,7 +417,7 @@ export class ProfilePageComponent implements OnInit {
       dateOfBirth: this.toDateValue(profile.dateOfBirth),
       gender: profile.gender || '',
       bloodType: profile.bloodType || '',
-      countryName: profile.countryName || '',
+      countryName: profile.countryName || 'Honduras',
       cityName: profile.cityName || '',
       addressLine1: profile.addressLine1 || '',
     });

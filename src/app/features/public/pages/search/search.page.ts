@@ -44,6 +44,7 @@ import { PublicProfessionalsService } from '../../../../public/services/public-p
 import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
+import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
 
 @Component({
   selector: 'app-search-page',
@@ -51,6 +52,7 @@ import { PublicFooterComponent } from '../../components/public-footer/public-foo
   imports: [
     PublicHeaderComponent,
     PublicFooterComponent,
+    DoctorNamePipe,
     RouterLink,
     ReactiveFormsModule,
     MatAutocompleteModule,

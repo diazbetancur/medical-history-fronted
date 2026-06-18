@@ -7,6 +7,7 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { FormLabelComponent } from '@shared/ui/forms';
 
 @Component({
   selector: 'app-create-group-dialog',
@@ -17,6 +18,7 @@ import { MatInputModule } from '@angular/material/input';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    FormLabelComponent,
   ],
   templateUrl: './create-group-dialog.component.html',
 })
