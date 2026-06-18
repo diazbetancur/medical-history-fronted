@@ -28,6 +28,7 @@ import { AppointmentsService } from '@patient/services/appointments.service';
 import { ActingPatientStore } from '@patient/services/acting-patient.store';
 import { FamilyGroupService } from '@patient/services/family-group.service';
 import { SlotsService } from '@patient/services/slots.service';
+import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
 
 export interface BookAppointmentDialogData {
   slug: string;
@@ -62,6 +63,7 @@ const OBSERVATION_MIN_NON_WHITESPACE = 10;
     MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    DoctorNamePipe,
   ],
   templateUrl: './book-appointment-dialog.component.html',
   styleUrl: './book-appointment-dialog.component.scss',
