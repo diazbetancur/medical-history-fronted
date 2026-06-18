@@ -13,9 +13,9 @@
 .slide--dark .dna span { color: #1f6aa0; }
 @keyframes dnaBob { 0%,100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-18px) rotate(8deg); } }
 
-.slide-inner { position: absolute; inset: 0; display: flex; align-items: center; gap: 16px; padding: 104px 56px 64px; }
+.slide-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 32px; padding: 104px 56px 64px; }
 .slide-inner--reverse { flex-direction: row-reverse; }
-.slide-text { flex: 1; min-width: 0; }
+.slide-text { flex: 0 1 460px; min-width: 0; }
 .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 5px 12px; border-radius: 20px; margin-bottom: 14px; background: rgba(10,110,189,.10); color: #0a6ebd; }
 .slide--dark .eyebrow { background: rgba(255,255,255,.12); color: #bfe0ff; }
 .slide-text h1 { font-size: 31px; line-height: 1.14; margin: 0 0 14px; font-weight: 800; max-width: 540px; }
@@ -29,20 +29,16 @@
 .btn--outline { background: transparent; border: 1.5px solid #072036; color: #072036; }
 .slide--dark .btn--outline { border-color: #cfe6fb; color: #eaf3fb; }
 
-.slide-media { flex: 1.5; position: relative; display: flex; align-items: flex-end; justify-content: flex-end; min-width: 0; align-self: stretch; padding-left: 64px; }
-/* Slide invertido (imagen a la izquierda): el aire va a la derecha. */
-.slide-inner--reverse .slide-media { justify-content: flex-start; padding-left: 0; padding-right: 64px; }
-/* La imagen (recorte transparente) se ancla al borde inferior y al borde
-   exterior del slide, sube casi hasta el top y es más alta/ancha, para que
-   no se vea cortada. */
+.slide-media { flex: 0 1 480px; position: relative; display: flex; align-items: flex-end; justify-content: center; min-width: 0; align-self: stretch; }
+/* La imagen (recorte) se apoya en el borde inferior y queda junto al texto:
+   el conjunto texto + imagen va centrado, con aire parejo a ambos extremos. */
 .slide-img {
-  width: auto; max-width: 100%;
-  height: calc(100% + 104px);           /* más alta; el margin negativo cancela el padding inferior */
-  object-fit: contain; object-position: bottom right;
-  margin-bottom: -64px; margin-right: -56px; /* toca el borde inferior y el lateral del slide */
+  width: 100%; max-width: 100%;
+  height: calc(100% + 104px);           /* el margin negativo inferior la apoya en el borde de abajo */
+  object-fit: contain; object-position: bottom center;
+  margin-bottom: -64px;
   position: relative; z-index: 2; animation: slideImgIn .9s ease both;
 }
-.slide-inner--reverse .slide-img { object-position: bottom left; margin-right: 0; margin-left: -56px; }
 @keyframes slideImgIn { from { opacity: 0; transform: translateX(46px) scale(.95); } to { opacity: 1; transform: none; } }
 .halo { position: absolute; width: 460px; height: 460px; border-radius: 50%; background: radial-gradient(circle, rgba(10,110,189,.16), transparent 70%); z-index: 1; }
 .orbit { position: absolute; width: 540px; height: 540px; z-index: 0; }
@@ -51,11 +47,12 @@
 @keyframes orbit { from { transform: rotate(var(--a)) translateX(255px) rotate(calc(-1 * var(--a))); }
   to { transform: rotate(calc(var(--a) + 360deg)) translateX(255px) rotate(calc(-1 * var(--a) - 360deg)); } }
 
-@media (max-width: 780px) {
-  .home-swiper { height: auto; min-height: 600px; }
-  .slide-inner { flex-direction: column; text-align: center; padding: 96px 22px 0; }
+@media (max-width: 960px) {
+  .home-swiper { height: 620px; }
+  .slide-inner { flex-direction: column; justify-content: flex-start; text-align: center; gap: 20px; padding: 92px 22px 32px; }
+  .slide-text { flex: 0 0 auto; max-width: 100%; }
   .slide-media { align-items: center; justify-content: center; align-self: auto; padding: 0; }
-  .slide-img { height: 260px; object-position: bottom center; margin: 0; }
+  .slide-img { height: 240px; object-position: bottom center; margin: 0; }
   .slide-text h1 { font-size: 23px; }
   .orbit { display: none; }
 }
