@@ -43,6 +43,10 @@ import { SpecialtyDto } from '../../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
 import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
+import {
+  AuthModalComponent,
+  AuthModalData,
+} from '../../components/auth-modal/auth-modal.component';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
 import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
@@ -324,16 +328,31 @@ export class SearchPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Agendar requiere sesión: si no hay login, invitamos a iniciar sesión en
-    // vez de abrir el modal y golpear un endpoint protegido (evita el 401).
+    // Agendar requiere sesión. Si no hay login, abrimos el modal de auth (no la
+    // página /login) y, si inicia sesión, continuamos al agendamiento. Así
+    // evitamos el 401 contra el endpoint protegido y el redirect feo.
     if (!this.authStore.isAuthenticated()) {
-      this.toast.info('Inicia sesión para agendar una cita');
-      this.router.navigate(['/login'], {
-        queryParams: { returnUrl: `/pro/${doctor.slug}` },
-      });
+      this.dialog
+        .open<AuthModalComponent, AuthModalData>(AuthModalComponent, {
+          data: { initialTab: 0 },
+          width: '440px',
+          maxWidth: '100vw',
+          panelClass: 'auth-modal-panel',
+          autoFocus: 'first-tabbable',
+        })
+        .afterClosed()
+        .subscribe(() => {
+          if (this.authStore.isAuthenticated()) {
+            this.openBookingDialog(doctor);
+          }
+        });
       return;
     }
 
+    this.openBookingDialog(doctor);
+  }
+
+  private openBookingDialog(doctor: SearchProfessional): void {
     this.dialog.open(BookAppointmentDialogComponent, {
       width: '760px',
       maxWidth: '96vw',
