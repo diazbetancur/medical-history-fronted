@@ -26,6 +26,7 @@ import {
   SearchProfessional,
 } from '@data/api';
 import { SeoService, ToastService } from '@shared/services';
+import { AuthStore } from '@core/auth';
 import {
   Subject,
   catchError,
@@ -80,6 +81,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private readonly seoService = inject(SeoService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
+  private readonly authStore = inject(AuthStore);
 
   private readonly destroy$ = new Subject<void>();
   private readonly pageSize = 10;
@@ -319,6 +321,16 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   bookAppointment(doctor: SearchProfessional): void {
     if (!doctor.slug) {
       this.toast.warning('No pudimos abrir el perfil para agendar la cita');
+      return;
+    }
+
+    // Agendar requiere sesión: si no hay login, invitamos a iniciar sesión en
+    // vez de abrir el modal y golpear un endpoint protegido (evita el 401).
+    if (!this.authStore.isAuthenticated()) {
+      this.toast.info('Inicia sesión para agendar una cita');
+      this.router.navigate(['/login'], {
+        queryParams: { returnUrl: `/pro/${doctor.slug}` },
+      });
       return;
     }
 
