@@ -115,7 +115,8 @@
         <div class="state-block error">{{ slotsError() }}</div>
       } @else if (selectedDate() && availableSlots().length === 0) {
         <div class="state-block">
-          No hay horarios disponibles para esta fecha.
+          El médico no tiene horarios disponibles para esta fecha. Por favor
+          selecciona otra fecha.
         </div>
       } @else if (availableSlots().length > 0) {
         <div class="slots-list">

@@ -53,11 +53,11 @@ export const RegisterFormMessages = {
 
   confirmPassword: {
     required: 'Confirma tu contraseña',
-    passwordMismatch: 'Las contraseñas deben coincidir',
+    passwordMismatch: 'Las contraseñas no coinciden',
     server: (errorValue) =>
       typeof errorValue === 'string'
         ? errorValue
-        : 'Las contraseñas deben coincidir',
+        : 'Las contraseñas no coinciden',
   } as FormErrorMessageMap,
 
   phoneNumber: {

@@ -128,11 +128,6 @@
             [submitted]="submitted()"
             [messages]="registerFormMessages.confirmPassword"
           ></app-form-control-error>
-          @if ( form.hasError('passwordMismatch') && (submitted() ||
-          form.controls.confirmPassword.touched ||
-          form.controls.confirmPassword.dirty) ) {
-          <mat-error>Las contraseñas no coinciden</mat-error>
-          }
         </mat-form-field>
 
         <div class="profile-hint">

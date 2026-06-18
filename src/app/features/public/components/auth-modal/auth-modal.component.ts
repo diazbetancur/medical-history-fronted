@@ -607,9 +607,33 @@ export class AuthModalComponent implements OnInit {
   private passwordMatchValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const password = control.get('password')?.value;
-      const confirmPassword = control.get('confirmPassword')?.value;
-      if (!password || !confirmPassword) return null;
-      return password === confirmPassword ? null : { passwordMismatch: true };
+      const confirm = control.get('confirmPassword');
+      if (!confirm) return null;
+
+      const clearMismatch = (): void => {
+        if (confirm.hasError('passwordMismatch')) {
+          const rest = { ...confirm.errors };
+          delete rest['passwordMismatch'];
+          confirm.setErrors(Object.keys(rest).length ? rest : null);
+        }
+      };
+
+      if (!password || !confirm.value) {
+        clearMismatch();
+        return null;
+      }
+
+      if (password !== confirm.value) {
+        // Reflejar el error también en el control para que Material muestre el
+        // <mat-error> bajo "Confirmar contraseña". La guarda evita bucles.
+        if (!confirm.hasError('passwordMismatch')) {
+          confirm.setErrors({ ...confirm.errors, passwordMismatch: true });
+        }
+        return { passwordMismatch: true };
+      }
+
+      clearMismatch();
+      return null;
     };
   }
 
