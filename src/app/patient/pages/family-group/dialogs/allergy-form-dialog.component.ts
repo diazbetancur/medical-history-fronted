@@ -9,6 +9,7 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { FormLabelComponent } from '@shared/ui/forms';
 import { AllergyInput } from '../../../services/family-group.models';
 
 @Component({
@@ -21,6 +22,7 @@ import { AllergyInput } from '../../../services/family-group.models';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    FormLabelComponent,
   ],
   templateUrl: './allergy-form-dialog.component.html',
 })

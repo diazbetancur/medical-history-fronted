@@ -2,7 +2,9 @@
 <mat-dialog-content>
   <form [formGroup]="form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Tipo</mat-label>
+      <mat-label>
+        <app-form-label text="Tipo" [required]="true"></app-form-label>
+      </mat-label>
       <input matInput formControlName="type" maxlength="120" placeholder="Ej. Patológico, Familiar, Quirúrgico" />
       @if (form.controls.type.hasError('required') && form.controls.type.touched) {
         <mat-error>El tipo es obligatorio</mat-error>
@@ -10,7 +12,9 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Título</mat-label>
+      <mat-label>
+        <app-form-label text="Título" [required]="true"></app-form-label>
+      </mat-label>
       <input matInput formControlName="title" maxlength="200" />
       @if (form.controls.title.hasError('required') && form.controls.title.touched) {
         <mat-error>El título es obligatorio</mat-error>
