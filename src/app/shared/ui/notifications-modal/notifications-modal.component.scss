@@ -64,6 +64,14 @@
     background: var(--color-primary-light, #eff6ff);
   }
 
+  &--clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(10, 110, 189, 0.06);
+    }
+  }
+
   &__dot {
     width: 8px;
     height: 8px;
