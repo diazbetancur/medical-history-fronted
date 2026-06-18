@@ -43,10 +43,7 @@ import { SpecialtyDto } from '../../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
 import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
-import {
-  AuthModalComponent,
-  AuthModalData,
-} from '../../components/auth-modal/auth-modal.component';
+import { AuthDialogService } from '../../components/auth-modal/auth-dialog.service';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
 import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
@@ -86,6 +83,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   private readonly authStore = inject(AuthStore);
+  private readonly authDialog = inject(AuthDialogService);
 
   private readonly destroy$ = new Subject<void>();
   private readonly pageSize = 10;
@@ -332,14 +330,8 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     // página /login) y, si inicia sesión, continuamos al agendamiento. Así
     // evitamos el 401 contra el endpoint protegido y el redirect feo.
     if (!this.authStore.isAuthenticated()) {
-      this.dialog
-        .open<AuthModalComponent, AuthModalData>(AuthModalComponent, {
-          data: { initialTab: 0 },
-          width: '440px',
-          maxWidth: '100vw',
-          panelClass: 'auth-modal-panel',
-          autoFocus: 'first-tabbable',
-        })
+      this.authDialog
+        .open()
         .afterClosed()
         .subscribe(() => {
           if (this.authStore.isAuthenticated()) {

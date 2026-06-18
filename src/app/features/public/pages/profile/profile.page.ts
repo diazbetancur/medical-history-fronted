@@ -10,7 +10,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, AuthStore } from '@core/auth';
 import { PublicProfessionalDetailResponse } from '@data/api';
 import { ProfileStore } from '@data/stores';
-import { AnalyticsService, SeoService } from '@shared/services';
+import { AnalyticsService, SeoService, ToastService } from '@shared/services';
+import { AuthDialogService } from '../../components/auth-modal/auth-dialog.service';
 import { isNotFoundError } from '@shared/utils';
 import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
@@ -44,6 +45,8 @@ export class ProfilePageComponent {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly authDialog = inject(AuthDialogService);
+  private readonly toast = inject(ToastService);
 
   readonly estimatedTariff = computed(() => {
     const value = this.store.profile()?.consultationValue;
@@ -156,11 +159,28 @@ export class ProfilePageComponent {
 
     const isAuthenticated =
       this.authStore.isAuthenticated() || this.authService.isAuthenticated();
+
+    if (!isAuthenticated) {
+      // Modal de auth (no la página /login); si inicia sesión, reintentamos.
+      this.authDialog
+        .open()
+        .afterClosed()
+        .subscribe(() => {
+          if (
+            this.authStore.isAuthenticated() ||
+            this.authService.isAuthenticated()
+          ) {
+            this.bookAppointment();
+          }
+        });
+      return;
+    }
+
     const hasPatientContext =
       this.authStore.currentContext()?.type === 'PATIENT' ||
       this.authStore.availableContexts().some((ctx) => ctx.type === 'PATIENT');
 
-    if (isAuthenticated && (hasPatientContext || this.authService.isClient())) {
+    if (hasPatientContext || this.authService.isClient()) {
       this.dialog.open(BookAppointmentDialogComponent, {
         width: '760px',
         maxWidth: '96vw',
@@ -175,11 +195,9 @@ export class ProfilePageComponent {
       return;
     }
 
-    this.router.navigate(['/login'], {
-      queryParams: {
-        returnUrl: `/pro/${profile.id}`,
-      },
-    });
+    this.toast.warning(
+      'Necesitas una cuenta de paciente para agendar una cita.',
+    );
   }
 
   private setProfileSeo(profile: PublicProfessionalDetailResponse): void {
