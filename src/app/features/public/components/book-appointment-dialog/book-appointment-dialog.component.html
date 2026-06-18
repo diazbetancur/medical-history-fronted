@@ -17,7 +17,7 @@
 
         <div class="summary-row">
           <strong>Médico:</strong>
-          <span>{{ professionalName() }}</span>
+          <span>{{ professionalName() | doctorName }}</span>
         </div>
         <div class="summary-row">
           <strong>Fecha:</strong>
@@ -48,7 +48,7 @@
         </div>
 
         <div class="pro-info">
-          <h3>{{ professionalName() }}</h3>
+          <h3>{{ professionalName() | doctorName }}</h3>
           @if (specialties().length > 0) {
             <p>{{ specialties().join(" · ") }}</p>
           }

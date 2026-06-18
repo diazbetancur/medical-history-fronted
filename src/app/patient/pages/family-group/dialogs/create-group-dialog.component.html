@@ -2,7 +2,9 @@
 <mat-dialog-content>
   <form [formGroup]="form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nombre del grupo</mat-label>
+      <mat-label>
+        <app-form-label text="Nombre del grupo" [required]="true"></app-form-label>
+      </mat-label>
       <input matInput formControlName="name" maxlength="120" placeholder="Ej. Familia Pérez" />
       @if (form.controls.name.hasError('required') && form.controls.name.touched) {
         <mat-error>El nombre es obligatorio</mat-error>

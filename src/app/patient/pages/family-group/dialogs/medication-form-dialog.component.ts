@@ -9,6 +9,7 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FormLabelComponent } from '@shared/ui/forms';
 import { MedicationInput } from '../../../services/family-group.models';
 
 @Component({
@@ -21,6 +22,7 @@ import { MedicationInput } from '../../../services/family-group.models';
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
+    FormLabelComponent,
   ],
   templateUrl: './medication-form-dialog.component.html',
 })

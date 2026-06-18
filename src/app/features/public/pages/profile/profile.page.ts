@@ -15,6 +15,7 @@ import { isNotFoundError } from '@shared/utils';
 import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
+import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
 
 @Component({
   selector: 'app-profile-page',
@@ -29,6 +30,7 @@ import { PublicHeaderComponent } from '../../components/public-header/public-hea
     MatChipsModule,
     MatProgressSpinnerModule,
     PublicFooterComponent,
+    DoctorNamePipe,
   ],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',

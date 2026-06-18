@@ -5,7 +5,7 @@
   <div class="card-image" [style.background-image]="'url(' + imageUrl + ')'">
     <div class="card-overlay">
       <div class="card-info">
-        <h3 class="professional-name">{{ professional.fullName }}</h3>
+        <h3 class="professional-name">{{ professional.fullName | doctorName }}</h3>
         <p class="professional-specialty">{{ professional.specialty }}</p>
         <div class="card-meta">
           <span class="experience"
