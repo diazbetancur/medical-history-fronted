@@ -2,7 +2,9 @@
 <mat-dialog-content>
   <form [formGroup]="form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Alérgeno</mat-label>
+      <mat-label>
+        <app-form-label text="Alérgeno" [required]="true"></app-form-label>
+      </mat-label>
       <input matInput formControlName="allergen" maxlength="200" placeholder="Ej. Penicilina" />
       @if (form.controls.allergen.hasError('required') && form.controls.allergen.touched) {
         <mat-error>El alérgeno es obligatorio</mat-error>
@@ -15,7 +17,9 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Severidad</mat-label>
+      <mat-label>
+        <app-form-label text="Severidad" [required]="true"></app-form-label>
+      </mat-label>
       <mat-select formControlName="severity">
         @for (option of severityOptions; track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -27,7 +31,9 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Estado</mat-label>
+      <mat-label>
+        <app-form-label text="Estado" [required]="true"></app-form-label>
+      </mat-label>
       <mat-select formControlName="status">
         @for (option of statusOptions; track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
