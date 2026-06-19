@@ -1,14 +1,14 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Component, PLATFORM_ID, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
+import { PlatformService } from '@core/platform/platform.service';
 
-const STORAGE_KEY = 'fg-help-panel-expanded';
+export const STORAGE_KEY = 'fg-help-panel-expanded';
 
 /**
  * Panel colapsable "¿Cómo funciona?" para el módulo de Grupo Familiar.
  * Colapsado por defecto; recuerda el estado del usuario en localStorage.
- * SSR-safe: en el servidor no toca localStorage y arranca colapsado.
+ * SSR-safe vía PlatformService (en el servidor getLocalStorage() es null).
  */
 @Component({
   selector: 'app-family-group-help-panel',
@@ -18,27 +18,27 @@ const STORAGE_KEY = 'fg-help-panel-expanded';
   styleUrl: './family-group-help-panel.component.scss',
 })
 export class FamilyGroupHelpPanelComponent {
-  private readonly platformId = inject(PLATFORM_ID);
+  private readonly platform = inject(PlatformService);
   readonly expanded = signal(this.readPersisted());
 
   onExpandedChange(open: boolean): void {
+    // Avoid redundant writes (mat-expansion-panel may echo the initial state).
+    if (this.expanded() === open) return;
     this.expanded.set(open);
     this.persist(open);
   }
 
   private readPersisted(): boolean {
-    if (!isPlatformBrowser(this.platformId)) return false;
     try {
-      return localStorage.getItem(STORAGE_KEY) === 'true';
+      return this.platform.getLocalStorage()?.getItem(STORAGE_KEY) === 'true';
     } catch {
       return false;
     }
   }
 
   private persist(open: boolean): void {
-    if (!isPlatformBrowser(this.platformId)) return;
     try {
-      localStorage.setItem(STORAGE_KEY, String(open));
+      this.platform.getLocalStorage()?.setItem(STORAGE_KEY, String(open));
     } catch {
       // ignore storage failures (modo privado, cuota)
     }
