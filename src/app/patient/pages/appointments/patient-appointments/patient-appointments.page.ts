@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { ApiError, getUserMessage } from '@core/http/api-error';
 import { ToastService } from '@shared/services/toast.service';
 import { ConfirmDialogComponent } from '@shared/ui';
+import { SpecialtySummaryComponent } from '@shared/ui/specialty-summary/specialty-summary.component';
 import { AppointmentDto } from '../../../models/appointment.dto';
 import { AppointmentsService } from '../../../services/appointments.service';
 import { AppointmentDetailDialogComponent } from '../../home/appointment-detail-dialog/appointment-detail-dialog.component';
@@ -24,6 +25,7 @@ import { AppointmentDetailDialogComponent } from '../../home/appointment-detail-
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+    SpecialtySummaryComponent,
   ],
   templateUrl: './patient-appointments.page.html',
   styleUrl: './patient-appointments.page.scss',
