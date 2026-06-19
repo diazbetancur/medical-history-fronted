@@ -238,7 +238,7 @@ export class AppointmentsService {
         name:
           item?.professional?.name ?? item?.professionalName ?? 'Profesional',
         specialty: this.extractSpecialty(item),
-        photoUrl: item?.professional?.photoUrl,
+        photoUrl: item?.professional?.photoUrl ?? item?.professionalPhotoUrl,
       },
       createdAt: item?.createdAt ?? new Date().toISOString(),
       updatedAt: item?.updatedAt ?? item?.createdAt ?? new Date().toISOString(),
@@ -334,7 +334,7 @@ export class AppointmentsService {
   private extractSpecialty(item: any): string {
     // Scalar field on professional or top-level
     const scalar: string =
-      item?.professional?.specialty || item?.specialtyName || '';
+      item?.professional?.specialty || item?.specialty || item?.specialtyName || '';
     if (scalar) return scalar;
 
     // Array on professional (e.g. professional.specialties[])
