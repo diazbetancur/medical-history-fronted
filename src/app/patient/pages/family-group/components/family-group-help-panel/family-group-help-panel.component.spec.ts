@@ -67,6 +67,9 @@ describe('FamilyGroupHelpPanelComponent', () => {
       .componentInstance;
     expect(c.expanded()).toBe(false);
     c.onExpandedChange(true);
+    // The signal still updates (interactive on SSR-rendered pages); only the
+    // localStorage write is suppressed on the server.
+    expect(c.expanded()).toBe(true);
     expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 });
