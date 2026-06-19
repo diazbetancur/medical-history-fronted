@@ -31,12 +31,17 @@
       <input matInput type="date" formControlName="startDate" />
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Fecha de fin</mat-label>
-      <input matInput type="date" formControlName="endDate" />
-    </mat-form-field>
+    <mat-checkbox formControlName="isOngoing">En curso (sin fecha de fin)</mat-checkbox>
 
-    <mat-checkbox formControlName="isOngoing">En curso</mat-checkbox>
+    @if (!form.controls.isOngoing.value) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Fecha de fin</mat-label>
+        <input matInput type="date" formControlName="endDate" />
+        @if (form.hasError('invalidDateRange')) {
+          <mat-error>La fecha de fin debe ser igual o posterior a la de inicio</mat-error>
+        }
+      </mat-form-field>
+    }
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Notas</mat-label>
@@ -46,7 +51,12 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Cancelar</button>
-  <button mat-flat-button color="primary" (click)="submit()">
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="form.invalid"
+  >
     {{ isEdit ? 'Guardar' : 'Agregar' }}
   </button>
 </mat-dialog-actions>

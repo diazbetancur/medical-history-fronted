@@ -1,5 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -36,16 +42,38 @@ export class MedicationFormDialogComponent {
 
   readonly isEdit = !!this.data;
 
-  readonly form = this.fb.nonNullable.group({
-    name: [this.data?.name ?? '', [Validators.required, Validators.maxLength(200)]],
-    dose: [this.data?.dose ?? '', [Validators.maxLength(120)]],
-    frequency: [this.data?.frequency ?? '', [Validators.maxLength(120)]],
-    prescribedBy: [this.data?.prescribedBy ?? '', [Validators.maxLength(200)]],
-    startDate: [this.data?.startDate ?? ''],
-    endDate: [this.data?.endDate ?? ''],
-    isOngoing: [this.data?.isOngoing ?? false],
-    notes: [this.data?.notes ?? '', [Validators.maxLength(1000)]],
-  });
+  readonly form = this.fb.nonNullable.group(
+    {
+      name: [this.data?.name ?? '', [Validators.required, Validators.maxLength(200)]],
+      dose: [this.data?.dose ?? '', [Validators.maxLength(120)]],
+      frequency: [this.data?.frequency ?? '', [Validators.maxLength(120)]],
+      prescribedBy: [this.data?.prescribedBy ?? '', [Validators.maxLength(200)]],
+      startDate: [this.data?.startDate ?? ''],
+      endDate: [this.data?.endDate ?? ''],
+      isOngoing: [this.data?.isOngoing ?? false],
+      notes: [this.data?.notes ?? '', [Validators.maxLength(1000)]],
+    },
+    { validators: [medicationConsistencyValidator] },
+  );
+
+  constructor() {
+    // "En curso" and "Fecha de fin" are mutually exclusive (backend rejects the
+    // combo). Keep the end date cleared/disabled while ongoing so the invalid
+    // state can't be submitted — and the user finds out before saving, not after.
+    const endDate = this.form.controls.endDate;
+    this.form.controls.isOngoing.valueChanges.subscribe((isOngoing) => {
+      if (isOngoing) {
+        endDate.setValue('');
+        endDate.disable();
+      } else {
+        endDate.enable();
+      }
+    });
+    if (this.form.controls.isOngoing.value) {
+      endDate.setValue('');
+      endDate.disable();
+    }
+  }
 
   submit(): void {
     if (this.form.invalid) {
@@ -69,4 +97,27 @@ export class MedicationFormDialogComponent {
   cancel(): void {
     this.dialogRef.close(null);
   }
+}
+
+/**
+ * Cross-field rules for a medication:
+ * - An ongoing medication ("En curso") cannot have an end date.
+ * - The end date must be on or after the start date.
+ */
+function medicationConsistencyValidator(
+  group: AbstractControl,
+): ValidationErrors | null {
+  const isOngoing = group.get('isOngoing')?.value;
+  const startDate = group.get('startDate')?.value;
+  const endDate = group.get('endDate')?.value;
+
+  if (isOngoing && endDate) {
+    return { ongoingWithEndDate: true };
+  }
+
+  if (!isOngoing && startDate && endDate && endDate < startDate) {
+    return { invalidDateRange: true };
+  }
+
+  return null;
 }
