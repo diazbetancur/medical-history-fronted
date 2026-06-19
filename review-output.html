@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Review — FamilyGroupHelpPanelComponent</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.6; background: #f7f8fa; color: #1a1d23; }
+  .page { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .meta { color: #6b7280; font-size: 0.875rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.1rem; font-weight: 700; margin: 2rem 0 0.75rem; letter-spacing: 0.01em; }
+  .verdict { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.45rem 1rem; border-radius: 6px; font-weight: 700; font-size: 0.95rem; margin-bottom: 1.75rem; }
+  .verdict.changes { background: #fef3c7; color: #92400e; border: 1.5px solid #f59e0b; }
+  .finding { background: #fff; border-radius: 8px; border: 1px solid #e5e7eb; padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
+  .finding-header { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.5rem; }
+  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; margin-top: 0.15rem; }
+  .badge.critical { background: #fee2e2; color: #991b1b; }
+  .badge.important { background: #fef3c7; color: #92400e; }
+  .badge.minor { background: #e0f2fe; color: #0369a1; }
+  .finding-title { font-weight: 600; font-size: 0.97rem; }
+  .finding-loc { font-size: 0.8rem; color: #6b7280; font-family: 'SF Mono', 'Fira Code', monospace; margin-bottom: 0.5rem; }
+  .finding-body { font-size: 0.9rem; color: #374151; }
+  .finding-body p { margin-bottom: 0.4rem; }
+  .finding-body code { background: #f3f4f6; padding: 0.1em 0.35em; border-radius: 3px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; }
+  .finding-body pre { background: #1e2330; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem; overflow-x: auto; margin: 0.5rem 0; }
+  .scenario { background: #f9fafb; border-left: 3px solid #d1d5db; padding: 0.5rem 0.75rem; border-radius: 0 4px 4px 0; font-size: 0.875rem; color: #4b5563; margin-top: 0.5rem; }
+  .scenario strong { color: #1a1d23; }
+  .strengths-list { list-style: none; padding: 0; }
+  .strengths-list li { padding: 0.3rem 0 0.3rem 1.4rem; position: relative; font-size: 0.92rem; }
+  .strengths-list li::before { content: "✓"; position: absolute; left: 0; color: #059669; font-weight: 700; }
+  .section-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 0.6rem; margin-top: 1.5rem; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Code Review — FamilyGroupHelpPanelComponent</h1>
+  <div class="meta">
+    Diff: <code>git diff 6dacfbc cb87349</code> &nbsp;·&nbsp;
+    Angular 19 · Standalone · Signals · SSR · Angular Material 19
+  </div>
+
+  <div class="verdict changes">⚠ CHANGES REQUESTED</div>
+
+  <!-- ─── STRENGTHS ─────────────────────────────── -->
+  <h2>Strengths</h2>
+  <ul class="strengths-list">
+    <li>Correct SSR guard — <code>isPlatformBrowser</code> checked in both <code>readPersisted()</code> and <code>persist()</code>, with a try/catch in each. Solid defensive layering.</li>
+    <li>Single responsibility — the component is genuinely small and focused: one collapsible panel, one piece of persisted boolean state. No scope creep.</li>
+    <li>Idiomatic Angular 19 — uses <code>inject()</code>, <code>signal()</code>, standalone component, no <code>NgModule</code> overhead.</li>
+    <li>Tests verify real behavior against the live <code>localStorage</code> (not mocks), covering the three main paths: default, pre-seeded true, and the toggle round-trip.</li>
+    <li>Comment in the catch block explicitly names the failure modes ("modo privado, cuota"), aiding future maintainers.</li>
+    <li>BEM class naming (<code>fg-help</code>, <code>fg-help__body</code>) is clean and consistent with Angular Material host-element patterns.</li>
+  </ul>
+
+  <hr>
+
+  <!-- ─── CRITICAL ──────────────────────────────── -->
+  <div class="section-label">Critical</div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span class="badge critical">Critical</span>
+      <span class="finding-title">Component is never used — it is dead code</span>
+    </div>
+    <div class="finding-loc">src/app/patient/pages/family-group/ (no parent imports or uses the selector)</div>
+    <div class="finding-body">
+      <p>No template in the codebase contains <code>&lt;app-family-group-help-panel&gt;</code> and no parent component imports <code>FamilyGroupHelpPanelComponent</code>. The component, its localStorage persistence, and its UX goal of onboarding users to the family group feature are all invisible to users.</p>
+      <div class="scenario"><strong>Failure scenario:</strong> A user lands on <code>/patient/family-group</code> for the first time. No "¿Cómo funciona?" panel ever appears. The entire rationale for this task is silently unmet.</div>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Import <code>FamilyGroupHelpPanelComponent</code> in <code>FamilyGroupListPage</code> (and/or <code>FamilyGroupDetailPage</code>) and add <code>&lt;app-family-group-help-panel /&gt;</code> to the template.</p>
+    </div>
+  </div>
+
+  <!-- ─── IMPORTANT ────────────────────────────── -->
+  <div class="section-label">Important</div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span class="badge important">Important</span>
+      <span class="finding-title">Bypasses the project's established <code>PlatformService</code> abstraction</span>
+    </div>
+    <div class="finding-loc">family-group-help-panel.component.ts · lines 1, 21, 30, 39</div>
+    <div class="finding-body">
+      <p>The project has a <code>PlatformService</code> (<code>src/app/core/platform/platform.service.ts</code>, <code>providedIn: 'root'</code>) that provides <code>isBrowser</code>, <code>getLocalStorage()</code>, <code>getWindow()</code>, etc. — exactly the SSR-safe primitives this component re-implements inline by directly injecting <code>PLATFORM_ID</code> and calling <code>isPlatformBrowser()</code>. This is the fourth independent copy of this pattern in the codebase (<code>SlotPreferencesService</code>, <code>PwaInstallService</code>, <code>PublicHomeService</code> are the others).</p>
+      <div class="scenario"><strong>Failure scenario:</strong> If Angular changes how SSR platform detection works, or if the team adds centralized error logging to <code>PlatformService</code>, this component is silently left behind because it bypasses the service entirely.</div>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Inject <code>PlatformService</code> and delegate: <code>this.platform.isBrowser</code> and <code>this.platform.getLocalStorage()?.getItem(KEY)</code>.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span class="badge important">Important</span>
+      <span class="finding-title">Tests never call <code>detectChanges()</code> — template and binding bugs are invisible</span>
+    </div>
+    <div class="finding-loc">family-group-help-panel.component.spec.ts · lines 16–18</div>
+    <div class="finding-body">
+      <p>The <code>create()</code> helper discards the <code>ComponentFixture</code> and returns only <code>componentInstance</code>. <code>fixture.detectChanges()</code> is never called in any test, so the template is never compiled or rendered.</p>
+      <div class="scenario"><strong>Failure scenario:</strong> Someone refactors the template to use <code>(opened)</code> instead of <code>(expandedChange)</code> (a plausible mistake — <code>MatExpansionPanel</code> has both). <code>onExpandedChange</code> is never wired up, localStorage is never updated, the "remember state" feature silently breaks in production — and every test still passes.</div>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Return the fixture from <code>create()</code> and call <code>fixture.detectChanges()</code>; add at least one test that triggers the panel open/close via DOM interaction to verify the <code>(expandedChange)</code> wiring.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span class="badge important">Important</span>
+      <span class="finding-title">No SSR platform test — the component's most distinctive feature is untested</span>
+    </div>
+    <div class="finding-loc">family-group-help-panel.component.spec.ts · (missing test)</div>
+    <div class="finding-body">
+      <p>The <code>isPlatformBrowser</code> guards in <code>readPersisted()</code> and <code>persist()</code> are the only SSR-specific code in this component, but no test exercises the server path. The browser tests all pass even if the guard is accidentally removed (the try/catch would swallow the error in jsdom), masking the regression.</p>
+      <div class="scenario"><strong>Failure scenario:</strong> A refactor removes the <code>!isPlatformBrowser</code> check. SSR render calls <code>localStorage</code> and throws <code>ReferenceError: localStorage is not defined</code>. The entire test suite stays green.</div>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong>
+<pre>it('starts collapsed and does not touch localStorage on the server', () => {
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    imports: [FamilyGroupHelpPanelComponent],
+    providers: [
+      provideNoopAnimations(),
+      { provide: PLATFORM_ID, useValue: 'server' },
+    ],
+  });
+  const c = TestBed.createComponent(FamilyGroupHelpPanelComponent).componentInstance;
+  expect(c.expanded()).toBe(false);
+  expect(() => c.onExpandedChange(true)).not.toThrow();
+  expect(c.expanded()).toBe(true);  // in-memory still works
+  expect(localStorage.getItem(KEY)).toBeNull();  // server never wrote
+});</pre></p>
+    </div>
+  </div>
+
+  <!-- ─── MINOR ──────────────────────────────── -->
+  <div class="section-label">Minor</div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span class="badge minor">Minor</span>
+      <span class="finding-title">Spec's <code>KEY</code> constant duplicates the private <code>STORAGE_KEY</code> — silent breakage on rename</span>
+    </div>
+    <div class="finding-loc">family-group-help-panel.component.spec.ts · line 6</div>
+    <div class="finding-body">
+      <p><code>KEY = 'fg-help-panel-expanded'</code> in the spec is a string-literal copy of the private <code>STORAGE_KEY</code> in the component. Because <code>STORAGE_KEY</code> is not exported, the spec cannot import it and must maintain its own copy.</p>
+      <div class="scenario"><strong>Failure scenario:</strong> <code>STORAGE_KEY</code> is renamed to namespace it per-user (<code>'fg-help-panel-expanded-v2'</code>). The spec's <code>KEY</code> still points at the old string. <code>localStorage.setItem(KEY, 'true')</code> seeds the old key; the component reads the new key and finds nothing. The "starts expanded" and "persists" tests silently keep passing while the feature is broken in production.</div>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Export <code>STORAGE_KEY</code> from the component file (or move it to a shared constants file) and import it in the spec.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span class="badge minor">Minor</span>
+      <span class="finding-title">Missing assertion: <code>expanded()</code> is not checked after <code>onExpandedChange(false)</code></span>
+    </div>
+    <div class="finding-loc">family-group-help-panel.component.spec.ts · line 34</div>
+    <div class="finding-body">
+      <p>The third test calls <code>c.onExpandedChange(false)</code> and checks <code>localStorage.getItem(KEY)</code>, but never asserts <code>expect(c.expanded()).toBe(false)</code>. The signal's state on the collapsing path is untested.</p>
+      <div class="scenario"><strong>Failure scenario:</strong> A refactor accidentally guards <code>this.expanded.set(open)</code> with <code>if (open)</code>. After <code>onExpandedChange(false)</code>, the signal stays <code>true</code>. The panel appears open when it should be closed. The test passes because it only checks the storage value.</div>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Add <code>expect(c.expanded()).toBe(false);</code> after <code>c.onExpandedChange(false)</code>.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span class="badge minor">Minor</span>
+      <span class="finding-title"><code>expanded</code> signal should be <code>protected</code>, not implicitly public</span>
+    </div>
+    <div class="finding-loc">family-group-help-panel.component.ts · line 22</div>
+    <div class="finding-body">
+      <p><code>readonly expanded = signal(...);</code> carries no access modifier — it is <code>public</code> by default. The signal is only consumed by the component's own template. Any caller holding a reference can call <code>expanded.set(true)</code> directly, bypassing <code>persist()</code>.</p>
+      <div class="scenario"><strong>Failure scenario:</strong> A test or parent directive sets <code>component.expanded.set(true)</code> directly; <code>persist()</code> is never called; localStorage is out of sync; the preference is silently lost on the next page load.</div>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> <code>protected readonly expanded = signal(this.readPersisted());</code> (Angular 17+ templates can access <code>protected</code> members.)</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span class="badge minor">Minor</span>
+      <span class="finding-title">Possible spurious <code>persist()</code> call on init (if <code>mat-expansion-panel</code> echoes <code>expandedChange</code>)</span>
+    </div>
+    <div class="finding-loc">family-group-help-panel.component.html · line 4 / component.ts · line 24</div>
+    <div class="finding-body">
+      <p>Angular Material's <code>mat-expansion-panel</code> may emit <code>(expandedChange)</code> once during initialization when it reconciles the <code>[expanded]</code> input binding. If it does, <code>onExpandedChange(false)</code> is called on every cold load, writing <code>"false"</code> to localStorage and making it impossible to distinguish "never opened" from "user explicitly closed."</p>
+      <div class="scenario"><strong>Failure scenario:</strong> On first visit, the key is immediately written as <code>"false"</code>, so any future logic that checks <code>localStorage.getItem(KEY) === null</code> to show a "first-time user" tooltip or badge will never fire.</div>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Guard <code>onExpandedChange</code> to skip no-ops:
+<pre>onExpandedChange(open: boolean): void {
+  if (this.expanded() === open) return;
+  this.expanded.set(open);
+  this.persist(open);
+}</pre></p>
+    </div>
+  </div>
+
+  <hr>
+
+  <p style="font-size:0.85rem; color:#6b7280;">Review by Claude (senior Angular reviewer) · 2026-06-19</p>
+
+</div>
+</body>
+</html>
