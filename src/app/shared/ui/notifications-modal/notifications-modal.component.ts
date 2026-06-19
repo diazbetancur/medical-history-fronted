@@ -5,6 +5,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
 import { NotificationDto, NotificationsApi } from '@data/api/notifications.api';
 import { catchError, of } from 'rxjs';
 
@@ -24,6 +25,7 @@ const PAGE_SIZE = 5;
 })
 export class NotificationsModalComponent implements OnInit {
   private readonly api = inject(NotificationsApi);
+  private readonly router = inject(Router);
 
   // Optional refs — one will be null depending on how this was opened
   private readonly dialogRef = inject(MatDialogRef<NotificationsModalComponent>, { optional: true });
@@ -77,6 +79,13 @@ export class NotificationsModalComponent implements OnInit {
   close(): void {
     this.dialogRef?.close();
     this.sheetRef?.dismiss();
+  }
+
+  /** Al hacer clic en una notificación con destino, cierra y navega allí. */
+  openNotification(notification: NotificationDto): void {
+    if (!notification.url) return;
+    this.close();
+    void this.router.navigateByUrl(notification.url);
   }
 
   formatDate(iso: string): string {

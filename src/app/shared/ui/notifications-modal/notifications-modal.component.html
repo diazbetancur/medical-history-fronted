@@ -23,7 +23,14 @@
   } @else {
     <ul class="notif-list" role="list">
       @for (n of items(); track n.id) {
-        <li class="notif-item" [class.notif-item--unread]="!n.isRead" role="listitem">
+        <li
+          class="notif-item"
+          [class.notif-item--unread]="!n.isRead"
+          [class.notif-item--clickable]="!!n.url"
+          [attr.tabindex]="n.url ? 0 : null"
+          (click)="openNotification(n)"
+          (keydown.enter)="openNotification(n)"
+        >
           <span class="notif-item__dot" [class.notif-item__dot--on]="!n.isRead" aria-hidden="true"></span>
           <div class="notif-item__body">
             <p class="notif-item__title">{{ n.title }}</p>
