@@ -34,10 +34,16 @@
       <mat-label>Fecha del examen *</mat-label>
       <input
         matInput
-        type="date"
+        [matDatepicker]="examDatePicker"
+        [max]="maxExamDate"
         formControlName="examDate"
         placeholder="Selecciona una fecha"
       />
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="examDatePicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #examDatePicker></mat-datepicker>
       @if (form.get("examDate")?.invalid && form.get("examDate")?.touched) {
         <mat-error>{{ getErrorMessage("examDate") }}</mat-error>
       }
@@ -78,14 +84,14 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="creating">Cancelar</button>
+  <button mat-button (click)="cancel()" [disabled]="creating()">Cancelar</button>
   <button
     mat-raised-button
     color="primary"
     (click)="create()"
-    [disabled]="form.invalid || creating || !selectedFile"
+    [disabled]="form.invalid || creating() || !selectedFile"
   >
-    @if (creating) {
+    @if (creating()) {
       <mat-spinner diameter="20"></mat-spinner>
     } @else {
       Crear examen

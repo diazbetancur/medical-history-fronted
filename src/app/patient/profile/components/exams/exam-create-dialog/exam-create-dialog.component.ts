@@ -1,7 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import {
+  MatNativeDateModule,
+  provideNativeDateAdapter,
+} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,10 +27,13 @@ import { PatientExamsStore } from '../../../../stores/patient-exams.store';
 @Component({
   selector: 'app-exam-create-dialog',
   standalone: true,
+  providers: [provideNativeDateAdapter()],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -43,7 +51,8 @@ export class ExamCreateDialogComponent {
   readonly categoryLabels = EXAM_CATEGORY_LABELS;
   readonly categories = Object.keys(EXAM_CATEGORY_LABELS) as ExamCategory[];
 
-  readonly creating = false;
+  readonly creating = signal(false);
+  readonly maxExamDate = this.getTodayDate();
   selectedFile: File | null = null;
 
   readonly form = this.fb.group({
@@ -83,10 +92,15 @@ export class ExamCreateDialogComponent {
       notes: formValue.notes?.trim() || undefined,
     };
 
-    const exam = await this.store.createExam(request, this.selectedFile);
+    this.creating.set(true);
+    try {
+      const exam = await this.store.createExam(request, this.selectedFile);
 
-    if (exam) {
-      this.dialogRef.close(true);
+      if (exam) {
+        this.dialogRef.close(true);
+      }
+    } finally {
+      this.creating.set(false);
     }
   }
 
@@ -103,6 +117,12 @@ export class ExamCreateDialogComponent {
     if (control.hasError('maxlength')) {
       const maxLength = control.getError('maxlength').requiredLength;
       return `Máximo ${maxLength} caracteres`;
+    }
+    if (control.hasError('matDatepickerMax')) {
+      return 'La fecha no puede ser posterior al día actual';
+    }
+    if (control.hasError('matDatepickerParse')) {
+      return 'Ingresa una fecha válida';
     }
     return '';
   }
@@ -123,8 +143,22 @@ export class ExamCreateDialogComponent {
       return value.length >= 10 ? value.slice(0, 10) : null;
     }
     if (value instanceof Date && !Number.isNaN(value.getTime())) {
-      return value.toISOString().split('T')[0];
+      // Local date parts (no toISOString) to avoid the UTC off-by-one shift.
+      return this.formatDateOnly(value);
     }
     return null;
+  }
+
+  private formatDateOnly(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private getTodayDate(): Date {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
   }
 }
