@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { ToastService } from '@shared/services';
 import { finalize } from 'rxjs';
 import { CreateGroupDialogComponent } from './dialogs/create-group-dialog.component';
+import { FamilyGroupHelpPanelComponent } from './components/family-group-help-panel/family-group-help-panel.component';
 import { FamilyGroupService } from '../../services/family-group.service';
 import { FamilyGroupSummary } from '../../services/family-group.models';
 
@@ -19,6 +20,7 @@ import { FamilyGroupSummary } from '../../services/family-group.models';
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    FamilyGroupHelpPanelComponent,
   ],
   templateUrl: './family-group-list.page.html',
   styleUrl: './family-group-list.page.scss',
