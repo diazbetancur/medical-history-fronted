@@ -1,0 +1,38 @@
+<mat-expansion-panel
+  class="fg-help"
+  [expanded]="expanded()"
+  (expandedChange)="onExpandedChange($event)"
+>
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      <mat-icon>help_outline</mat-icon>
+      ¿Cómo funciona el grupo familiar?
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <div class="fg-help__body">
+    <p>
+      <strong>Qué es:</strong> Un grupo familiar te permite administrar la
+      información médica de las personas que cuidas —tus hijos, un familiar
+      mayor o tu pareja— desde tu propia cuenta.
+    </p>
+
+    <p><strong>Dos formas de sumar personas:</strong></p>
+    <ul>
+      <li>
+        <strong>Dependiente</strong> — alguien sin cuenta propia (por ejemplo un
+        hijo menor). Tú creas y gestionas todo su perfil.
+      </li>
+      <li>
+        <strong>Miembro registrado (por invitación)</strong> — alguien que ya
+        tiene cuenta. Le envías una invitación y, al aceptarla, autoriza que los
+        administradores del grupo vean y gestionen su información.
+      </li>
+    </ul>
+
+    <p>
+      <strong>Roles:</strong> Principal (creador) · Administrador (gestiona e
+      invita) · Miembro.
+    </p>
+  </div>
+</mat-expansion-panel>
