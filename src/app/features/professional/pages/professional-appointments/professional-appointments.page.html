@@ -505,6 +505,105 @@
         }
       </mat-tab>
 
+      <!-- ── Tab 5: Citas canceladas ─────────────────────────────────────── -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>event_busy</mat-icon>
+          <span>Citas canceladas</span>
+          @if (sortedCancelledAppointments().length > 0) {
+            <span class="tab-badge">{{ sortedCancelledAppointments().length }}</span>
+          }
+        </ng-template>
+
+        <div class="range-filter">
+          <mat-form-field appearance="outline">
+            <mat-label>Desde</mat-label>
+            <input
+              matInput
+              type="date"
+              aria-label="Fecha de inicio"
+              [ngModel]="cancelledFrom()"
+              (ngModelChange)="cancelledFrom.set($event)"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Hasta</mat-label>
+            <input
+              matInput
+              type="date"
+              aria-label="Fecha de fin"
+              [ngModel]="cancelledTo()"
+              (ngModelChange)="cancelledTo.set($event)"
+            />
+          </mat-form-field>
+
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="applyCancelledFilter()"
+            [disabled]="cancelledLoading()"
+          >
+            <mat-icon>search</mat-icon>
+            Generar reporte
+          </button>
+        </div>
+
+        @if (cancelledLoading()) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Cargando citas canceladas...</p>
+          </div>
+        } @else if (cancelledLoaded() && sortedCancelledAppointments().length === 0) {
+          <div class="empty-tab">
+            <mat-icon>event_available</mat-icon>
+            <p>No hay citas canceladas en ese período</p>
+          </div>
+        } @else if (sortedCancelledAppointments().length > 0) {
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="sortedCancelledAppointments()" class="appointments-table">
+
+              <!-- Quién canceló -->
+              <ng-container matColumnDef="cancelledBy">
+                <th mat-header-cell *matHeaderCellDef>Canceló</th>
+                <td mat-cell *matCellDef="let row">{{ getCancelledByLabel(row.cancelledBy) }}</td>
+              </ng-container>
+
+              <!-- Paciente -->
+              <ng-container matColumnDef="patient">
+                <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                <td mat-cell *matCellDef="let row" class="cell-patient">
+                  {{ getPatientDisplayName(row) }}
+                </td>
+              </ng-container>
+
+              <!-- Fecha de la cita -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Fecha de la cita</th>
+                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+              </ng-container>
+
+              <!-- Hora de la cita -->
+              <ng-container matColumnDef="time">
+                <th mat-header-cell *matHeaderCellDef>Hora</th>
+                <td mat-cell *matCellDef="let row" class="cell-time">
+                  {{ row.startTime }} – {{ row.endTime }}
+                </td>
+              </ng-container>
+
+              <!-- Fecha de cancelación -->
+              <ng-container matColumnDef="cancelledAt">
+                <th mat-header-cell *matHeaderCellDef>Fecha de cancelación</th>
+                <td mat-cell *matCellDef="let row">{{ formatCancelledAt(row.cancelledAt) }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="cancelledColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: cancelledColumns;"></tr>
+            </table>
+          </div>
+        }
+      </mat-tab>
+
     </mat-tab-group>
   }
 </div>
