@@ -50,6 +50,13 @@ const LOCAL_FORBIDDEN_PATTERNS = ['/api/professional/patients/'];
  * These endpoints handle errors gracefully in the component/store level
  */
 const SILENT_ERROR_URLS = ['/public/search/suggest'];
+/**
+ * Endpoints whose outages must stay transparent to the user. The notifications
+ * bell polls these on a timer; a backend hiccup should not surface the generic
+ * "Estamos presentando fallas" toast. The component already swallows the error
+ * (catchError → fallback value), so we just suppress the global toast here.
+ */
+const SILENT_OUTAGE_TOAST_URLS = ['/notifications'];
 const GENERIC_API_FAILURE_MESSAGE =
   'Estamos presentando fallas. Inténtalo nuevamente más tarde.';
 const GENERIC_API_FAILURE_STATUSES = new Set([0, 502, 503, 504]);
@@ -89,6 +96,10 @@ function shouldSilenceError(url: string, status: number): boolean {
     return true;
   }
   return false;
+}
+
+function shouldSilenceOutageToast(url: string): boolean {
+  return SILENT_OUTAGE_TOAST_URLS.some((pattern) => url.includes(pattern));
 }
 
 function isNetworkOrUnavailableError(error: HttpErrorResponse): boolean {
@@ -165,8 +176,13 @@ export const errorInterceptor: HttpInterceptorFn = (
         toast.error(problemDetails.title);
         router.navigate(['/forbidden']);
       }
-      // Phase 1: only show a global fallback toast for network/API outages.
-      else if (isApiRequest(req.url) && isNetworkOrUnavailableError(error)) {
+      // Phase 1: only show a global fallback toast for network/API outages,
+      // but keep polled/background endpoints (e.g. notifications) transparent.
+      else if (
+        isApiRequest(req.url) &&
+        isNetworkOrUnavailableError(error) &&
+        !shouldSilenceOutageToast(req.url)
+      ) {
         showGenericApiFailureToast(toast);
       }
 
