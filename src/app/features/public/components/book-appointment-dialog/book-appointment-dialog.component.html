@@ -19,6 +19,12 @@
           <strong>Médico:</strong>
           <span>{{ professionalName() | doctorName }}</span>
         </div>
+        @if (specialties().length > 0) {
+          <div class="summary-row">
+            <strong>{{ specialties().length > 1 ? 'Especialidades:' : 'Especialidad:' }}</strong>
+            <span>{{ specialties().join(" · ") }}</span>
+          </div>
+        }
         <div class="summary-row">
           <strong>Fecha:</strong>
           <span>{{ bookingConfirmation()!.date }}</span>
