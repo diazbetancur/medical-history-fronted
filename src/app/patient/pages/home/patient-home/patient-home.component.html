@@ -63,7 +63,11 @@
 
                 <div class="appointment-info">
                   <h3>{{ apt.professional.name }}</h3>
-                  <p class="specialty">{{ apt.professional.specialty }}</p>
+                  <p class="specialty">
+                    <app-specialty-summary
+                      [value]="apt.professional.specialty"
+                    ></app-specialty-summary>
+                  </p>
 
                   <div class="appointment-meta">
                     <span class="date">
