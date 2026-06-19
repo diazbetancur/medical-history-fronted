@@ -1,0 +1,28 @@
+.fg-help {
+  display: block;
+  margin-bottom: 1rem;
+
+  mat-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+  }
+
+  &__body {
+    p {
+      margin: 0 0 0.75rem;
+      line-height: 1.5;
+    }
+
+    ul {
+      margin: 0 0 0.75rem;
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+  }
+}

@@ -8,6 +8,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { FamilyGroupService } from '../../services/family-group.service';
 import type { FamilyJoinRequest } from '../../services/family-group.models';
+import { FamilyGroupHelpPanelComponent } from './components/family-group-help-panel/family-group-help-panel.component';
 
 @Component({
   selector: 'app-family-requests',
@@ -18,6 +19,7 @@ import type { FamilyJoinRequest } from '../../services/family-group.models';
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    FamilyGroupHelpPanelComponent,
   ],
   templateUrl: './family-requests.page.html',
   styleUrl: './family-requests.page.scss',
