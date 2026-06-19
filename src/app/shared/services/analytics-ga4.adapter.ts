@@ -44,7 +44,9 @@ export class GA4Adapter implements AnalyticsProvider {
     if (!this.config?.enabled || this.config.provider !== 'ga4') return;
 
     const measurementId = this.config.measurementId;
-    if (!measurementId) {
+    if (!this.isValidMeasurementId(measurementId)) {
+      // Guard: ignora el placeholder 'G-XXXXXXXXXX' aunque alguien deje enabled:true
+      // antes de pegar el ID real, para no cargar gtag con un ID inválido.
       return;
     }
 
@@ -145,6 +147,16 @@ export class GA4Adapter implements AnalyticsProvider {
     window.gtag('set', 'user_properties', properties);
 
     this.debugLog('setUserProperties', properties);
+  }
+
+  /**
+   * Valid GA4 Measurement ID: non-empty, formato 'G-XXXXXXXX' y distinto del
+   * placeholder por defecto. Evita inicializar gtag con un ID falso.
+   */
+  private isValidMeasurementId(id: string | undefined | null): id is string {
+    return (
+      !!id && id !== 'G-XXXXXXXXXX' && /^G-[A-Z0-9]{6,}$/.test(id)
+    );
   }
 
   /**
