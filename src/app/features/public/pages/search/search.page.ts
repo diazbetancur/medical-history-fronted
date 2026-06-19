@@ -18,7 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   AppliedFilters,
   MetadataResponse,
@@ -55,7 +55,6 @@ import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
     PublicHeaderComponent,
     PublicFooterComponent,
     DoctorNamePipe,
-    RouterLink,
     ReactiveFormsModule,
     MatAutocompleteModule,
     MatFormFieldModule,
