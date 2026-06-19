@@ -69,6 +69,10 @@ export interface AppointmentDto {
   notes?: string;
   observation?: string;
   cancellationReason?: string;
+  /** Who cancelled: Professional | Patient | System | CalendarSync */
+  cancelledBy?: string;
+  /** Cancellation timestamp (ISO) */
+  cancelledAt?: string;
   createdAt: string;
   updatedAt: string;
   /** Indicates if appointment was booked through the platform or added externally */

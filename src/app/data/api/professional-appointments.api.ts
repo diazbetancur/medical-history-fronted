@@ -15,6 +15,20 @@ import { ApiClient } from './api-client';
 const READ_RETRY = { count: 2, delay: 1000 } as const;
 
 /**
+ * Traduce el código de estado del front (CANCELLED…) al nombre del enum del
+ * backend (Cancelled…), que es lo que espera `AppointmentFilterDto.Status`.
+ * Sin esto, un `status` en mayúsculas no liga al enum y puede dar 400.
+ */
+const STATUS_TO_BACKEND: Record<string, string> = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  CANCELLED: 'Cancelled',
+  COMPLETED: 'Completed',
+  NO_SHOW: 'NoShow',
+  RESCHEDULED: 'Rescheduled',
+};
+
+/**
  * Professional Appointments API
  *
  * API para que el profesional gestione sus citas.
@@ -39,7 +53,8 @@ export class ProfessionalAppointmentsApi {
     if (filters?.professionalId)
       params['professionalProfileId'] = filters.professionalId;
     if (filters?.patientId) params['patientId'] = filters.patientId;
-    if (filters?.status) params['status'] = filters.status;
+    if (filters?.status)
+      params['status'] = STATUS_TO_BACKEND[filters.status] ?? filters.status;
     if (filters?.from) params['startDate'] = filters.from;
     if (filters?.to) params['endDate'] = filters.to;
     if (filters?.page) params['page'] = String(filters.page);
@@ -205,6 +220,8 @@ export class ProfessionalAppointmentsApi {
       notes: item?.notes,
       observation: item?.observation,
       cancellationReason: item?.cancellationReason ?? item?.cancelReason,
+      cancelledBy: item?.cancelledBy,
+      cancelledAt: item?.cancelledAt,
       createdAt: item?.createdAt ?? item?.dateCreated ?? new Date().toISOString(),
       updatedAt:
         item?.updatedAt ??
