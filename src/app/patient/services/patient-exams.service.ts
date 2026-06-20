@@ -1,10 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiClient } from '@data/api';
-import {
-  ExamDownloadUrlDto,
-  ExamDto,
-  PatientExamsResponseDto,
-} from '@data/models';
+import { ExamDownloadUrlDto } from '@data/models';
 import { Observable, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type {
@@ -14,6 +10,45 @@ import type {
   UpdateExamRequest,
   UploadAttachmentsResponse,
 } from '../models/patient-exam.dto';
+
+/**
+ * Real backend shape of a single exam (matches `ExamDetailDto`).
+ * NOTE: this endpoint returns `contentType`/`createdAtUtc` — NOT the
+ * `fileType`/`uploadedAtUtc`/`patientProfileId` of the shared `ExamDto`
+ * (which belongs to the separate MVP flow and is adapted by its own service).
+ */
+interface ExamDetailResponse {
+  id: string;
+  title: string;
+  examDate: string;
+  notes?: string;
+  originalFileName: string;
+  contentType: string;
+  fileSizeBytes: number;
+  isActive: boolean;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  fileUrl?: string;
+  fileUrlExpiresAtUtc?: string;
+}
+
+/** Real backend shape of a list item (matches `ExamListItemDto`) — a subset of the detail. */
+interface ExamListItemResponse {
+  id: string;
+  title: string;
+  examDate: string;
+  originalFileName: string;
+  fileSizeBytes: number;
+  createdAtUtc: string;
+}
+
+/** Real backend shape of the paginated list (matches `ExamListResponseDto`). */
+interface ExamListResponse {
+  items: ExamListItemResponse[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
 
 /**
  * Patient Exams Service
@@ -38,7 +73,7 @@ export class PatientExamsService {
     pageSize: number = 10,
   ): Observable<PaginatedExamsResponse> {
     return this.api
-      .get<PatientExamsResponseDto>(this.basePath, {
+      .get<ExamListResponse>(this.basePath, {
         params: {
           page: String(page),
           pageSize: String(pageSize),
@@ -48,10 +83,10 @@ export class PatientExamsService {
       .pipe(
         map((response) => ({
           items: response.items.map((item) => this.mapExam(item)),
-          total: response.totalCount,
+          total: response.total,
           page: response.page,
           pageSize: response.pageSize,
-          totalPages: response.totalPages,
+          totalPages: Math.ceil(response.total / response.pageSize),
         })),
       );
   }
@@ -63,7 +98,7 @@ export class PatientExamsService {
    */
   getById(id: string): Observable<PatientExamDto> {
     return this.api
-      .get<ExamDto>(`${this.basePath}/${id}`)
+      .get<ExamDetailResponse>(`${this.basePath}/${id}`)
       .pipe(map((item) => this.mapExam(item)));
   }
 
@@ -84,7 +119,7 @@ export class PatientExamsService {
     formData.append('file', file, file.name);
 
     return this.api
-      .postMultipart<ExamDto>(this.basePath, formData)
+      .postMultipart<ExamDetailResponse>(this.basePath, formData)
       .pipe(map((item) => this.mapExam(item)));
   }
 
@@ -95,7 +130,7 @@ export class PatientExamsService {
    */
   update(id: string, request: UpdateExamRequest): Observable<PatientExamDto> {
     return this.api
-      .put<ExamDto>(`${this.basePath}/${id}`, {
+      .put<ExamDetailResponse>(`${this.basePath}/${id}`, {
         title: request.title,
         examDate: request.examDate,
         notes: request.notes,
@@ -177,25 +212,45 @@ export class PatientExamsService {
     return this.api.buildUrl(`${this.basePath}/${examId}/download-url`);
   }
 
-  private mapExam(exam: ExamDto): PatientExamDto {
+  private mapExam(
+    exam: ExamDetailResponse | ExamListItemResponse,
+  ): PatientExamDto {
+    // List items are a subset of the detail; access detail-only fields optionally.
+    const detail = exam as Partial<ExamDetailResponse>;
+    const createdAt = exam.createdAtUtc;
     return {
       id: exam.id,
-      patientId: exam.patientProfileId,
+      patientId: '', // backend exam DTOs don't expose the patient profile id; unused by the UI
       title: exam.title,
       examDate: exam.examDate,
-      notes: exam.notes,
-      createdAt: exam.uploadedAtUtc,
-      updatedAt: exam.updatedAtUtc,
+      notes: detail.notes,
+      createdAt,
+      updatedAt: detail.updatedAtUtc ?? createdAt,
       attachments: [
         {
           id: exam.id,
           examId: exam.id,
           originalFileName: exam.originalFileName,
           fileSize: exam.fileSizeBytes,
-          mimeType: exam.fileType === 'PDF' ? 'application/pdf' : 'image/*',
-          uploadedAt: exam.uploadedAtUtc,
+          mimeType: this.resolveMimeType(detail.contentType, exam.originalFileName),
+          uploadedAt: createdAt,
         },
       ],
     };
+  }
+
+  /**
+   * Resolve a usable MIME type: prefer the backend's `contentType` (only present
+   * on the detail DTO); for list items (no contentType) fall back to the file
+   * extension so the UI shows the right icon instead of defaulting to an image.
+   */
+  private resolveMimeType(contentType: string | undefined, fileName: string): string {
+    if (contentType) return contentType;
+    const name = (fileName ?? '').toLowerCase();
+    if (name.endsWith('.pdf')) return 'application/pdf';
+    if (name.endsWith('.png')) return 'image/png';
+    if (name.endsWith('.webp')) return 'image/webp';
+    if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'image/jpeg';
+    return 'application/octet-stream';
   }
 }
