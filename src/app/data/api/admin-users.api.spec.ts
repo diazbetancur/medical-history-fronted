@@ -10,7 +10,12 @@ describe('AdminUsersApi', () => {
   let api: jasmine.SpyObj<ApiClient>;
 
   beforeEach(() => {
-    api = jasmine.createSpyObj<ApiClient>('ApiClient', ['get']);
+    api = jasmine.createSpyObj<ApiClient>('ApiClient', [
+      'get',
+      'post',
+      'patch',
+      'delete',
+    ]);
     TestBed.configureTestingModule({
       providers: [AdminUsersApi, { provide: ApiClient, useValue: api }],
     });
@@ -87,6 +92,86 @@ describe('AdminUsersApi', () => {
         expect(res.pagination.totalItems).toBe(0);
         expect(res.pagination.totalPages).toBe(0);
         done();
+      });
+    });
+  });
+
+  describe('buildQueryParams (via listUsers)', () => {
+    it('trims q, drops non-positive page/pageSize, and keeps defined booleans', () => {
+      api.get.and.returnValue(of({ items: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0 }) as any);
+
+      apiService
+        .listUsers({
+          q: '  juan  ',
+          page: 2,
+          pageSize: 0, // non-positive -> dropped
+          sortBy: 'userName',
+          isLockedOut: false, // defined -> kept
+        })
+        .subscribe();
+
+      const [endpoint, options] = api.get.calls.mostRecent().args as [
+        string,
+        { params: Record<string, unknown> },
+      ];
+      expect(endpoint).toBe('/admin/rbac/users');
+      expect(options.params).toEqual({
+        q: 'juan',
+        page: 2,
+        sortBy: 'userName',
+        isLockedOut: false,
+      });
+    });
+  });
+
+  describe('write operations', () => {
+    it('createUser POSTs to the base path with the dto', () => {
+      api.post.and.returnValue(of({ userId: 'new' }) as any);
+
+      apiService.createUser({ username: 'a' } as any).subscribe();
+
+      expect(api.post).toHaveBeenCalledWith('/admin/rbac/users', {
+        username: 'a',
+      } as any);
+    });
+
+    it('updateUser PATCHes the user path with the dto', () => {
+      api.patch.and.returnValue(of({ userId: 'u1' }) as any);
+
+      apiService.updateUser('u1', { email: 'x@y.z' } as any).subscribe();
+
+      expect(api.patch).toHaveBeenCalledWith('/admin/rbac/users/u1', {
+        email: 'x@y.z',
+      } as any);
+    });
+
+    it('deleteUser DELETEs the user path', () => {
+      api.delete.and.returnValue(of({ deleted: true }) as any);
+
+      apiService.deleteUser('u1').subscribe();
+
+      expect(api.delete).toHaveBeenCalledWith('/admin/rbac/users/u1');
+    });
+
+    it('maps errors from write operations through parseError', (done) => {
+      api.post.and.returnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { message: 'Datos inválidos' },
+            }),
+        ),
+      );
+
+      apiService.createUser({ username: '' } as any).subscribe({
+        next: () => fail('expected an error'),
+        error: (err: AdminApiError) => {
+          expect(err.status).toBe(400);
+          expect(err.code).toBe('BAD_REQUEST');
+          expect(err.message).toBe('Datos inválidos');
+          done();
+        },
       });
     });
   });
