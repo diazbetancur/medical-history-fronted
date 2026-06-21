@@ -42,5 +42,5 @@ import { AuthStore } from '@core/auth';
   ],
 })
 export class LicenseBannerComponent {
-  readonly authStore = inject(AuthStore);
+  protected readonly authStore = inject(AuthStore);
 }
