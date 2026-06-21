@@ -5,6 +5,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type {
   CreateExamRequest,
+  ExamCategory,
   PaginatedExamsResponse,
   PatientExamDto,
   UpdateExamRequest,
@@ -22,6 +23,7 @@ interface ExamDetailResponse {
   title: string;
   examDate: string;
   notes?: string;
+  category?: string;
   originalFileName: string;
   contentType: string;
   fileSizeBytes: number;
@@ -37,6 +39,7 @@ interface ExamListItemResponse {
   id: string;
   title: string;
   examDate: string;
+  category?: string;
   originalFileName: string;
   fileSizeBytes: number;
   createdAtUtc: string;
@@ -116,6 +119,9 @@ export class PatientExamsService {
     if (request.notes) {
       formData.append('notes', request.notes);
     }
+    if (request.category) {
+      formData.append('category', request.category);
+    }
     formData.append('file', file, file.name);
 
     return this.api
@@ -134,6 +140,7 @@ export class PatientExamsService {
         title: request.title,
         examDate: request.examDate,
         notes: request.notes,
+        category: request.category,
       })
       .pipe(map((item) => this.mapExam(item)));
   }
@@ -222,6 +229,7 @@ export class PatientExamsService {
       id: exam.id,
       patientId: '', // backend exam DTOs don't expose the patient profile id; unused by the UI
       title: exam.title,
+      category: exam.category as ExamCategory | undefined,
       examDate: exam.examDate,
       notes: detail.notes,
       createdAt,
