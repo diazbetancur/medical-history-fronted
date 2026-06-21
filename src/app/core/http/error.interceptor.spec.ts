@@ -135,4 +135,21 @@ describe('errorInterceptor', () => {
       },
     });
   });
+
+  it('toasts a LICENSE_INACTIVE 403 even on a locally-handled-forbidden URL (no silent swallow)', (done) => {
+    run(`${API}/professional/patients/123/external`, 403, {
+      type: 'https://httpstatuses.com/403',
+      title: 'Tu plan está inactivo. Reactivalo para gestionar tu información.',
+      status: 403,
+      errorCode: 'LICENSE_INACTIVE',
+    }).subscribe({
+      error: () => {
+        expect(toast.error).toHaveBeenCalledWith(
+          'Tu plan está inactivo. Reactivalo para gestionar tu información.',
+        );
+        expect(router.navigate).not.toHaveBeenCalled();
+        done();
+      },
+    });
+  });
 });
