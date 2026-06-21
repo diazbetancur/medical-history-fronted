@@ -170,7 +170,7 @@ $pro-directory-success: mat.m2-define-palette($success-palette, 500, 300, 700);
 
 // Typography configuration - Optimized for readability
 $pro-directory-typography: mat.m2-define-typography-config(
-  $font-family: 'Roboto, "Helvetica Neue", sans-serif',
+  $font-family: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   $headline-1: mat.m2-define-typography-level(
       96px,
       96px,
@@ -531,11 +531,19 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 
 // Dialog
 .mat-mdc-dialog-container {
-  border-radius: 16px !important;
+  border-radius: 18px !important;
 
   .mat-mdc-dialog-title {
     color: var(--color-text-primary, #1e293b);
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .mdc-dialog__surface {
+    border-radius: 18px !important;
+    box-shadow:
+      0 24px 60px -12px rgba(16, 24, 40, 0.28),
+      0 0 0 1px rgba(16, 24, 40, 0.04) !important;
   }
 }
 
