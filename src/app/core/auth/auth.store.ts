@@ -62,6 +62,7 @@ export class AuthStore {
   readonly userRoles = computed(() => this._state().user?.roles ?? []);
   readonly userPermissions = computed(() => this._state().user?.permissions ?? []);
   readonly availableContexts = computed(() => this._state().user?.contexts ?? []);
+  readonly licenseLapsed = computed(() => this._state().user?.licenseLapsed ?? false);
 
   hasPermission(permission: string): boolean {
     return this.userPermissions().includes(permission);

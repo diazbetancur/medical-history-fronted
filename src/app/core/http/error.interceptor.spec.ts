@@ -118,4 +118,21 @@ describe('errorInterceptor', () => {
       },
     });
   });
+
+  it('on a 403 LICENSE_INACTIVE: toasts but does NOT redirect to /forbidden', (done) => {
+    run(`${API}/professional/services`, 403, {
+      type: 'https://httpstatuses.com/403',
+      title: 'Tu plan está inactivo. Reactivalo para gestionar tu información.',
+      status: 403,
+      errorCode: 'LICENSE_INACTIVE',
+    }).subscribe({
+      error: () => {
+        expect(toast.error).toHaveBeenCalledWith(
+          'Tu plan está inactivo. Reactivalo para gestionar tu información.',
+        );
+        expect(router.navigate).not.toHaveBeenCalled();
+        done();
+      },
+    });
+  });
 });
