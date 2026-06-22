@@ -10,6 +10,11 @@ import {
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
+  MatNativeDateModule,
+  provideNativeDateAdapter,
+} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
@@ -34,6 +39,7 @@ export interface MedicationDialogData {
 @Component({
   selector: 'app-medication-dialog',
   standalone: true,
+  providers: [provideNativeDateAdapter()],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -41,6 +47,8 @@ export interface MedicationDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatSelectModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
@@ -93,9 +101,9 @@ export class MedicationDialogComponent implements OnInit {
           medication?.prescribedBy || '',
           [Validators.maxLength(200)],
         ],
-        startDate: [this.normalizeDateOnly(medication?.startDate) || null],
+        startDate: [this.toDateValue(medication?.startDate)],
         isOngoing: [medication?.isOngoing ?? true],
-        endDate: [this.normalizeDateOnly(medication?.endDate) || null, []],
+        endDate: [this.toDateValue(medication?.endDate), []],
         notes: [medication?.notes || '', [Validators.maxLength(500)]],
         status: [medication?.status || 'Active', [Validators.required]],
       },
@@ -175,6 +183,10 @@ export class MedicationDialogComponent implements OnInit {
       return `Máximo ${maxLength} caracteres`;
     }
 
+    if (control.errors['matDatepickerParse']) {
+      return 'Ingresa una fecha válida';
+    }
+
     if (
       fieldName === 'endDate' &&
       this.form.hasError('invalidDateRange') &&
@@ -206,8 +218,25 @@ export class MedicationDialogComponent implements OnInit {
       return value.length >= 10 ? value.slice(0, 10) : null;
     }
     if (value instanceof Date && !Number.isNaN(value.getTime())) {
-      return value.toISOString().split('T')[0];
+      // Local date parts (no toISOString) to avoid the UTC off-by-one shift.
+      return this.formatDateOnly(value);
     }
     return null;
+  }
+
+  private formatDateOnly(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /** Parse a stored YYYY-MM-DD string into a local Date for the datepicker control. */
+  private toDateValue(value: unknown): Date | null {
+    const dateOnly = this.normalizeDateOnly(value);
+    if (!dateOnly) return null;
+    const [year, month, day] = dateOnly.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
   }
 }
