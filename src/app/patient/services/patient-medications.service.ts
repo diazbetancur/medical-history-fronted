@@ -124,6 +124,8 @@ export class PatientMedicationsService {
         endDate: dto.endDate ?? null,
         prescribedBy: dto.prescribedBy,
         notes: dto.notes,
+        isOngoing: dto.isOngoing,
+        status: dto.status,
       })
       .pipe(
         map((medication) => ({
@@ -154,6 +156,8 @@ export class PatientMedicationsService {
         endDate: dto.endDate ?? null,
         prescribedBy: dto.prescribedBy,
         notes: dto.notes,
+        isOngoing: dto.isOngoing,
+        status: dto.status,
       })
       .pipe(
         map((medication) => ({
