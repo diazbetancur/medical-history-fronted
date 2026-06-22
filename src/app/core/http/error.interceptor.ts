@@ -127,7 +127,8 @@ function showGenericApiFailureToast(toast: ToastService): void {
  * Responsibilities:
  * - Normalize errors to ProblemDetails format
  * - Handle 401 with redirect to home
- * - Handle 403 with redirect to forbidden page
+ * - Handle 403 with a toast (the backend's real reason); never redirect —
+ *   route-level access is owned by guards, which redirect to /forbidden
  * - Show only a generic toast for network/API-unavailable failures
  * - Never expose stack traces or technical errors to users
  */
@@ -176,13 +177,21 @@ export const errorInterceptor: HttpInterceptorFn = (
       ) {
         toast.error(problemDetails.title);
       }
-      // Handle 403 Forbidden
+      // Non-license 403 on an API call (e.g. a plan-gated report): the specific
+      // action/data was denied, not the whole page. Surface the backend's real
+      // reason (detail) and stay put. Route-level access is already guarded —
+      // guards redirect to /forbidden — so a full-page redirect here is redundant,
+      // jarring, and hides what actually happened.
       else if (
         error.status === 403 &&
         !shouldHandleForbiddenLocally(req.url)
       ) {
-        toast.error(problemDetails.title);
-        router.navigate(['/forbidden']);
+        // Use the backend's raw `detail` if present (e.g. "requiere el plan
+        // Growth"), NOT problemDetails.detail — the latter falls back to the raw
+        // HttpErrorResponse message. Otherwise the friendly status-based title.
+        const backendDetail = (error.error as { detail?: string } | null)
+          ?.detail;
+        toast.error(backendDetail || problemDetails.title);
       }
       // Phase 1: only show a global fallback toast for network/API outages,
       // but keep polled/background endpoints (e.g. notifications) transparent.
