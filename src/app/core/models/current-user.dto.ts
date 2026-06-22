@@ -55,6 +55,12 @@ export interface CurrentUserDto {
   /** True when the professional profile exists AND is active (not deactivated by admin) */
   isProfessionalActive?: boolean;
 
+  /** True when the professional profile exists AND its license is active. */
+  isLicenseActive?: boolean;
+
+  /** True when the license has lapsed (was active before, now inactive) — drives the panel banner/gate. */
+  licenseLapsed?: boolean;
+
   /**
    * Per-session anti-CSRF token (from the JWT's `csrf` claim). Kept in memory by
    * CsrfTokenStore and echoed back in the X-XSRF-TOKEN header on unsafe requests.

@@ -170,7 +170,7 @@ $pro-directory-success: mat.m2-define-palette($success-palette, 500, 300, 700);
 
 // Typography configuration - Optimized for readability
 $pro-directory-typography: mat.m2-define-typography-config(
-  $font-family: 'Roboto, "Helvetica Neue", sans-serif',
+  $font-family: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   $headline-1: mat.m2-define-typography-level(
       96px,
       96px,
@@ -425,26 +425,34 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
     margin: 0;
   }
 
-  &.mat-focused {
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-color: var(--color-primary, #2563eb) !important;
-      border-width: 2px;
-    }
+  // Soft-outline (delicado): borde fino en reposo, foco de marca + anillo translúcido,
+  // inválido sutil. Se usan las variables MDC del outlined text-field en vez de
+  // pelear con los pseudo-bordes del notched-outline.
+  --mdc-outlined-text-field-container-shape: 11px;
+  --mdc-outlined-text-field-outline-color: var(--field-border, #dde3ea);
+  --mdc-outlined-text-field-hover-outline-color: var(--field-border-hover, #c4ccd6);
+  --mdc-outlined-text-field-focus-outline-color: var(--color-primary, #0a6ebd);
+  --mdc-outlined-text-field-outline-width: 1px;
+  --mdc-outlined-text-field-focus-outline-width: 1.5px;
+  --mdc-outlined-text-field-error-outline-color: var(--field-invalid-border, #f0a6a6);
+  --mdc-outlined-text-field-error-hover-outline-color: var(--field-invalid-border, #f0a6a6);
+  --mdc-outlined-text-field-error-focus-outline-color: var(--field-invalid-border, #f0a6a6);
+
+  .mat-mdc-text-field-wrapper {
+    transition: box-shadow 150ms ease-in-out;
   }
 
-  &.mat-form-field-invalid {
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-color: var(--color-error, #dc2626) !important;
-    }
+  &.mat-focused .mat-mdc-text-field-wrapper {
+    box-shadow: 0 0 0 4px var(--field-ring, rgba(10, 110, 189, 0.12));
+  }
+
+  &.mat-form-field-invalid.mat-focused .mat-mdc-text-field-wrapper {
+    box-shadow: 0 0 0 4px var(--field-invalid-ring, rgba(220, 38, 38, 0.12));
   }
 }
 
 .mat-mdc-text-field-wrapper {
-  border-radius: 8px !important;
+  border-radius: 11px !important;
 }
 
 // Chips
@@ -523,11 +531,19 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 
 // Dialog
 .mat-mdc-dialog-container {
-  border-radius: 16px !important;
+  border-radius: 18px !important;
 
   .mat-mdc-dialog-title {
     color: var(--color-text-primary, #1e293b);
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .mdc-dialog__surface {
+    border-radius: 18px !important;
+    box-shadow:
+      0 24px 60px -12px rgba(16, 24, 40, 0.28),
+      0 0 0 1px rgba(16, 24, 40, 0.04) !important;
   }
 }
 

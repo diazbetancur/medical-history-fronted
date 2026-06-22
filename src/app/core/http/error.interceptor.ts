@@ -168,6 +168,14 @@ export const errorInterceptor: HttpInterceptorFn = (
           });
         }
       }
+      // Lapsed-license 403: explain via toast, never redirect, regardless of URL
+      // (including locally-handled-forbidden routes like /api/professional/patients/*).
+      else if (
+        error.status === 403 &&
+        problemDetails.errorCode === 'LICENSE_INACTIVE'
+      ) {
+        toast.error(problemDetails.title);
+      }
       // Handle 403 Forbidden
       else if (
         error.status === 403 &&
