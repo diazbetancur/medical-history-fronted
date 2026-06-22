@@ -76,13 +76,28 @@ describe('errorInterceptor', () => {
     });
   });
 
-  it('on 403: toasts the message and navigates to /forbidden', (done) => {
+  it('on a generic API 403: toasts the message and does NOT redirect to /forbidden', (done) => {
     run(`${API}/admin/rbac/users`, 403).subscribe({
       error: () => {
         expect(toast.error).toHaveBeenCalledWith(
           'No tienes permisos para realizar esta acción.',
         );
-        expect(router.navigate).toHaveBeenCalledWith(['/forbidden']);
+        expect(router.navigate).not.toHaveBeenCalled();
+        done();
+      },
+    });
+  });
+
+  it('on a 403 carrying a backend detail (e.g. a plan-gated report): toasts the real detail, not the generic title, and does not redirect', (done) => {
+    run(`${API}/professional/reports/appointments-detail`, 403, {
+      status: 403,
+      detail: 'Este tipo de reporte requiere el plan Growth.',
+    }).subscribe({
+      error: () => {
+        expect(toast.error).toHaveBeenCalledWith(
+          'Este tipo de reporte requiere el plan Growth.',
+        );
+        expect(router.navigate).not.toHaveBeenCalled();
         done();
       },
     });
