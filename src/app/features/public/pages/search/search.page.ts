@@ -26,7 +26,8 @@ import {
   SearchProfessional,
 } from '@data/api';
 import { SeoService, ToastService } from '@shared/services';
-import { AuthStore, UiProfileService } from '@core/auth';
+import { Location } from '@angular/common';
+import { AuthStore } from '@core/auth';
 import {
   Subject,
   catchError,
@@ -83,9 +84,9 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private readonly authStore = inject(AuthStore);
   private readonly authDialog = inject(AuthDialogService);
-  private readonly uiProfile = inject(UiProfileService);
+  private readonly location = inject(Location);
 
-  /** True when a user is logged in — drives the "Volver" button to their area. */
+  /** True when a user is logged in — drives the "Volver" button. */
   readonly isAuthenticated = this.authStore.isAuthenticated;
 
   private readonly destroy$ = new Subject<void>();
@@ -112,9 +113,9 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   readonly cities = computed(() => this.metadata()?.cities ?? []);
   readonly hasResults = computed(() => this.professionals().length > 0);
 
-  /** Navigate a logged-in user back to their area's main menu (patient/professional/admin). */
+  /** Return to the page the user came from (their menu/area), not a permission-derived one. */
   goBack(): void {
-    this.router.navigate([this.uiProfile.baseRoute()]);
+    this.location.back();
   }
 
   ngOnInit(): void {
