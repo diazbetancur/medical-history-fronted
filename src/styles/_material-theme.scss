@@ -244,7 +244,7 @@ $pro-directory-light-theme: mat.m2-define-light-theme(
       warn: $pro-directory-warn,
     ),
     typography: $pro-directory-typography,
-    density: 0,
+    density: -1,
   )
 );
 
@@ -359,7 +359,7 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 // Form fields
 .mat-mdc-form-field {
   .mat-mdc-form-field-infix {
-    min-height: 48px;
+    min-height: 44px;
     display: block;
     width: auto;
     flex: 1 1 auto;
@@ -367,7 +367,7 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 
   .mat-mdc-form-field-icon-prefix,
   .mat-mdc-form-field-icon-suffix {
-    min-height: 48px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -403,7 +403,7 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 
   .mat-mdc-form-field-subscript-wrapper,
   .mat-mdc-form-field-bottom-align::before {
-    min-height: 22px;
+    min-height: 20px;
   }
 
   &.mat-mdc-form-field-has-icon-prefix {
@@ -420,7 +420,7 @@ $pro-directory-dark-theme: mat.m2-define-dark-theme(
 
   textarea.mat-mdc-input-element {
     line-height: 1.5;
-    min-height: 88px;
+    min-height: 76px;
     resize: vertical;
     margin: 0;
   }
