@@ -62,7 +62,11 @@
         <div class="toggle-label">
           <span class="toggle-text">Condición crónica</span>
           <span class="toggle-hint">
-            Indica si es una condicion de largo plazo o recurrente
+            @if (isChronicTypeSelected) {
+              Marcado automáticamente por el tipo "Crónico".
+            } @else {
+              Indica si es una condicion de largo plazo o recurrente
+            }
           </span>
         </div>
       </mat-slide-toggle>
