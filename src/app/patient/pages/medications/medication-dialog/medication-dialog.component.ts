@@ -117,6 +117,10 @@ export class MedicationDialogComponent implements OnInit {
     this.form.get('isOngoing')?.valueChanges.subscribe((isOngoing) => {
       const endDateControl = this.form.get('endDate');
       if (isOngoing) {
+        // An ongoing medication cannot be "Suspendido" — keep status consistent.
+        if (this.form.get('status')?.value === 'Stopped') {
+          this.form.get('status')?.setValue('Active');
+        }
         endDateControl?.clearValidators();
         endDateControl?.setValue(null);
         endDateControl?.disable();
