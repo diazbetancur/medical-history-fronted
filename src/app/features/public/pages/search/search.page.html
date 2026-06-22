@@ -1,6 +1,13 @@
 <app-public-header></app-public-header>
 
 <div class="search-container">
+  @if (isAuthenticated()) {
+    <button type="button" mat-button class="back-to-area" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver
+    </button>
+  }
+
   <section class="search-hero">
     <h1>Buscar Médicos</h1>
     <p>Encuentra al especialista ideal para tu consulta</p>

@@ -26,7 +26,7 @@ import {
   SearchProfessional,
 } from '@data/api';
 import { SeoService, ToastService } from '@shared/services';
-import { AuthStore } from '@core/auth';
+import { AuthStore, UiProfileService } from '@core/auth';
 import {
   Subject,
   catchError,
@@ -83,6 +83,10 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private readonly authStore = inject(AuthStore);
   private readonly authDialog = inject(AuthDialogService);
+  private readonly uiProfile = inject(UiProfileService);
+
+  /** True when a user is logged in — drives the "Volver" button to their area. */
+  readonly isAuthenticated = this.authStore.isAuthenticated;
 
   private readonly destroy$ = new Subject<void>();
   private readonly pageSize = 10;
@@ -107,6 +111,11 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
   readonly cities = computed(() => this.metadata()?.cities ?? []);
   readonly hasResults = computed(() => this.professionals().length > 0);
+
+  /** Navigate a logged-in user back to their area's main menu (patient/professional/admin). */
+  goBack(): void {
+    this.router.navigate([this.uiProfile.baseRoute()]);
+  }
 
   ngOnInit(): void {
     this.loadMetadata();
