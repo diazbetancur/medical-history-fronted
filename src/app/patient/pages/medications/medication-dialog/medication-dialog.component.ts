@@ -63,6 +63,7 @@ export class MedicationDialogComponent implements OnInit {
 
   form!: FormGroup;
   isSubmitting = signal(false);
+  readonly maxStartDate = this.getTodayDate();
 
   readonly statusOptions = [
     { value: 'Active' as const, label: 'Activo' },
@@ -187,6 +188,10 @@ export class MedicationDialogComponent implements OnInit {
       return 'Ingresa una fecha válida';
     }
 
+    if (control.errors['matDatepickerMax']) {
+      return 'La fecha de inicio no puede ser posterior a hoy';
+    }
+
     if (
       fieldName === 'endDate' &&
       this.form.hasError('invalidDateRange') &&
@@ -222,6 +227,12 @@ export class MedicationDialogComponent implements OnInit {
       return this.formatDateOnly(value);
     }
     return null;
+  }
+
+  private getTodayDate(): Date {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
   }
 
   private formatDateOnly(date: Date): string {
