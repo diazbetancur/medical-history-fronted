@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://qa-api.meditigo.com/api',
+  apiBaseUrl: 'https://medical-history-backend-qa.onrender.com/api',
   analytics: {
     enabled: false, // I-12: disabled until real GA4 ID is configured
     provider: 'ga4' as const,
