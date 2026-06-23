@@ -185,13 +185,33 @@ export class RegisterPageComponent implements OnInit {
   private passwordMatchValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const password = control.get('password')?.value;
-      const confirmPassword = control.get('confirmPassword')?.value;
+      const confirm = control.get('confirmPassword');
+      if (!confirm) return null;
 
-      if (!password || !confirmPassword) {
+      const clearMismatch = (): void => {
+        if (confirm.hasError('passwordMismatch')) {
+          const rest = { ...confirm.errors };
+          delete rest['passwordMismatch'];
+          confirm.setErrors(Object.keys(rest).length ? rest : null);
+        }
+      };
+
+      if (!password || !confirm.value) {
+        clearMismatch();
         return null;
       }
 
-      return password === confirmPassword ? null : { passwordMismatch: true };
+      if (password !== confirm.value) {
+        // Reflejar el error en el control para que Material muestre el mensaje
+        // bajo "Confirmar contraseña". La guarda evita bucles.
+        if (!confirm.hasError('passwordMismatch')) {
+          confirm.setErrors({ ...confirm.errors, passwordMismatch: true });
+        }
+        return { passwordMismatch: true };
+      }
+
+      clearMismatch();
+      return null;
     };
   }
 

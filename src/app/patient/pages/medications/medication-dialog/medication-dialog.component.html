@@ -66,7 +66,9 @@
     <!-- Start Date -->
     <mat-form-field appearance="outline">
       <mat-label>Fecha de inicio</mat-label>
-      <input matInput type="date" formControlName="startDate" />
+      <input matInput [matDatepicker]="startPicker" [max]="maxStartDate" formControlName="startDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
       <mat-error>{{ getErrorMessage("startDate") }}</mat-error>
     </mat-form-field>
 
@@ -81,7 +83,9 @@
     @if (!form.get("isOngoing")?.value) {
       <mat-form-field appearance="outline">
         <mat-label>Fecha de fin *</mat-label>
-        <input matInput type="date" formControlName="endDate" required />
+        <input matInput [matDatepicker]="endPicker" formControlName="endDate" required />
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
         <mat-error>{{ getErrorMessage("endDate") }}</mat-error>
       </mat-form-field>
     }

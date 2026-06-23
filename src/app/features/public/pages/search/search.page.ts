@@ -18,7 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   AppliedFilters,
   MetadataResponse,
@@ -26,6 +26,8 @@ import {
   SearchProfessional,
 } from '@data/api';
 import { SeoService, ToastService } from '@shared/services';
+import { Location } from '@angular/common';
+import { AuthStore } from '@core/auth';
 import {
   Subject,
   catchError,
@@ -42,6 +44,7 @@ import { SpecialtyDto } from '../../../../public/models/specialty.dto';
 import { PublicCatalogService } from '../../../../public/services/public-catalog.service';
 import { PublicProfessionalsService } from '../../../../public/services/public-professionals.service';
 import { BookAppointmentDialogComponent } from '../../components/book-appointment-dialog/book-appointment-dialog.component';
+import { AuthDialogService } from '../../components/auth-modal/auth-dialog.service';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
 import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
@@ -53,7 +56,6 @@ import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
     PublicHeaderComponent,
     PublicFooterComponent,
     DoctorNamePipe,
-    RouterLink,
     ReactiveFormsModule,
     MatAutocompleteModule,
     MatFormFieldModule,
@@ -80,6 +82,12 @@ export class SearchPageComponent implements OnInit, OnDestroy {
   private readonly seoService = inject(SeoService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
+  private readonly authStore = inject(AuthStore);
+  private readonly authDialog = inject(AuthDialogService);
+  private readonly location = inject(Location);
+
+  /** True when a user is logged in — drives the "Volver" button. */
+  readonly isAuthenticated = this.authStore.isAuthenticated;
 
   private readonly destroy$ = new Subject<void>();
   private readonly pageSize = 10;
@@ -104,6 +112,11 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
   readonly cities = computed(() => this.metadata()?.cities ?? []);
   readonly hasResults = computed(() => this.professionals().length > 0);
+
+  /** Return to the page the user came from (their menu/area), not a permission-derived one. */
+  goBack(): void {
+    this.location.back();
+  }
 
   ngOnInit(): void {
     this.loadMetadata();
@@ -322,6 +335,25 @@ export class SearchPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Agendar requiere sesión. Si no hay login, abrimos el modal de auth (no la
+    // página /login) y, si inicia sesión, continuamos al agendamiento. Así
+    // evitamos el 401 contra el endpoint protegido y el redirect feo.
+    if (!this.authStore.isAuthenticated()) {
+      this.authDialog
+        .open()
+        .afterClosed()
+        .subscribe(() => {
+          if (this.authStore.isAuthenticated()) {
+            this.openBookingDialog(doctor);
+          }
+        });
+      return;
+    }
+
+    this.openBookingDialog(doctor);
+  }
+
+  private openBookingDialog(doctor: SearchProfessional): void {
     this.dialog.open(BookAppointmentDialogComponent, {
       width: '760px',
       maxWidth: '96vw',

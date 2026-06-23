@@ -573,14 +573,25 @@
                       </button>
                       <button
                         mat-icon-button
-                        color="primary"
                         type="button"
+                        class="star-button"
+                        [class.is-primary-star]="location.isDefault"
                         [disabled]="location.isDefault || sectionBusy()"
                         (click)="setDefaultLocation(location.id)"
-                        aria-label="Marcar como principal"
-                        title="Marcar como principal"
+                        [attr.aria-label]="
+                          location.isDefault
+                            ? 'Sede principal'
+                            : 'Marcar como principal'
+                        "
+                        [title]="
+                          location.isDefault
+                            ? 'Sede principal'
+                            : 'Marcar como principal'
+                        "
                       >
-                        <mat-icon>stars</mat-icon>
+                        <mat-icon>{{
+                          location.isDefault ? "star" : "star_border"
+                        }}</mat-icon>
                       </button>
                       <button
                         mat-icon-button

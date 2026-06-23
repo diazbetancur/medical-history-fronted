@@ -96,6 +96,7 @@ export class BackgroundDialogComponent implements OnInit {
 
   private initForm(): void {
     const background = this.data.background;
+    const isChronicType = background?.type === 'Chronic';
 
     this.form = this.fb.group({
       type: [background?.type || null, [Validators.required]],
@@ -111,8 +112,32 @@ export class BackgroundDialogComponent implements OnInit {
         this.toDateValue(background?.eventDate),
         [this.maxDateValidator()],
       ],
-      isChronic: [background?.isChronic || false],
+      isChronic: [
+        {
+          value: isChronicType ? true : (background?.isChronic ?? false),
+          disabled: isChronicType,
+        },
+      ],
     });
+
+    // "Crónico" type implies a chronic condition: force the flag on and lock the
+    // toggle so it registers as chronic just from the type. Other types keep it
+    // editable; switching away from "Crónico" clears the auto-forced flag.
+    this.form.get('type')?.valueChanges.subscribe((type) => {
+      const isChronicControl = this.form.get('isChronic');
+      if (!isChronicControl) return;
+      if (type === 'Chronic') {
+        isChronicControl.setValue(true);
+        isChronicControl.disable();
+      } else if (isChronicControl.disabled) {
+        isChronicControl.enable();
+        isChronicControl.setValue(false);
+      }
+    });
+  }
+
+  get isChronicTypeSelected(): boolean {
+    return this.form?.get('type')?.value === 'Chronic';
   }
 
   onSubmit(): void {
@@ -121,7 +146,9 @@ export class BackgroundDialogComponent implements OnInit {
       return;
     }
 
-    const formValue = this.form.value;
+    // getRawValue (not .value) so the disabled "isChronic" control — locked on when
+    // type is "Crónico" — is still included in the payload.
+    const formValue = this.form.getRawValue();
 
     const dto: CreateBackgroundDto | UpdateBackgroundDto = {
       type: formValue.type,

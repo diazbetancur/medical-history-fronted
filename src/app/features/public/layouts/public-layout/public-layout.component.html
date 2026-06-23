@@ -26,10 +26,14 @@
     Dashboard
   </a>
   } @else {
-  <a class="pill-btn pill-btn--ghost-light" routerLink="/login">
+  <button
+    type="button"
+    class="pill-btn pill-btn--ghost-light"
+    (click)="openAuthModal()"
+  >
     <mat-icon>login</mat-icon>
     Ingresar
-  </a>
+  </button>
   }
 </mat-toolbar>
 

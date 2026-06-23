@@ -1,0 +1,26 @@
+.specialty-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+
+  &__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__more {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.5;
+    background: rgba(10, 110, 189, 0.1);
+    color: #0a6ebd;
+    cursor: default;
+  }
+}

@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthStore } from '@core/auth';
+import { AuthDialogService } from '../../components/auth-modal/auth-dialog.service';
 
 @Component({
   selector: 'app-public-layout',
@@ -21,4 +22,9 @@ import { AuthStore } from '@core/auth';
 })
 export class PublicLayoutComponent {
   readonly authStore = inject(AuthStore);
+  private readonly authDialog = inject(AuthDialogService);
+
+  openAuthModal(): void {
+    this.authDialog.open();
+  }
 }

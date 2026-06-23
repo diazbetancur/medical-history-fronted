@@ -261,6 +261,15 @@ $color-white-alpha-90: rgba($color-neutral-white, 0.9);
   --color-border-success: #{$color-brand-success};
 
   // ----------------------------------------------------------------------------
+  // Form fields (soft outline)
+  // ----------------------------------------------------------------------------
+  --field-border: #dde3ea;
+  --field-border-hover: #c4ccd6;
+  --field-ring: rgba(10, 110, 189, 0.12);
+  --field-invalid-border: #f0a6a6;
+  --field-invalid-ring: rgba(220, 38, 38, 0.12);
+
+  // ----------------------------------------------------------------------------
   // Focus & Interaction
   // ----------------------------------------------------------------------------
   --color-focus-ring: #{$color-primary-alpha-50};

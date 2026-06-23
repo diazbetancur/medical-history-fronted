@@ -19,6 +19,12 @@
           <strong>Médico:</strong>
           <span>{{ professionalName() | doctorName }}</span>
         </div>
+        @if (specialties().length > 0) {
+          <div class="summary-row">
+            <strong>{{ specialties().length > 1 ? 'Especialidades:' : 'Especialidad:' }}</strong>
+            <span>{{ specialties().join(" · ") }}</span>
+          </div>
+        }
         <div class="summary-row">
           <strong>Fecha:</strong>
           <span>{{ bookingConfirmation()!.date }}</span>
@@ -115,7 +121,8 @@
         <div class="state-block error">{{ slotsError() }}</div>
       } @else if (selectedDate() && availableSlots().length === 0) {
         <div class="state-block">
-          No hay horarios disponibles para esta fecha.
+          El médico no tiene horarios disponibles para esta fecha. Por favor
+          selecciona otra fecha.
         </div>
       } @else if (availableSlots().length > 0) {
         <div class="slots-list">

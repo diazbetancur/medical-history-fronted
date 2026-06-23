@@ -322,6 +322,25 @@
   white-space: nowrap;
 }
 
+// Estrella de "sede principal": azul marino para la principal, gris para el
+// resto. La principal queda con el botón deshabilitado (no se re-marca), por eso
+// forzamos el color del icono para que no lo pinte el gris de "disabled".
+.star-button {
+  --mat-icon-color: #9ca3af; // gris — sede no principal
+
+  .mat-icon {
+    color: #9ca3af;
+  }
+
+  &.is-primary-star {
+    --mat-icon-color: #1e3a8a; // azul marino — sede principal
+
+    .mat-icon {
+      color: #1e3a8a !important;
+    }
+  }
+}
+
 .status-chip {
   border: 1px solid #dbeafe;
   color: #1d4ed8;

@@ -19,6 +19,7 @@ import { MenuService } from '@core/services/menu.service';
 import { LayoutTopbarComponent } from '@shared/ui/layout-topbar/layout-topbar.component';
 import { SidebarComponent } from '@shared/ui/sidebar/sidebar.component';
 import { BottomNavComponent } from '@shared/ui/bottom-nav/bottom-nav.component';
+import { LicenseBannerComponent } from '@shared/ui/license-banner/license-banner.component';
 
 /**
  * Diálogo informativo para profesionales recién registrados
@@ -76,6 +77,7 @@ export class ProfileRequiredDialogComponent {}
     LayoutTopbarComponent,
     SidebarComponent,
     BottomNavComponent,
+    LicenseBannerComponent,
   ],
   templateUrl: './professional-layout.component.html',
   styleUrl: './professional-layout.component.scss',

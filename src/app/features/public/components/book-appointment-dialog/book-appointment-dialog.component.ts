@@ -289,8 +289,14 @@ export class BookAppointmentDialogComponent {
         this.loadingSlots.set(false);
       },
       error: (error: ApiError) => {
-        this.slotsError.set(getUserMessage(error));
         this.loadingSlots.set(false);
+        // 404 = el médico no tiene disponibilidad configurada para esa fecha.
+        // No es un error real: mostramos el estado vacío amigable, no el bloque de error.
+        if (error.status === 404) {
+          this.availableSlots.set([]);
+          return;
+        }
+        this.slotsError.set(getUserMessage(error));
       },
     });
   }

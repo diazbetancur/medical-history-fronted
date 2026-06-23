@@ -50,6 +50,13 @@ const LOCAL_FORBIDDEN_PATTERNS = ['/api/professional/patients/'];
  * These endpoints handle errors gracefully in the component/store level
  */
 const SILENT_ERROR_URLS = ['/public/search/suggest'];
+/**
+ * Endpoints whose outages must stay transparent to the user. The notifications
+ * bell polls these on a timer; a backend hiccup should not surface the generic
+ * "Estamos presentando fallas" toast. The component already swallows the error
+ * (catchError → fallback value), so we just suppress the global toast here.
+ */
+const SILENT_OUTAGE_TOAST_URLS = ['/notifications'];
 const GENERIC_API_FAILURE_MESSAGE =
   'Estamos presentando fallas. Inténtalo nuevamente más tarde.';
 const GENERIC_API_FAILURE_STATUSES = new Set([0, 502, 503, 504]);
@@ -91,6 +98,10 @@ function shouldSilenceError(url: string, status: number): boolean {
   return false;
 }
 
+function shouldSilenceOutageToast(url: string): boolean {
+  return SILENT_OUTAGE_TOAST_URLS.some((pattern) => url.includes(pattern));
+}
+
 function isNetworkOrUnavailableError(error: HttpErrorResponse): boolean {
   if (GENERIC_API_FAILURE_STATUSES.has(error.status)) {
     return true;
@@ -116,7 +127,8 @@ function showGenericApiFailureToast(toast: ToastService): void {
  * Responsibilities:
  * - Normalize errors to ProblemDetails format
  * - Handle 401 with redirect to home
- * - Handle 403 with redirect to forbidden page
+ * - Handle 403 with a toast (the backend's real reason); never redirect —
+ *   route-level access is owned by guards, which redirect to /forbidden
  * - Show only a generic toast for network/API-unavailable failures
  * - Never expose stack traces or technical errors to users
  */
@@ -157,16 +169,37 @@ export const errorInterceptor: HttpInterceptorFn = (
           });
         }
       }
-      // Handle 403 Forbidden
+      // Lapsed-license 403: explain via toast, never redirect, regardless of URL
+      // (including locally-handled-forbidden routes like /api/professional/patients/*).
+      else if (
+        error.status === 403 &&
+        problemDetails.errorCode === 'LICENSE_INACTIVE'
+      ) {
+        toast.error(problemDetails.title);
+      }
+      // Non-license 403 on an API call (e.g. a plan-gated report): the specific
+      // action/data was denied, not the whole page. Surface the backend's real
+      // reason (detail) and stay put. Route-level access is already guarded —
+      // guards redirect to /forbidden — so a full-page redirect here is redundant,
+      // jarring, and hides what actually happened.
       else if (
         error.status === 403 &&
         !shouldHandleForbiddenLocally(req.url)
       ) {
-        toast.error(problemDetails.title);
-        router.navigate(['/forbidden']);
+        // Use the backend's raw `detail` if present (e.g. "requiere el plan
+        // Growth"), NOT problemDetails.detail — the latter falls back to the raw
+        // HttpErrorResponse message. Otherwise the friendly status-based title.
+        const backendDetail = (error.error as { detail?: string } | null)
+          ?.detail;
+        toast.error(backendDetail || problemDetails.title);
       }
-      // Phase 1: only show a global fallback toast for network/API outages.
-      else if (isApiRequest(req.url) && isNetworkOrUnavailableError(error)) {
+      // Phase 1: only show a global fallback toast for network/API outages,
+      // but keep polled/background endpoints (e.g. notifications) transparent.
+      else if (
+        isApiRequest(req.url) &&
+        isNetworkOrUnavailableError(error) &&
+        !shouldSilenceOutageToast(req.url)
+      ) {
         showGenericApiFailureToast(toast);
       }
 

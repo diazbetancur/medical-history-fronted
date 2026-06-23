@@ -3,10 +3,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
 import { AuthService, AuthStore } from '@core/auth';
+import { ToastService } from '@shared/services';
 import { PublicHomeProfessionalCardDto } from '../../../../public/models/public-home.dto';
 import { BookAppointmentDialogComponent } from '../book-appointment-dialog/book-appointment-dialog.component';
+import { AuthDialogService } from '../auth-modal/auth-dialog.service';
 import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
 
 @Component({
@@ -25,10 +26,11 @@ import { DoctorNamePipe } from '@shared/pipes/doctor-name.pipe';
 export class ProfessionalCardComponent {
   @Input({ required: true }) professional!: PublicHomeProfessionalCardDto;
 
-  private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly authStore = inject(AuthStore);
   private readonly dialog = inject(MatDialog);
+  private readonly authDialog = inject(AuthDialogService);
+  private readonly toast = inject(ToastService);
 
   get imageUrl(): string {
     return (
@@ -44,11 +46,19 @@ export class ProfessionalCardComponent {
       this.authStore.isAuthenticated() || this.authService.isAuthenticated();
 
     if (!isAuthenticated) {
-      this.router.navigate(['/login'], {
-        queryParams: {
-          returnUrl: `/pro/${this.professional.slug}`,
-        },
-      });
+      // Abrimos el modal de auth (no la página /login); si inicia sesión,
+      // reintentamos el agendamiento ya autenticado.
+      this.authDialog
+        .open()
+        .afterClosed()
+        .subscribe(() => {
+          if (
+            this.authStore.isAuthenticated() ||
+            this.authService.isAuthenticated()
+          ) {
+            this.onBookAppointment();
+          }
+        });
       return;
     }
 
@@ -70,11 +80,9 @@ export class ProfessionalCardComponent {
         },
       });
     } else {
-      this.router.navigate(['/login'], {
-        queryParams: {
-          returnUrl: `/pro/${this.professional.slug}`,
-        },
-      });
+      this.toast.warning(
+        'Necesitas una cuenta de paciente para agendar una cita.',
+      );
     }
   }
 }

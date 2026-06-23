@@ -40,7 +40,8 @@
         type="button"
         class="notif-item"
         [class.notif-item--unread]="!n.isRead"
-        (click)="markRead(n, $event)"
+        [class.notif-item--clickable]="!!n.url"
+        (click)="openNotification(n, $event)"
       >
         <span class="notif-item__dot" [class.notif-item__dot--on]="!n.isRead"></span>
         <span class="notif-item__content">

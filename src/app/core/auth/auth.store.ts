@@ -62,6 +62,7 @@ export class AuthStore {
   readonly userRoles = computed(() => this._state().user?.roles ?? []);
   readonly userPermissions = computed(() => this._state().user?.permissions ?? []);
   readonly availableContexts = computed(() => this._state().user?.contexts ?? []);
+  readonly licenseLapsed = computed(() => this._state().user?.licenseLapsed ?? false);
 
   hasPermission(permission: string): boolean {
     return this.userPermissions().includes(permission);
@@ -159,11 +160,17 @@ export class AuthStore {
 
   /**
    * Initialize auth on app load.
-   * Always calls /me — the httpOnly cookie is present if the user was logged in.
-   * A missing or expired cookie results in a 401, which clears state gracefully.
+   *
+   * The session lives in an httpOnly cookie that JS can't read, so we can't tell
+   * directly whether a session exists. Instead we rely on the context marker that
+   * is persisted on login and cleared on logout/401: if it's absent there is no
+   * session to restore, so we skip the /me probe entirely — this avoids the noisy
+   * 401 in the console for anonymous visitors. If the cookie ever outlives the
+   * marker, the user simply logs in again.
    */
   initialize(): Observable<CurrentUserDto | null> {
     if (!this.isBrowser) return of(null);
+    if (!this.getPersistedContext()) return of(null);
     return this.loadMe();
   }
 

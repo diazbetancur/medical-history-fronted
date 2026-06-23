@@ -6,13 +6,19 @@
     </button>
   </header>
 
+  <app-family-group-help-panel />
+
   @if (isLoading()) {
     <div class="fg-list__loading"><mat-spinner diameter="40" /></div>
   } @else if (groups().length === 0) {
     <mat-card class="fg-empty">
       <mat-icon>family_restroom</mat-icon>
       <h2>Aún no tienes grupos familiares</h2>
-      <p>Crea un grupo para administrar a los pacientes que cuidas.</p>
+      <p>
+        Crea uno para administrar la información médica de las personas que
+        cuidas (hijos, adultos mayores o tu pareja). Podrás agregar dependientes
+        sin cuenta o invitar a quienes ya tienen una.
+      </p>
       <button mat-flat-button color="primary" (click)="openCreate()">Crear grupo familiar</button>
     </mat-card>
   } @else {

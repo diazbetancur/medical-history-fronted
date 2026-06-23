@@ -37,6 +37,8 @@ import {
 } from './appointment-detail-dialog/appointment-detail-dialog.component';
 
 const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+/** Rango máximo permitido para el reporte de citas canceladas. */
+const MAX_CANCELLED_REPORT_DAYS = 90;
 
 @Component({
   selector: 'app-professional-appointments-page',
@@ -79,6 +81,13 @@ export class ProfessionalAppointmentsPage implements OnInit {
   protected readonly hasRangeFilterResult = signal(false);
   protected readonly rangeAppointments = signal<AppointmentDto[]>([]);
 
+  // ── Citas canceladas (reporte por rango, máx. 90 días) ───────────────────
+  protected readonly cancelledFrom = signal(this.firstDayOfMonth());
+  protected readonly cancelledTo = signal(this.getDateInputValue(new Date()));
+  protected readonly cancelledLoading = signal(false);
+  protected readonly cancelledLoaded = signal(false);
+  protected readonly cancelledAppointments = signal<AppointmentDto[]>([]);
+
   /**
    * Alias to the store's monthLoading signal — keeps the template unchanged.
    */
@@ -96,6 +105,15 @@ export class ProfessionalAppointmentsPage implements OnInit {
     'patient',
     'status',
     'actions',
+  ];
+
+  /** Columnas de la tabla de citas canceladas (reporte) */
+  protected readonly cancelledColumns: string[] = [
+    'cancelledBy',
+    'patient',
+    'date',
+    'time',
+    'cancelledAt',
   ];
 
   /** "Hoy" — today's appointments sorted by start time (CANCELLED already excluded in store) */
@@ -116,6 +134,13 @@ export class ProfessionalAppointmentsPage implements OnInit {
       const dc = a.date.localeCompare(b.date);
       return dc !== 0 ? dc : a.startTime.localeCompare(b.startTime);
     }),
+  );
+
+  /** "Citas canceladas" — ordenadas por fecha de cancelación, más reciente primero */
+  protected readonly sortedCancelledAppointments = computed(() =>
+    [...this.cancelledAppointments()].sort((a, b) =>
+      (b.cancelledAt ?? '').localeCompare(a.cancelledAt ?? ''),
+    ),
   );
 
   ngOnInit(): void {
@@ -172,6 +197,11 @@ export class ProfessionalAppointmentsPage implements OnInit {
     // handled by _reloadAll() inside the store after each action.
     if (index === 2 && !this.store.monthLoaded() && !this.monthLoading()) {
       this.store.loadMonthAppointments();
+    }
+
+    // Tab "Citas canceladas": cargar el mes actual en la primera visita.
+    if (index === 4 && !this.cancelledLoaded() && !this.cancelledLoading()) {
+      this.loadCancelled(this.cancelledFrom(), this.cancelledTo());
     }
   }
 
@@ -355,6 +385,94 @@ export class ProfessionalAppointmentsPage implements OnInit {
 
   protected isExternalAppointment(appointment: AppointmentDto): boolean {
     return appointment.type === 'EXTERNAL';
+  }
+
+  // ── Citas canceladas ──────────────────────────────────────────────────────
+
+  protected getCancelledByLabel(cancelledBy: string | undefined): string {
+    const labels: Record<string, string> = {
+      Professional: 'Profesional',
+      Patient: 'Paciente',
+      System: 'Sistema',
+      CalendarSync: 'Calendario externo',
+    };
+    return cancelledBy ? (labels[cancelledBy] ?? cancelledBy) : '—';
+  }
+
+  protected formatCancelledAt(iso: string | undefined): string {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  protected applyCancelledFilter(): void {
+    const from = this.cancelledFrom();
+    const to = this.cancelledTo();
+
+    if (!from || !to) {
+      this.toast.warning('Debes seleccionar fecha inicial y final');
+      return;
+    }
+    if (from > to) {
+      this.toast.warning('La fecha inicial no puede ser mayor que la final');
+      return;
+    }
+    if (this.daysBetween(from, to) > MAX_CANCELLED_REPORT_DAYS) {
+      this.toast.warning('El rango máximo del reporte es de 90 días');
+      return;
+    }
+
+    this.loadCancelled(from, to);
+  }
+
+  private loadCancelled(from: string, to: string): void {
+    const professionalId = this.authStore.user()?.professionalProfileId;
+    if (!professionalId) {
+      this.toast.error('No se encontró perfil profesional');
+      return;
+    }
+
+    this.cancelledLoading.set(true);
+    this.cancelledLoaded.set(true);
+    this.cancelledAppointments.set([]);
+
+    this.appointmentsApi
+      .getAppointments({
+        professionalId,
+        status: 'CANCELLED',
+        from,
+        to,
+        page: 1,
+        pageSize: PAGE_SIZE_CALENDAR_RANGE,
+      })
+      .subscribe({
+        next: (response) => {
+          this.cancelledAppointments.set(response.items ?? []);
+          this.cancelledLoading.set(false);
+        },
+        error: (error: { error?: { title?: string } }) => {
+          this.toast.error(
+            error?.error?.title || 'Error al cargar citas canceladas',
+          );
+          this.cancelledLoading.set(false);
+        },
+      });
+  }
+
+  private firstDayOfMonth(): string {
+    const now = new Date();
+    return this.getDateInputValue(
+      new Date(now.getFullYear(), now.getMonth(), 1),
+    );
+  }
+
+  private daysBetween(from: string, to: string): number {
+    const f = new Date(`${from}T00:00:00`).getTime();
+    const t = new Date(`${to}T00:00:00`).getTime();
+    return Math.round((t - f) / 86_400_000);
   }
 
   private getDateInputValue(date: Date): string {

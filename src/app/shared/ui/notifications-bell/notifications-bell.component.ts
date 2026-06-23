@@ -7,6 +7,7 @@ import {
   OnInit,
   PLATFORM_ID,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -14,8 +15,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
 import { NotificationDto, NotificationsApi, NotificationsPageDto } from '@data/api/notifications.api';
 import { NotificationsModalComponent } from '@shared/ui/notifications-modal/notifications-modal.component';
 import { catchError, of } from 'rxjs';
@@ -47,6 +49,8 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly breakpoints = inject(BreakpointObserver);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly router = inject(Router);
+  @ViewChild(MatMenuTrigger) private readonly menuTrigger?: MatMenuTrigger;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private lastFetchAt = 0;
 
@@ -87,11 +91,20 @@ export class NotificationsBellComponent implements OnInit, OnDestroy {
     }
   }
 
-  markRead(notification: NotificationDto, event: Event): void {
-    event.stopPropagation();
+  openNotification(notification: NotificationDto, event: Event): void {
+    // Marcar como leída visualmente
     this.preview.update((list) =>
       list.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n)),
     );
+
+    // Si la notificación tiene destino, cerrar el menú y navegar allí.
+    if (notification.url) {
+      this.menuTrigger?.closeMenu();
+      void this.router.navigateByUrl(notification.url);
+    } else {
+      // Sin destino: no cerrar el menú (solo se marca como leída).
+      event.stopPropagation();
+    }
   }
 
   openHistory(event: Event): void {

@@ -11,7 +11,12 @@
       <mat-tab label="Miembros">
         @if (d.iAmAdmin) {
           <div class="fg-detail__actions">
-            <button mat-flat-button color="primary" (click)="openAddMember()">
+            <button
+              mat-flat-button
+              color="primary"
+              matTooltip="Agrega un dependiente (sin cuenta) o invita a alguien que ya tiene cuenta."
+              (click)="openAddMember()"
+            >
               <mat-icon>person_add</mat-icon> Agregar miembro
             </button>
           </div>
@@ -22,9 +27,19 @@
               <div class="fg-member__info">
                 <span class="fg-member__name">{{ m.fullName }}</span>
                 <span class="fg-member__chips">
-                  <span class="chip">{{ m.linkType === 'Dependent' ? 'Dependiente' : 'Registrado' }}</span>
+                  <span
+                    class="chip"
+                    [matTooltip]="
+                      m.linkType === 'Dependent'
+                        ? 'Persona sin cuenta propia; su perfil lo gestionan los administradores del grupo.'
+                        : 'Persona con cuenta propia, vinculada por invitación. Debe autorizar el acceso.'
+                    "
+                  >{{ m.linkType === 'Dependent' ? 'Dependiente' : 'Registrado' }}</span>
                   @if (m.adminRole !== 'None') {
-                    <span class="chip chip--admin">
+                    <span
+                      class="chip chip--admin"
+                      matTooltip="Puede gestionar miembros, invitar y administrar la información del grupo."
+                    >
                       {{ m.adminRole === 'Principal' ? 'Principal' : 'Admin' }}
                     </span>
                   }
