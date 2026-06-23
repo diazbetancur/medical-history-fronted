@@ -57,8 +57,13 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
 
-  // Click en el cuerpo de la notificación o en la acción "ver"
-  const targetUrl = data.url || '/patient/appointments';
+  // Click en el cuerpo de la notificación o en la acción "ver".
+  // Si la notificación no trae URL de destino (data.url vacío), no se navega
+  // a ningún lado: solo se cierra (p. ej. aviso al médico de cita cancelada).
+  const targetUrl = data.url;
+  if (!targetUrl) {
+    return;
+  }
 
   event.waitUntil(
     clients
