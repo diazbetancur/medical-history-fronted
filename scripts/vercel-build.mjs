@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 
 const vercelEnv = process.env.VERCEL_ENV;
+const forcedConfiguration = process.env.ANGULAR_CONFIGURATION?.trim().toLowerCase();
 
 const configByEnv = {
   production: "production",
@@ -8,10 +9,29 @@ const configByEnv = {
   development: "development",
 };
 
-const configuration = configByEnv[vercelEnv] ?? "qa";
+const configAliases = {
+  dev: "development",
+  development: "development",
+  qa: "qa",
+  pdn: "production",
+  prod: "production",
+  production: "production",
+};
+
+const configuration =
+  (forcedConfiguration ? configAliases[forcedConfiguration] : undefined) ??
+  configByEnv[vercelEnv] ??
+  "qa";
+
+if (!["development", "qa", "production"].includes(configuration)) {
+  console.error(
+    `[vercel-build] ANGULAR_CONFIGURATION invalido: ${forcedConfiguration}. Usa development, qa o production.`,
+  );
+  process.exit(1);
+}
 
 console.log(
-  `[vercel-build] VERCEL_ENV=${vercelEnv ?? "undefined"} -> Angular configuration=${configuration}`,
+  `[vercel-build] VERCEL_ENV=${vercelEnv ?? "undefined"} ANGULAR_CONFIGURATION=${forcedConfiguration ?? "undefined"} -> Angular configuration=${configuration}`,
 );
 
 const result = spawnSync(
