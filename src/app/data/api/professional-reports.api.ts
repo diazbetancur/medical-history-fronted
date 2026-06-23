@@ -43,11 +43,16 @@ export class ProfessionalReportsApi {
     );
   }
 
-  downloadCsv(type: ReportType, from: string, to: string): Observable<Blob> {
+  downloadExport(
+    format: 'csv' | 'xlsx',
+    type: ReportType,
+    from: string,
+    to: string,
+  ): Observable<Blob> {
     const url = `${this.baseUrl}/professional/reports/appointments-export`;
     return this.http.get(url, {
       responseType: 'blob',
-      params: { type, from, to },
+      params: { type, from, to, format },
     });
   }
 }

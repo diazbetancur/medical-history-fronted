@@ -171,22 +171,22 @@ export class ProfessionalReportsPage implements OnInit {
     this.loadDetail();
   }
 
-  downloadCsv(): void {
+  download(format: 'csv' | 'xlsx'): void {
     this.isDownloading.set(true);
     this.api
-      .downloadCsv(this.selectedType(), this.formatDate(this.fromDate()), this.formatDate(this.toDate()))
+      .downloadExport(format, this.selectedType(), this.formatDate(this.fromDate()), this.formatDate(this.toDate()))
       .pipe(finalize(() => this.isDownloading.set(false)))
       .subscribe({
         next: (blob) => {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `reporte-${this.selectedType()}-${this.formatDate(this.fromDate())}-${this.formatDate(this.toDate())}.csv`;
+          a.download = `reporte-${this.selectedType()}-${this.formatDate(this.fromDate())}-${this.formatDate(this.toDate())}.${format}`;
           a.click();
           URL.revokeObjectURL(url);
         },
         error: () => {
-          this.detailError.set('No se pudo generar el archivo CSV');
+          this.detailError.set(`No se pudo generar el archivo ${format.toUpperCase()}`);
         },
       });
   }

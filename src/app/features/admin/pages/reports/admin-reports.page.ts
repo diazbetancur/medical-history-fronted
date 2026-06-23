@@ -71,8 +71,8 @@ export class AdminReportsPage implements OnInit {
     });
   }
 
-  exportCsv(): void {
-    const url = this.api.getExportUrl(this.fromDate(), this.toDate());
+  export(format: 'csv' | 'xlsx'): void {
+    const url = this.api.getExportUrl(this.fromDate(), this.toDate(), format);
     const token = this.authStore.token();
     this.http
       .get(url, { responseType: 'blob', headers: { Authorization: `Bearer ${token}` } })
@@ -80,11 +80,11 @@ export class AdminReportsPage implements OnInit {
         next: (blob) => {
           const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
-          link.download = `licencias_${this.fromDate()}_${this.toDate()}.csv`;
+          link.download = `licencias_${this.fromDate()}_${this.toDate()}.${format}`;
           link.click();
           URL.revokeObjectURL(link.href);
         },
-        error: () => this.error.set('Error al descargar el CSV.'),
+        error: () => this.error.set(`Error al descargar el ${format.toUpperCase()}.`),
       });
   }
 }

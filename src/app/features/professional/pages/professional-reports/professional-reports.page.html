@@ -89,18 +89,11 @@
     <div class="detail-header">
       <h3 class="detail-title">{{ selectedCardLabel() }}</h3>
       @if (detailItems().length > 0) {
-        <button
-          mat-stroked-button
-          type="button"
-          [disabled]="isDownloading()"
-          (click)="downloadCsv()"
-        >
-          @if (isDownloading()) {
-            <mat-spinner diameter="16" />
-          } @else {
-            <mat-icon>download</mat-icon>
-          }
-          Exportar CSV
+        <button mat-stroked-button color="primary" type="button" (click)="download('csv')" [disabled]="isDownloading()">
+          <mat-icon>description</mat-icon> CSV
+        </button>
+        <button mat-stroked-button color="primary" type="button" (click)="download('xlsx')" [disabled]="isDownloading()">
+          <mat-icon>grid_on</mat-icon> Excel
         </button>
       }
     </div>

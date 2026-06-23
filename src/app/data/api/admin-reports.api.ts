@@ -40,7 +40,7 @@ export class AdminReportsApi {
     return this.http.get<AdminReportsOverviewDto>(`${this.base}/overview`, { params });
   }
 
-  getExportUrl(from: string, to: string): string {
-    return `${this.base}/licenses/export?from=${from}&to=${to}`;
+  getExportUrl(from: string, to: string, format: 'csv' | 'xlsx' = 'csv'): string {
+    return `${this.base}/licenses/export?from=${from}&to=${to}&format=${format}`;
   }
 }
