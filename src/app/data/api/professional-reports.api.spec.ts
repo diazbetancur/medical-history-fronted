@@ -28,6 +28,8 @@ describe('ProfessionalReportsApi.downloadExport', () => {
     expect(req.request.params.get('format')).toBe('xlsx');
     expect(req.request.params.get('type')).toBe('attended');
     expect(req.request.responseType).toBe('blob');
+    expect(req.request.params.get('from')).toBe('2026-06-01');
+    expect(req.request.params.get('to')).toBe('2026-06-30');
     req.flush(new Blob());
   });
 });
