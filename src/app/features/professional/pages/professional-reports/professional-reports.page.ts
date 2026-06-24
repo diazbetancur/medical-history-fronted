@@ -100,16 +100,18 @@ export class ProfessionalReportsPage implements OnInit {
   readonly trendMonths = signal(6);
   readonly trendLoading = signal(false);
   readonly trendPoints = signal<AppointmentTrendPointDto[]>([]);
+  readonly trendError = signal<string | null>(null);
 
   loadTrend(): void {
     if (this.trendPoints().length || this.trendLoading()) return;
+    this.trendError.set(null);
     this.trendLoading.set(true);
     this.api
       .getAppointmentsTrend(this.trendMonths())
       .pipe(finalize(() => this.trendLoading.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => this.trendPoints.set(data.points),
-        error: () => this.trendPoints.set([]),
+        error: () => this.trendError.set('No se pudo cargar la tendencia'),
       });
   }
 

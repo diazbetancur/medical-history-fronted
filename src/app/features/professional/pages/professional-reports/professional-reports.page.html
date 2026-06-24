@@ -110,6 +110,11 @@
           <div class="cards-loading">
             <mat-progress-spinner mode="indeterminate" diameter="32" />
           </div>
+        } @else if (trendError()) {
+          <div class="error-banner">
+            <mat-icon>error</mat-icon>
+            <span>{{ trendError() }}</span>
+          </div>
         } @else if (trendPoints().length) {
           @defer (on immediate) {
             <app-appointments-trend-chart [points]="trendPoints()" />
@@ -230,7 +235,7 @@
             />
           }
 
-          @if (!detailLoading() && !detailError() && detailItems().length === 0) {
+          @if (!detailLoading() && !detailError() && detailLoaded() && detailItems().length === 0) {
             <div class="empty-state">
               <mat-icon>event_busy</mat-icon>
               <p>No hay citas en esta categoría para el período seleccionado.</p>
