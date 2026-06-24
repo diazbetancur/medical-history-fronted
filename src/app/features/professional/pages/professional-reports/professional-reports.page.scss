@@ -18,17 +18,23 @@
 .date-filter {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
 
   mat-form-field {
     flex: 1 1 180px;
     max-width: 240px;
   }
+
+  // Los campos de fecha no usan hints; ocultar la franja de subscript
+  // (los errores se muestran aparte en .range-error). Quita el espacio muerto
+  // que los hacía verse altos y desalinea el botón.
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
 }
 
 .reset-btn {
-  align-self: center;
   height: 40px;
 }
 
