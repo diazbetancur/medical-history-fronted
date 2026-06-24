@@ -1148,6 +1148,34 @@ export function hasFieldErrors(
 // Professional Reports Models
 // =============================================================================
 
+export interface AppointmentReportComparisonDto {
+  previousFrom: string;
+  previousTo: string;
+  attendedCount: number;
+  cancelledCount: number;
+  confirmedCount: number;
+  noShowCount: number;
+  attendedDeltaPct: number | null;
+  cancelledDeltaPct: number | null;
+  confirmedDeltaPct: number | null;
+  noShowDeltaPct: number | null;
+}
+
+export interface AppointmentTrendPointDto {
+  year: number;
+  month: number;
+  label: string;
+  attendedCount: number;
+  cancelledCount: number;
+  confirmedCount: number;
+  noShowCount: number;
+}
+
+export interface AppointmentTrendDto {
+  months: number;
+  points: AppointmentTrendPointDto[];
+}
+
 export interface AppointmentReportSummaryDto {
   from: string;
   to: string;
@@ -1156,6 +1184,7 @@ export interface AppointmentReportSummaryDto {
   cancelledCount: number;
   confirmedCount: number;
   noShowCount: number;
+  comparison?: AppointmentReportComparisonDto | null;
 }
 
 export interface AppointmentReportDetailItemDto {

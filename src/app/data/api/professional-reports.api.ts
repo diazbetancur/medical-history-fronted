@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import type {
   AppointmentReportDetailResult,
   AppointmentReportSummaryDto,
+  AppointmentTrendDto,
   ReportType,
 } from '@data/api/api-models';
 import { environment } from '@env';
@@ -43,11 +44,23 @@ export class ProfessionalReportsApi {
     );
   }
 
-  downloadCsv(type: ReportType, from: string, to: string): Observable<Blob> {
+  getAppointmentsTrend(months: number): Observable<AppointmentTrendDto> {
+    return this.apiClient.get<AppointmentTrendDto>(
+      '/professional/reports/appointments-trend',
+      { params: { months: String(months) } },
+    );
+  }
+
+  downloadExport(
+    format: 'csv' | 'xlsx',
+    type: ReportType,
+    from: string,
+    to: string,
+  ): Observable<Blob> {
     const url = `${this.baseUrl}/professional/reports/appointments-export`;
     return this.http.get(url, {
       responseType: 'blob',
-      params: { type, from, to },
+      params: { type, from, to, format },
     });
   }
 }

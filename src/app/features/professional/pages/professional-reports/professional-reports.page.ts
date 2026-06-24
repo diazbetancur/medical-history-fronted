@@ -17,14 +17,19 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import type {
   AppointmentReportDetailItemDto,
   AppointmentReportSummaryDto,
+  AppointmentTrendPointDto,
   ReportType,
 } from '@data/api/api-models';
 import { ProfessionalReportsApi } from '@data/api/professional-reports.api';
 import { finalize } from 'rxjs';
+import { AppointmentsTrendChartComponent } from './appointments-trend-chart.component';
 
 interface ReportCard {
   type: ReportType;
@@ -48,8 +53,12 @@ interface ReportCard {
     MatNativeDateModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTabsModule,
+    MatChipsModule,
+    MatMenuModule,
     MatTableModule,
     MatTooltipModule,
+    AppointmentsTrendChartComponent,
   ],
   templateUrl: './professional-reports.page.html',
   styleUrl: './professional-reports.page.scss',
@@ -85,8 +94,28 @@ export class ProfessionalReportsPage implements OnInit {
   readonly detailTotal = signal(0);
   readonly detailPage = signal(0);
   readonly detailPageSize = signal(20);
+  readonly selectedTabIndex = signal(0);
+  readonly detailLoaded = signal(false);
 
   readonly isDownloading = signal(false);
+
+  readonly trendMonths = signal(6);
+  readonly trendLoading = signal(false);
+  readonly trendPoints = signal<AppointmentTrendPointDto[]>([]);
+  readonly trendError = signal<string | null>(null);
+
+  loadTrend(): void {
+    if (this.trendPoints().length || this.trendLoading()) return;
+    this.trendError.set(null);
+    this.trendLoading.set(true);
+    this.api
+      .getAppointmentsTrend(this.trendMonths())
+      .pipe(finalize(() => this.trendLoading.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => this.trendPoints.set(data.points),
+        error: () => this.trendError.set('No se pudo cargar la tendencia'),
+      });
+  }
 
   readonly displayedColumns = ['patientName', 'documentType', 'documentNumber', 'gender', 'appointmentDate', 'timeSlot', 'status'];
 
@@ -99,7 +128,6 @@ export class ProfessionalReportsPage implements OnInit {
 
   ngOnInit(): void {
     this.loadSummary();
-    this.loadDetail();
   }
 
   resetToCurrentMonth(): void {
@@ -107,8 +135,7 @@ export class ProfessionalReportsPage implements OnInit {
     this.toDate.set(new Date());
     this.rangeError.set(null);
     this.detailPage.set(0);
-    this.loadSummary();
-    this.loadDetail();
+    this.refreshAfterFilterChange();
   }
 
   onFromChange(date: Date | null): void {
@@ -126,7 +153,25 @@ export class ProfessionalReportsPage implements OnInit {
   selectCard(type: ReportType): void {
     this.selectedType.set(type);
     this.detailPage.set(0);
+    this.detailLoaded.set(false);
+    this.selectedTabIndex.set(2); // → pestaña Detalle; onTabChange dispara la carga
+  }
+
+  // Cambio de tipo desde los chips dentro de la pestaña Detalle (sin cambiar de pestaña)
+  selectType(type: ReportType | null): void {
+    if (!type) return; // evita "deseleccionar" el chip
+    this.selectedType.set(type);
+    this.detailPage.set(0);
     this.loadDetail();
+  }
+
+  onTabChange(index: number): void {
+    this.selectedTabIndex.set(index);
+    if (index === 1) {
+      this.loadTrend();
+    } else if (index === 2 && !this.detailLoaded()) {
+      this.loadDetail();
+    }
   }
 
   onPageChange(event: PageEvent): void {
@@ -167,26 +212,25 @@ export class ProfessionalReportsPage implements OnInit {
 
     this.rangeError.set(null);
     this.detailPage.set(0);
-    this.loadSummary();
-    this.loadDetail();
+    this.refreshAfterFilterChange();
   }
 
-  downloadCsv(): void {
+  download(format: 'csv' | 'xlsx'): void {
     this.isDownloading.set(true);
     this.api
-      .downloadCsv(this.selectedType(), this.formatDate(this.fromDate()), this.formatDate(this.toDate()))
+      .downloadExport(format, this.selectedType(), this.formatDate(this.fromDate()), this.formatDate(this.toDate()))
       .pipe(finalize(() => this.isDownloading.set(false)))
       .subscribe({
         next: (blob) => {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `reporte-${this.selectedType()}-${this.formatDate(this.fromDate())}-${this.formatDate(this.toDate())}.csv`;
+          a.download = `reporte-${this.selectedType()}-${this.formatDate(this.fromDate())}-${this.formatDate(this.toDate())}.${format}`;
           a.click();
           URL.revokeObjectURL(url);
         },
         error: () => {
-          this.detailError.set('No se pudo generar el archivo CSV');
+          this.detailError.set(`No se pudo generar el archivo ${format.toUpperCase()}`);
         },
       });
   }
@@ -212,8 +256,18 @@ export class ProfessionalReportsPage implements OnInit {
       });
   }
 
+  private refreshAfterFilterChange(): void {
+    this.loadSummary();
+    this.detailLoaded.set(false);
+    this.detailItems.set([]);
+    if (this.selectedTabIndex() === 2) {
+      this.loadDetail();
+    }
+  }
+
   private loadDetail(): void {
     if (this.rangeError()) return;
+    this.detailLoaded.set(true);
 
     this.detailLoading.set(true);
     this.detailError.set(null);
@@ -240,6 +294,26 @@ export class ProfessionalReportsPage implements OnInit {
           this.detailError.set(msg || 'Error al cargar el detalle');
         },
       });
+  }
+
+  cardDelta(type: ReportType): number | null {
+    const c = this.summary()?.comparison;
+    if (!c) return null;
+    switch (type) {
+      case 'attended': return c.attendedDeltaPct;
+      case 'confirmed': return c.confirmedDeltaPct;
+      case 'cancelled': return c.cancelledDeltaPct;
+      case 'noShow': return c.noShowDeltaPct;
+    }
+  }
+
+  // 'up' = increase, 'down' = decrease, 'flat' = 0, null = no baseline
+  deltaDirection(type: ReportType): 'up' | 'down' | 'flat' | null {
+    const d = this.cardDelta(type);
+    if (d === null || d === undefined) return null;
+    if (d > 0) return 'up';
+    if (d < 0) return 'down';
+    return 'flat';
   }
 
   private formatDate(date: Date): string {

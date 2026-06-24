@@ -18,18 +18,42 @@
 .date-filter {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
 
   mat-form-field {
-    flex: 1 1 180px;
-    max-width: 240px;
+    flex: 0 1 190px; // ancho contenido, sin estirarse
+  }
+}
+
+// Material renderiza el interior del mat-form-field FUERA del CSS encapsulado del
+// componente, así que un selector normal (.date-filter .mat-...) no lo alcanza.
+// :host ::ng-deep (acotado a este componente) sí llega: compactamos el datepicker
+// y ocultamos la franja vacía de hints, para que no se vea tan alto y alinee con el botón.
+:host ::ng-deep .date-filter {
+  // sin franja de hint/error (los errores van aparte en .range-error)
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  // alto fijo del campo, IGUAL al del botón, para que la fila quede pareja.
+  // (el theme global fija el infix en 44px + padding → se veían altos)
+  .mat-mdc-text-field-wrapper {
+    height: 44px;
+  }
+  .mat-mdc-form-field-flex {
+    height: 44px;
+    align-items: center;
+  }
+  .mat-mdc-form-field-infix {
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
 
 .reset-btn {
-  align-self: center;
-  height: 40px;
+  height: 44px; // misma altura que los inputs
 }
 
 .range-error {
@@ -111,6 +135,10 @@
   text-align: center;
 }
 
+.delta { display: inline-flex; align-items: center; gap: 2px; font-size: 0.8rem; color: var(--color-text-secondary, #475569); }
+.delta mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.delta--none { color: var(--color-text-tertiary, #94a3b8); }
+
 // ── Detail ───────────────────────────────────────────────────────────────────
 
 .detail-section {
@@ -155,6 +183,29 @@ table {
   &.status-cancelled { background: #ffebee; color: #b71c1c; }
   &.status-noshow    { background: #fff3e0; color: #bf360c; }
   &.status-pending   { background: #f3e5f5; color: #6a1b9a; }
+}
+
+// ── Tabs / chips / tendencia ──────────────────────────────────────────────────
+
+// Material no añade padding al cuerpo de la pestaña → el contenido quedaba pegado
+// al borde superior del tab. Lo separamos un poco.
+:host ::ng-deep .mat-mdc-tab-body-content {
+  padding-top: 16px;
+}
+
+.type-chips {
+  margin-bottom: 12px;
+}
+
+.trend-window-label {
+  margin: 8px 0 16px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #475569);
+}
+
+.trend-empty {
+  color: rgba(0, 0, 0, 0.5);
+  padding: 16px 0;
 }
 
 // ── Error / Empty ─────────────────────────────────────────────────────────────

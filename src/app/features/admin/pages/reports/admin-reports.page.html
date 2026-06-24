@@ -13,9 +13,11 @@
       </p>
     </div>
 
-    <button mat-stroked-button color="primary" (click)="exportCsv()" [disabled]="loading()">
-      <mat-icon>download</mat-icon>
-      Exportar licencias CSV
+    <button mat-stroked-button color="primary" type="button" (click)="export('csv')" [disabled]="loading()">
+      <mat-icon>description</mat-icon> CSV
+    </button>
+    <button mat-stroked-button color="primary" type="button" (click)="export('xlsx')" [disabled]="loading()">
+      <mat-icon>grid_on</mat-icon> Excel
     </button>
   </div>
 
