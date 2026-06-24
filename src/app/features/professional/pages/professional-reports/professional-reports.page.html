@@ -95,11 +95,11 @@
   <!-- Tendencia mensual -->
   <mat-accordion>
     <mat-expansion-panel (opened)="loadTrend()">
-      <mat-expansion-panel-header>
+      <mat-expansion-panel-header #trendHeader>
         <mat-panel-title>Tendencia mensual</mat-panel-title>
       </mat-expansion-panel-header>
 
-      @defer (on viewport) {
+      @defer (on interaction(trendHeader)) {
         @if (trendLoading()) {
           <mat-progress-spinner mode="indeterminate" diameter="32" />
         } @else if (trendPoints().length) {

@@ -98,6 +98,7 @@ export class ProfessionalReportsPage implements OnInit {
   readonly trendPoints = signal<AppointmentTrendPointDto[]>([]);
 
   loadTrend(): void {
+    if (this.trendPoints().length || this.trendLoading()) return;
     this.trendLoading.set(true);
     this.api
       .getAppointmentsTrend(this.trendMonths())
