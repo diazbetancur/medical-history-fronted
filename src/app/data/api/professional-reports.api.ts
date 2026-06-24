@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import type {
   AppointmentReportDetailResult,
   AppointmentReportSummaryDto,
+  AppointmentTrendDto,
   ReportType,
 } from '@data/api/api-models';
 import { environment } from '@env';
@@ -40,6 +41,13 @@ export class ProfessionalReportsApi {
           pageSize: String(params.pageSize),
         },
       },
+    );
+  }
+
+  getAppointmentsTrend(months: number): Observable<AppointmentTrendDto> {
+    return this.apiClient.get<AppointmentTrendDto>(
+      '/professional/reports/appointments-trend',
+      { params: { months: String(months) } },
     );
   }
 
