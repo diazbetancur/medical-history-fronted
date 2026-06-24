@@ -17,7 +17,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import type {
   AppointmentReportDetailItemDto,
@@ -51,7 +52,8 @@ interface ReportCard {
     MatNativeDateModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
-    MatExpansionModule,
+    MatTabsModule,
+    MatChipsModule,
     MatTableModule,
     MatTooltipModule,
     AppointmentsTrendChartComponent,
@@ -90,6 +92,8 @@ export class ProfessionalReportsPage implements OnInit {
   readonly detailTotal = signal(0);
   readonly detailPage = signal(0);
   readonly detailPageSize = signal(20);
+  readonly selectedTabIndex = signal(0);
+  readonly detailLoaded = signal(false);
 
   readonly isDownloading = signal(false);
 
@@ -120,7 +124,6 @@ export class ProfessionalReportsPage implements OnInit {
 
   ngOnInit(): void {
     this.loadSummary();
-    this.loadDetail();
   }
 
   resetToCurrentMonth(): void {
@@ -128,8 +131,7 @@ export class ProfessionalReportsPage implements OnInit {
     this.toDate.set(new Date());
     this.rangeError.set(null);
     this.detailPage.set(0);
-    this.loadSummary();
-    this.loadDetail();
+    this.refreshAfterFilterChange();
   }
 
   onFromChange(date: Date | null): void {
@@ -147,7 +149,25 @@ export class ProfessionalReportsPage implements OnInit {
   selectCard(type: ReportType): void {
     this.selectedType.set(type);
     this.detailPage.set(0);
+    this.detailLoaded.set(false);
+    this.selectedTabIndex.set(2); // → pestaña Detalle; onTabChange dispara la carga
+  }
+
+  // Cambio de tipo desde los chips dentro de la pestaña Detalle (sin cambiar de pestaña)
+  selectType(type: ReportType | null): void {
+    if (!type) return; // evita "deseleccionar" el chip
+    this.selectedType.set(type);
+    this.detailPage.set(0);
     this.loadDetail();
+  }
+
+  onTabChange(index: number): void {
+    this.selectedTabIndex.set(index);
+    if (index === 1) {
+      this.loadTrend();
+    } else if (index === 2 && !this.detailLoaded()) {
+      this.loadDetail();
+    }
   }
 
   onPageChange(event: PageEvent): void {
@@ -188,8 +208,7 @@ export class ProfessionalReportsPage implements OnInit {
 
     this.rangeError.set(null);
     this.detailPage.set(0);
-    this.loadSummary();
-    this.loadDetail();
+    this.refreshAfterFilterChange();
   }
 
   downloadCsv(): void {
@@ -233,8 +252,18 @@ export class ProfessionalReportsPage implements OnInit {
       });
   }
 
+  private refreshAfterFilterChange(): void {
+    this.loadSummary();
+    this.detailLoaded.set(false);
+    this.detailItems.set([]);
+    if (this.selectedTabIndex() === 2) {
+      this.loadDetail();
+    }
+  }
+
   private loadDetail(): void {
     if (this.rangeError()) return;
+    this.detailLoaded.set(true);
 
     this.detailLoading.set(true);
     this.detailError.set(null);

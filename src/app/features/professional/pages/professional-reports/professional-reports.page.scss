@@ -167,6 +167,23 @@ table {
   &.status-pending   { background: #f3e5f5; color: #6a1b9a; }
 }
 
+// ── Tabs / chips / tendencia ──────────────────────────────────────────────────
+
+.type-chips {
+  margin-bottom: 12px;
+}
+
+.trend-window-label {
+  margin: 8px 0 16px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #475569);
+}
+
+.trend-empty {
+  color: rgba(0, 0, 0, 0.5);
+  padding: 16px 0;
+}
+
 // ── Error / Empty ─────────────────────────────────────────────────────────────
 
 .error-banner {
