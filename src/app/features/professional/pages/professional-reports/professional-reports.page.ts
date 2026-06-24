@@ -262,6 +262,26 @@ export class ProfessionalReportsPage implements OnInit {
       });
   }
 
+  cardDelta(type: ReportType): number | null {
+    const c = this.summary()?.comparison;
+    if (!c) return null;
+    switch (type) {
+      case 'attended': return c.attendedDeltaPct;
+      case 'confirmed': return c.confirmedDeltaPct;
+      case 'cancelled': return c.cancelledDeltaPct;
+      case 'noShow': return c.noShowDeltaPct;
+    }
+  }
+
+  // 'up' = increase, 'down' = decrease, 'flat' = 0, null = no baseline
+  deltaDirection(type: ReportType): 'up' | 'down' | 'flat' | null {
+    const d = this.cardDelta(type);
+    if (d === null || d === undefined) return null;
+    if (d > 0) return 'up';
+    if (d < 0) return 'down';
+    return 'flat';
+  }
+
   private formatDate(date: Date): string {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');

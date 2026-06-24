@@ -79,6 +79,14 @@
           <mat-icon class="card-icon icon-{{ card.type }}">{{ card.icon }}</mat-icon>
           <span class="card-count">{{ card.count() }}</span>
           <span class="card-label">{{ card.label }}</span>
+          @if (deltaDirection(card.type); as dir) {
+            <span class="delta delta--{{ dir }}" [matTooltip]="'vs período anterior'">
+              <mat-icon>{{ dir === 'up' ? 'arrow_upward' : dir === 'down' ? 'arrow_downward' : 'remove' }}</mat-icon>
+              {{ cardDelta(card.type) }}%
+            </span>
+          } @else {
+            <span class="delta delta--none">— sin base</span>
+          }
         </button>
       }
     </div>
