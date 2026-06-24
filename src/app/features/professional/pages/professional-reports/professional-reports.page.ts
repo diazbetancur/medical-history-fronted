@@ -17,14 +17,17 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import type {
   AppointmentReportDetailItemDto,
   AppointmentReportSummaryDto,
+  AppointmentTrendPointDto,
   ReportType,
 } from '@data/api/api-models';
 import { ProfessionalReportsApi } from '@data/api/professional-reports.api';
 import { finalize } from 'rxjs';
+import { AppointmentsTrendChartComponent } from './appointments-trend-chart.component';
 
 interface ReportCard {
   type: ReportType;
@@ -48,8 +51,10 @@ interface ReportCard {
     MatNativeDateModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatExpansionModule,
     MatTableModule,
     MatTooltipModule,
+    AppointmentsTrendChartComponent,
   ],
   templateUrl: './professional-reports.page.html',
   styleUrl: './professional-reports.page.scss',
@@ -87,6 +92,21 @@ export class ProfessionalReportsPage implements OnInit {
   readonly detailPageSize = signal(20);
 
   readonly isDownloading = signal(false);
+
+  readonly trendMonths = signal(6);
+  readonly trendLoading = signal(false);
+  readonly trendPoints = signal<AppointmentTrendPointDto[]>([]);
+
+  loadTrend(): void {
+    this.trendLoading.set(true);
+    this.api
+      .getAppointmentsTrend(this.trendMonths())
+      .pipe(finalize(() => this.trendLoading.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => this.trendPoints.set(data.points),
+        error: () => this.trendPoints.set([]),
+      });
+  }
 
   readonly displayedColumns = ['patientName', 'documentType', 'documentNumber', 'gender', 'appointmentDate', 'timeSlot', 'status'];
 

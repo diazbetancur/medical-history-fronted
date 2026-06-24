@@ -84,6 +84,27 @@
     </div>
   }
 
+  <!-- Tendencia mensual -->
+  <mat-accordion>
+    <mat-expansion-panel (opened)="loadTrend()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Tendencia mensual</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      @defer (on viewport) {
+        @if (trendLoading()) {
+          <mat-progress-spinner mode="indeterminate" diameter="32" />
+        } @else if (trendPoints().length) {
+          <app-appointments-trend-chart [points]="trendPoints()" />
+        } @else {
+          <p>No hay datos para el período.</p>
+        }
+      } @placeholder {
+        <p>Abre para ver la tendencia.</p>
+      }
+    </mat-expansion-panel>
+  </mat-accordion>
+
   <!-- Detalle -->
   <div class="detail-section">
     <div class="detail-header">
