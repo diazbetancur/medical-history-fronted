@@ -2,7 +2,8 @@
 
   <h2 class="page-title">Reportes</h2>
 
-  <!-- Filtro de fechas -->
+  <!-- Filtro de fechas — global; se oculta en la pestaña Tendencia (no aplica a esa vista) -->
+  @if (selectedTabIndex() !== 1) {
   <div class="date-filter">
     <mat-form-field appearance="outline">
       <mat-label>Desde</mat-label>
@@ -51,131 +52,193 @@
       </p>
     }
   </div>
-
-  <!-- Tarjetas de resumen -->
-  @if (summaryLoading()) {
-    <div class="cards-loading">
-      <mat-spinner diameter="36" />
-    </div>
   }
 
-  @if (!summaryLoading() && summaryError()) {
-    <div class="error-banner">
-      <mat-icon>error</mat-icon>
-      <span>{{ summaryError() }}</span>
-    </div>
-  }
+  <mat-tab-group
+    [selectedIndex]="selectedTabIndex()"
+    (selectedIndexChange)="onTabChange($event)"
+    animationDuration="0ms"
+  >
+    <!-- Resumen -->
+    <mat-tab label="Resumen">
+      <ng-template matTabContent>
+        @if (summaryLoading()) {
+          <div class="cards-loading">
+            <mat-spinner diameter="36" />
+          </div>
+        }
 
-  @if (!summaryLoading() && !summaryError()) {
-    <div class="cards-grid">
-      @for (card of cards; track card.type) {
-        <button
-          class="report-card"
-          [class.selected]="selectedType() === card.type"
-          type="button"
-          (click)="selectCard(card.type)"
-          [attr.aria-pressed]="selectedType() === card.type"
-        >
-          <mat-icon class="card-icon icon-{{ card.type }}">{{ card.icon }}</mat-icon>
-          <span class="card-count">{{ card.count() }}</span>
-          <span class="card-label">{{ card.label }}</span>
-        </button>
-      }
-    </div>
-  }
+        @if (!summaryLoading() && summaryError()) {
+          <div class="error-banner">
+            <mat-icon>error</mat-icon>
+            <span>{{ summaryError() }}</span>
+          </div>
+        }
 
-  <!-- Detalle -->
-  <div class="detail-section">
-    <div class="detail-header">
-      <h3 class="detail-title">{{ selectedCardLabel() }}</h3>
-      @if (detailItems().length > 0) {
-        <button mat-stroked-button color="primary" type="button" (click)="download('csv')" [disabled]="isDownloading()">
-          <mat-icon>description</mat-icon> CSV
-        </button>
-        <button mat-stroked-button color="primary" type="button" (click)="download('xlsx')" [disabled]="isDownloading()">
-          <mat-icon>grid_on</mat-icon> Excel
-        </button>
-      }
-    </div>
+        @if (!summaryLoading() && !summaryError()) {
+          <div class="cards-grid">
+            @for (card of cards; track card.type) {
+              <button
+                class="report-card"
+                [class.selected]="selectedType() === card.type"
+                type="button"
+                (click)="selectCard(card.type)"
+                [attr.aria-pressed]="selectedType() === card.type"
+              >
+                <mat-icon class="card-icon icon-{{ card.type }}">{{ card.icon }}</mat-icon>
+                <span class="card-count">{{ card.count() }}</span>
+                <span class="card-label">{{ card.label }}</span>
+                @if (deltaDirection(card.type); as dir) {
+                  <span class="delta delta--{{ dir }}" [matTooltip]="'vs período anterior'">
+                    <mat-icon>{{ dir === 'up' ? 'arrow_upward' : dir === 'down' ? 'arrow_downward' : 'remove' }}</mat-icon>
+                    {{ cardDelta(card.type) }}%
+                  </span>
+                } @else {
+                  <span class="delta delta--none">— sin base</span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </ng-template>
+    </mat-tab>
 
-    @if (detailLoading()) {
-      <div class="detail-loading">
-        <mat-spinner diameter="36" />
-      </div>
-    }
+    <!-- Tendencia -->
+    <mat-tab label="Tendencia">
+      <ng-template matTabContent>
+        <p class="trend-window-label">Últimos {{ trendMonths() }} meses</p>
 
-    @if (!detailLoading() && detailError()) {
-      <div class="error-banner">
-        <mat-icon>error</mat-icon>
-        <span>{{ detailError() }}</span>
-      </div>
-    }
+        @if (trendLoading()) {
+          <div class="cards-loading">
+            <mat-progress-spinner mode="indeterminate" diameter="32" />
+          </div>
+        } @else if (trendError()) {
+          <div class="error-banner">
+            <mat-icon>error</mat-icon>
+            <span>{{ trendError() }}</span>
+          </div>
+        } @else if (trendPoints().length) {
+          @defer (on immediate) {
+            <app-appointments-trend-chart [points]="trendPoints()" />
+          } @placeholder {
+            <div class="cards-loading">
+              <mat-progress-spinner mode="indeterminate" diameter="32" />
+            </div>
+          }
+        } @else {
+          <p class="trend-empty">No hay datos para mostrar.</p>
+        }
+      </ng-template>
+    </mat-tab>
 
-    @if (!detailLoading() && !detailError() && detailItems().length > 0) {
-      <div class="table-container">
-        <table mat-table [dataSource]="detailItems()">
+    <!-- Detalle -->
+    <mat-tab label="Detalle">
+      <ng-template matTabContent>
+        <div class="detail-section">
+          <mat-chip-listbox
+            class="type-chips"
+            [value]="selectedType()"
+            (change)="selectType($event.value)"
+            aria-label="Tipo de reporte"
+          >
+            @for (card of cards; track card.type) {
+              <mat-chip-option [value]="card.type">{{ card.label }}</mat-chip-option>
+            }
+          </mat-chip-listbox>
 
-          <ng-container matColumnDef="patientName">
-            <th mat-header-cell *matHeaderCellDef>Paciente</th>
-            <td mat-cell *matCellDef="let row">{{ row.patientName }}</td>
-          </ng-container>
+          <div class="detail-header">
+            <h3 class="detail-title">{{ selectedCardLabel() }}</h3>
+            @if (detailItems().length > 0) {
+              <button mat-stroked-button color="primary" type="button" (click)="download('csv')" [disabled]="isDownloading()">
+                <mat-icon>description</mat-icon> CSV
+              </button>
+              <button mat-stroked-button color="primary" type="button" (click)="download('xlsx')" [disabled]="isDownloading()">
+                <mat-icon>grid_on</mat-icon> Excel
+              </button>
+            }
+          </div>
 
-          <ng-container matColumnDef="documentType">
-            <th mat-header-cell *matHeaderCellDef>Tipo Doc.</th>
-            <td mat-cell *matCellDef="let row">{{ row.documentType ?? '—' }}</td>
-          </ng-container>
+          @if (detailLoading()) {
+            <div class="detail-loading">
+              <mat-spinner diameter="36" />
+            </div>
+          }
 
-          <ng-container matColumnDef="documentNumber">
-            <th mat-header-cell *matHeaderCellDef>Número Doc.</th>
-            <td mat-cell *matCellDef="let row">{{ row.documentNumber ?? '—' }}</td>
-          </ng-container>
+          @if (!detailLoading() && detailError()) {
+            <div class="error-banner">
+              <mat-icon>error</mat-icon>
+              <span>{{ detailError() }}</span>
+            </div>
+          }
 
-          <ng-container matColumnDef="gender">
-            <th mat-header-cell *matHeaderCellDef>Sexo</th>
-            <td mat-cell *matCellDef="let row">{{ row.gender ?? '—' }}</td>
-          </ng-container>
+          @if (!detailLoading() && !detailError() && detailItems().length > 0) {
+            <div class="table-container">
+              <table mat-table [dataSource]="detailItems()">
 
-          <ng-container matColumnDef="appointmentDate">
-            <th mat-header-cell *matHeaderCellDef>Fecha</th>
-            <td mat-cell *matCellDef="let row">{{ row.appointmentDate | date: 'dd/MM/yyyy' }}</td>
-          </ng-container>
+                <ng-container matColumnDef="patientName">
+                  <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                  <td mat-cell *matCellDef="let row">{{ row.patientName }}</td>
+                </ng-container>
 
-          <ng-container matColumnDef="timeSlot">
-            <th mat-header-cell *matHeaderCellDef>Hora</th>
-            <td mat-cell *matCellDef="let row">{{ row.timeSlot }}</td>
-          </ng-container>
+                <ng-container matColumnDef="documentType">
+                  <th mat-header-cell *matHeaderCellDef>Tipo Doc.</th>
+                  <td mat-cell *matCellDef="let row">{{ row.documentType ?? '—' }}</td>
+                </ng-container>
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="status-chip status-{{ row.status | lowercase }}">
-                {{ statusLabel(row.status) }}
-              </span>
-            </td>
-          </ng-container>
+                <ng-container matColumnDef="documentNumber">
+                  <th mat-header-cell *matHeaderCellDef>Número Doc.</th>
+                  <td mat-cell *matCellDef="let row">{{ row.documentNumber ?? '—' }}</td>
+                </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
-      </div>
+                <ng-container matColumnDef="gender">
+                  <th mat-header-cell *matHeaderCellDef>Sexo</th>
+                  <td mat-cell *matCellDef="let row">{{ row.gender ?? '—' }}</td>
+                </ng-container>
 
-      <mat-paginator
-        [length]="detailTotal()"
-        [pageSize]="detailPageSize()"
-        [pageIndex]="detailPage()"
-        [pageSizeOptions]="[10, 20, 50]"
-        (page)="onPageChange($event)"
-        showFirstLastButtons
-        aria-label="Seleccionar página"
-      />
-    }
+                <ng-container matColumnDef="appointmentDate">
+                  <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                  <td mat-cell *matCellDef="let row">{{ row.appointmentDate | date: 'dd/MM/yyyy' }}</td>
+                </ng-container>
 
-    @if (!detailLoading() && !detailError() && detailItems().length === 0) {
-      <div class="empty-state">
-        <mat-icon>event_busy</mat-icon>
-        <p>No hay citas en esta categoría para el período seleccionado.</p>
-      </div>
-    }
-  </div>
+                <ng-container matColumnDef="timeSlot">
+                  <th mat-header-cell *matHeaderCellDef>Hora</th>
+                  <td mat-cell *matCellDef="let row">{{ row.timeSlot }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let row">
+                    <span class="status-chip status-{{ row.status | lowercase }}">
+                      {{ statusLabel(row.status) }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+            </div>
+
+            <mat-paginator
+              [length]="detailTotal()"
+              [pageSize]="detailPageSize()"
+              [pageIndex]="detailPage()"
+              [pageSizeOptions]="[10, 20, 50]"
+              (page)="onPageChange($event)"
+              showFirstLastButtons
+              aria-label="Seleccionar página"
+            />
+          }
+
+          @if (!detailLoading() && !detailError() && detailLoaded() && detailItems().length === 0) {
+            <div class="empty-state">
+              <mat-icon>event_busy</mat-icon>
+              <p>No hay citas en esta categoría para el período seleccionado.</p>
+            </div>
+          }
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
 
 </div>
