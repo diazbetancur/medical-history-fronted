@@ -149,12 +149,31 @@
           <div class="detail-header">
             <h3 class="detail-title">{{ selectedCardLabel() }}</h3>
             @if (detailItems().length > 0) {
-              <button mat-stroked-button color="primary" type="button" (click)="download('csv')" [disabled]="isDownloading()">
-                <mat-icon>description</mat-icon> CSV
+              <button
+                mat-stroked-button
+                color="primary"
+                type="button"
+                [matMenuTriggerFor]="downloadMenu"
+                [disabled]="isDownloading()"
+              >
+                @if (isDownloading()) {
+                  <mat-spinner diameter="16" />
+                } @else {
+                  <mat-icon>download</mat-icon>
+                }
+                Descargar
+                <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
               </button>
-              <button mat-stroked-button color="primary" type="button" (click)="download('xlsx')" [disabled]="isDownloading()">
-                <mat-icon>grid_on</mat-icon> Excel
-              </button>
+              <mat-menu #downloadMenu="matMenu">
+                <button mat-menu-item type="button" (click)="download('csv')">
+                  <mat-icon>description</mat-icon>
+                  <span>CSV</span>
+                </button>
+                <button mat-menu-item type="button" (click)="download('xlsx')">
+                  <mat-icon>grid_on</mat-icon>
+                  <span>Excel</span>
+                </button>
+              </mat-menu>
             }
           </div>
 

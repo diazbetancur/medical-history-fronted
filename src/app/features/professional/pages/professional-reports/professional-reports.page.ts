@@ -19,6 +19,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import type {
   AppointmentReportDetailItemDto,
@@ -54,6 +55,7 @@ interface ReportCard {
     MatProgressSpinnerModule,
     MatTabsModule,
     MatChipsModule,
+    MatMenuModule,
     MatTableModule,
     MatTooltipModule,
     AppointmentsTrendChartComponent,
