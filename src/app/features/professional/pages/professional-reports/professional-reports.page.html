@@ -2,7 +2,8 @@
 
   <h2 class="page-title">Reportes</h2>
 
-  <!-- Filtro de fechas (global, fuera de las pestañas) -->
+  <!-- Filtro de fechas — global; se oculta en la pestaña Tendencia (no aplica a esa vista) -->
+  @if (selectedTabIndex() !== 1) {
   <div class="date-filter">
     <mat-form-field appearance="outline">
       <mat-label>Desde</mat-label>
@@ -51,6 +52,7 @@
       </p>
     }
   </div>
+  }
 
   <mat-tab-group
     [selectedIndex]="selectedTabIndex()"
