@@ -17,16 +17,19 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@core/auth/auth.store';
+import { GoogleCalendarApi } from '@data/api/google-calendar.api';
 import { ProfessionalAppointmentsApi } from '@data/api/professional-appointments.api';
 import type {
   AppointmentDto,
   AppointmentStatus,
 } from '@data/models/appointment.models';
+import type { CalendarBusyBlock } from '@data/models/google-calendar.models';
 import { ProfessionalAppointmentsStore } from '@data/stores/professional-appointments.store';
 import {
   PAGE_SIZE_CALENDAR_RANGE,
   ToastService,
 } from '@shared/index';
+import { catchError, of } from 'rxjs';
 import {
   AddExternalAppointmentDialogComponent,
   type AddExternalAppointmentDialogData,
@@ -66,6 +69,7 @@ const MAX_CANCELLED_REPORT_DAYS = 90;
 export class ProfessionalAppointmentsPage implements OnInit {
   protected readonly store = inject(ProfessionalAppointmentsStore);
   private readonly appointmentsApi = inject(ProfessionalAppointmentsApi);
+  private readonly googleCalendarApi = inject(GoogleCalendarApi);
   private readonly authStore = inject(AuthStore);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
@@ -80,6 +84,11 @@ export class ProfessionalAppointmentsPage implements OnInit {
   protected readonly rangeLoading = signal(false);
   protected readonly hasRangeFilterResult = signal(false);
   protected readonly rangeAppointments = signal<AppointmentDto[]>([]);
+
+  // ── Google Calendar busy blocks (read-only, best-effort) ─────────────────
+  /** Busy blocks loaded from external calendar for the upcoming 7-day window. */
+  protected readonly busyBlocks = signal<CalendarBusyBlock[]>([]);
+  protected readonly busyBlocksLoading = signal(false);
 
   // ── Citas canceladas (reporte por rango, máx. 90 días) ───────────────────
   protected readonly cancelledFrom = signal(this.firstDayOfMonth());
@@ -145,12 +154,46 @@ export class ProfessionalAppointmentsPage implements OnInit {
 
   ngOnInit(): void {
     this.store.loadUpcomingAppointments();
+    this.loadBusyBlocks();
 
     const requestedTab = this.route.snapshot.queryParamMap.get('tab');
     if (requestedTab === 'month') {
       this.selectedTabIndex.set(2);
       this.store.loadMonthAppointments();
     }
+  }
+
+  /** Load Google Calendar busy blocks for today + next 7 days. Best-effort: errors → empty list. */
+  private loadBusyBlocks(): void {
+    const today = new Date();
+    const to = this.addDays(today, 7);
+    const fromIso = today.toISOString();
+    const toIso = to.toISOString();
+
+    this.busyBlocksLoading.set(true);
+    this.googleCalendarApi
+      .getBusyBlocks(fromIso, toIso)
+      .pipe(catchError(() => of([])))
+      .subscribe((blocks) => {
+        this.busyBlocks.set(blocks);
+        this.busyBlocksLoading.set(false);
+      });
+  }
+
+  /** Format an ISO UTC date string for display (local time). */
+  protected formatBusyBlockTime(isoUtc: string): string {
+    const d = new Date(isoUtc);
+    return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  /** Format just the date portion of an ISO UTC string (local date). */
+  protected formatBusyBlockDate(isoUtc: string): string {
+    const d = new Date(isoUtc);
+    return d.toLocaleDateString('es-ES', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
   }
 
   /**

@@ -26,3 +26,16 @@ export interface CalendarConnectionStatus {
   isActive: boolean;
   lastSyncError?: string;
 }
+
+/**
+ * A busy block from the professional's external calendar (e.g. Google Calendar).
+ * Read-only — represents time already occupied in the external calendar.
+ * Dates are ISO 8601 strings (UTC).
+ */
+export interface CalendarBusyBlock {
+  id: string;
+  title: string;
+  startUtc: string;
+  endUtc: string;
+  isAllDay: boolean;
+}

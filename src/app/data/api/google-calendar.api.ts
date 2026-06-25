@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiClient } from './api-client';
 import {
+  CalendarBusyBlock,
   CalendarConnectionStatus,
   GoogleCalendarConnectResponse,
 } from '../models/google-calendar.models';
@@ -41,5 +42,16 @@ export class GoogleCalendarApi {
    */
   disconnect(id: string): Observable<void> {
     return this.api.delete<void>(`/calendar/connections/${id}`);
+  }
+
+  /**
+   * Get busy blocks (external calendar events) for the authenticated professional
+   * within the given ISO date range.
+   * Returns an empty array on error (best-effort).
+   */
+  getBusyBlocks(fromIso: string, toIso: string): Observable<CalendarBusyBlock[]> {
+    return this.api.get<CalendarBusyBlock[]>('/calendar/busy-blocks', {
+      params: { from: fromIso, to: toIso },
+    });
   }
 }

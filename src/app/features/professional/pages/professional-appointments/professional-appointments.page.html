@@ -605,5 +605,40 @@
       </mat-tab>
 
     </mat-tab-group>
+
+    <!-- ── Google Calendar busy blocks (read-only) ───────────────────────── -->
+    @if (busyBlocksLoading()) {
+      <div class="busy-blocks-section">
+        <div class="busy-blocks-header">
+          <mat-icon>event</mat-icon>
+          <span>Eventos de Google Calendar</span>
+          <mat-spinner diameter="20"></mat-spinner>
+        </div>
+      </div>
+    } @else if (busyBlocks().length > 0) {
+      <div class="busy-blocks-section">
+        <div class="busy-blocks-header">
+          <mat-icon>event</mat-icon>
+          <span>Eventos de Google Calendar (próximos 7 días)</span>
+        </div>
+        <div class="busy-blocks-list">
+          @for (block of busyBlocks(); track block.id) {
+            <div class="busy-block-chip">
+              <mat-icon class="busy-block-icon">event</mat-icon>
+              <span class="busy-block-title">{{ block.title }}</span>
+              <span class="busy-block-time">
+                @if (block.isAllDay) {
+                  {{ formatBusyBlockDate(block.startUtc) }} — Todo el día
+                } @else {
+                  {{ formatBusyBlockDate(block.startUtc) }},
+                  {{ formatBusyBlockTime(block.startUtc) }}–{{ formatBusyBlockTime(block.endUtc) }}
+                }
+              </span>
+              <span class="busy-block-readonly-badge">Solo lectura</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
   }
 </div>
