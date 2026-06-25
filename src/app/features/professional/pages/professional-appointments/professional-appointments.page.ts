@@ -43,6 +43,11 @@ const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 /** Rango máximo permitido para el reporte de citas canceladas. */
 const MAX_CANCELLED_REPORT_DAYS = 90;
 
+/** Row discriminated union for merged appointment + Google tables. */
+export type AgendaRow =
+  | { kind: 'appt'; appt: AppointmentDto }
+  | { kind: 'google'; block: CalendarBusyBlock };
+
 @Component({
   selector: 'app-professional-appointments-page',
   standalone: true,
@@ -152,27 +157,170 @@ export class ProfessionalAppointmentsPage implements OnInit {
     ),
   );
 
+  // ── Merged AgendaRow arrays (appointments + Google blocks, sorted by time) ──
+
+  /** Merged rows for "Hoy" tab: appointments + busy blocks sorted by start. */
+  protected readonly todayRows = computed<AgendaRow[]>(() => {
+    const appts: AgendaRow[] = this.sortedTodayAppointments().map((a) => ({
+      kind: 'appt',
+      appt: a,
+    }));
+    const blocks: AgendaRow[] = this.busyBlocks().map((b) => ({
+      kind: 'google',
+      block: b,
+    }));
+    return [...appts, ...blocks].sort((a, b) => {
+      const aTime =
+        a.kind === 'appt'
+          ? `${a.appt.date}T${a.appt.startTime}`
+          : a.block.startUtc;
+      const bTime =
+        b.kind === 'appt'
+          ? `${b.appt.date}T${b.appt.startTime}`
+          : b.block.startUtc;
+      return aTime.localeCompare(bTime);
+    });
+  });
+
+  /** Merged rows for "Próximos 7 días" tab. */
+  protected readonly upcomingRows = computed<AgendaRow[]>(() => {
+    const appts: AgendaRow[] = this.upcomingAppointments().map((a) => ({
+      kind: 'appt',
+      appt: a,
+    }));
+    const blocks: AgendaRow[] = this.busyBlocks().map((b) => ({
+      kind: 'google',
+      block: b,
+    }));
+    return [...appts, ...blocks].sort((a, b) => {
+      const aTime =
+        a.kind === 'appt'
+          ? `${a.appt.date}T${a.appt.startTime}`
+          : a.block.startUtc;
+      const bTime =
+        b.kind === 'appt'
+          ? `${b.appt.date}T${b.appt.startTime}`
+          : b.block.startUtc;
+      return aTime.localeCompare(bTime);
+    });
+  });
+
+  /** Merged rows for "Este mes" tab. */
+  protected readonly monthRows = computed<AgendaRow[]>(() => {
+    const appts: AgendaRow[] = this.sortedMonthAppointments().map((a) => ({
+      kind: 'appt',
+      appt: a,
+    }));
+    const blocks: AgendaRow[] = this.busyBlocks().map((b) => ({
+      kind: 'google',
+      block: b,
+    }));
+    return [...appts, ...blocks].sort((a, b) => {
+      const aTime =
+        a.kind === 'appt'
+          ? `${a.appt.date}T${a.appt.startTime}`
+          : a.block.startUtc;
+      const bTime =
+        b.kind === 'appt'
+          ? `${b.appt.date}T${b.appt.startTime}`
+          : b.block.startUtc;
+      return aTime.localeCompare(bTime);
+    });
+  });
+
+  /** Merged rows for "Por rango" tab. */
+  protected readonly rangeRows = computed<AgendaRow[]>(() => {
+    const appts: AgendaRow[] = this.sortedRangeAppointments().map((a) => ({
+      kind: 'appt',
+      appt: a,
+    }));
+    const blocks: AgendaRow[] = this.busyBlocks().map((b) => ({
+      kind: 'google',
+      block: b,
+    }));
+    return [...appts, ...blocks].sort((a, b) => {
+      const aTime =
+        a.kind === 'appt'
+          ? `${a.appt.date}T${a.appt.startTime}`
+          : a.block.startUtc;
+      const bTime =
+        b.kind === 'appt'
+          ? `${b.appt.date}T${b.appt.startTime}`
+          : b.block.startUtc;
+      return aTime.localeCompare(bTime);
+    });
+  });
+
   ngOnInit(): void {
     this.store.loadUpcomingAppointments();
-    this.loadBusyBlocks();
+    // Tab 0 is "Hoy" — load blocks for today's range on init.
+    this.loadBusyBlocksForTab(0);
 
     const requestedTab = this.route.snapshot.queryParamMap.get('tab');
     if (requestedTab === 'month') {
       this.selectedTabIndex.set(2);
       this.store.loadMonthAppointments();
+      this.loadBusyBlocksForTab(2);
     }
   }
 
-  /** Load Google Calendar busy blocks for today + next 7 days. Best-effort: errors → empty list. */
-  private loadBusyBlocks(): void {
+  /**
+   * Returns {fromIso, toIso} for a given tab index.
+   * Tab 4 (Citas canceladas) returns null — no Google blocks.
+   */
+  private busyRangeForTab(
+    index: number,
+  ): { fromIso: string; toIso: string } | null {
     const today = new Date();
-    const to = this.addDays(today, 7);
-    const fromIso = today.toISOString();
-    const toIso = to.toISOString();
+    switch (index) {
+      case 0: {
+        // Hoy: start of today → end of today
+        const from = new Date(today);
+        from.setHours(0, 0, 0, 0);
+        const to = new Date(today);
+        to.setHours(23, 59, 59, 999);
+        return { fromIso: from.toISOString(), toIso: to.toISOString() };
+      }
+      case 1: {
+        // Próximos 7 días: today → +7
+        return {
+          fromIso: today.toISOString(),
+          toIso: this.addDays(today, 7).toISOString(),
+        };
+      }
+      case 2: {
+        // Este mes: first day → last day
+        const first = new Date(today.getFullYear(), today.getMonth(), 1);
+        const last = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        last.setHours(23, 59, 59, 999);
+        return { fromIso: first.toISOString(), toIso: last.toISOString() };
+      }
+      case 3: {
+        // Por rango: use rangeFrom/rangeTo signals (date strings yyyy-MM-dd)
+        const from = this.rangeFrom();
+        const to = this.rangeTo();
+        if (!from || !to) return null;
+        return {
+          fromIso: new Date(`${from}T00:00:00`).toISOString(),
+          toIso: new Date(`${to}T23:59:59`).toISOString(),
+        };
+      }
+      default:
+        return null; // Tab 4: Citas canceladas — no blocks
+    }
+  }
 
+  /** Load Google Calendar busy blocks for the given tab's range. Best-effort. */
+  private loadBusyBlocksForTab(index: number): void {
+    const range = this.busyRangeForTab(index);
+    if (!range) {
+      this.busyBlocks.set([]);
+      this.busyBlocksLoading.set(false);
+      return;
+    }
     this.busyBlocksLoading.set(true);
     this.googleCalendarApi
-      .getBusyBlocks(fromIso, toIso)
+      .getBusyBlocks(range.fromIso, range.toIso)
       .pipe(catchError(() => of([])))
       .subscribe((blocks) => {
         this.busyBlocks.set(blocks);
@@ -246,6 +394,9 @@ export class ProfessionalAppointmentsPage implements OnInit {
     if (index === 4 && !this.cancelledLoaded() && !this.cancelledLoading()) {
       this.loadCancelled(this.cancelledFrom(), this.cancelledTo());
     }
+
+    // Reload Google busy blocks for the active tab's range.
+    this.loadBusyBlocksForTab(index);
   }
 
   /** Short date for table cells, e.g. "mar., 26 may." */
@@ -409,6 +560,8 @@ export class ProfessionalAppointmentsPage implements OnInit {
         next: (response) => {
           this.rangeAppointments.set(response.items ?? []);
           this.rangeLoading.set(false);
+          // Reload Google blocks for the new range.
+          this.loadBusyBlocksForTab(3);
         },
         error: (error: { error?: { title?: string } }) => {
           this.toast.error(

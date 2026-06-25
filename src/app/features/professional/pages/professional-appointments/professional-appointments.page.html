@@ -47,34 +47,53 @@
           }
         </ng-template>
 
-        @if (sortedTodayAppointments().length === 0) {
+        @if (todayRows().length === 0) {
           <div class="empty-tab">
             <mat-icon>check_circle</mat-icon>
             <p>No tienes citas para hoy</p>
           </div>
         } @else {
           <div class="table-wrapper">
-            <table mat-table [dataSource]="sortedTodayAppointments()" class="appointments-table">
+            <table mat-table [dataSource]="todayRows()" class="appointments-table">
 
               <!-- Fecha -->
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Fecha</th>
-                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+                <td mat-cell *matCellDef="let row">
+                  @if (row.kind === 'appt') {
+                    {{ formatShortDate(row.appt.date) }}
+                  } @else {
+                    {{ row.block.isAllDay ? formatBusyBlockDate(row.block.startUtc) : formatBusyBlockDate(row.block.startUtc) }}
+                  }
+                </td>
               </ng-container>
 
               <!-- Hora -->
               <ng-container matColumnDef="time">
                 <th mat-header-cell *matHeaderCellDef>Hora</th>
                 <td mat-cell *matCellDef="let row" class="cell-time">
-                  {{ row.startTime }} – {{ row.endTime }}
+                  @if (row.kind === 'appt') {
+                    {{ row.appt.startTime }} – {{ row.appt.endTime }}
+                  } @else if (row.block.isAllDay) {
+                    Todo el día
+                  } @else {
+                    {{ formatBusyBlockTime(row.block.startUtc) }}–{{ formatBusyBlockTime(row.block.endUtc) }}
+                  }
                 </td>
               </ng-container>
 
-              <!-- Paciente -->
+              <!-- Paciente / Asunto -->
               <ng-container matColumnDef="patient">
                 <th mat-header-cell *matHeaderCellDef>Paciente</th>
                 <td mat-cell *matCellDef="let row" class="cell-patient">
-                  {{ getPatientDisplayName(row) }}
+                  @if (row.kind === 'appt') {
+                    {{ getPatientDisplayName(row.appt) }}
+                  } @else {
+                    <span class="google-row-subject">
+                      <mat-icon class="google-row-icon">event</mat-icon>
+                      {{ row.block.title }}
+                    </span>
+                  }
                 </td>
               </ng-container>
 
@@ -82,9 +101,13 @@
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
                 <td mat-cell *matCellDef="let row">
-                  <span class="status-pill status-{{ row.status.toLowerCase() }}">
-                    {{ getStatusLabel(row.status) }}
-                  </span>
+                  @if (row.kind === 'appt') {
+                    <span class="status-pill status-{{ row.appt.status.toLowerCase() }}">
+                      {{ getStatusLabel(row.appt.status) }}
+                    </span>
+                  } @else {
+                    <span class="status-pill status-google">Google</span>
+                  }
                 </td>
               </ng-container>
 
@@ -92,52 +115,54 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let row" class="cell-actions">
-                  <button type="button" mat-icon-button [matMenuTriggerFor]="menuToday" matTooltip="Acciones">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menuToday="matMenu">
-                    <button type="button" mat-menu-item (click)="openAppointmentDetail(row)">
-                      <mat-icon>visibility</mat-icon>
-                      <span>Ver detalle</span>
+                  @if (row.kind === 'appt') {
+                    <button type="button" mat-icon-button [matMenuTriggerFor]="menuToday" matTooltip="Acciones">
+                      <mat-icon>more_vert</mat-icon>
                     </button>
-                    @if (hasMenuActionsAfterDetail(row)) {
-                      <mat-divider></mat-divider>
-                    }
-                    @if (row.status === 'PENDING') {
-                      <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
-                        <mat-icon>check_circle</mat-icon>
-                        <span>Confirmar</span>
+                    <mat-menu #menuToday="matMenu">
+                      <button type="button" mat-menu-item (click)="openAppointmentDetail(row.appt)">
+                        <mat-icon>visibility</mat-icon>
+                        <span>Ver detalle</span>
                       </button>
-                    }
-                    @if (canMarkAttendance(row)) {
-                      <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
-                        <mat-icon>done_all</mat-icon>
-                        <span>Marcar como completada</span>
-                      </button>
-                      <button type="button" mat-menu-item (click)="markAsNoShow(row.id)">
-                        <mat-icon>event_busy</mat-icon>
-                        <span>Paciente no asistió</span>
-                      </button>
-                    }
-                    @if (canCreateHistoryFromAppointment(row)) {
-                      <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row)">
-                        <mat-icon>description</mat-icon>
-                        <span>Adicionar historia clínica</span>
-                      </button>
-                    }
-                    @if (row.status !== 'CANCELLED' && row.status !== 'COMPLETED') {
-                      <mat-divider></mat-divider>
-                      <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.id)">
-                        <mat-icon>cancel</mat-icon>
-                        <span>Cancelar cita</span>
-                      </button>
-                    }
-                  </mat-menu>
+                      @if (hasMenuActionsAfterDetail(row.appt)) {
+                        <mat-divider></mat-divider>
+                      }
+                      @if (row.appt.status === 'PENDING') {
+                        <button type="button" mat-menu-item (click)="confirmAppointment(row.appt.id)">
+                          <mat-icon>check_circle</mat-icon>
+                          <span>Confirmar</span>
+                        </button>
+                      }
+                      @if (canMarkAttendance(row.appt)) {
+                        <button type="button" mat-menu-item (click)="completeAppointment(row.appt.id)">
+                          <mat-icon>done_all</mat-icon>
+                          <span>Marcar como completada</span>
+                        </button>
+                        <button type="button" mat-menu-item (click)="markAsNoShow(row.appt.id)">
+                          <mat-icon>event_busy</mat-icon>
+                          <span>Paciente no asistió</span>
+                        </button>
+                      }
+                      @if (canCreateHistoryFromAppointment(row.appt)) {
+                        <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row.appt)">
+                          <mat-icon>description</mat-icon>
+                          <span>Adicionar historia clínica</span>
+                        </button>
+                      }
+                      @if (row.appt.status !== 'CANCELLED' && row.appt.status !== 'COMPLETED') {
+                        <mat-divider></mat-divider>
+                        <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.appt.id)">
+                          <mat-icon>cancel</mat-icon>
+                          <span>Cancelar cita</span>
+                        </button>
+                      }
+                    </mat-menu>
+                  }
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.google-row]="row.kind === 'google'"></tr>
             </table>
           </div>
         }
@@ -153,34 +178,53 @@
           }
         </ng-template>
 
-        @if (upcomingAppointments().length === 0) {
+        @if (upcomingRows().length === 0) {
           <div class="empty-tab">
             <mat-icon>event</mat-icon>
             <p>No tienes citas programadas en los próximos 7 días</p>
           </div>
         } @else {
           <div class="table-wrapper">
-            <table mat-table [dataSource]="upcomingAppointments()" class="appointments-table">
+            <table mat-table [dataSource]="upcomingRows()" class="appointments-table">
 
               <!-- Fecha -->
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Fecha</th>
-                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+                <td mat-cell *matCellDef="let row">
+                  @if (row.kind === 'appt') {
+                    {{ formatShortDate(row.appt.date) }}
+                  } @else {
+                    {{ formatBusyBlockDate(row.block.startUtc) }}
+                  }
+                </td>
               </ng-container>
 
               <!-- Hora -->
               <ng-container matColumnDef="time">
                 <th mat-header-cell *matHeaderCellDef>Hora</th>
                 <td mat-cell *matCellDef="let row" class="cell-time">
-                  {{ row.startTime }} – {{ row.endTime }}
+                  @if (row.kind === 'appt') {
+                    {{ row.appt.startTime }} – {{ row.appt.endTime }}
+                  } @else if (row.block.isAllDay) {
+                    Todo el día
+                  } @else {
+                    {{ formatBusyBlockTime(row.block.startUtc) }}–{{ formatBusyBlockTime(row.block.endUtc) }}
+                  }
                 </td>
               </ng-container>
 
-              <!-- Paciente -->
+              <!-- Paciente / Asunto -->
               <ng-container matColumnDef="patient">
                 <th mat-header-cell *matHeaderCellDef>Paciente</th>
                 <td mat-cell *matCellDef="let row" class="cell-patient">
-                  {{ getPatientDisplayName(row) }}
+                  @if (row.kind === 'appt') {
+                    {{ getPatientDisplayName(row.appt) }}
+                  } @else {
+                    <span class="google-row-subject">
+                      <mat-icon class="google-row-icon">event</mat-icon>
+                      {{ row.block.title }}
+                    </span>
+                  }
                 </td>
               </ng-container>
 
@@ -188,9 +232,13 @@
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
                 <td mat-cell *matCellDef="let row">
-                  <span class="status-pill status-{{ row.status.toLowerCase() }}">
-                    {{ getStatusLabel(row.status) }}
-                  </span>
+                  @if (row.kind === 'appt') {
+                    <span class="status-pill status-{{ row.appt.status.toLowerCase() }}">
+                      {{ getStatusLabel(row.appt.status) }}
+                    </span>
+                  } @else {
+                    <span class="status-pill status-google">Google</span>
+                  }
                 </td>
               </ng-container>
 
@@ -198,52 +246,54 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let row" class="cell-actions">
-                  <button type="button" mat-icon-button [matMenuTriggerFor]="menuUpcoming" matTooltip="Acciones">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menuUpcoming="matMenu">
-                    <button type="button" mat-menu-item (click)="openAppointmentDetail(row)">
-                      <mat-icon>visibility</mat-icon>
-                      <span>Ver detalle</span>
+                  @if (row.kind === 'appt') {
+                    <button type="button" mat-icon-button [matMenuTriggerFor]="menuUpcoming" matTooltip="Acciones">
+                      <mat-icon>more_vert</mat-icon>
                     </button>
-                    @if (hasMenuActionsAfterDetail(row)) {
-                      <mat-divider></mat-divider>
-                    }
-                    @if (row.status === 'PENDING') {
-                      <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
-                        <mat-icon>check_circle</mat-icon>
-                        <span>Confirmar</span>
+                    <mat-menu #menuUpcoming="matMenu">
+                      <button type="button" mat-menu-item (click)="openAppointmentDetail(row.appt)">
+                        <mat-icon>visibility</mat-icon>
+                        <span>Ver detalle</span>
                       </button>
-                    }
-                    @if (canMarkAttendance(row)) {
-                      <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
-                        <mat-icon>done_all</mat-icon>
-                        <span>Marcar como completada</span>
-                      </button>
-                      <button type="button" mat-menu-item (click)="markAsNoShow(row.id)">
-                        <mat-icon>event_busy</mat-icon>
-                        <span>Paciente no asistió</span>
-                      </button>
-                    }
-                    @if (canCreateHistoryFromAppointment(row)) {
-                      <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row)">
-                        <mat-icon>description</mat-icon>
-                        <span>Adicionar historia clínica</span>
-                      </button>
-                    }
-                    @if (row.status !== 'CANCELLED' && row.status !== 'COMPLETED') {
-                      <mat-divider></mat-divider>
-                      <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.id)">
-                        <mat-icon>cancel</mat-icon>
-                        <span>Cancelar cita</span>
-                      </button>
-                    }
-                  </mat-menu>
+                      @if (hasMenuActionsAfterDetail(row.appt)) {
+                        <mat-divider></mat-divider>
+                      }
+                      @if (row.appt.status === 'PENDING') {
+                        <button type="button" mat-menu-item (click)="confirmAppointment(row.appt.id)">
+                          <mat-icon>check_circle</mat-icon>
+                          <span>Confirmar</span>
+                        </button>
+                      }
+                      @if (canMarkAttendance(row.appt)) {
+                        <button type="button" mat-menu-item (click)="completeAppointment(row.appt.id)">
+                          <mat-icon>done_all</mat-icon>
+                          <span>Marcar como completada</span>
+                        </button>
+                        <button type="button" mat-menu-item (click)="markAsNoShow(row.appt.id)">
+                          <mat-icon>event_busy</mat-icon>
+                          <span>Paciente no asistió</span>
+                        </button>
+                      }
+                      @if (canCreateHistoryFromAppointment(row.appt)) {
+                        <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row.appt)">
+                          <mat-icon>description</mat-icon>
+                          <span>Adicionar historia clínica</span>
+                        </button>
+                      }
+                      @if (row.appt.status !== 'CANCELLED' && row.appt.status !== 'COMPLETED') {
+                        <mat-divider></mat-divider>
+                        <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.appt.id)">
+                          <mat-icon>cancel</mat-icon>
+                          <span>Cancelar cita</span>
+                        </button>
+                      }
+                    </mat-menu>
+                  }
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.google-row]="row.kind === 'google'"></tr>
             </table>
           </div>
         }
@@ -264,34 +314,53 @@
             <mat-spinner diameter="40"></mat-spinner>
             <p>Cargando citas del mes...</p>
           </div>
-        } @else if (sortedMonthAppointments().length === 0) {
+        } @else if (monthRows().length === 0) {
           <div class="empty-tab">
             <mat-icon>calendar_month</mat-icon>
             <p>No tienes citas registradas para este mes</p>
           </div>
         } @else {
           <div class="table-wrapper">
-            <table mat-table [dataSource]="sortedMonthAppointments()" class="appointments-table">
+            <table mat-table [dataSource]="monthRows()" class="appointments-table">
 
               <!-- Fecha -->
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Fecha</th>
-                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+                <td mat-cell *matCellDef="let row">
+                  @if (row.kind === 'appt') {
+                    {{ formatShortDate(row.appt.date) }}
+                  } @else {
+                    {{ formatBusyBlockDate(row.block.startUtc) }}
+                  }
+                </td>
               </ng-container>
 
               <!-- Hora -->
               <ng-container matColumnDef="time">
                 <th mat-header-cell *matHeaderCellDef>Hora</th>
                 <td mat-cell *matCellDef="let row" class="cell-time">
-                  {{ row.startTime }} – {{ row.endTime }}
+                  @if (row.kind === 'appt') {
+                    {{ row.appt.startTime }} – {{ row.appt.endTime }}
+                  } @else if (row.block.isAllDay) {
+                    Todo el día
+                  } @else {
+                    {{ formatBusyBlockTime(row.block.startUtc) }}–{{ formatBusyBlockTime(row.block.endUtc) }}
+                  }
                 </td>
               </ng-container>
 
-              <!-- Paciente -->
+              <!-- Paciente / Asunto -->
               <ng-container matColumnDef="patient">
                 <th mat-header-cell *matHeaderCellDef>Paciente</th>
                 <td mat-cell *matCellDef="let row" class="cell-patient">
-                  {{ getPatientDisplayName(row) }}
+                  @if (row.kind === 'appt') {
+                    {{ getPatientDisplayName(row.appt) }}
+                  } @else {
+                    <span class="google-row-subject">
+                      <mat-icon class="google-row-icon">event</mat-icon>
+                      {{ row.block.title }}
+                    </span>
+                  }
                 </td>
               </ng-container>
 
@@ -299,9 +368,13 @@
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
                 <td mat-cell *matCellDef="let row">
-                  <span class="status-pill status-{{ row.status.toLowerCase() }}">
-                    {{ getStatusLabel(row.status) }}
-                  </span>
+                  @if (row.kind === 'appt') {
+                    <span class="status-pill status-{{ row.appt.status.toLowerCase() }}">
+                      {{ getStatusLabel(row.appt.status) }}
+                    </span>
+                  } @else {
+                    <span class="status-pill status-google">Google</span>
+                  }
                 </td>
               </ng-container>
 
@@ -309,52 +382,54 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let row" class="cell-actions">
-                  <button type="button" mat-icon-button [matMenuTriggerFor]="menuMonth" matTooltip="Acciones">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menuMonth="matMenu">
-                    <button type="button" mat-menu-item (click)="openAppointmentDetail(row)">
-                      <mat-icon>visibility</mat-icon>
-                      <span>Ver detalle</span>
+                  @if (row.kind === 'appt') {
+                    <button type="button" mat-icon-button [matMenuTriggerFor]="menuMonth" matTooltip="Acciones">
+                      <mat-icon>more_vert</mat-icon>
                     </button>
-                    @if (hasMenuActionsAfterDetail(row)) {
-                      <mat-divider></mat-divider>
-                    }
-                    @if (row.status === 'PENDING') {
-                      <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
-                        <mat-icon>check_circle</mat-icon>
-                        <span>Confirmar</span>
+                    <mat-menu #menuMonth="matMenu">
+                      <button type="button" mat-menu-item (click)="openAppointmentDetail(row.appt)">
+                        <mat-icon>visibility</mat-icon>
+                        <span>Ver detalle</span>
                       </button>
-                    }
-                    @if (canMarkAttendance(row)) {
-                      <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
-                        <mat-icon>done_all</mat-icon>
-                        <span>Marcar como completada</span>
-                      </button>
-                      <button type="button" mat-menu-item (click)="markAsNoShow(row.id)">
-                        <mat-icon>event_busy</mat-icon>
-                        <span>Paciente no asistió</span>
-                      </button>
-                    }
-                    @if (canCreateHistoryFromAppointment(row)) {
-                      <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row)">
-                        <mat-icon>description</mat-icon>
-                        <span>Adicionar historia clínica</span>
-                      </button>
-                    }
-                    @if (row.status !== 'CANCELLED' && row.status !== 'COMPLETED') {
-                      <mat-divider></mat-divider>
-                      <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.id)">
-                        <mat-icon>cancel</mat-icon>
-                        <span>Cancelar cita</span>
-                      </button>
-                    }
-                  </mat-menu>
+                      @if (hasMenuActionsAfterDetail(row.appt)) {
+                        <mat-divider></mat-divider>
+                      }
+                      @if (row.appt.status === 'PENDING') {
+                        <button type="button" mat-menu-item (click)="confirmAppointment(row.appt.id)">
+                          <mat-icon>check_circle</mat-icon>
+                          <span>Confirmar</span>
+                        </button>
+                      }
+                      @if (canMarkAttendance(row.appt)) {
+                        <button type="button" mat-menu-item (click)="completeAppointment(row.appt.id)">
+                          <mat-icon>done_all</mat-icon>
+                          <span>Marcar como completada</span>
+                        </button>
+                        <button type="button" mat-menu-item (click)="markAsNoShow(row.appt.id)">
+                          <mat-icon>event_busy</mat-icon>
+                          <span>Paciente no asistió</span>
+                        </button>
+                      }
+                      @if (canCreateHistoryFromAppointment(row.appt)) {
+                        <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row.appt)">
+                          <mat-icon>description</mat-icon>
+                          <span>Adicionar historia clínica</span>
+                        </button>
+                      }
+                      @if (row.appt.status !== 'CANCELLED' && row.appt.status !== 'COMPLETED') {
+                        <mat-divider></mat-divider>
+                        <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.appt.id)">
+                          <mat-icon>cancel</mat-icon>
+                          <span>Cancelar cita</span>
+                        </button>
+                      }
+                    </mat-menu>
+                  }
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.google-row]="row.kind === 'google'"></tr>
             </table>
           </div>
         }
@@ -409,34 +484,53 @@
             <mat-spinner diameter="40"></mat-spinner>
             <p>Cargando citas del rango...</p>
           </div>
-        } @else if (hasRangeFilterResult() && sortedRangeAppointments().length === 0) {
+        } @else if (hasRangeFilterResult() && rangeRows().length === 0) {
           <div class="empty-tab">
             <mat-icon>event_busy</mat-icon>
             <p>No hay citas para ese rango de fechas</p>
           </div>
-        } @else if (sortedRangeAppointments().length > 0) {
+        } @else if (rangeRows().length > 0) {
           <div class="table-wrapper">
-            <table mat-table [dataSource]="sortedRangeAppointments()" class="appointments-table">
+            <table mat-table [dataSource]="rangeRows()" class="appointments-table">
 
               <!-- Fecha -->
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Fecha</th>
-                <td mat-cell *matCellDef="let row">{{ formatShortDate(row.date) }}</td>
+                <td mat-cell *matCellDef="let row">
+                  @if (row.kind === 'appt') {
+                    {{ formatShortDate(row.appt.date) }}
+                  } @else {
+                    {{ formatBusyBlockDate(row.block.startUtc) }}
+                  }
+                </td>
               </ng-container>
 
               <!-- Hora -->
               <ng-container matColumnDef="time">
                 <th mat-header-cell *matHeaderCellDef>Hora</th>
                 <td mat-cell *matCellDef="let row" class="cell-time">
-                  {{ row.startTime }} – {{ row.endTime }}
+                  @if (row.kind === 'appt') {
+                    {{ row.appt.startTime }} – {{ row.appt.endTime }}
+                  } @else if (row.block.isAllDay) {
+                    Todo el día
+                  } @else {
+                    {{ formatBusyBlockTime(row.block.startUtc) }}–{{ formatBusyBlockTime(row.block.endUtc) }}
+                  }
                 </td>
               </ng-container>
 
-              <!-- Paciente -->
+              <!-- Paciente / Asunto -->
               <ng-container matColumnDef="patient">
                 <th mat-header-cell *matHeaderCellDef>Paciente</th>
                 <td mat-cell *matCellDef="let row" class="cell-patient">
-                  {{ getPatientDisplayName(row) }}
+                  @if (row.kind === 'appt') {
+                    {{ getPatientDisplayName(row.appt) }}
+                  } @else {
+                    <span class="google-row-subject">
+                      <mat-icon class="google-row-icon">event</mat-icon>
+                      {{ row.block.title }}
+                    </span>
+                  }
                 </td>
               </ng-container>
 
@@ -444,9 +538,13 @@
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
                 <td mat-cell *matCellDef="let row">
-                  <span class="status-pill status-{{ row.status.toLowerCase() }}">
-                    {{ getStatusLabel(row.status) }}
-                  </span>
+                  @if (row.kind === 'appt') {
+                    <span class="status-pill status-{{ row.appt.status.toLowerCase() }}">
+                      {{ getStatusLabel(row.appt.status) }}
+                    </span>
+                  } @else {
+                    <span class="status-pill status-google">Google</span>
+                  }
                 </td>
               </ng-container>
 
@@ -454,52 +552,54 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let row" class="cell-actions">
-                  <button type="button" mat-icon-button [matMenuTriggerFor]="menuRange" matTooltip="Acciones">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menuRange="matMenu">
-                    <button type="button" mat-menu-item (click)="openAppointmentDetail(row)">
-                      <mat-icon>visibility</mat-icon>
-                      <span>Ver detalle</span>
+                  @if (row.kind === 'appt') {
+                    <button type="button" mat-icon-button [matMenuTriggerFor]="menuRange" matTooltip="Acciones">
+                      <mat-icon>more_vert</mat-icon>
                     </button>
-                    @if (hasMenuActionsAfterDetail(row)) {
-                      <mat-divider></mat-divider>
-                    }
-                    @if (row.status === 'PENDING') {
-                      <button type="button" mat-menu-item (click)="confirmAppointment(row.id)">
-                        <mat-icon>check_circle</mat-icon>
-                        <span>Confirmar</span>
+                    <mat-menu #menuRange="matMenu">
+                      <button type="button" mat-menu-item (click)="openAppointmentDetail(row.appt)">
+                        <mat-icon>visibility</mat-icon>
+                        <span>Ver detalle</span>
                       </button>
-                    }
-                    @if (canMarkAttendance(row)) {
-                      <button type="button" mat-menu-item (click)="completeAppointment(row.id)">
-                        <mat-icon>done_all</mat-icon>
-                        <span>Marcar como completada</span>
-                      </button>
-                      <button type="button" mat-menu-item (click)="markAsNoShow(row.id)">
-                        <mat-icon>event_busy</mat-icon>
-                        <span>Paciente no asistió</span>
-                      </button>
-                    }
-                    @if (canCreateHistoryFromAppointment(row)) {
-                      <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row)">
-                        <mat-icon>description</mat-icon>
-                        <span>Adicionar historia clínica</span>
-                      </button>
-                    }
-                    @if (row.status !== 'CANCELLED' && row.status !== 'COMPLETED') {
-                      <mat-divider></mat-divider>
-                      <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.id)">
-                        <mat-icon>cancel</mat-icon>
-                        <span>Cancelar cita</span>
-                      </button>
-                    }
-                  </mat-menu>
+                      @if (hasMenuActionsAfterDetail(row.appt)) {
+                        <mat-divider></mat-divider>
+                      }
+                      @if (row.appt.status === 'PENDING') {
+                        <button type="button" mat-menu-item (click)="confirmAppointment(row.appt.id)">
+                          <mat-icon>check_circle</mat-icon>
+                          <span>Confirmar</span>
+                        </button>
+                      }
+                      @if (canMarkAttendance(row.appt)) {
+                        <button type="button" mat-menu-item (click)="completeAppointment(row.appt.id)">
+                          <mat-icon>done_all</mat-icon>
+                          <span>Marcar como completada</span>
+                        </button>
+                        <button type="button" mat-menu-item (click)="markAsNoShow(row.appt.id)">
+                          <mat-icon>event_busy</mat-icon>
+                          <span>Paciente no asistió</span>
+                        </button>
+                      }
+                      @if (canCreateHistoryFromAppointment(row.appt)) {
+                        <button type="button" mat-menu-item (click)="openClinicalHistoryFromAppointment(row.appt)">
+                          <mat-icon>description</mat-icon>
+                          <span>Adicionar historia clínica</span>
+                        </button>
+                      }
+                      @if (row.appt.status !== 'CANCELLED' && row.appt.status !== 'COMPLETED') {
+                        <mat-divider></mat-divider>
+                        <button type="button" mat-menu-item class="action-danger" (click)="cancelAppointment(row.appt.id)">
+                          <mat-icon>cancel</mat-icon>
+                          <span>Cancelar cita</span>
+                        </button>
+                      }
+                    </mat-menu>
+                  }
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.google-row]="row.kind === 'google'"></tr>
             </table>
           </div>
         }
@@ -606,39 +706,5 @@
 
     </mat-tab-group>
 
-    <!-- ── Google Calendar busy blocks (read-only) ───────────────────────── -->
-    @if (busyBlocksLoading()) {
-      <div class="busy-blocks-section">
-        <div class="busy-blocks-header">
-          <mat-icon>event</mat-icon>
-          <span>Eventos de Google Calendar</span>
-          <mat-spinner diameter="20"></mat-spinner>
-        </div>
-      </div>
-    } @else if (busyBlocks().length > 0) {
-      <div class="busy-blocks-section">
-        <div class="busy-blocks-header">
-          <mat-icon>event</mat-icon>
-          <span>Eventos de Google Calendar (próximos 7 días)</span>
-        </div>
-        <div class="busy-blocks-list">
-          @for (block of busyBlocks(); track block.id) {
-            <div class="busy-block-chip">
-              <mat-icon class="busy-block-icon">event</mat-icon>
-              <span class="busy-block-title">{{ block.title }}</span>
-              <span class="busy-block-time">
-                @if (block.isAllDay) {
-                  {{ formatBusyBlockDate(block.startUtc) }} — Todo el día
-                } @else {
-                  {{ formatBusyBlockDate(block.startUtc) }},
-                  {{ formatBusyBlockTime(block.startUtc) }}–{{ formatBusyBlockTime(block.endUtc) }}
-                }
-              </span>
-              <span class="busy-block-readonly-badge">Solo lectura</span>
-            </div>
-          }
-        </div>
-      </div>
-    }
   }
 </div>
