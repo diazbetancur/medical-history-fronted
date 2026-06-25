@@ -278,6 +278,13 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PROFESSIONAL',
     bottomNav: false,
   },
+  {
+    label: 'Google Calendar',
+    icon: 'event_sync',
+    route: '/professional/calendar',
+    context: 'PROFESSIONAL',
+    bottomNav: false,
+  },
 
   // ==========================================================================
   // PATIENT MENU

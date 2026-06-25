@@ -1,0 +1,28 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Google Calendar</mat-card-title>
+    <mat-card-subtitle>Tus eventos de Google bloquean tu disponibilidad automáticamente.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    @if (loading()) {
+      <mat-spinner diameter="28"></mat-spinner>
+    } @else if (connections().length === 0) {
+      <p>No tienes ningún calendario conectado.</p>
+      <button mat-flat-button color="primary" (click)="connect()">
+        <mat-icon>event</mat-icon> Conectar Google Calendar
+      </button>
+    } @else {
+      @for (c of connections(); track c.id) {
+        <div class="conn-row">
+          <div class="conn-info">
+            <strong>{{ c.calendarName }}</strong>
+            <small>{{ c.accountEmail }}</small>
+            <small>Último sync: {{ c.lastSyncedAtUtc ? (c.lastSyncedAtUtc | date:'short') : 'nunca' }}</small>
+            @if (c.lastSyncError) { <small class="err">&#9888; {{ c.lastSyncError }}</small> }
+          </div>
+          <button mat-stroked-button color="warn" (click)="disconnect(c.id)">Desconectar</button>
+        </div>
+      }
+    }
+  </mat-card-content>
+</mat-card>

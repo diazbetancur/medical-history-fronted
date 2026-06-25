@@ -345,6 +345,14 @@ export const routes: Routes = [
         title: 'Reportes | MediTigo',
       },
       {
+        path: 'calendar',
+        loadComponent: () =>
+          import('./features/professional/pages/calendar/google-calendar-settings.page').then(
+            (m) => m.GoogleCalendarSettingsPage,
+          ),
+        title: 'Google Calendar | MediTigo',
+      },
+      {
         path: 'agenda',
         redirectTo: 'appointments',
         pathMatch: 'full',
