@@ -353,6 +353,14 @@ export const routes: Routes = [
         title: 'Google Calendar | MediTigo',
       },
       {
+        path: 'calendar/callback',
+        loadComponent: () =>
+          import('./features/professional/pages/calendar/google-calendar-callback.page').then(
+            (m) => m.GoogleCalendarCallbackPage,
+          ),
+        title: 'Conectando Google Calendar | MediTigo',
+      },
+      {
         path: 'agenda',
         redirectTo: 'appointments',
         pathMatch: 'full',
