@@ -165,7 +165,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
       kind: 'appt',
       appt: a,
     }));
-    const blocks: AgendaRow[] = this.busyBlocks().map((b) => ({
+    const blocks: AgendaRow[] = (this.selectedTabIndex() === 0 ? this.busyBlocks() : []).map((b) => ({
       kind: 'google',
       block: b,
     }));
@@ -188,7 +188,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
       kind: 'appt',
       appt: a,
     }));
-    const blocks: AgendaRow[] = this.busyBlocks().map((b) => ({
+    const blocks: AgendaRow[] = (this.selectedTabIndex() === 1 ? this.busyBlocks() : []).map((b) => ({
       kind: 'google',
       block: b,
     }));
@@ -211,7 +211,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
       kind: 'appt',
       appt: a,
     }));
-    const blocks: AgendaRow[] = this.busyBlocks().map((b) => ({
+    const blocks: AgendaRow[] = (this.selectedTabIndex() === 2 ? this.busyBlocks() : []).map((b) => ({
       kind: 'google',
       block: b,
     }));
@@ -234,7 +234,7 @@ export class ProfessionalAppointmentsPage implements OnInit {
       kind: 'appt',
       appt: a,
     }));
-    const blocks: AgendaRow[] = this.busyBlocks().map((b) => ({
+    const blocks: AgendaRow[] = (this.selectedTabIndex() === 3 ? this.busyBlocks() : []).map((b) => ({
       kind: 'google',
       block: b,
     }));

@@ -63,7 +63,7 @@
                   @if (row.kind === 'appt') {
                     {{ formatShortDate(row.appt.date) }}
                   } @else {
-                    {{ row.block.isAllDay ? formatBusyBlockDate(row.block.startUtc) : formatBusyBlockDate(row.block.startUtc) }}
+                    {{ formatBusyBlockDate(row.block.startUtc) }}
                   }
                 </td>
               </ng-container>
