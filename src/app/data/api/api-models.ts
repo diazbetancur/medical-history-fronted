@@ -558,6 +558,7 @@ export interface ProfessionalProfile {
   dateCreated: string;
   dateUpdated?: string;
   servicesCount: number;
+  requireConfirmation: boolean;
 }
 
 export interface CreateProfessionalProfilePayload {
@@ -572,6 +573,7 @@ export interface CreateProfessionalProfilePayload {
   email?: string;
   address?: string;
   profileImageUrl?: string;
+  requireConfirmation?: boolean;
 }
 
 export interface UpdateProfessionalProfilePayload {
@@ -585,6 +587,7 @@ export interface UpdateProfessionalProfilePayload {
   email?: string;
   address?: string;
   profileImageUrl?: string;
+  requireConfirmation?: boolean;
 }
 
 export interface ProfessionalProfilePhotoResponse {
