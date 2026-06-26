@@ -51,6 +51,12 @@
                   </div>
                 </div>
                 <div class="managed__item-actions">
+                  <button type="button" mat-icon-button matTooltip="Ver" color="primary" (click)="viewExam(x)">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button type="button" mat-icon-button matTooltip="Descargar" color="accent" (click)="downloadExam(x)">
+                    <mat-icon>download</mat-icon>
+                  </button>
                   <button type="button" mat-icon-button matTooltip="Eliminar" color="warn" (click)="deleteExam(x)">
                     <mat-icon>delete</mat-icon>
                   </button>
