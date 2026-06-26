@@ -164,9 +164,12 @@
 
             <div class="toggle-field">
               <mat-slide-toggle formControlName="requireConfirmation">
-                Siempre confirmar mis citas
+                Quiero confirmar mis citas
               </mat-slide-toggle>
-              <p class="hint">Si está activo, las citas que agenden tus pacientes quedan pendientes hasta que las confirmes.</p>
+              <p class="hint">
+                Si está activo, las citas que agenden tus pacientes quedan
+                pendientes hasta que las confirmes.
+              </p>
             </div>
 
             @if (submitError()) {
@@ -174,9 +177,7 @@
               <mat-icon>error_outline</mat-icon>
               <span>{{ submitError() }}</span>
             </div>
-            }
-
-            @if (hasExistingProfile()) {
+            } @if (hasExistingProfile()) {
             <div class="form-section photo-section">
               <div class="photo-row">
                 <div class="photo-preview">
@@ -596,9 +597,10 @@
                             : 'Marcar como principal'
                         "
                       >
-                        <mat-icon>{{
-                          location.isDefault ? "star" : "star_border"
-                        }}</mat-icon>
+                        <mat-icon
+                          >{{ location.isDefault ? "star" : "star_border"
+                          }}</mat-icon
+                        >
                       </button>
                       <button
                         mat-icon-button
