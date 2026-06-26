@@ -61,3 +61,8 @@ export { RolesApi } from './roles.api';
 export { SpecialtiesApi } from './specialties.api';
 export type * from './users.api';
 export { UsersApi } from './users.api';
+export { GoogleCalendarApi } from './google-calendar.api';
+export type {
+  CalendarConnectionStatus,
+  GoogleCalendarConnectResponse,
+} from '../models/google-calendar.models';

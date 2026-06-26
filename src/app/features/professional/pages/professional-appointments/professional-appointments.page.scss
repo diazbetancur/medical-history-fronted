@@ -119,6 +119,15 @@
     }
   }
 
+  // Google Calendar busy-block rows — read-only, visually distinct
+  .google-row {
+    background: #f0f4ff;  // subtle blue tint
+
+    &:hover {
+      background: #e4ecff;
+    }
+  }
+
   // Specific cells
   .cell-time {
     white-space: nowrap;
@@ -175,6 +184,11 @@
     background: #f3f4f6;   // gray-100
     color: #374151;        // gray-700   → contrast 7.4:1 on #f3f4f6
   }
+
+  &.status-google {
+    background: #e8f0fe;   // Google blue-50
+    color: #1a56c4;        // Google blue-700 → contrast 5.0:1 on #e8f0fe
+  }
 }
 
 // ─── Menu danger action ───────────────────────────────────────────────────────
@@ -197,6 +211,21 @@
   button mat-icon {
     margin-right: 6px;
   }
+}
+
+.google-row-subject {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1a56c4;
+}
+
+.google-row-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #1a56c4;
+  flex-shrink: 0;
 }
 
 // ─── Responsive ───────────────────────────────────────────────────────────────

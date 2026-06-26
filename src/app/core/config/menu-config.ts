@@ -278,6 +278,16 @@ export const MENU_ITEMS: MenuItem[] = [
     context: 'PROFESSIONAL',
     bottomNav: false,
   },
+  // Google Calendar — entrada de menú OCULTA temporalmente hasta terminar los 2 ajustes
+  // pendientes + la entrega de permisos. La ruta /professional/calendar sigue ACTIVA
+  // (accesible por URL para pruebas/E2E). Re-habilitar = descomentar este bloque.
+  // {
+  //   label: 'Google Calendar',
+  //   icon: 'event_sync',
+  //   route: '/professional/calendar',
+  //   context: 'PROFESSIONAL',
+  //   bottomNav: false,
+  // },
 
   // ==========================================================================
   // PATIENT MENU
