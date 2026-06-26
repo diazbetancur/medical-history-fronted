@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { createApiError } from '@core/http/api-error';
 import { environment } from '@env';
 import { catchError, Observable, throwError } from 'rxjs';
+import { ExamDownloadUrlDto } from '@data/models';
 import {
   AddMemberByDocumentRequest,
   AddMemberResult,
@@ -217,6 +218,22 @@ export class FamilyGroupService {
   deleteExam(patientProfileId: string, examId: string): Observable<unknown> {
     return this.http
       .delete(`${this.patientUrl(patientProfileId, 'exams')}/${examId}`)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  getExamViewUrl(patientProfileId: string, examId: string): Observable<ExamDownloadUrlDto> {
+    return this.http
+      .get<ExamDownloadUrlDto>(
+        `${this.patientUrl(patientProfileId, 'exams')}/${examId}/view-url`,
+      )
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  getExamDownloadUrl(patientProfileId: string, examId: string): Observable<ExamDownloadUrlDto> {
+    return this.http
+      .get<ExamDownloadUrlDto>(
+        `${this.patientUrl(patientProfileId, 'exams')}/${examId}/download-url`,
+      )
       .pipe(catchError((e) => this.handle(e)));
   }
 
