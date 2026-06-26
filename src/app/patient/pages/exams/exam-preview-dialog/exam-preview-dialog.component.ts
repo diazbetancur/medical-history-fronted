@@ -11,6 +11,8 @@ import { catchError, of, switchMap } from 'rxjs';
 
 interface ExamPreviewDialogData {
   exam: ExamDto;
+  /** Optional pre-fetched URL; when provided the service call is skipped. */
+  preloadedUrl?: string;
 }
 
 @Component({
@@ -55,6 +57,12 @@ export class ExamPreviewDialogComponent {
   private loadPreviewUrl(): void {
     this.loading.set(true);
     this.error.set(null);
+
+    if (this.data.preloadedUrl) {
+      this.previewUrl.set(this.data.preloadedUrl);
+      this.loading.set(false);
+      return;
+    }
 
     this.examsService
       .getById(this.data.exam.id)

@@ -17,6 +17,7 @@ import {
   BackgroundInput,
   MedicationInput,
 } from '../../services/family-group.models';
+import { ExamPreviewDialogComponent } from '../exams/exam-preview-dialog/exam-preview-dialog.component';
 import { AllergyFormDialogComponent } from './dialogs/allergy-form-dialog.component';
 import { BackgroundFormDialogComponent } from './dialogs/background-form-dialog.component';
 import {
@@ -113,6 +114,59 @@ export class ManagedPatientPage implements OnInit {
           error: (e) => this.toast.error(e?.message || 'No se pudo subir el examen'),
         });
       });
+  }
+
+  viewExam(item: any): void {
+    const examId: string = item.id;
+    const ext = (item.originalFileName ?? '').split('.').pop()?.toLowerCase();
+    const fileType: 'PDF' | 'IMAGE' = ext === 'pdf' ? 'PDF' : 'IMAGE';
+    this.familyGroup.getExamViewUrl(this.id, examId).subscribe({
+      next: (response) => {
+        const url = response.downloadUrl ?? (response as any).url ?? null;
+        if (!url) {
+          this.toast.error('No se pudo obtener la vista previa del examen');
+          return;
+        }
+        this.dialog.open(ExamPreviewDialogComponent, {
+          width: 'min(92vw, 980px)',
+          maxWidth: '98vw',
+          data: {
+            exam: {
+              id: examId,
+              patientProfileId: this.id,
+              title: item.title ?? '',
+              examDate: item.examDate ?? '',
+              originalFileName: item.originalFileName ?? item.title ?? '',
+              fileType,
+              fileSizeBytes: item.fileSizeBytes ?? 0,
+              uploadedAtUtc: item.uploadedAtUtc ?? item.dateCreated ?? '',
+              updatedAtUtc: item.updatedAtUtc ?? item.dateCreated ?? '',
+              isActive: item.isActive ?? true,
+            },
+            preloadedUrl: url,
+          },
+        });
+      },
+      error: (e) => this.toast.error(e?.message || 'No se pudo obtener la vista previa del examen'),
+    });
+  }
+
+  downloadExam(item: any): void {
+    const examId: string = item.id;
+    this.familyGroup.getExamDownloadUrl(this.id, examId).subscribe({
+      next: (response) => {
+        const url = response.downloadUrl ?? (response as any).url ?? null;
+        if (!url) {
+          this.toast.error('No se pudo obtener el enlace de descarga');
+          return;
+        }
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = item.originalFileName ?? item.title ?? 'examen';
+        link.click();
+      },
+      error: (e) => this.toast.error(e?.message || 'Error al descargar examen'),
+    });
   }
 
   deleteExam(item: any): void {

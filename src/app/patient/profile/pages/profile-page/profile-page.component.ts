@@ -68,8 +68,6 @@ export class ProfilePageComponent implements OnInit {
   readonly bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   readonly genderOptions = ['Masculino', 'Femenino', 'Otro', 'Prefiero no especificar'];
   readonly documentTypeOptions = ['DNI', 'Pasaporte', 'RNP'];
-  // El sistema opera solo en Honduras (geografía/ciudades de Honduras).
-  readonly countryOptions = ['Honduras'];
   private readonly patientService = inject(PatientService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
