@@ -16,6 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { AuthStore } from '@core/auth';
 import { ProblemDetails } from '@core/models';
@@ -74,6 +75,7 @@ type LocationWithOptionalGeography = ProfessionalLocation & {
     MatProgressSpinnerModule,
     MatCardModule,
     MatChipsModule,
+    MatSlideToggleModule,
     MatTabsModule,
   ],
   templateUrl: './professional-onboarding.page.html',
@@ -159,6 +161,7 @@ export class ProfessionalOnboardingPage implements OnInit {
     whatsApp: ['', [Validators.maxLength(20), Validators.pattern(/^[+]?[\d\s\-().]{7,20}$/)]],
     email: ['', [Validators.email, Validators.maxLength(100)]],
     address: ['', [Validators.maxLength(300)]],
+    requireConfirmation: [false],
   });
 
   readonly specialtyProposalForm = this.fb.nonNullable.group({
@@ -371,6 +374,7 @@ export class ProfessionalOnboardingPage implements OnInit {
             whatsApp: profile.whatsApp ?? '',
             email: profile.email ?? '',
             address: profile.address ?? '',
+            requireConfirmation: profile.requireConfirmation ?? false,
           },
           { emitEvent: false },
         );
@@ -704,6 +708,7 @@ export class ProfessionalOnboardingPage implements OnInit {
       whatsApp: value.whatsApp.trim() || undefined,
       email: value.email.trim() || undefined,
       address: value.address.trim() || undefined,
+      requireConfirmation: value.requireConfirmation,
     };
 
     const request$ = this.hasExistingProfile()

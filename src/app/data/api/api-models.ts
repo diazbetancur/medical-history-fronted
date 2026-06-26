@@ -573,6 +573,7 @@ export interface CreateProfessionalProfilePayload {
   email?: string;
   address?: string;
   profileImageUrl?: string;
+  requireConfirmation?: boolean;
 }
 
 export interface UpdateProfessionalProfilePayload {
