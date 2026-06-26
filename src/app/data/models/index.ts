@@ -17,3 +17,4 @@ export * from './professional-location.models';
 export * from './professional-schedule.models';
 export * from './public-page.models';
 export * from './specialty.models';
+export * from './google-calendar.models';

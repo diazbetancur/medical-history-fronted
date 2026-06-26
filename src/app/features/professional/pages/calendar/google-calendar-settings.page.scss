@@ -1,0 +1,16 @@
+.conn-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: .75rem 0;
+}
+
+.conn-info small {
+  display: block;
+  color: rgba(0, 0, 0, .6);
+}
+
+.conn-info .err {
+  color: #b00020;
+}
