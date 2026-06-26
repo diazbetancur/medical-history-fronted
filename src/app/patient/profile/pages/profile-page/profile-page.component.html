@@ -218,11 +218,13 @@
 
                     <mat-form-field appearance="outline">
                       <mat-label>País</mat-label>
-                      <mat-select formControlName="countryName" title="País">
-                        @for (c of countryOptions; track c) {
-                          <mat-option [value]="c">{{ c }}</mat-option>
-                        }
-                      </mat-select>
+                      <input
+                        matInput
+                        formControlName="countryName"
+                        maxlength="100"
+                        placeholder="Honduras"
+                        title="País"
+                      />
                       <app-form-control-error [control]="summaryForm.controls.countryName" />
                     </mat-form-field>
 
