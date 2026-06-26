@@ -118,7 +118,8 @@ export class ManagedPatientPage implements OnInit {
 
   viewExam(item: any): void {
     const examId: string = item.id;
-    const fileType = item.fileContentType === 'application/pdf' ? 'PDF' : 'IMAGE';
+    const ext = (item.originalFileName ?? '').split('.').pop()?.toLowerCase();
+    const fileType: 'PDF' | 'IMAGE' = ext === 'pdf' ? 'PDF' : 'IMAGE';
     this.familyGroup.getExamViewUrl(this.id, examId).subscribe({
       next: (response) => {
         const url = response.downloadUrl ?? (response as any).url ?? null;
