@@ -47,10 +47,33 @@
   line-height: 1.3;
 }
 
-.professional-specialty {
+.professional-specialties {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
   margin: 0 0 12px 0;
-  font-size: 14px;
-  opacity: 0.9;
+}
+
+.specialty-chip {
+  display: inline-block;
+  max-width: 100%;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--color-text-inverted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.specialty-chip--more {
+  flex-shrink: 0;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.28);
+  cursor: help;
 }
 
 .card-meta {

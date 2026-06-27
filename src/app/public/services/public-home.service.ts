@@ -135,11 +135,13 @@ export class PublicHomeService {
     return professionals.map((professional) => {
       const fullName = professional.businessName;
       const [firstName = fullName, ...restNames] = fullName.split(' ');
-      const primarySpecialty =
-        professional.specialties.find((specialty) => specialty.isPrimary)
-          ?.specialtyName ??
-        professional.specialties[0]?.specialtyName ??
-        'Especialista';
+
+      // Lista completa de especialidades, la principal primero, luego el resto.
+      const specialtyNames = [...professional.specialties]
+        .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary))
+        .map((specialty) => specialty.specialtyName)
+        .filter((name): name is string => !!name);
+      const primarySpecialty = specialtyNames[0] ?? 'Especialista';
 
       return {
         id: professional.id,
@@ -148,6 +150,7 @@ export class PublicHomeService {
         lastName: restNames.join(' '),
         fullName,
         specialty: primarySpecialty,
+        specialties: specialtyNames.length ? specialtyNames : [primarySpecialty],
         avatarUrl: professional.profileImageUrl,
         rating: 0,
         reviewsCount: 0,
