@@ -78,7 +78,10 @@ export interface PublicHomeProfessionalCardDto {
   firstName: string;
   lastName: string;
   fullName: string;
+  /** Especialidad principal (compat). Para mostrar todas, usar `specialties`. */
   specialty: string;
+  /** Todas las especialidades del profesional, la principal primero. */
+  specialties: string[];
   avatarUrl?: string;
   rating: number;
   reviewsCount: number;

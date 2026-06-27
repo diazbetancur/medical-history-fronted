@@ -268,8 +268,8 @@ export interface FeaturedSpecialty {
 }
 
 export interface FeaturedProfessionalSpecialty {
-  specialtyId: string;
-  specialtyName: string;
+  id: string;
+  name: string;
   isPrimary: boolean;
 }
 
