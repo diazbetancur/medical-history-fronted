@@ -139,7 +139,7 @@ export class PublicHomeService {
       // Lista completa de especialidades, la principal primero, luego el resto.
       const specialtyNames = [...professional.specialties]
         .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary))
-        .map((specialty) => specialty.specialtyName)
+        .map((specialty) => specialty.name)
         .filter((name): name is string => !!name);
       const primarySpecialty = specialtyNames[0] ?? 'Especialista';
 

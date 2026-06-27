@@ -9,12 +9,12 @@
           {{ professional.fullName | doctorName }}
         </h3>
         <div class="professional-specialties">
-          @for (spec of visibleSpecialties; track spec) {
-            <span class="specialty-chip">{{ spec }}</span>
-          }
+          <span class="professional-specialty">{{
+            visibleSpecialties.join(", ")
+          }}</span>
           @if (hiddenCount > 0) {
             <span
-              class="specialty-chip specialty-chip--more"
+              class="specialty-chip-more"
               [matTooltip]="hiddenTooltip"
               matTooltipPosition="above"
               >+{{ hiddenCount }}</span
