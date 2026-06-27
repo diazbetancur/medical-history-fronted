@@ -5,12 +5,21 @@
   <div class="card-image" [style.background-image]="'url(' + imageUrl + ')'">
     <div class="card-overlay">
       <div class="card-info">
-        <h3 class="professional-name">{{ professional.fullName | doctorName }}</h3>
-        <p class="professional-specialty">{{ professional.specialty }}</p>
-        <div class="card-meta">
-          <span class="experience"
-            >{{ professional.yearsOfExperience }} años</span
-          >
+        <h3 class="professional-name">
+          {{ professional.fullName | doctorName }}
+        </h3>
+        <div class="professional-specialties">
+          <span class="professional-specialty">{{
+            visibleSpecialties.join(", ")
+          }}</span>
+          @if (hiddenCount > 0) {
+            <span
+              class="specialty-chip-more"
+              [matTooltip]="hiddenTooltip"
+              matTooltipPosition="above"
+              >+{{ hiddenCount }}</span
+            >
+          }
         </div>
       </div>
     </div>
