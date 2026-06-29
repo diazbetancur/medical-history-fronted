@@ -1,0 +1,22 @@
+.doctors-swiper {
+  display: block;
+  width: 100%;
+  padding-bottom: 8px;
+
+  // Color/tamaño de las flechas de navegación de Swiper.
+  --swiper-navigation-color: var(--color-primary, #2563eb);
+  --swiper-navigation-size: 26px;
+}
+
+.doctor-slide {
+  // Slide a la altura de su contenido; las tarjetas quedan uniformes por su
+  // imagen con relación de aspecto fija.
+  height: auto;
+  display: flex;
+}
+
+.doctor-slide app-professional-card {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

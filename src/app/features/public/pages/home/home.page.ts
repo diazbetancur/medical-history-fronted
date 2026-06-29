@@ -26,9 +26,9 @@ import {
   AuthModalComponent,
   AuthModalData,
 } from '../../components/auth-modal/auth-modal.component';
-import { ProfessionalCardComponent } from '../../components/professional-card/professional-card.component';
 import { PublicFooterComponent } from '../../components/public-footer/public-footer.component';
 import { PublicHeaderComponent } from '../../components/public-header/public-header.component';
+import { FeaturedDoctorsComponent } from './components/featured-doctors/featured-doctors.component';
 import { HomeSliderComponent } from './components/home-slider/home-slider.component';
 import AOS from 'aos';
 
@@ -44,7 +44,7 @@ import AOS from 'aos';
     MatProgressSpinnerModule,
     PublicHeaderComponent,
     PublicFooterComponent,
-    ProfessionalCardComponent,
+    FeaturedDoctorsComponent,
     HomeSliderComponent,
   ],
   templateUrl: './home.page.html',
