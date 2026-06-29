@@ -1,0 +1,9 @@
+<swiper-container #swiperEl init="false" class="doctors-swiper">
+  @for (professional of professionals; track professional.id) {
+    <swiper-slide class="doctor-slide">
+      <app-professional-card
+        [professional]="professional"
+      ></app-professional-card>
+    </swiper-slide>
+  }
+</swiper-container>

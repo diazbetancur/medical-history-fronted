@@ -73,7 +73,12 @@ export class PublicHomeService {
 
     return {
       stats: this.mapStats(home),
-      featuredProfessionals: this.mapProfessionals(home.featuredProfessionals),
+      // Orden aleatorio para que no salgan siempre los mismos en el mismo orden.
+      // Se baraja una vez por carga (el resultado se cachea ~10 min), así el
+      // orden es estable mientras navegas y cambia en cada carga fresca.
+      featuredProfessionals: this.shuffle(
+        this.mapProfessionals(home.featuredProfessionals),
+      ),
       specialties: this.mapSpecialties(home.featuredSpecialties),
       seo: home.seo,
       popularCities: home.popularCities,
@@ -163,6 +168,16 @@ export class PublicHomeService {
         priceFrom: professional.priceFrom,
       };
     });
+  }
+
+  /** Baraja una copia del arreglo (Fisher-Yates). No muta el original. */
+  private shuffle<T>(items: T[]): T[] {
+    const result = [...items];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
   }
 
   clearCache(): void {

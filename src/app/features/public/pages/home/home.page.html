@@ -173,13 +173,11 @@
       <p>Cargando médicos destacados...</p>
     </div>
     } @else if (professionals().length > 0) {
-    <div class="doctors-grid" data-aos="fade-up">
-      @for (professional of professionals(); track professional.id) {
-      <app-professional-card
-        [professional]="professional"
-      ></app-professional-card>
-      }
-    </div>
+    <app-featured-doctors
+      class="doctors-carousel"
+      data-aos="fade-up"
+      [professionals]="professionals()"
+    ></app-featured-doctors>
     <div class="doctors-actions">
       <button
         type="button"
