@@ -31,6 +31,7 @@ export interface FamilyGroupMember {
   linkType: FamilyLinkType;
   adminRole: FamilyAdminRole;
   hasAccount: boolean;
+  canEditName: boolean;
 }
 
 export interface FamilyGroupDetail {

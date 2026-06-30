@@ -1,0 +1,26 @@
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  mat-icon {
+    color: var(--color-primary);
+  }
+}
+
+.dialog-warning {
+  margin: 0 0 16px;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.edit-name-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 320px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
