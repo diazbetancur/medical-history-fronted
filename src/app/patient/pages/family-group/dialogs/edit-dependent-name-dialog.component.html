@@ -1,0 +1,31 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>edit</mat-icon>
+  <span>Editar nombre</span>
+</h2>
+
+<mat-dialog-content>
+  <p class="dialog-warning">
+    Verifica que el nombre sea correcto. Este cambio queda registrado y afecta a este paciente en todos los grupos donde aparezca.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="edit-name-form">
+    <mat-form-field appearance="outline">
+      <mat-label>
+        <app-form-label text="Nombre completo" [required]="true"></app-form-label>
+      </mat-label>
+      <input matInput formControlName="fullName" maxlength="200" />
+      <app-form-control-error
+        [control]="form.controls.fullName"
+        [submitted]="submitted()"
+        [messages]="messages.fullName"
+      ></app-form-control-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()">
+    Guardar
+  </button>
+</mat-dialog-actions>

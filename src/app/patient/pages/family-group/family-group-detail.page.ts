@@ -14,6 +14,7 @@ import { ToastService } from '@shared/services';
 import { ConfirmDialogComponent } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { AddDependentDialogComponent } from './dialogs/add-dependent-dialog.component';
+import { EditDependentNameDialogComponent } from './dialogs/edit-dependent-name-dialog.component';
 import { ActingPatientStore } from '../../services/acting-patient.store';
 import { FamilyGroupService } from '../../services/family-group.service';
 import {
@@ -175,6 +176,24 @@ export class FamilyGroupDetailPage implements OnInit {
           this.load();
         },
         error: (e) => this.toast.error(e.message || 'No se pudo sacar al miembro'),
+      });
+    });
+  }
+
+  editName(member: FamilyGroupMember): void {
+    const ref = this.dialog.open<EditDependentNameDialogComponent, { currentName: string }, string | null>(
+      EditDependentNameDialogComponent,
+      { width: '460px', maxWidth: '95vw', data: { currentName: member.fullName } },
+    );
+    ref.afterClosed().subscribe((newName) => {
+      const trimmed = (newName ?? '').trim();
+      if (!trimmed || trimmed === member.fullName) return;
+      this.service.updateDependentName(this.groupId, member.patientProfileId, trimmed).subscribe({
+        next: () => {
+          this.toast.success('Nombre actualizado');
+          this.load();
+        },
+        error: (e) => this.toast.error(e.message || 'No se pudo actualizar el nombre'),
       });
     });
   }
