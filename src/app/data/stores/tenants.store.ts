@@ -40,13 +40,8 @@ export class TenantsStore {
     this._tenants().filter((t) => t.isActive),
   );
 
-  constructor() {
-    // Auto-load tenants on init
-    this.loadTenants();
-  }
-
   /**
-   * Load all tenants
+   * Load all tenants (on-demand — call explicitly from SuperAdmin-only contexts)
    */
   loadTenants(): void {
     this._isLoading.set(true);

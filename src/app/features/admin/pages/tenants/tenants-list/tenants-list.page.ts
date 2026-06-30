@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -35,11 +35,15 @@ import { TenantFormDialogComponent } from '../tenant-form-dialog/tenant-form-dia
   templateUrl: './tenants-list.page.html',
   styleUrl: './tenants-list.page.scss',
 })
-export class TenantsListPage {
+export class TenantsListPage implements OnInit {
   readonly store = inject(TenantsStore);
   private readonly dialog = inject(MatDialog);
 
   filterName = '';
+
+  ngOnInit(): void {
+    this.store.loadTenants();
+  }
 
   displayedColumns: string[] = ['code', 'name', 'isActive', 'actions'];
 

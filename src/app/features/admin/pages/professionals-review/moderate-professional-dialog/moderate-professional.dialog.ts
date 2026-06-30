@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -45,7 +45,7 @@ export interface ModerateProfessionalDialogResult {
   templateUrl: './moderate-professional.dialog.html',
   styleUrl: './moderate-professional.dialog.scss',
 })
-export class ModerateProfessionalDialogComponent {
+export class ModerateProfessionalDialogComponent implements OnInit {
   readonly data = inject<ModerateProfessionalDialogData>(MAT_DIALOG_DATA);
   private readonly dialogRef =
     inject<
@@ -64,6 +64,12 @@ export class ModerateProfessionalDialogComponent {
   adminNotes = '';
   isFeatured = false;
   readonly error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    if (this.isSuperAdmin()) {
+      this.tenantsStore.loadTenants();
+    }
+  }
 
   readonly isSuperAdmin = computed(() =>
     this.authStore.userRoles().some((r) => r.toUpperCase() === 'SUPERADMIN'),

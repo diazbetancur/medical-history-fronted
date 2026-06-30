@@ -86,6 +86,9 @@ export class UserEditDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
+    if (this.isSuperAdmin()) {
+      this.tenantsStore.loadTenants();
+    }
   }
 
   private initializeForm(): void {
