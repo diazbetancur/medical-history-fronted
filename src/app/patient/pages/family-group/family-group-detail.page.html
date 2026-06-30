@@ -56,6 +56,17 @@
                   >
                     <mat-icon>switch_account</mat-icon>
                   </button>
+                  @if (detail()?.iAmAdmin && m.canEditName) {
+                    <button
+                      type="button"
+                      mat-icon-button
+                      color="primary"
+                      matTooltip="Editar nombre"
+                      (click)="editName(m)"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  }
                   @if (m.adminRole === 'None' && m.hasAccount) {
                     <button
                       type="button"
