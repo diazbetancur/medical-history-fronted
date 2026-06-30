@@ -961,6 +961,7 @@ export interface AdminProfessionalListItem {
   dateUpdated?: string;
   email?: string;
   phone?: string;
+  tenantId?: string | null;
 }
 
 export interface AdminProfessionalsResponse extends PaginatedResponse<AdminProfessionalListItem> {}
