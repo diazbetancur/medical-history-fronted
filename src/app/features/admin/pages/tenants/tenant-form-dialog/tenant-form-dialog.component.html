@@ -1,0 +1,63 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEditMode ? "edit" : "apartment" }}</mat-icon>
+  {{ isEditMode ? "Editar tenant" : "Nuevo tenant" }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="tenant-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>
+        <app-form-label text="Código" [required]="!isEditMode"></app-form-label>
+      </mat-label>
+      <input
+        matInput
+        formControlName="code"
+        placeholder="Ingresa el código único del tenant"
+        [readonly]="isEditMode"
+      />
+      @if (!isEditMode) {
+        <mat-hint>Único e inmutable. Máximo 40 caracteres.</mat-hint>
+      } @else {
+        <mat-hint>El código no puede modificarse.</mat-hint>
+      }
+      <app-form-control-error
+        [control]="form.get('code')"
+        [submitted]="submitted()"
+      ></app-form-control-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>
+        <app-form-label text="Nombre" [required]="true"></app-form-label>
+      </mat-label>
+      <input
+        matInput
+        formControlName="name"
+        placeholder="Ingresa el nombre del tenant"
+      />
+      <app-form-control-error
+        [control]="form.get('name')"
+        [submitted]="submitted()"
+      ></app-form-control-error>
+    </mat-form-field>
+
+    @if (isEditMode) {
+    <div class="toggle-container">
+      <mat-slide-toggle formControlName="isActive" color="primary">
+        Tenant activo
+      </mat-slide-toggle>
+      <p class="toggle-hint">
+        Los tenants inactivos no pueden operar en el sistema.
+      </p>
+    </div>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()">
+    <mat-icon>{{ isEditMode ? "save" : "add" }}</mat-icon>
+    {{ isEditMode ? "Guardar" : "Crear" }}
+  </button>
+</mat-dialog-actions>

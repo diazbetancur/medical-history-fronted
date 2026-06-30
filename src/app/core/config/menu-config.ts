@@ -227,6 +227,13 @@ export const MENU_ITEMS: MenuItem[] = [
       'Licenses.ViewReports',
     ],
   },
+  {
+    label: 'Tenants',
+    icon: 'apartment',
+    route: '/admin/tenants',
+    context: 'ADMIN',
+    requiredPermissions: ['Tenants.Manage'],
+  },
   // ==========================================================================
   // PROFESSIONAL MENU
   // ==========================================================================
