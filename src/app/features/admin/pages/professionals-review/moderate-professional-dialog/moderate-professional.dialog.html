@@ -35,7 +35,23 @@
   <mat-checkbox [(ngModel)]="isFeatured" [disabled]="store.saving()">
     Marcar como profesional destacado
   </mat-checkbox>
-  } @if (error()) {
+  }
+
+  @if (isSuperAdmin()) {
+  <div class="tenant-section">
+    <mat-form-field appearance="outline" class="tenant-field">
+      <mat-label>Tenant / Empresa</mat-label>
+      <mat-select [(ngModel)]="selectedTenantId" [disabled]="store.saving() || savingTenant()">
+        <mat-option [value]="null">Sin tenant</mat-option>
+        @for (tenant of tenantsStore.activeTenants(); track tenant.id) {
+          <mat-option [value]="tenant.id">{{ tenant.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  }
+
+  @if (error()) {
   <p class="dialog-error">
     <mat-icon>error</mat-icon>
     {{ error() }}
@@ -44,16 +60,16 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-stroked-button mat-dialog-close [disabled]="store.saving()">
+  <button mat-stroked-button mat-dialog-close [disabled]="store.saving() || savingTenant()">
     Cancelar
   </button>
   <button
     mat-raised-button
     [color]="isVerify ? 'primary' : 'warn'"
     (click)="confirm()"
-    [disabled]="store.saving()"
+    [disabled]="store.saving() || savingTenant()"
   >
-    @if (store.saving()) {
+    @if (store.saving() || savingTenant()) {
     <mat-progress-spinner
       mode="indeterminate"
       diameter="20"

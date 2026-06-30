@@ -205,6 +205,18 @@ export const routes: Routes = [
           ),
         title: 'Reportes - Admin',
       },
+      {
+        path: 'tenants',
+        canActivate: [permissionStoreGuard],
+        data: {
+          requiredPermissions: ['Tenants.Manage'],
+        },
+        loadComponent: () =>
+          import('./features/admin/pages/tenants/tenants-list/tenants-list.page').then(
+            (m) => m.TenantsListPage,
+          ),
+        title: 'Tenants - Admin',
+      },
     ],
   },
 
