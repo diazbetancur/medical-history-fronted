@@ -11,6 +11,7 @@ import {
   BackgroundInput,
   CreateFamilyGroupRequest,
   FamilyGroupDetail,
+  FamilyGroupMember,
   FamilyGroupPendingRequest,
   FamilyGroupSummary,
   FamilyJoinRequest,
@@ -63,6 +64,19 @@ export class FamilyGroupService {
   removeMember(groupId: string, memberId: string): Observable<unknown> {
     return this.http
       .delete(`${this.baseUrl}/${groupId}/members/${memberId}`)
+      .pipe(catchError((e) => this.handle(e)));
+  }
+
+  updateDependentName(
+    groupId: string,
+    patientProfileId: string,
+    fullName: string,
+  ): Observable<FamilyGroupMember> {
+    return this.http
+      .put<FamilyGroupMember>(
+        `${this.baseUrl}/${groupId}/members/${patientProfileId}/name`,
+        { fullName },
+      )
       .pipe(catchError((e) => this.handle(e)));
   }
 
