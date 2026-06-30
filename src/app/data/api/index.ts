@@ -62,6 +62,7 @@ export { SpecialtiesApi } from './specialties.api';
 export type * from './users.api';
 export { UsersApi } from './users.api';
 export { GoogleCalendarApi } from './google-calendar.api';
+export { TenantsApi } from './tenants.api';
 export type {
   CalendarConnectionStatus,
   GoogleCalendarConnectResponse,

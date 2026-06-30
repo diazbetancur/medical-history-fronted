@@ -27,3 +27,6 @@ export * from './professionals-search.store';
 // Professional flow stores
 export * from './professional-appointments.store';
 export * from './professional-availability.store';
+
+// Tenant stores
+export * from './tenants.store';

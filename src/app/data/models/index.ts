@@ -18,3 +18,4 @@ export * from './professional-schedule.models';
 export * from './public-page.models';
 export * from './specialty.models';
 export * from './google-calendar.models';
+export * from './tenant.models';
