@@ -226,6 +226,19 @@ export const ADMIN_MENU: AdminMenuSection[] = [
     ],
     dividerAfter: true,
   },
+  {
+    title: 'Multi-Tenant',
+    items: [
+      {
+        id: 'tenants',
+        label: 'Tenants',
+        icon: 'apartment',
+        route: '/admin/tenants',
+        permissionsAny: ['Tenants.Manage'],
+        tooltip: 'Administrar empresas / tenants del sistema (solo SuperAdmin)',
+      },
+    ],
+  },
 ];
 
 /**

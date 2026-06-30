@@ -1,0 +1,97 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Tenants</h1>
+      <p class="page-subtitle">Gestión de empresas / tenants del sistema</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Nuevo Tenant
+    </button>
+  </div>
+
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field class="filter-field">
+          <mat-label>Buscar</mat-label>
+          <input
+            matInput
+            [(ngModel)]="filterName"
+            placeholder="Buscar por nombre o código..."
+          />
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="table-card">
+    <mat-card-content>
+      @if (store.isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando tenants...</p>
+      </div>
+      } @else if (store.hasTenants()) {
+      <table
+        mat-table
+        [dataSource]="filteredTenants"
+        class="tenants-table"
+      >
+        <ng-container matColumnDef="code">
+          <th mat-header-cell *matHeaderCellDef>Código</th>
+          <td mat-cell *matCellDef="let tenant">
+            <code>{{ tenant.code }}</code>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let tenant">
+            <strong>{{ tenant.name }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="isActive">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let tenant">
+            <mat-chip
+              [class.chip-active]="tenant.isActive"
+              [class.chip-inactive]="!tenant.isActive"
+            >
+              {{ tenant.isActive ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let tenant">
+            <button
+              mat-icon-button
+              (click)="openEditDialog(tenant)"
+              matTooltip="Editar"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      } @else {
+      <div class="empty-state">
+        <mat-icon>apartment</mat-icon>
+        <h3>No hay tenants</h3>
+        <p>Comienza creando tu primer tenant</p>
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          Crear Tenant
+        </button>
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

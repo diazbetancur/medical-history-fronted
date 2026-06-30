@@ -144,6 +144,7 @@ export interface AdminUserListDto {
   isLockedOut: boolean;
   createdAt: string;
   lastLogin?: string | null;
+  tenantId?: string | null;
 }
 
 /**
@@ -164,6 +165,7 @@ export interface AdminUserDetailDto {
   lockoutEnd?: string | null;
   createdAt: string;
   lastLogin?: string | null;
+  tenantId?: string | null;
   metadata?: {
     loginCount?: number;
     lastPasswordChange?: string;

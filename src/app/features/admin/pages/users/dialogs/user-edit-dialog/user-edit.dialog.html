@@ -64,6 +64,22 @@
         }
       </div>
     </div>
+
+    @if (isSuperAdmin()) {
+    <div class="form-section">
+      <h3>Tenant / Empresa</h3>
+      <mat-form-field appearance="outline">
+        <mat-label>Tenant</mat-label>
+        <mat-select formControlName="tenantId">
+          <mat-option [value]="null">Sin tenant</mat-option>
+          @for (tenant of tenantsStore.activeTenants(); track tenant.id) {
+            <mat-option [value]="tenant.id">{{ tenant.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>business</mat-icon>
+      </mat-form-field>
+    </div>
+    }
   </form>
 
   @if (errorMessage()) {
@@ -75,16 +91,16 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()" [disabled]="saving()">
+  <button mat-button (click)="onCancel()" [disabled]="saving() || savingTenant()">
     Cancelar
   </button>
   <button
     mat-raised-button
     color="primary"
     (click)="onSubmit()"
-    [disabled]="saving() || !hasChanges()"
+    [disabled]="saving() || savingTenant() || !hasChanges()"
   >
-    @if (saving()) {
+    @if (saving() || savingTenant()) {
     <mat-spinner diameter="20"></mat-spinner>
     } @else {
     <ng-container>
